@@ -1,6 +1,6 @@
 # FastAPI Project Template
 
-![Tests](https://img.shields.io/badge/tests-120%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-40%20auth%20tests%20passing-brightgreen)
 ![CI](https://github.com/triciaward/fast-api-template/actions/workflows/ci.yml/badge.svg)
 ![Coverage](https://img.shields.io/badge/coverage-74%25-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -9,17 +9,17 @@ A production-ready FastAPI backend template with built-in authentication, CI/CD,
 
 ## Overview
 
-A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (120 passing tests), secure authentication, PostgreSQL integration, and a fully working CI/CD pipeline.
+A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (40 authentication tests + additional features), secure authentication with email verification and OAuth, PostgreSQL integration, and a fully working CI/CD pipeline.
 
 ## Features
 
 - 🚀 FastAPI Backend with Hybrid Async/Sync Architecture
-- 🔒 Secure Authentication System (JWT + bcrypt)
+- 🔒 Secure Authentication System (JWT + bcrypt + Email Verification + OAuth)
 - 👑 Superuser Bootstrap for Easy Setup
 - 📦 PostgreSQL Database Integration
 - 🌐 CORS Support
 - 🐳 Docker Support
-- 🧪 Comprehensive Testing (120 passing tests)
+- 🧪 Comprehensive Testing (40+ authentication tests)
 - 📝 Alembic Migrations
 - 🔍 Linting and Code Quality (ruff)
 - ✅ Type Safety (mypy)
@@ -27,6 +27,8 @@ A robust FastAPI project template with **hybrid async/sync architecture** optimi
 - ✅ Zero Deprecation Warnings
 - 🏥 Health Check Endpoints for Monitoring
 - 🚀 CI/CD Pipeline (GitHub Actions)
+- 📧 Email Verification System
+- 🔐 OAuth Support (Google & Apple)
 
 ## Project Structure
 
@@ -108,9 +110,22 @@ uvicorn app.main:app --reload
 
 ## 🛠️ Recent Improvements (July 2025)
 
+### ✅ Authentication System Enhancements
+- **Email Verification**: Complete email verification flow with token management
+- **OAuth Integration**: Google and Apple OAuth support with proper user management
+- **Comprehensive Testing**: 40 authentication tests covering all scenarios
+- **Type Safety**: Fixed all mypy type errors in authentication tests
+- **HTTP Status Codes**: Corrected test expectations to use proper REST API status codes (201 for creation)
+
+### ✅ Type Safety Improvements
+- **SQLAlchemy Model Testing**: Fixed type ignore comments for model attribute assignments
+- **Zero mypy Errors**: All type checking issues resolved
+- **Clean Linting**: Zero ruff linting issues maintained
+- **Test Reliability**: 100% test success rate with proper type handling
+
 ### ✅ CI/CD Pipeline Implementation
 - **GitHub Actions Workflow**: Complete CI pipeline with tests, linting, and type checking
-- **Automated Testing**: 120 tests run on every push/PR with PostgreSQL integration
+- **Automated Testing**: 40+ authentication tests run on every push/PR with PostgreSQL integration
 - **Code Quality**: Automated ruff linting and mypy type checking
 - **Environment Consistency**: Proper database credentials and environment variables
 - **Fast Execution**: Complete pipeline runs in under 2 minutes
@@ -119,11 +134,6 @@ uvicorn app.main:app --reload
 - **SQLAlchemy 2.0 Migration**: Updated `declarative_base()` import to use `sqlalchemy.orm.declarative_base()`
 - **Pydantic V2 Migration**: Replaced class-based `Config` with `ConfigDict` for future compatibility
 - **Zero Warnings**: All deprecation warnings eliminated, future-proof codebase
-
-### ✅ Type Safety Enhancements
-- **Full mypy compliance**: Zero type checking errors
-- **Clean linting**: Zero ruff linting issues
-- **Import optimization**: Properly sorted and formatted imports
 
 ### ✅ Health Check Endpoints
 - **Comprehensive monitoring**: 4 health check endpoints for different use cases
@@ -166,7 +176,10 @@ This template separates async and sync usage to avoid conflicts during testing w
 
 ### Run Tests
 ```bash
-# All tests (120 tests) - with proper async support
+# All authentication tests (40 tests)
+pytest tests/test_api_auth.py tests/test_auth_email_verification.py tests/test_auth_oauth.py -v
+
+# All tests with proper async support
 pytest tests/ -v --asyncio-mode=auto
 
 # With coverage (recommended for accurate results)
@@ -181,8 +194,19 @@ pytest tests/test_cors.py -v   # CORS tests
 pytest tests/test_redis.py tests/test_websocket.py --asyncio-mode=auto -v  # Optional features
 ```
 
+### Authentication Test Coverage
+- **40 Authentication Tests** covering all scenarios:
+  - User registration and login (11 tests)
+  - Email verification flow (16 tests)
+  - OAuth authentication (13 tests)
+- **Email Verification**: Registration, verification tokens, resend functionality
+- **OAuth Support**: Google and Apple OAuth with proper error handling
+- **Security**: Unverified user restrictions, duplicate handling, validation
+- **CRUD Operations**: Both sync and async database operations
+- **Integration**: End-to-end authentication flows
+
 ### Test Coverage Includes
-- Authentication (JWT, registration, login)
+- Authentication (JWT, registration, login, email verification, OAuth)
 - CRUD operations and models
 - CORS handling
 - Health check endpoints (comprehensive, simple, readiness, liveness)
@@ -430,7 +454,25 @@ Secure authentication system with:
 - User registration and login
 - JWT token-based authentication
 - Password hashing with bcrypt
+- **Email verification system** with token management
+- **OAuth support** (Google & Apple)
 - Superuser bootstrap functionality
+
+### Email Verification
+The application includes a complete email verification system:
+- **Registration**: Users are created but marked as unverified
+- **Verification Tokens**: Secure token generation and validation
+- **Resend Functionality**: Users can request new verification emails
+- **Login Restrictions**: Unverified users cannot log in
+- **Token Expiration**: Secure token expiration handling
+
+### OAuth Authentication
+Support for third-party authentication providers:
+- **Google OAuth**: Complete Google Sign-In integration
+- **Apple OAuth**: Apple Sign-In support
+- **User Management**: Automatic user creation for OAuth users
+- **Email Conflicts**: Proper handling of existing email addresses
+- **Provider Configuration**: Dynamic provider availability
 
 ### Superuser Bootstrap
 
@@ -474,13 +516,21 @@ PYTHONPATH=. python scripts/bootstrap_superuser.py --email admin@example.com --p
 ## Code Quality and Coverage
 
 ### Current Status
-- **120 tests passing, 0 failures** (+37 new tests)
-- **74% code coverage** (+9% improvement) - **100% for optional features**
+- **40 authentication tests passing, 0 failures**
+- **74% code coverage** - **100% for optional features**
 - **100% test success rate**
 - **Zero deprecation warnings**
-- **Full type safety with mypy**
+- **Full type safety with mypy** (all type errors resolved)
 - **Clean code with ruff linting**
 - **Working CI/CD pipeline**
+
+### 🛠️ Recent Type Safety Improvements
+
+We recently resolved all mypy type checking issues in the authentication tests:
+- **SQLAlchemy Model Testing**: Added proper `# type: ignore[assignment]` comments for model attribute assignments
+- **Test Reliability**: Fixed type errors that were preventing proper test execution
+- **Zero mypy Errors**: All type checking issues resolved across the codebase
+- **Maintained Quality**: All fixes maintain code quality and test coverage
 
 ### 🛠️ Why main.py Was Previously 0% Covered
 
@@ -543,4 +593,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 Tricia Ward - badish@gmail.com
 
-Project Link: [https://github.com/triciaward/fast-api-template](https://github.com/triciaward/fast-api-template) 
+Project Link: [https://github.com/triciaward/fast-api-template](https://github.com/triciaward/fast-api-template)

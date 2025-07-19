@@ -10,7 +10,7 @@ class TestAuthEndpoints:
         """Test successful user registration."""
         response = client.post("/api/v1/auth/register", json=test_user_data)
 
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
 
         # Check response contains expected fields
@@ -32,7 +32,7 @@ class TestAuthEndpoints:
         """Test registration with duplicate email."""
         # Create user first via API
         response = client.post("/api/v1/auth/register", json=test_user_data)
-        assert response.status_code == 200
+        assert response.status_code == 201
 
         # Try to register with same email
         response = client.post("/api/v1/auth/register", json=test_user_data)
@@ -49,13 +49,14 @@ class TestAuthEndpoints:
         """Test registration with duplicate username."""
         # Create user first via API
         response = client.post("/api/v1/auth/register", json=test_user_data)
-        assert response.status_code == 200
+        assert response.status_code == 201
 
         # Try to register with same username but different email
         duplicate_username_data = test_user_data_2.copy()
         duplicate_username_data["username"] = test_user_data["username"]
 
-        response = client.post("/api/v1/auth/register", json=duplicate_username_data)
+        response = client.post("/api/v1/auth/register",
+                               json=duplicate_username_data)
 
         assert response.status_code == 400
         assert "Username already taken" in response.json()["detail"]
@@ -87,7 +88,17 @@ class TestAuthEndpoints:
         """Test successful user login."""
         # Create user first via API
         response = client.post("/api/v1/auth/register", json=test_user_data)
-        assert response.status_code == 200
+        assert response.status_code == 201
+
+        # Verify the user first (simulate email verification)
+        from app.crud.user import get_user_by_email_sync, verify_user_sync
+        from tests.conftest import TestingSyncSessionLocal
+
+        # Get the sync database session
+        with TestingSyncSessionLocal() as db:
+            user = get_user_by_email_sync(db, test_user_data["email"])
+            assert user is not None
+            verify_user_sync(db, str(user.id))
 
         # Login with correct credentials
         login_data = {
@@ -114,10 +125,11 @@ class TestAuthEndpoints:
         """Test login with wrong password."""
         # Create user first via API
         response = client.post("/api/v1/auth/register", json=test_user_data)
-        assert response.status_code == 200
+        assert response.status_code == 201
 
         # Try to login with wrong password
-        login_data = {"username": test_user_data["email"], "password": "wrongpassword"}
+        login_data = {
+            "username": test_user_data["email"], "password": "wrongpassword"}
 
         response = client.post("/api/v1/auth/login", data=login_data)
 
@@ -130,7 +142,7 @@ class TestAuthEndpoints:
         """Test login with wrong email."""
         # Create user first via API
         response = client.post("/api/v1/auth/register", json=test_user_data)
-        assert response.status_code == 200
+        assert response.status_code == 201
 
         # Try to login with wrong email
         login_data = {
@@ -145,7 +157,8 @@ class TestAuthEndpoints:
 
     def test_login_nonexistent_user(self, client: TestClient) -> None:
         """Test login for non-existent user."""
-        login_data = {"username": "nonexistent@example.com", "password": "anypassword"}
+        login_data = {"username": "nonexistent@example.com",
+                      "password": "anypassword"}
 
         response = client.post("/api/v1/auth/login", data=login_data)
 
@@ -158,3 +171,23 @@ class TestAuthEndpoints:
 
         assert response.status_code == 422
         # Validation error for missing required fields
+
+    def test_login_unverified_user(
+        self, client: TestClient, test_user_data: dict[str, str]
+    ) -> None:
+        """Test login with unverified user (should fail)."""
+        # Create user first via API
+        response = client.post("/api/v1/auth/register", json=test_user_data)
+        assert response.status_code == 201
+
+        # Try to login without verifying email
+        login_data = {
+            "username": test_user_data["email"],
+            "password": test_user_data["password"],
+        }
+
+        response = client.post("/api/v1/auth/login", data=login_data)
+
+        assert response.status_code == 401
+        assert "Please verify your email before logging in" in response.json()[
+            "detail"]
