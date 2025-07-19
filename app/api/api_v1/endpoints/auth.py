@@ -23,12 +23,12 @@ from app.schemas.user import (
 try:
     from app.services.email import email_service
 except ImportError:
-    email_service = None
+    email_service = None  # type: ignore
 
 try:
     from app.services.oauth import oauth_service
 except ImportError:
-    oauth_service = None
+    oauth_service = None  # type: ignore
 
 router = APIRouter()
 
