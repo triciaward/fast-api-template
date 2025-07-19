@@ -2,114 +2,101 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   test:
+    name: 🧪 Run Tests
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: fastapi_template_test
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        ports:
-          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fastapi_template_test
+      ASYNC_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/fastapi_template_test
+      SECRET_KEY: test-secret-key-for-ci
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      BACKEND_CORS_ORIGINS: '["http://localhost:3000","http://localhost:8080"]'
+      FIRST_SUPERUSER: admin@example.com
+      FIRST_SUPERUSER_PASSWORD: testpassword123
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    
-    - name: Create .env file for testing
-      run: |
-        cat > .env << EOF
-        DATABASE_URL=postgresql://postgres:postgres@localhost:5432/fastapi_template_test
-        SECRET_KEY=test-secret-key-for-ci
-        ALGORITHM=HS256
-        ACCESS_TOKEN_EXPIRE_MINUTES=30
-        BACKEND_CORS_ORIGINS=["http://localhost:3000","http://localhost:8080"]
-        FIRST_SUPERUSER=admin@example.com
-        FIRST_SUPERUSER_PASSWORD=testpassword123
-        EOF
-    
-    - name: Wait for PostgreSQL
-      run: |
-        echo "Waiting for PostgreSQL to be ready..."
-        sleep 10
-        echo "PostgreSQL should be ready now"
-    
-    - name: Run tests
-      run: |
-        # Set environment variables for testing
-        export TESTING=1
-        export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/fastapi_template_test
-        export SECRET_KEY=test-secret-key-for-ci
-        export ALGORITHM=HS256
-        export ACCESS_TOKEN_EXPIRE_MINUTES=30
-        export BACKEND_CORS_ORIGINS='["http://localhost:3000","http://localhost:8080"]'
-        export FIRST_SUPERUSER=admin@example.com
-        export FIRST_SUPERUSER_PASSWORD=testpassword123
-        
-        # Run tests
-        pytest tests/ -v --cov=app --cov-report=term-missing --cov-fail-under=60
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run migrations
+        run: |
+          alembic upgrade head
+
+      - name: Run tests
+        run: |
+          pytest tests/ -v --cov=app --cov-report=term-missing --cov-fail-under=60
 
   lint:
+    name: 🔍 Lint (ruff)
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    
-    - name: Run ruff linting
-      run: |
-        ruff check .
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Run Ruff
+        run: |
+          ruff check .
+          ruff format --check .
 
   type-check:
+    name: 🧠 Type Check (mypy)
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    
-    - name: Run mypy type checking
-      run: |
-        mypy . 
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Mypy
+        run: |
+          mypy . 
