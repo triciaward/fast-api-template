@@ -26,9 +26,21 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
         # Bootstrap superuser if environment variables are set
         await bootstrap_superuser()
+
+    # Initialize Redis if enabled
+    if settings.ENABLE_REDIS:
+        from app.services.redis import init_redis
+        await init_redis()
+
     yield
+
     # Shutdown
     await engine.dispose()
+
+    # Close Redis if enabled
+    if settings.ENABLE_REDIS:
+        from app.services.redis import close_redis
+        await close_redis()
 
 
 app = FastAPI(
@@ -49,3 +61,13 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 @app.get("/")
 async def root() -> dict[str, str]:
     return {"message": "Welcome to FastAPI Template"}
+
+
+# Add feature status endpoint
+@app.get("/features")
+async def get_features() -> dict[str, bool]:
+    """Get the status of optional features."""
+    return {
+        "redis": settings.ENABLE_REDIS,
+        "websockets": settings.ENABLE_WEBSOCKETS,
+    }

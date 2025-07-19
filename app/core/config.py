@@ -31,6 +31,13 @@ class Settings(BaseSettings):
         "postgresql://postgres:dev_password_123@localhost:5432/fastapi_template"
     )
 
+    # Redis (Optional)
+    ENABLE_REDIS: bool = False
+    REDIS_URL: str = "redis://localhost:6379/0"
+
+    # WebSockets (Optional)
+    ENABLE_WEBSOCKETS: bool = False
+
     # CORS
     BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost:3000",  # React default

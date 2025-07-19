@@ -15,14 +15,30 @@ services:
       - app-network
     restart: unless-stopped
 
+  # Optional Redis service - only used when ENABLE_REDIS=true
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    profiles:
+      - redis  # Only start when explicitly requested
+
   api:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
       SECRET_KEY: ${SECRET_KEY}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      ENABLE_REDIS: ${ENABLE_REDIS:-false}
+      ENABLE_WEBSOCKETS: ${ENABLE_WEBSOCKETS:-false}
     ports:
       - "${API_PORT}:8000"
     depends_on:
@@ -36,6 +52,7 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
 
 networks:
   app-network:

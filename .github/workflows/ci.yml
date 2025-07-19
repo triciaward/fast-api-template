@@ -60,7 +60,7 @@ jobs:
         run: |
           echo "Database URL: $DATABASE_URL"
           echo "Async Database URL: $ASYNC_DATABASE_URL"
-          pytest tests/ -v --cov=app --cov-report=term-missing --cov-fail-under=60
+          pytest tests/ -v --asyncio-mode=auto --cov=app --cov-report=term-missing --cov-fail-under=60
 
   lint:
     name: 🔍 Lint (ruff)
