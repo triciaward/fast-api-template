@@ -22,11 +22,14 @@ class TestRedisService:
         """Setup test environment."""
         # Reset Redis client before each test
         import app.services.redis
+
         app.services.redis.redis_client = None
 
     @patch("app.services.redis.settings")
     @patch("app.services.redis.redis")
-    async def test_init_redis_disabled(self, mock_redis: MagicMock, mock_settings: MagicMock) -> None:
+    async def test_init_redis_disabled(
+        self, mock_redis: MagicMock, mock_settings: MagicMock
+    ) -> None:
         """Test Redis initialization when disabled."""
         mock_settings.ENABLE_REDIS = False
 
@@ -37,7 +40,9 @@ class TestRedisService:
 
     @patch("app.services.redis.settings")
     @patch("app.services.redis.redis")
-    async def test_init_redis_success(self, mock_redis: MagicMock, mock_settings: MagicMock) -> None:
+    async def test_init_redis_success(
+        self, mock_redis: MagicMock, mock_settings: MagicMock
+    ) -> None:
         """Test successful Redis initialization."""
         mock_settings.ENABLE_REDIS = True
         mock_settings.REDIS_URL = "redis://localhost:6379/0"
@@ -61,7 +66,9 @@ class TestRedisService:
 
     @patch("app.services.redis.settings")
     @patch("app.services.redis.redis")
-    async def test_init_redis_connection_error(self, mock_redis: MagicMock, mock_settings: MagicMock) -> None:
+    async def test_init_redis_connection_error(
+        self, mock_redis: MagicMock, mock_settings: MagicMock
+    ) -> None:
         """Test Redis initialization with connection error."""
         mock_settings.ENABLE_REDIS = True
         mock_settings.REDIS_URL = "redis://localhost:6379/0"
@@ -74,7 +81,9 @@ class TestRedisService:
 
     @patch("app.services.redis.settings")
     @patch("app.services.redis.redis")
-    async def test_init_redis_ping_error(self, mock_redis: MagicMock, mock_settings: MagicMock) -> None:
+    async def test_init_redis_ping_error(
+        self, mock_redis: MagicMock, mock_settings: MagicMock
+    ) -> None:
         """Test Redis initialization with ping error."""
         mock_settings.ENABLE_REDIS = True
         mock_settings.REDIS_URL = "redis://localhost:6379/0"
@@ -91,6 +100,7 @@ class TestRedisService:
         """Test closing Redis when no client exists."""
         # Ensure no client exists
         import app.services.redis
+
         app.services.redis.redis_client = None
 
         await close_redis()
@@ -122,6 +132,7 @@ class TestRedisService:
         """Test getting Redis client when none exists."""
         # Ensure no client exists
         import app.services.redis
+
         app.services.redis.redis_client = None
 
         result = get_redis_client()
@@ -131,6 +142,7 @@ class TestRedisService:
         """Test getting existing Redis client."""
         mock_client = MagicMock()
         import app.services.redis
+
         app.services.redis.redis_client = mock_client
 
         result = get_redis_client()
@@ -140,13 +152,16 @@ class TestRedisService:
         """Test Redis health check when no client exists."""
         # Ensure no client exists
         import app.services.redis
+
         app.services.redis.redis_client = None
 
         result = await health_check_redis()
         assert result is False
 
     @patch("app.services.redis.redis_client")
-    async def test_health_check_redis_success(self, mock_redis_client: MagicMock) -> None:
+    async def test_health_check_redis_success(
+        self, mock_redis_client: MagicMock
+    ) -> None:
         """Test successful Redis health check."""
         mock_client = AsyncMock()
         mock_client.ping.return_value = True

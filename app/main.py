@@ -30,6 +30,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Initialize Redis if enabled
     if settings.ENABLE_REDIS:
         from app.services.redis import init_redis
+
         await init_redis()
 
     yield
@@ -40,6 +41,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Close Redis if enabled
     if settings.ENABLE_REDIS:
         from app.services.redis import close_redis
+
         await close_redis()
 
 

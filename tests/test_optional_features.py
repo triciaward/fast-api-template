@@ -81,8 +81,7 @@ class TestWebSocketDemoEndpoint:
         from app.api.api_v1.endpoints.ws_demo import router
 
         # Check that the router has the expected routes
-        routes = [str(route.path)
-                  for route in router.routes if hasattr(route, 'path')]
+        routes = [str(route.path) for route in router.routes if hasattr(route, "path")]
         assert "/ws/demo" in routes
         assert "/ws/status" in routes
 

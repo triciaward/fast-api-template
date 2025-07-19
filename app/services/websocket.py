@@ -36,7 +36,8 @@ class ConnectionManager:
 
         self.active_connections[room].add(websocket)
         logger.info(
-            f"WebSocket connected to room '{room}'. Total connections: {len(self.active_connections[room])}")
+            f"WebSocket connected to room '{room}'. Total connections: {len(self.active_connections[room])}"
+        )
 
     def disconnect(self, websocket: WebSocket, room: str = "default") -> None:
         """

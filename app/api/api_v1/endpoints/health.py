@@ -42,8 +42,11 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     if settings.ENABLE_REDIS:
         try:
             from app.services.redis import health_check_redis
+
             redis_healthy = await health_check_redis()
-            health_status["checks"]["redis"] = "healthy" if redis_healthy else "unhealthy"
+            health_status["checks"]["redis"] = (
+                "healthy" if redis_healthy else "unhealthy"
+            )
             if not redis_healthy:
                 health_status["status"] = "unhealthy"
         except Exception as e:
@@ -105,17 +108,20 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     if settings.ENABLE_REDIS:
         try:
             from app.services.redis import health_check_redis
+
             redis_ready = await health_check_redis()
             readiness_status["components"]["redis"] = {
                 "ready": redis_ready,
-                "message": "Redis connection successful" if redis_ready else "Redis connection failed"
+                "message": "Redis connection successful"
+                if redis_ready
+                else "Redis connection failed",
             }
             if not redis_ready:
                 readiness_status["ready"] = False
         except Exception as e:
             readiness_status["components"]["redis"] = {
                 "ready": False,
-                "message": f"Redis connection failed: {str(e)}"
+                "message": f"Redis connection failed: {str(e)}",
             }
             readiness_status["ready"] = False
 
