@@ -19,16 +19,22 @@ from app.schemas.user import (
     VerifyEmailResponse,
 )
 
-# Conditional imports for optional services
+# Initialize services as None - will be set if available
+email_service = None
+oauth_service = None
+
+# Try to import optional services
 try:
-    from app.services.email import email_service
-except ImportError:
-    email_service = None  # type: ignore
+    from app.services.email import email_service as _email_service
+    email_service = _email_service
+except (ImportError, ModuleNotFoundError):
+    pass
 
 try:
-    from app.services.oauth import oauth_service
-except ImportError:
-    oauth_service = None  # type: ignore
+    from app.services.oauth import oauth_service as _oauth_service
+    oauth_service = _oauth_service
+except (ImportError, ModuleNotFoundError):
+    pass
 
 router = APIRouter()
 
@@ -53,7 +59,8 @@ async def register_user(
     # Send verification email if service is available
     if email_service and email_service.is_configured():
         verification_token = await email_service.create_verification_token(
-            db, str(db_user.id))
+            db, str(db_user.id)
+        )
         if verification_token:
             email_service.send_verification_email(
                 str(user.email), str(user.username), verification_token
@@ -92,21 +99,17 @@ async def login_user(
 
 
 @router.post("/oauth/login", response_model=Token)
-async def oauth_login(
-    oauth_data: OAuthLogin, db: Session = Depends(get_db)
-) -> Token:
+async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> Token:
     """Login with OAuth provider (Google or Apple)."""
     if not oauth_service:
         raise HTTPException(
-            status_code=503, detail="OAuth service not available"
-        )
+            status_code=503, detail="OAuth service not available")
 
     provider = oauth_data.provider.lower()
 
-    if provider not in ['google', 'apple']:
+    if provider not in ["google", "apple"]:
         raise HTTPException(
-            status_code=400, detail="Unsupported OAuth provider"
-        )
+            status_code=400, detail="Unsupported OAuth provider")
 
     if not oauth_service.is_provider_configured(provider):
         raise HTTPException(
@@ -115,25 +118,25 @@ async def oauth_login(
 
     try:
         # Verify the OAuth token and get user info
-        if provider == 'google':
+        if provider == "google":
             user_info = await oauth_service.verify_google_token(oauth_data.access_token)
             if not user_info:
                 raise HTTPException(
                     status_code=400, detail="Invalid Google token")
 
-            oauth_id = user_info.get('sub')
-            email = user_info.get('email')
-            name = user_info.get('name')
+            oauth_id = user_info.get("sub")
+            email = user_info.get("email")
+            name = user_info.get("name")
 
-        elif provider == 'apple':
+        elif provider == "apple":
             user_info = await oauth_service.verify_apple_token(oauth_data.access_token)
             if not user_info:
                 raise HTTPException(
                     status_code=400, detail="Invalid Apple token")
 
-            oauth_id = user_info.get('sub')
-            email = user_info.get('email')
-            name = user_info.get('name', '')
+            oauth_id = user_info.get("sub")
+            email = user_info.get("email")
+            name = user_info.get("name", "")
 
         if not oauth_id or not email:
             raise HTTPException(
@@ -145,7 +148,8 @@ async def oauth_login(
         if existing_user:
             # User exists, generate token
             access_token_expires = timedelta(
-                minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+                minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+            )
             access_token = create_access_token(
                 subject=existing_user.email, expires_delta=access_token_expires
             )
@@ -155,8 +159,7 @@ async def oauth_login(
         existing_email_user = crud_user.get_user_by_email_sync(db, email)
         if existing_email_user:
             raise HTTPException(
-                status_code=400,
-                detail="Email already registered with different method"
+                status_code=400, detail="Email already registered with different method"
             )
 
         # Create new OAuth user
@@ -175,7 +178,7 @@ async def oauth_login(
             oauth_provider=provider,
             oauth_id=oauth_id,
             oauth_email=email,
-            name=name
+            name=name,
         )
 
         # Generate token for new user
@@ -204,23 +207,19 @@ async def resend_verification_email(
 
     if user.is_verified:
         return EmailVerificationResponse(
-            message="User is already verified",
-            email_sent=False
+            message="User is already verified", email_sent=False
         )
 
     if not email_service or not email_service.is_configured():
         return EmailVerificationResponse(
-            message="Email service not configured",
-            email_sent=False
+            message="Email service not configured", email_sent=False
         )
 
     # Create new verification token
-    verification_token = await email_service.create_verification_token(
-        db, str(user.id))
+    verification_token = await email_service.create_verification_token(db, str(user.id))
     if not verification_token:
         return EmailVerificationResponse(
-            message="Failed to create verification token",
-            email_sent=False
+            message="Failed to create verification token", email_sent=False
         )
 
     # Send verification email
@@ -230,13 +229,11 @@ async def resend_verification_email(
 
     if email_sent:
         return EmailVerificationResponse(
-            message="Verification email sent successfully",
-            email_sent=True
+            message="Verification email sent successfully", email_sent=True
         )
     else:
         return EmailVerificationResponse(
-            message="Failed to send verification email",
-            email_sent=False
+            message="Failed to send verification email", email_sent=False
         )
 
 
@@ -247,21 +244,16 @@ async def verify_email(
     """Verify email with token."""
     if not email_service:
         return VerifyEmailResponse(
-            message="Email service not available",
-            verified=False
+            message="Email service not available", verified=False
         )
 
     verified = await email_service.verify_token(db, request.token)
 
     if verified:
-        return VerifyEmailResponse(
-            message="Email verified successfully",
-            verified=True
-        )
+        return VerifyEmailResponse(message="Email verified successfully", verified=True)
     else:
         return VerifyEmailResponse(
-            message="Invalid or expired verification token",
-            verified=False
+            message="Invalid or expired verification token", verified=False
         )
 
 
@@ -273,10 +265,10 @@ async def get_oauth_providers() -> dict:
 
     providers = {}
 
-    if oauth_service.is_provider_configured('google'):
-        providers['google'] = oauth_service.get_oauth_provider_config('google')
+    if oauth_service.is_provider_configured("google"):
+        providers["google"] = oauth_service.get_oauth_provider_config("google")
 
-    if oauth_service.is_provider_configured('apple'):
-        providers['apple'] = oauth_service.get_oauth_provider_config('apple')
+    if oauth_service.is_provider_configured("apple"):
+        providers["apple"] = oauth_service.get_oauth_provider_config("apple")
 
     return {"providers": providers}
