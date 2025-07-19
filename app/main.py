@@ -1,8 +1,11 @@
+import json  # This should trigger a linting error
 import os
+import sys
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.api_v1.api import api_router
 from app.bootstrap_superuser import bootstrap_superuser
@@ -10,6 +13,9 @@ from app.core.config import settings
 from app.core.cors import configure_cors
 from app.database.database import engine
 from app.models import models
+
+# Create database tables
+models.Base.metadata.create_all(bind=engine)
 
 
 @asynccontextmanager
@@ -30,17 +36,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="FastAPI Template with Authentication",
+    description=settings.DESCRIPTION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Configure CORS
 configure_cors(app)
 
+# Include API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")
 async def root() -> dict[str, str]:
-    return {"message": "FastAPI Template is running!"}
+    return {"message": "Welcome to FastAPI Template"}
+
+# Test linting issue - unused import
