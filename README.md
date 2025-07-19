@@ -78,6 +78,26 @@ SECRET_KEY=dev_secret_key_change_in_production
 ACCESS_TOKEN_EXPIRE_MINUTES=43200
 BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://localhost:4200
 
+# OAuth Configuration (Optional)
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+APPLE_CLIENT_ID=your_apple_client_id
+APPLE_TEAM_ID=your_apple_team_id
+APPLE_KEY_ID=your_apple_key_id
+APPLE_PRIVATE_KEY=your_apple_private_key
+
+# Email Configuration (Optional)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+SMTP_TLS=true
+SMTP_SSL=false
+FROM_EMAIL=noreply@example.com
+FROM_NAME=Your App Name
+VERIFICATION_TOKEN_EXPIRE_HOURS=24
+FRONTEND_URL=http://localhost:3000
+
 # Optional features:
 ENABLE_REDIS=false
 REDIS_URL=redis://localhost:6379/0
@@ -365,6 +385,23 @@ curl http://localhost:8000/features
 - Swagger UI: http://localhost:8000/docs
 - Redoc: http://localhost:8000/redoc
 
+### Authentication Endpoints
+
+#### User Registration & Login
+- `POST /api/v1/auth/register` - Register new user (returns 201 Created)
+- `POST /api/v1/auth/login` - Login with email/password
+
+#### Email Verification
+- `POST /api/v1/auth/resend-verification` - Resend verification email
+- `POST /api/v1/auth/verify-email` - Verify email with token
+
+#### OAuth Authentication
+- `POST /api/v1/auth/oauth/login` - OAuth login with Google or Apple
+- `GET /api/v1/auth/oauth/providers` - Get available OAuth providers
+
+#### User Management
+- `GET /api/v1/users/me` - Get current user information (requires authentication)
+
 ## Health Check Endpoints
 
 The application provides comprehensive health monitoring endpoints for container orchestration and uptime monitoring:
@@ -466,13 +503,53 @@ The application includes a complete email verification system:
 - **Login Restrictions**: Unverified users cannot log in
 - **Token Expiration**: Secure token expiration handling
 
+#### Email Verification API Endpoints
+- `POST /api/v1/auth/resend-verification` - Resend verification email
+- `POST /api/v1/auth/verify-email` - Verify email with token
+
+#### Email Configuration
+**SMTP Settings:**
+- `SMTP_HOST` - SMTP server hostname (default: smtp.gmail.com)
+- `SMTP_PORT` - SMTP server port (default: 587)
+- `SMTP_USERNAME` - SMTP username/email
+- `SMTP_PASSWORD` - SMTP password or app password
+- `SMTP_TLS` - Enable TLS (default: true)
+- `SMTP_SSL` - Enable SSL (default: false)
+
+**Email Templates:**
+- `FROM_EMAIL` - Sender email address
+- `FROM_NAME` - Sender name
+- `FRONTEND_URL` - Frontend URL for verification links
+- `VERIFICATION_TOKEN_EXPIRE_HOURS` - Token expiration time (default: 24 hours)
+
+**Features:**
+- HTML email templates with verification links
+- Secure token generation (32-character random strings)
+- Automatic token expiration handling
+- Frontend URL integration for seamless verification flow
+
 ### OAuth Authentication
 Support for third-party authentication providers:
 - **Google OAuth**: Complete Google Sign-In integration
-- **Apple OAuth**: Apple Sign-In support
+- **Apple OAuth**: Apple Sign-In support with Team ID, Key ID, and Private Key
 - **User Management**: Automatic user creation for OAuth users
 - **Email Conflicts**: Proper handling of existing email addresses
 - **Provider Configuration**: Dynamic provider availability
+
+#### OAuth API Endpoints
+- `POST /api/v1/auth/oauth/login` - OAuth login with Google or Apple
+- `GET /api/v1/auth/oauth/providers` - Get available OAuth providers
+
+#### OAuth Configuration
+**Google OAuth:**
+- Requires `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
+- Supports email and profile scopes
+- Automatic user creation with unique username generation
+
+**Apple OAuth:**
+- Requires `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, and `APPLE_PRIVATE_KEY`
+- Supports name and email scopes
+- JWT token verification with expiration checking
 
 ### Superuser Bootstrap
 
