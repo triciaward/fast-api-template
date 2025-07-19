@@ -59,6 +59,17 @@ jobs:
     
     - name: Run tests
       run: |
+        # Set environment variables for testing
+        export TESTING=1
+        export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/fastapi_template_test
+        export SECRET_KEY=test-secret-key-for-ci
+        export ALGORITHM=HS256
+        export ACCESS_TOKEN_EXPIRE_MINUTES=30
+        export BACKEND_CORS_ORIGINS='["http://localhost:3000","http://localhost:8080"]'
+        export FIRST_SUPERUSER=admin@example.com
+        export FIRST_SUPERUSER_PASSWORD=testpassword123
+        
+        # Run tests
         pytest tests/ -v --cov=app --cov-report=term-missing --cov-fail-under=60
 
   lint:
