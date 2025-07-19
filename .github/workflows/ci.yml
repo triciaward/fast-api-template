@@ -50,12 +50,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Wait for PostgreSQL
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 10
+          echo "PostgreSQL should be ready now"
+
       - name: Run migrations
         run: |
           alembic upgrade head
 
       - name: Run tests
         run: |
+          echo "Database URL: $DATABASE_URL"
+          echo "Async Database URL: $ASYNC_DATABASE_URL"
           pytest tests/ -v --cov=app --cov-report=term-missing --cov-fail-under=60
 
   lint:
@@ -71,12 +79,16 @@ jobs:
           python-version: '3.11'
           cache: pip
 
-      - name: Install Ruff
-        run: pip install ruff
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run Ruff
         run: |
+          echo "Running ruff check..."
           ruff check .
+          echo "Running ruff format check..."
           ruff format --check .
 
   type-check:

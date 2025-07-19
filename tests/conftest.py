@@ -19,11 +19,11 @@ from app.database.database import Base, get_db
 os.environ["TESTING"] = "1"
 
 
-# Test database URLs
-TEST_DATABASE_URL = "postgresql+asyncpg://postgres:dev_password_123@localhost:5432/fastapi_template_test"
-SYNC_TEST_DATABASE_URL = (
-    "postgresql://postgres:dev_password_123@localhost:5432/fastapi_template_test"
-)
+# Test database URLs - use environment variables if available, otherwise fallback to defaults
+TEST_DATABASE_URL = os.getenv(
+    "ASYNC_DATABASE_URL", "postgresql+asyncpg://postgres:dev_password_123@localhost:5432/fastapi_template_test")
+SYNC_TEST_DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql://postgres:dev_password_123@localhost:5432/fastapi_template_test")
 
 # Create async engine for direct database tests
 test_engine = create_async_engine(
