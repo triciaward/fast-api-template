@@ -4,6 +4,8 @@
 ![CI](https://github.com/triciaward/fast-api-template/workflows/CI/badge.svg)
 ![License](https://img.shields.io/github/license/yourusername/fast-api-template)
 
+<!-- CI Test: This comment tests the CI workflow -->
+
 ## Overview
 
 A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (80 passing tests), secure authentication, and PostgreSQL integration.
