@@ -13,8 +13,9 @@ class TestUserEndpoints:
     ) -> None:
         """Test successfully getting current user information."""
         # Create user via API instead of direct database access
-        register_response = client.post("/api/v1/auth/register", json=test_user_data)
-        assert register_response.status_code == 200
+        register_response = client.post(
+            "/api/v1/auth/register", json=test_user_data)
+        assert register_response.status_code == 201
 
         # Get the created user's email for token creation
         user_email = test_user_data["email"]
@@ -63,8 +64,9 @@ class TestUserEndpoints:
     ) -> None:
         """Test getting current user with expired token."""
         # Create user via API
-        register_response = client.post("/api/v1/auth/register", json=test_user_data)
-        assert register_response.status_code == 200
+        register_response = client.post(
+            "/api/v1/auth/register", json=test_user_data)
+        assert register_response.status_code == 201
 
         user_email = test_user_data["email"]
 
@@ -87,8 +89,9 @@ class TestUserEndpoints:
     ) -> None:
         """Test getting current user with token signed by wrong secret key."""
         # Create user via API
-        register_response = client.post("/api/v1/auth/register", json=test_user_data)
-        assert register_response.status_code == 200
+        register_response = client.post(
+            "/api/v1/auth/register", json=test_user_data)
+        assert register_response.status_code == 201
 
         user_email = test_user_data["email"]
 
@@ -100,7 +103,8 @@ class TestUserEndpoints:
         expire = datetime.utcnow() + timedelta(minutes=30)
         to_encode = {"exp": expire, "sub": str(user_email)}
         # Use wrong secret key
-        malicious_token = jwt.encode(to_encode, "wrong_secret_key", algorithm="HS256")
+        malicious_token = jwt.encode(
+            to_encode, "wrong_secret_key", algorithm="HS256")
 
         headers = {"Authorization": f"Bearer {malicious_token}"}
 
@@ -134,8 +138,9 @@ class TestUserEndpoints:
     ) -> None:
         """Test getting current user with wrong authentication scheme."""
         # Create user via API
-        register_response = client.post("/api/v1/auth/register", json=test_user_data)
-        assert register_response.status_code == 200
+        register_response = client.post(
+            "/api/v1/auth/register", json=test_user_data)
+        assert register_response.status_code == 201
 
         user_email = test_user_data["email"]
 
