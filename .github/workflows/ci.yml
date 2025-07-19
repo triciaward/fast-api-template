@@ -58,7 +58,7 @@ jobs:
 
       - name: Run migrations
         run: |
-          alembic upgrade head
+          alembic upgrade head --sqlalchemy-url="$DATABASE_URL"
 
       - name: Run tests
         run: |
