@@ -108,6 +108,7 @@ def rate_limit_oauth(func: Callable) -> Callable:
 
 def rate_limit_custom(limit: str) -> Callable[[Callable], Callable]:
     """Custom rate limit decorator with specified limit."""
+
     def decorator(func: Callable) -> Callable:
         if not settings.ENABLE_RATE_LIMITING:
             return _no_op_decorator(func)

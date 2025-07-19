@@ -121,8 +121,7 @@ async def get_user_by_verification_token(db: DBSession, token: str) -> Optional[
     if isinstance(db, AsyncSession):
         result = await db.execute(select(User).filter(User.verification_token == token))
     else:
-        result = db.execute(select(User).filter(
-            User.verification_token == token))
+        result = db.execute(select(User).filter(User.verification_token == token))
     return result.scalar_one_or_none()
 
 

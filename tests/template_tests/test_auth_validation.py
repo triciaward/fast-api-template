@@ -1,4 +1,3 @@
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -9,6 +8,7 @@ pytestmark = pytest.mark.usefixtures("patch_email_service_is_configured")
 @pytest.fixture(autouse=True)
 def patch_email_service_is_configured(monkeypatch: pytest.MonkeyPatch) -> None:
     from app.services.email import email_service
+
     monkeypatch.setattr(email_service, "is_configured", lambda: True)
 
 
@@ -188,8 +188,7 @@ class TestAuthEndpointValidation:
         client.post("/api/v1/auth/register", json=user_data)
 
         # Try to login with wrong password
-        login_data = {"username": "test@example.com",
-                      "password": "WrongPassword123!"}
+        login_data = {"username": "test@example.com", "password": "WrongPassword123!"}
 
         response = client.post("/api/v1/auth/login", data=login_data)
         assert response.status_code == 401
@@ -201,8 +200,7 @@ class TestAuthEndpointValidation:
         self, client: TestClient, sync_db_session: Session
     ) -> None:
         """Test OAuth login with invalid provider."""
-        oauth_data = {"provider": "invalid_provider",
-                      "access_token": "fake_token"}
+        oauth_data = {"provider": "invalid_provider", "access_token": "fake_token"}
 
         response = client.post("/api/v1/auth/oauth/login", json=oauth_data)
         assert response.status_code == 422  # Validation error
@@ -435,8 +433,7 @@ class TestEmailVerificationValidation:
         """Test email verification with invalid token format."""
         verification_data = {"token": "invalid_token_format"}
 
-        response = client.post(
-            "/api/v1/auth/verify-email", json=verification_data)
+        response = client.post("/api/v1/auth/verify-email", json=verification_data)
         # Endpoint returns 200 with success/failure in body
         assert response.status_code == 200
 
@@ -450,8 +447,7 @@ class TestEmailVerificationValidation:
         """Test email verification with empty token."""
         verification_data = {"token": ""}
 
-        response = client.post(
-            "/api/v1/auth/verify-email", json=verification_data)
+        response = client.post("/api/v1/auth/verify-email", json=verification_data)
         # Endpoint returns 200 with success/failure in body
         assert response.status_code == 200
 
@@ -465,8 +461,7 @@ class TestEmailVerificationValidation:
         """Test email verification with malformed token."""
         verification_data = {"token": "not_a_real_token_at_all"}
 
-        response = client.post(
-            "/api/v1/auth/verify-email", json=verification_data)
+        response = client.post("/api/v1/auth/verify-email", json=verification_data)
         # Endpoint returns 200 with success/failure in body
         assert response.status_code == 200
 
@@ -942,8 +937,7 @@ class TestWeakPasswordValidation:
     ) -> None:
         """Test registration with common weak passwords."""
         # Test that passwords meeting all requirements are accepted
-        strong_passwords = ["Password123!",
-                            "Abc123!@#", "Test123!@#", "Valid123!@#"]
+        strong_passwords = ["Password123!", "Abc123!@#", "Test123!@#", "Valid123!@#"]
 
         for i, password in enumerate(strong_passwords):
             user_data = {

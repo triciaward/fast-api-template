@@ -22,7 +22,8 @@ from app.services.rate_limiter import (
 # Suppress the RuntimeWarning about coroutine not being awaited
 # This is a known issue with the test setup and doesn't affect functionality
 warnings.filterwarnings(
-    "ignore", message=".*coroutine.*was never awaited.*", category=RuntimeWarning)
+    "ignore", message=".*coroutine.*was never awaited.*", category=RuntimeWarning
+)
 
 
 class TestRateLimiter:
@@ -32,11 +33,12 @@ class TestRateLimiter:
         """Test that get_limiter creates a limiter instance."""
         # Clear any existing limiter
         import app.services.rate_limiter
+
         app.services.rate_limiter.limiter = None
 
         limiter = get_limiter()
         assert limiter is not None
-        assert hasattr(limiter, 'limit')
+        assert hasattr(limiter, "limit")
 
     def test_get_limiter_returns_same_instance(self) -> None:
         """Test that get_limiter returns the same instance."""
@@ -44,7 +46,7 @@ class TestRateLimiter:
         limiter2 = get_limiter()
         assert limiter1 is limiter2
 
-    @patch('app.services.rate_limiter.settings')
+    @patch("app.services.rate_limiter.settings")
     def test_get_limiter_with_redis_backend(self, mock_settings: MagicMock) -> None:
         """Test get_limiter with Redis backend."""
         mock_settings.ENABLE_REDIS = True
@@ -53,12 +55,13 @@ class TestRateLimiter:
         mock_settings.RATE_LIMIT_DEFAULT = "100/minute"
 
         # Mock Redis client
-        with patch('app.services.redis.get_redis_client') as mock_get_redis:
+        with patch("app.services.redis.get_redis_client") as mock_get_redis:
             mock_redis = MagicMock()
             mock_get_redis.return_value = mock_redis
 
             # Clear any existing limiter
             import app.services.rate_limiter
+
             app.services.rate_limiter.limiter = None
 
             limiter = get_limiter()
@@ -116,7 +119,7 @@ class TestRateLimiter:
         decorator = rate_limit_custom("5/minute")
         assert callable(decorator)
 
-    @patch('app.services.rate_limiter.settings')
+    @patch("app.services.rate_limiter.settings")
     def test_setup_rate_limiting_disabled(self, mock_settings: MagicMock) -> None:
         """Test setup_rate_limiting when rate limiting is disabled."""
         mock_settings.ENABLE_RATE_LIMITING = False
@@ -127,7 +130,7 @@ class TestRateLimiter:
         # Should not add exception handler or limiter state
         mock_app.add_exception_handler.assert_not_called()
 
-    @patch('app.services.rate_limiter.settings')
+    @patch("app.services.rate_limiter.settings")
     def test_setup_rate_limiting_enabled(self, mock_settings: MagicMock) -> None:
         """Test setup_rate_limiting when rate limiting is enabled."""
         mock_settings.ENABLE_RATE_LIMITING = True
@@ -138,7 +141,7 @@ class TestRateLimiter:
         # Should add exception handler
         mock_app.add_exception_handler.assert_called_once()
 
-    @patch('app.services.rate_limiter.settings')
+    @patch("app.services.rate_limiter.settings")
     def test_get_rate_limit_info_disabled(self, mock_settings: MagicMock) -> None:
         """Test get_rate_limit_info when rate limiting is disabled."""
         mock_settings.ENABLE_RATE_LIMITING = False
@@ -148,7 +151,7 @@ class TestRateLimiter:
 
         assert result["enabled"] is False
 
-    @patch('app.services.rate_limiter.settings')
+    @patch("app.services.rate_limiter.settings")
     def test_get_rate_limit_info_enabled(self, mock_settings: MagicMock) -> None:
         """Test get_rate_limit_info when rate limiting is enabled."""
         mock_settings.ENABLE_RATE_LIMITING = True
@@ -163,8 +166,8 @@ class TestRateLimiter:
         assert result["enabled"] is True
         assert result["client_ip"] == "127.0.0.1"
         assert result["remaining"] == 100  # Hardcoded in the function
-        assert result["reset_time"] == 0   # Hardcoded in the function
-        assert result["limit"] == 100      # Hardcoded in the function
+        assert result["reset_time"] == 0  # Hardcoded in the function
+        assert result["limit"] == 100  # Hardcoded in the function
 
 
 class TestRateLimitingIntegration:
@@ -182,10 +185,10 @@ class TestRateLimitingIntegration:
     def test_auth_endpoints_have_rate_limiting(self, client: TestClient) -> None:
         """Test that authentication endpoints have rate limiting applied."""
         # Test that login endpoint exists and has rate limiting
-        response = client.post("/api/v1/auth/login", data={
-            "username": "test@example.com",
-            "password": "testpassword"
-        })
+        response = client.post(
+            "/api/v1/auth/login",
+            data={"username": "test@example.com", "password": "testpassword"},
+        )
         # Should get 401 (unauthorized) not 429 (rate limited) initially
         assert response.status_code in [401, 422]  # 422 for validation error
 
@@ -204,17 +207,17 @@ class TestRateLimitingIntegration:
     def test_rate_limiting_configuration(self, client: TestClient) -> None:
         """Test rate limiting configuration through settings."""
         # Test that rate limiting can be configured
-        assert hasattr(settings, 'ENABLE_RATE_LIMITING')
-        assert hasattr(settings, 'RATE_LIMIT_DEFAULT')
-        assert hasattr(settings, 'RATE_LIMIT_LOGIN')
-        assert hasattr(settings, 'RATE_LIMIT_REGISTER')
-        assert hasattr(settings, 'RATE_LIMIT_EMAIL_VERIFICATION')
-        assert hasattr(settings, 'RATE_LIMIT_OAUTH')
+        assert hasattr(settings, "ENABLE_RATE_LIMITING")
+        assert hasattr(settings, "RATE_LIMIT_DEFAULT")
+        assert hasattr(settings, "RATE_LIMIT_LOGIN")
+        assert hasattr(settings, "RATE_LIMIT_REGISTER")
+        assert hasattr(settings, "RATE_LIMIT_EMAIL_VERIFICATION")
+        assert hasattr(settings, "RATE_LIMIT_OAUTH")
 
     def test_rate_limiting_storage_backend_configuration(self) -> None:
         """Test rate limiting storage backend configuration."""
-        assert hasattr(settings, 'RATE_LIMIT_STORAGE_BACKEND')
-        assert settings.RATE_LIMIT_STORAGE_BACKEND in ['memory', 'redis']
+        assert hasattr(settings, "RATE_LIMIT_STORAGE_BACKEND")
+        assert settings.RATE_LIMIT_STORAGE_BACKEND in ["memory", "redis"]
 
     @pytest.mark.asyncio
     async def test_init_rate_limiter(self) -> None:
@@ -258,8 +261,10 @@ class TestRateLimitingEdgeCases:
         decorator = rate_limit_custom("invalid_limit")
         assert callable(decorator)
 
-    @patch('app.services.rate_limiter.settings')
-    def test_get_rate_limit_info_with_limiter_error(self, mock_settings: MagicMock) -> None:
+    @patch("app.services.rate_limiter.settings")
+    def test_get_rate_limit_info_with_limiter_error(
+        self, mock_settings: MagicMock
+    ) -> None:
         """Test get_rate_limit_info when limiter raises an error."""
         mock_settings.ENABLE_RATE_LIMITING = True
 
@@ -271,7 +276,7 @@ class TestRateLimitingEdgeCases:
         mock_limiter = MagicMock()
         mock_limiter.get_window_stats.side_effect = Exception("Limiter error")
 
-        with patch('app.services.rate_limiter.get_limiter', return_value=mock_limiter):
+        with patch("app.services.rate_limiter.get_limiter", return_value=mock_limiter):
             # Should handle the error gracefully
             result = get_rate_limit_info(mock_request)
             # The function should handle the error and return a valid response

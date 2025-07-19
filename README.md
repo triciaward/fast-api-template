@@ -332,8 +332,11 @@ This template separates async and sync usage to avoid conflicts during testing w
 
 ### Test Structure
 The test suite is organized to separate template tests from your application-specific tests:
+- `tests/` - All test files (run with `pytest tests/`)
 - `tests/template_tests/` - Template-specific tests (authentication, validation, etc.)
-- `tests/` - Your application-specific tests (add your own test files here)
+- `tests/your_module/` - Your application-specific tests (add your own test files here)
+
+**Note**: All tests are located in the `tests/` directory. Template tests are grouped under `tests/template_tests/`, and you should add your own test files in `tests/your_module/` or directly in `tests/`.
 
 ### Run Tests
 ```bash
@@ -431,6 +434,8 @@ The CI pipeline mirrors your local development environment:
 
 ## Docker Deployment
 
+Docker Compose uses profiles to conditionally start optional services like Redis. This allows you to run only the services you need.
+
 ### Local Development
 ```bash
 # Create .env.docker file with your settings
@@ -482,6 +487,8 @@ if redis_client:
     await redis_client.set("key", "value")
     value = await redis_client.get("key")
 ```
+
+**Note**: The Redis client is initialized only if `ENABLE_REDIS=true`. If disabled, calls to `get_redis_client()` will return `None`, allowing for safe fallbacks and optional Redis usage.
 
 ### WebSocket Support
 WebSockets are an optional feature for real-time communication.
@@ -552,6 +559,30 @@ curl http://localhost:8000/features
 
 #### User Management
 - `GET /api/v1/users/me` - Get current user information (requires authentication)
+
+## Security Model
+
+The application implements a comprehensive security model with multiple layers of protection:
+
+### Security Highlights
+- **Unverified users cannot log in** or perform sensitive actions
+- **All tokens expire** and are signed with your secret key
+- **Email verification is required** before login
+- **Rate limiting is enforced** on all auth-related endpoints
+- **Input is sanitized and validated** at both schema and route level
+- **SQL injection protection** through parameterized queries and input validation
+- **XSS prevention** through proper character handling and validation
+- **Weak password detection** and prevention
+- **Reserved word protection** against common system terms
+- **Unicode normalization** for consistent character handling
+
+### Security Layers
+1. **Authentication**: JWT tokens with expiration, bcrypt password hashing
+2. **Authorization**: Email verification required, role-based access
+3. **Input Validation**: Comprehensive schema validation and sanitization
+4. **Rate Limiting**: Endpoint-specific limits to prevent abuse
+5. **CORS Protection**: Configurable cross-origin request handling
+6. **Database Security**: Parameterized queries, connection pooling
 
 ## Rate Limiting
 

@@ -10,6 +10,7 @@ pytestmark = pytest.mark.usefixtures("patch_email_service_is_configured")
 @pytest.fixture(autouse=True)
 def patch_email_service_is_configured(monkeypatch: pytest.MonkeyPatch) -> None:
     from app.services.email import email_service
+
     monkeypatch.setattr(email_service, "is_configured", lambda: True)
 
 
