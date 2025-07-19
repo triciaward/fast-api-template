@@ -128,6 +128,101 @@ alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
+## 🚀 Creating a New Project from This Template
+
+This template is designed to be used as a starting point for new FastAPI projects. Here's how to create a new project based on this template:
+
+### Step-by-Step: Create a New Project
+
+1. **Clone the Template Repo (but don't keep it linked to GitHub)**
+```bash
+git clone https://github.com/triciaward/fast-api-template.git test-project
+cd test-project
+```
+✅ This creates a new folder `test-project` with all the code.
+
+2. **Remove Git History so it's not tied to your template repo**
+```bash
+rm -rf .git
+```
+✅ This clears all Git history from the template — so it's a clean slate.
+
+3. **Reinitialize Git for your new project**
+```bash
+git init
+git add .
+git commit -m "Initial commit from template"
+```
+✅ Now it's a new project, and you're ready to push it to your own repo.
+
+4. **Create a new GitHub repo and push it**
+Go to GitHub and create a new repo called `test-project`, then:
+```bash
+git remote add origin git@github.com:your-username/test-project.git
+git branch -M main
+git push -u origin main
+```
+
+5. **Create and activate a virtual environment**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+6. **Install dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+7. **Create a .env file**
+Make a copy of your environment settings. For now, just use a local dev version:
+```bash
+cp .env.example .env
+```
+Then open `.env` and update things like:
+```bash
+DATABASE_URL=postgresql://postgres:password@localhost:5432/test_project
+SECRET_KEY=change_me
+FIRST_SUPERUSER=admin@example.com
+FIRST_SUPERUSER_PASSWORD=supersecret
+```
+
+8. **Start Postgres**
+Use Docker if you don't already have a Postgres instance running:
+```bash
+docker-compose --env-file .env up -d
+```
+
+9. **Run migrations**
+```bash
+alembic upgrade head
+```
+
+10. **Bootstrap a superuser**
+```bash
+./bootstrap_superuser.sh
+```
+
+11. **Run the app**
+```bash
+uvicorn app.main:app --reload
+```
+Now you can go to:
+- Swagger docs: http://localhost:8000/docs
+- Health check: http://localhost:8000/api/v1/health
+
+### 🧪 Bonus: Run tests
+```bash
+pytest tests/ --asyncio-mode=auto --cov=app --cov-report=term-missing
+```
+
+### 🎯 What You Get
+- **Complete FastAPI backend** with authentication, database, and testing
+- **Production-ready setup** with Docker, CI/CD, and monitoring
+- **Optional features** like Redis and WebSockets that you can enable as needed
+- **Clean Git history** ready for your own project
+- **All tests passing** and ready for development
+
 ## 🛠️ Recent Improvements (July 2025)
 
 ### ✅ Authentication System Enhancements
