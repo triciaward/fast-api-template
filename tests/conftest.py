@@ -90,14 +90,14 @@ async def setup_test_db() -> AsyncGenerator[None, None]:
 async def db_session(setup_test_db: None) -> AsyncGenerator[AsyncSession, None]:
     """Create a fresh database session for each test with proper isolation."""
     async with TestingAsyncSessionLocal() as session:
-        # Clean the database before each test
+        # Clean the database before each test - more robust cleanup
         await session.execute(text("DELETE FROM users"))
         await session.commit()
 
         try:
             yield session
         finally:
-            # Clean up after the test, handling session state
+            # Clean up after the test, handling session state - more robust cleanup
             try:
                 if session.is_active:
                     await session.execute(text("DELETE FROM users"))
@@ -135,14 +135,15 @@ def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
     # Override the database dependency with our test-specific sync version
     app.dependency_overrides[get_db] = override_get_db_sync
 
-    # Clean the database before each test
+    # Clean the database before each test - more robust cleanup
     with sync_test_engine.begin() as conn:
         conn.execute(text("DELETE FROM users"))
+        conn.commit()
 
     with TestClient(app) as test_client:
         yield test_client
 
-    # Clean the database after each test
+    # Clean the database after each test - more robust cleanup
     with sync_test_engine.begin() as conn:
         conn.execute(text("DELETE FROM users"))
         conn.commit()
