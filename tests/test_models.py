@@ -171,6 +171,7 @@ class TestUserSchemas:
             email="test@example.com",
             username="testuser",
             is_superuser=False,
+            is_verified=True,
             date_created=date_created,
         )
 
@@ -178,11 +179,13 @@ class TestUserSchemas:
         assert user_response.email == "test@example.com"
         assert user_response.username == "testuser"
         assert user_response.is_superuser is False
+        assert user_response.is_verified is True
         assert user_response.date_created == date_created
 
     def test_token_schema(self) -> None:
         """Test Token schema."""
-        token_data = {"access_token": "sample_jwt_token_123", "token_type": "bearer"}
+        token_data = {"access_token": "sample_jwt_token_123",
+                      "token_type": "bearer"}
 
         token = Token(**token_data)
 

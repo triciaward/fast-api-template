@@ -19,22 +19,8 @@ from app.schemas.user import (
     VerifyEmailResponse,
 )
 
-# Initialize services as None - will be set if available
-email_service = None
-oauth_service = None
-
-# Try to import optional services
-try:
-    from app.services.email import email_service as _email_service
-    email_service = _email_service
-except (ImportError, ModuleNotFoundError):
-    pass
-
-try:
-    from app.services.oauth import oauth_service as _oauth_service
-    oauth_service = _oauth_service
-except (ImportError, ModuleNotFoundError):
-    pass
+# Import services from the services module
+from app.services import email_service, oauth_service
 
 router = APIRouter()
 
@@ -73,8 +59,7 @@ async def register_user(
 async def login_user(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ) -> Token:
-    user = crud_user.authenticate_user_sync(
-        db, form_data.username, form_data.password)
+    user = crud_user.authenticate_user_sync(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -90,8 +75,7 @@ async def login_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token_expires = timedelta(
-        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         subject=user.email, expires_delta=access_token_expires
     )
@@ -102,14 +86,12 @@ async def login_user(
 async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> Token:
     """Login with OAuth provider (Google or Apple)."""
     if not oauth_service:
-        raise HTTPException(
-            status_code=503, detail="OAuth service not available")
+        raise HTTPException(status_code=503, detail="OAuth service not available")
 
     provider = oauth_data.provider.lower()
 
     if provider not in ["google", "apple"]:
-        raise HTTPException(
-            status_code=400, detail="Unsupported OAuth provider")
+        raise HTTPException(status_code=400, detail="Unsupported OAuth provider")
 
     if not oauth_service.is_provider_configured(provider):
         raise HTTPException(
@@ -121,8 +103,7 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
         if provider == "google":
             user_info = await oauth_service.verify_google_token(oauth_data.access_token)
             if not user_info:
-                raise HTTPException(
-                    status_code=400, detail="Invalid Google token")
+                raise HTTPException(status_code=400, detail="Invalid Google token")
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
@@ -131,20 +112,17 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
         elif provider == "apple":
             user_info = await oauth_service.verify_apple_token(oauth_data.access_token)
             if not user_info:
-                raise HTTPException(
-                    status_code=400, detail="Invalid Apple token")
+                raise HTTPException(status_code=400, detail="Invalid Apple token")
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
             name = user_info.get("name", "")
 
         if not oauth_id or not email:
-            raise HTTPException(
-                status_code=400, detail="Invalid OAuth user info")
+            raise HTTPException(status_code=400, detail="Invalid OAuth user info")
 
         # Check if user already exists
-        existing_user = crud_user.get_user_by_oauth_id_sync(
-            db, provider, oauth_id)
+        existing_user = crud_user.get_user_by_oauth_id_sync(db, provider, oauth_id)
         if existing_user:
             # User exists, generate token
             access_token_expires = timedelta(
@@ -182,8 +160,7 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
         )
 
         # Generate token for new user
-        access_token_expires = timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
             subject=new_user.email, expires_delta=access_token_expires
         )
@@ -192,8 +169,7 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=400, detail=f"OAuth login failed: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"OAuth login failed: {str(e)}")
 
 
 @router.post("/resend-verification", response_model=EmailVerificationResponse)

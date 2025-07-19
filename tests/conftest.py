@@ -39,7 +39,7 @@ test_engine = create_async_engine(
 
 # Create sync engine for TestClient tests
 sync_test_engine = create_engine(
-    SYNC_TEST_DATABASE_URL, echo=False, pool_pre_ping=False, pool_size=1, max_overflow=0
+    SYNC_TEST_DATABASE_URL, echo=False, pool_pre_ping=False, pool_size=5, max_overflow=10
 )
 
 # Create session makers
@@ -149,6 +149,27 @@ def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
         conn.commit()
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def sync_db_session(setup_sync_test_db: None) -> Generator:
+    """Create a synchronous database session for tests that need sync operations."""
+    with TestingSyncSessionLocal() as session:
+        # Clean the database before each test
+        session.execute(text("DELETE FROM users"))
+        session.commit()
+
+        try:
+            yield session
+        finally:
+            # Clean up after the test
+            try:
+                session.execute(text("DELETE FROM users"))
+                session.commit()
+            except Exception:
+                session.rollback()
+                session.execute(text("DELETE FROM users"))
+                session.commit()
 
 
 @pytest.fixture

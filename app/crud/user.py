@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Union
 
 from sqlalchemy import select
@@ -61,6 +62,126 @@ async def authenticate_user(db: DBSession, email: str, password: str) -> Optiona
     return user
 
 
+# OAuth CRUD operations
+async def get_user_by_oauth_id(db: DBSession, oauth_provider: str, oauth_id: str) -> Optional[User]:
+    if isinstance(db, AsyncSession):
+        result = await db.execute(
+            select(User).filter(
+                User.oauth_provider == oauth_provider,
+                User.oauth_id == oauth_id
+            )
+        )
+    else:
+        result = db.execute(
+            select(User).filter(
+                User.oauth_provider == oauth_provider,
+                User.oauth_id == oauth_id
+            )
+        )
+    return result.scalar_one_or_none()
+
+
+async def create_oauth_user(
+    db: DBSession,
+    email: str,
+    username: str,
+    oauth_provider: str,
+    oauth_id: str,
+    oauth_email: str,
+    name: Optional[str] = None
+) -> User:
+    db_user = User(
+        email=email,
+        username=username,
+        hashed_password=None,  # OAuth users don't have passwords
+        is_superuser=False,
+        is_verified=True,  # OAuth users are pre-verified
+        oauth_provider=oauth_provider,
+        oauth_id=oauth_id,
+        oauth_email=oauth_email,
+    )
+    db.add(db_user)
+    if isinstance(db, AsyncSession):
+        await db.commit()
+        try:
+            await db.refresh(db_user)
+        except Exception:
+            pass
+    else:
+        db.commit()
+        try:
+            db.refresh(db_user)
+        except Exception:
+            pass
+    return db_user
+
+
+# Email verification CRUD operations
+async def get_user_by_verification_token(db: DBSession, token: str) -> Optional[User]:
+    if isinstance(db, AsyncSession):
+        result = await db.execute(
+            select(User).filter(User.verification_token == token)
+        )
+    else:
+        result = db.execute(
+            select(User).filter(User.verification_token == token)
+        )
+    return result.scalar_one_or_none()
+
+
+async def update_verification_token(
+    db: DBSession, user_id: str, token: str, expires: datetime
+) -> bool:
+    if isinstance(db, AsyncSession):
+        result = await db.execute(
+            select(User).filter(User.id == user_id)
+        )
+    else:
+        result = db.execute(
+            select(User).filter(User.id == user_id)
+        )
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.verification_token = token  # type: ignore
+    user.verification_token_expires = expires  # type: ignore
+
+    if isinstance(db, AsyncSession):
+        await db.commit()
+    else:
+        db.commit()
+
+    return True
+
+
+async def verify_user(db: DBSession, user_id: str) -> bool:
+    if isinstance(db, AsyncSession):
+        result = await db.execute(
+            select(User).filter(User.id == user_id)
+        )
+    else:
+        result = db.execute(
+            select(User).filter(User.id == user_id)
+        )
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.is_verified = True  # type: ignore
+    user.verification_token = None  # type: ignore
+    user.verification_token_expires = None  # type: ignore
+
+    if isinstance(db, AsyncSession):
+        await db.commit()
+    else:
+        db.commit()
+
+    return True
+
+
 # Sync versions for TestClient compatibility
 def get_user_by_email_sync(db: Session, email: str) -> Optional[User]:
     result = db.execute(select(User).filter(User.email == email))
@@ -96,6 +217,88 @@ def authenticate_user_sync(db: Session, email: str, password: str) -> Optional[U
     if not verify_password(password, str(user.hashed_password)):
         return None
     return user
+
+
+# Sync OAuth operations
+def get_user_by_oauth_id_sync(db: Session, oauth_provider: str, oauth_id: str) -> Optional[User]:
+    result = db.execute(
+        select(User).filter(
+            User.oauth_provider == oauth_provider,
+            User.oauth_id == oauth_id
+        )
+    )
+    return result.scalar_one_or_none()
+
+
+def create_oauth_user_sync(
+    db: Session,
+    email: str,
+    username: str,
+    oauth_provider: str,
+    oauth_id: str,
+    oauth_email: str,
+    name: Optional[str] = None
+) -> User:
+    db_user = User(
+        email=email,
+        username=username,
+        hashed_password=None,  # OAuth users don't have passwords
+        is_superuser=False,
+        is_verified=True,  # OAuth users are pre-verified
+        oauth_provider=oauth_provider,
+        oauth_id=oauth_id,
+        oauth_email=oauth_email,
+    )
+    db.add(db_user)
+    db.commit()
+    try:
+        db.refresh(db_user)
+    except Exception:
+        pass
+    return db_user
+
+
+# Sync email verification operations
+def get_user_by_verification_token_sync(db: Session, token: str) -> Optional[User]:
+    result = db.execute(
+        select(User).filter(User.verification_token == token)
+    )
+    return result.scalar_one_or_none()
+
+
+def update_verification_token_sync(
+    db: Session, user_id: str, token: str, expires: datetime
+) -> bool:
+    result = db.execute(
+        select(User).filter(User.id == user_id)
+    )
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.verification_token = token  # type: ignore
+    user.verification_token_expires = expires  # type: ignore
+    db.commit()
+
+    return True
+
+
+def verify_user_sync(db: Session, user_id: str) -> bool:
+    result = db.execute(
+        select(User).filter(User.id == user_id)
+    )
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.is_verified = True  # type: ignore
+    user.verification_token = None  # type: ignore
+    user.verification_token_expires = None  # type: ignore
+    db.commit()
+
+    return True
 
 
 # Async versions for backward compatibility
