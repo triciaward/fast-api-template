@@ -1,11 +1,9 @@
 
 import os
-import sys
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.api_v1.api import api_router
 from app.bootstrap_superuser import bootstrap_superuser
