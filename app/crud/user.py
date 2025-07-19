@@ -63,19 +63,19 @@ async def authenticate_user(db: DBSession, email: str, password: str) -> Optiona
 
 
 # OAuth CRUD operations
-async def get_user_by_oauth_id(db: DBSession, oauth_provider: str, oauth_id: str) -> Optional[User]:
+async def get_user_by_oauth_id(
+    db: DBSession, oauth_provider: str, oauth_id: str
+) -> Optional[User]:
     if isinstance(db, AsyncSession):
         result = await db.execute(
             select(User).filter(
-                User.oauth_provider == oauth_provider,
-                User.oauth_id == oauth_id
+                User.oauth_provider == oauth_provider, User.oauth_id == oauth_id
             )
         )
     else:
         result = db.execute(
             select(User).filter(
-                User.oauth_provider == oauth_provider,
-                User.oauth_id == oauth_id
+                User.oauth_provider == oauth_provider, User.oauth_id == oauth_id
             )
         )
     return result.scalar_one_or_none()
@@ -88,7 +88,7 @@ async def create_oauth_user(
     oauth_provider: str,
     oauth_id: str,
     oauth_email: str,
-    name: Optional[str] = None
+    name: Optional[str] = None,
 ) -> User:
     db_user = User(
         email=email,
@@ -119,13 +119,9 @@ async def create_oauth_user(
 # Email verification CRUD operations
 async def get_user_by_verification_token(db: DBSession, token: str) -> Optional[User]:
     if isinstance(db, AsyncSession):
-        result = await db.execute(
-            select(User).filter(User.verification_token == token)
-        )
+        result = await db.execute(select(User).filter(User.verification_token == token))
     else:
-        result = db.execute(
-            select(User).filter(User.verification_token == token)
-        )
+        result = db.execute(select(User).filter(User.verification_token == token))
     return result.scalar_one_or_none()
 
 
@@ -133,13 +129,9 @@ async def update_verification_token(
     db: DBSession, user_id: str, token: str, expires: datetime
 ) -> bool:
     if isinstance(db, AsyncSession):
-        result = await db.execute(
-            select(User).filter(User.id == user_id)
-        )
+        result = await db.execute(select(User).filter(User.id == user_id))
     else:
-        result = db.execute(
-            select(User).filter(User.id == user_id)
-        )
+        result = db.execute(select(User).filter(User.id == user_id))
     user = result.scalar_one_or_none()
 
     if not user:
@@ -158,13 +150,9 @@ async def update_verification_token(
 
 async def verify_user(db: DBSession, user_id: str) -> bool:
     if isinstance(db, AsyncSession):
-        result = await db.execute(
-            select(User).filter(User.id == user_id)
-        )
+        result = await db.execute(select(User).filter(User.id == user_id))
     else:
-        result = db.execute(
-            select(User).filter(User.id == user_id)
-        )
+        result = db.execute(select(User).filter(User.id == user_id))
     user = result.scalar_one_or_none()
 
     if not user:
@@ -220,11 +208,12 @@ def authenticate_user_sync(db: Session, email: str, password: str) -> Optional[U
 
 
 # Sync OAuth operations
-def get_user_by_oauth_id_sync(db: Session, oauth_provider: str, oauth_id: str) -> Optional[User]:
+def get_user_by_oauth_id_sync(
+    db: Session, oauth_provider: str, oauth_id: str
+) -> Optional[User]:
     result = db.execute(
         select(User).filter(
-            User.oauth_provider == oauth_provider,
-            User.oauth_id == oauth_id
+            User.oauth_provider == oauth_provider, User.oauth_id == oauth_id
         )
     )
     return result.scalar_one_or_none()
@@ -237,7 +226,7 @@ def create_oauth_user_sync(
     oauth_provider: str,
     oauth_id: str,
     oauth_email: str,
-    name: Optional[str] = None
+    name: Optional[str] = None,
 ) -> User:
     db_user = User(
         email=email,
@@ -260,18 +249,14 @@ def create_oauth_user_sync(
 
 # Sync email verification operations
 def get_user_by_verification_token_sync(db: Session, token: str) -> Optional[User]:
-    result = db.execute(
-        select(User).filter(User.verification_token == token)
-    )
+    result = db.execute(select(User).filter(User.verification_token == token))
     return result.scalar_one_or_none()
 
 
 def update_verification_token_sync(
     db: Session, user_id: str, token: str, expires: datetime
 ) -> bool:
-    result = db.execute(
-        select(User).filter(User.id == user_id)
-    )
+    result = db.execute(select(User).filter(User.id == user_id))
     user = result.scalar_one_or_none()
 
     if not user:
@@ -285,9 +270,7 @@ def update_verification_token_sync(
 
 
 def verify_user_sync(db: Session, user_id: str) -> bool:
-    result = db.execute(
-        select(User).filter(User.id == user_id)
-    )
+    result = db.execute(select(User).filter(User.id == user_id))
     user = result.scalar_one_or_none()
 
     if not user:

@@ -39,7 +39,11 @@ test_engine = create_async_engine(
 
 # Create sync engine for TestClient tests
 sync_test_engine = create_engine(
-    SYNC_TEST_DATABASE_URL, echo=False, pool_pre_ping=False, pool_size=5, max_overflow=10
+    SYNC_TEST_DATABASE_URL,
+    echo=False,
+    pool_pre_ping=False,
+    pool_size=5,
+    max_overflow=10,
 )
 
 # Create session makers

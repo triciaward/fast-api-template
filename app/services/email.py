@@ -24,9 +24,7 @@ class EmailService:
     def is_configured(self) -> bool:
         """Check if email service is properly configured."""
         return bool(
-            settings.SMTP_USERNAME
-            and settings.SMTP_PASSWORD
-            and settings.SMTP_HOST
+            settings.SMTP_USERNAME and settings.SMTP_PASSWORD and settings.SMTP_HOST
         )
 
     def generate_verification_token(self) -> str:
@@ -42,7 +40,9 @@ class EmailService:
         if not self.is_configured():
             return False
 
-        verification_url = f"{settings.FRONTEND_URL}/verify-email?token={verification_token}"
+        verification_url = (
+            f"{settings.FRONTEND_URL}/verify-email?token={verification_token}"
+        )
 
         # Simple HTML template
         html_content = f"""
@@ -77,10 +77,14 @@ class EmailService:
         except Exception:
             return False
 
-    async def create_verification_token(self, db: Session, user_id: str) -> Optional[str]:
+    async def create_verification_token(
+        self, db: Session, user_id: str
+    ) -> Optional[str]:
         """Create and store verification token for a user."""
         token = self.generate_verification_token()
-        expires = datetime.utcnow() + timedelta(hours=settings.VERIFICATION_TOKEN_EXPIRE_HOURS)
+        expires = datetime.utcnow() + timedelta(
+            hours=settings.VERIFICATION_TOKEN_EXPIRE_HOURS
+        )
 
         success = crud_user.update_verification_token_sync(
             db, user_id=user_id, token=token, expires=expires
@@ -95,7 +99,10 @@ class EmailService:
             return False
 
         # Check if token is expired
-        if user.verification_token_expires and user.verification_token_expires < datetime.utcnow():
+        if (
+            user.verification_token_expires
+            and user.verification_token_expires < datetime.utcnow()
+        ):
             return False
 
         # Mark user as verified and clear token
