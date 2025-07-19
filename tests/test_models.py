@@ -136,13 +136,13 @@ class TestUserSchemas:
         user_create = UserCreate(
             email="test@example.com",
             username="testuser",
-            password="testpassword123",
+            password="TestPassword123!",
             is_superuser=False,
         )
 
         assert user_create.email == "test@example.com"
         assert user_create.username == "testuser"
-        assert user_create.password == "testpassword123"
+        assert user_create.password == "TestPassword123!"
         assert user_create.is_superuser is False
 
     def test_user_create_schema_invalid_email(self) -> None:
@@ -151,7 +151,7 @@ class TestUserSchemas:
             UserCreate(
                 email="invalid-email",
                 username="testuser",
-                password="testpassword123",
+                password="TestPassword123!",
                 is_superuser=False,
             )
 
@@ -184,7 +184,8 @@ class TestUserSchemas:
 
     def test_token_schema(self) -> None:
         """Test Token schema."""
-        token_data = {"access_token": "sample_jwt_token_123", "token_type": "bearer"}
+        token_data = {"access_token": "sample_jwt_token_123",
+                      "token_type": "bearer"}
 
         token = Token(**token_data)
 

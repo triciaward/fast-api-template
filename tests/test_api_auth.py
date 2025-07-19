@@ -55,7 +55,8 @@ class TestAuthEndpoints:
         duplicate_username_data = test_user_data_2.copy()
         duplicate_username_data["username"] = test_user_data["username"]
 
-        response = client.post("/api/v1/auth/register", json=duplicate_username_data)
+        response = client.post("/api/v1/auth/register",
+                               json=duplicate_username_data)
 
         assert response.status_code == 400
         assert "Username already taken" in response.json()["detail"]
@@ -127,12 +128,13 @@ class TestAuthEndpoints:
         assert response.status_code == 201
 
         # Try to login with wrong password
-        login_data = {"username": test_user_data["email"], "password": "wrongpassword"}
+        login_data = {
+            "username": test_user_data["email"], "password": "wrongpassword"}
 
         response = client.post("/api/v1/auth/login", data=login_data)
 
         assert response.status_code == 401
-        assert "Incorrect email or password" in response.json()["detail"]
+        assert "Invalid email or password" in response.json()["detail"]
 
     def test_login_wrong_email(
         self, client: TestClient, test_user_data: dict[str, str]
@@ -151,16 +153,17 @@ class TestAuthEndpoints:
         response = client.post("/api/v1/auth/login", data=login_data)
 
         assert response.status_code == 401
-        assert "Incorrect email or password" in response.json()["detail"]
+        assert "Invalid email or password" in response.json()["detail"]
 
     def test_login_nonexistent_user(self, client: TestClient) -> None:
         """Test login for non-existent user."""
-        login_data = {"username": "nonexistent@example.com", "password": "anypassword"}
+        login_data = {"username": "nonexistent@example.com",
+                      "password": "anypassword"}
 
         response = client.post("/api/v1/auth/login", data=login_data)
 
         assert response.status_code == 401
-        assert "Incorrect email or password" in response.json()["detail"]
+        assert "Invalid email or password" in response.json()["detail"]
 
     def test_login_missing_credentials(self, client: TestClient) -> None:
         """Test login with missing credentials."""
@@ -186,4 +189,5 @@ class TestAuthEndpoints:
         response = client.post("/api/v1/auth/login", data=login_data)
 
         assert response.status_code == 401
-        assert "Please verify your email before logging in" in response.json()["detail"]
+        assert "Please verify your email before logging in" in response.json()[
+            "detail"]

@@ -25,6 +25,7 @@ class TestConnectionManager:
         websocket = AsyncMock(spec=WebSocket)
         return websocket
 
+    @pytest.mark.asyncio
     async def test_connect_new_room(
         self, connection_manager: ConnectionManager, mock_websocket: AsyncMock
     ) -> None:
@@ -36,6 +37,7 @@ class TestConnectionManager:
         assert len(connection_manager.active_connections["test-room"]) == 1
         mock_websocket.accept.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_connect_existing_room(
         self, connection_manager: ConnectionManager, mock_websocket: AsyncMock
     ) -> None:
@@ -51,6 +53,7 @@ class TestConnectionManager:
         assert mock_websocket in connection_manager.active_connections["test-room"]
         assert mock_websocket2 in connection_manager.active_connections["test-room"]
 
+    @pytest.mark.asyncio
     async def test_connect_default_room(
         self, connection_manager: ConnectionManager, mock_websocket: AsyncMock
     ) -> None:
@@ -89,6 +92,7 @@ class TestConnectionManager:
 
         assert "test-room" not in connection_manager.active_connections
 
+    @pytest.mark.asyncio
     async def test_send_personal_message_success(
         self, connection_manager: ConnectionManager, mock_websocket: AsyncMock
     ) -> None:
@@ -99,6 +103,7 @@ class TestConnectionManager:
 
         mock_websocket.send_text.assert_called_once_with(message)
 
+    @pytest.mark.asyncio
     async def test_send_personal_message_error(
         self, connection_manager: ConnectionManager, mock_websocket: AsyncMock
     ) -> None:
@@ -109,6 +114,7 @@ class TestConnectionManager:
         await connection_manager.send_personal_message(message, mock_websocket)
         # Should not raise exception
 
+    @pytest.mark.asyncio
     async def test_broadcast_empty_room(
         self, connection_manager: ConnectionManager
     ) -> None:
@@ -118,6 +124,7 @@ class TestConnectionManager:
         await connection_manager.broadcast(message, "empty-room")
         # Should not raise any exceptions
 
+    @pytest.mark.asyncio
     async def test_broadcast_success(
         self, connection_manager: ConnectionManager
     ) -> None:
@@ -137,6 +144,7 @@ class TestConnectionManager:
         mock_websocket1.send_text.assert_called_once_with(message)
         mock_websocket2.send_text.assert_called_once_with(message)
 
+    @pytest.mark.asyncio
     async def test_broadcast_with_disconnected_websocket(
         self, connection_manager: ConnectionManager
     ) -> None:
@@ -161,6 +169,7 @@ class TestConnectionManager:
         assert mock_websocket1 in connection_manager.active_connections["test-room"]
         assert mock_websocket2 not in connection_manager.active_connections["test-room"]
 
+    @pytest.mark.asyncio
     async def test_broadcast_json(self, connection_manager: ConnectionManager) -> None:
         """Test broadcasting JSON data."""
         data = {"type": "message", "content": "Hello"}

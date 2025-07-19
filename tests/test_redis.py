@@ -27,6 +27,7 @@ class TestRedisService:
 
     @patch("app.services.redis.settings")
     @patch("app.services.redis.redis")
+    @pytest.mark.asyncio
     async def test_init_redis_disabled(
         self, mock_redis: MagicMock, mock_settings: MagicMock
     ) -> None:
@@ -40,6 +41,7 @@ class TestRedisService:
 
     @patch("app.services.redis.settings")
     @patch("app.services.redis.redis")
+    @pytest.mark.asyncio
     async def test_init_redis_success(
         self, mock_redis: MagicMock, mock_settings: MagicMock
     ) -> None:
@@ -66,6 +68,7 @@ class TestRedisService:
 
     @patch("app.services.redis.settings")
     @patch("app.services.redis.redis")
+    @pytest.mark.asyncio
     async def test_init_redis_connection_error(
         self, mock_redis: MagicMock, mock_settings: MagicMock
     ) -> None:
@@ -81,6 +84,7 @@ class TestRedisService:
 
     @patch("app.services.redis.settings")
     @patch("app.services.redis.redis")
+    @pytest.mark.asyncio
     async def test_init_redis_ping_error(
         self, mock_redis: MagicMock, mock_settings: MagicMock
     ) -> None:
@@ -96,6 +100,7 @@ class TestRedisService:
 
         assert result is None
 
+    @pytest.mark.asyncio
     async def test_close_redis_no_client(self) -> None:
         """Test closing Redis when no client exists."""
         # Ensure no client exists
@@ -107,6 +112,7 @@ class TestRedisService:
         # Should not raise any exceptions
 
     @patch("app.services.redis.redis_client")
+    @pytest.mark.asyncio
     async def test_close_redis_success(self, mock_redis_client: MagicMock) -> None:
         """Test successful Redis connection closure."""
         mock_client = AsyncMock()
@@ -118,6 +124,7 @@ class TestRedisService:
         mock_client.close.assert_called_once()
 
     @patch("app.services.redis.redis_client")
+    @pytest.mark.asyncio
     async def test_close_redis_error(self, mock_redis_client: MagicMock) -> None:
         """Test Redis closure with error."""
         mock_client = AsyncMock()
@@ -148,6 +155,7 @@ class TestRedisService:
         result = get_redis_client()
         assert result == mock_client
 
+    @pytest.mark.asyncio
     async def test_health_check_redis_no_client(self) -> None:
         """Test Redis health check when no client exists."""
         # Ensure no client exists
@@ -159,6 +167,7 @@ class TestRedisService:
         assert result is False
 
     @patch("app.services.redis.redis_client")
+    @pytest.mark.asyncio
     async def test_health_check_redis_success(
         self, mock_redis_client: MagicMock
     ) -> None:
@@ -173,6 +182,7 @@ class TestRedisService:
         mock_client.ping.assert_called_once()
 
     @patch("app.services.redis.redis_client")
+    @pytest.mark.asyncio
     async def test_health_check_redis_error(self, mock_redis_client: MagicMock) -> None:
         """Test Redis health check with error."""
         mock_client = AsyncMock()

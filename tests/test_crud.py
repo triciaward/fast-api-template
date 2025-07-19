@@ -14,7 +14,7 @@ class TestCRUD:
         user_create = UserCreate(
             email="test@example.com",
             username="testuser",
-            password="testpassword123",
+            password="TestPassword123!",
             is_superuser=False,
         )
         user = await crud_user.create_user_async(db=db_session, user=user_create)
@@ -22,7 +22,7 @@ class TestCRUD:
         assert user.email == "test@example.com"
         assert user.username == "testuser"
         assert user.hashed_password is not None
-        assert user.hashed_password != "testpassword123"
+        assert user.hashed_password != "TestPassword123!"
         assert user.id is not None
 
     async def test_get_user_by_email(self, db_session: AsyncSession) -> None:
@@ -30,7 +30,7 @@ class TestCRUD:
         user_create = UserCreate(
             email="test@example.com",
             username="testuser",
-            password="testpassword123",
+            password="TestPassword123!",
             is_superuser=False,
         )
         created_user = await crud_user.create_user_async(
@@ -59,7 +59,7 @@ class TestCRUD:
         user_create = UserCreate(
             email="test@example.com",
             username="testuser",
-            password="testpassword123",
+            password="TestPassword123!",
             is_superuser=False,
         )
         created_user = await crud_user.create_user_async(
@@ -88,14 +88,14 @@ class TestCRUD:
         user_create = UserCreate(
             email="test@example.com",
             username="testuser",
-            password="testpassword123",
+            password="TestPassword123!",
             is_superuser=False,
         )
         await crud_user.create_user_async(db=db_session, user=user_create)
 
         # Authenticate with correct credentials
         user = await crud_user.authenticate_user_async(
-            db=db_session, email="test@example.com", password="testpassword123"
+            db=db_session, email="test@example.com", password="TestPassword123!"
         )
         assert user is not None
         assert user.email == "test@example.com"
@@ -107,7 +107,7 @@ class TestCRUD:
         user_create = UserCreate(
             email="test@example.com",
             username="testuser",
-            password="testpassword123",
+            password="TestPassword123!",
             is_superuser=False,
         )
         await crud_user.create_user_async(db=db_session, user=user_create)
@@ -132,21 +132,21 @@ class TestCRUD:
         user_create = UserCreate(
             email="test@example.com",
             username="testuser",
-            password="testpassword123",
+            password="TestPassword123!",
             is_superuser=False,
         )
         user = await crud_user.create_user_async(db=db_session, user=user_create)
 
         # Password should be hashed
-        assert user.hashed_password != "testpassword123"
-        assert len(user.hashed_password) > len("testpassword123")
+        assert user.hashed_password != "TestPassword123!"
+        assert len(user.hashed_password) > len("TestPassword123!")
 
     async def test_user_uuid_generation(self, db_session: AsyncSession) -> None:
         """Test that users get UUID primary keys."""
         user_create = UserCreate(
             email="test@example.com",
             username="testuser",
-            password="testpassword123",
+            password="TestPassword123!",
             is_superuser=False,
         )
         user = await crud_user.create_user_async(db=db_session, user=user_create)
@@ -161,7 +161,7 @@ class TestCRUD:
         user_create = UserCreate(
             email="test@example.com",
             username="testuser",
-            password="testpassword123",
+            password="TestPassword123!",
             is_superuser=False,
         )
         user = await crud_user.create_user_async(db=db_session, user=user_create)

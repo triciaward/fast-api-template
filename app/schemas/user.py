@@ -2,22 +2,71 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+
+from app.core.validation import (
+    clean_input,
+    sanitize_input,
+    validate_email_format,
+    validate_password,
+    validate_username,
+)
 
 
 class UserBase(BaseModel):
     email: EmailStr
     username: str
 
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        """Validate email format and check for disposable domains."""
+        is_valid, error_msg = validate_email_format(v)
+        if not is_valid:
+            raise ValueError(error_msg)
+        return v.lower().strip()
+
+    @field_validator('username')
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        """Validate username format and content."""
+        # Clean first to remove whitespace and control characters
+        v = clean_input(v)
+
+        # Then validate (including length)
+        is_valid, error_msg = validate_username(v)
+        if not is_valid:
+            raise ValueError(error_msg)
+
+        return v
+
 
 class UserCreate(UserBase):
     password: str
     is_superuser: bool = False
 
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        """Validate password strength."""
+        is_valid, error_msg = validate_password(v)
+        if not is_valid:
+            raise ValueError(error_msg)
+        return v
+
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        """Validate email format."""
+        is_valid, error_msg = validate_email_format(v)
+        if not is_valid:
+            raise ValueError(error_msg)
+        return v.lower().strip()
 
 
 class UserResponse(UserBase):
@@ -44,6 +93,14 @@ class OAuthLogin(BaseModel):
     provider: str  # 'google' or 'apple'
     access_token: str
 
+    @field_validator('provider')
+    @classmethod
+    def validate_provider(cls, v: str) -> str:
+        """Validate OAuth provider."""
+        if v.lower() not in ['google', 'apple']:
+            raise ValueError("Provider must be 'google' or 'apple'")
+        return v.lower()
+
 
 class OAuthUserInfo(BaseModel):
     provider: str
@@ -57,6 +114,15 @@ class OAuthUserInfo(BaseModel):
 class EmailVerificationRequest(BaseModel):
     email: EmailStr
 
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        """Validate email format."""
+        is_valid, error_msg = validate_email_format(v)
+        if not is_valid:
+            raise ValueError(error_msg)
+        return v.lower().strip()
+
 
 class EmailVerificationResponse(BaseModel):
     message: str
@@ -65,6 +131,12 @@ class EmailVerificationResponse(BaseModel):
 
 class VerifyEmailRequest(BaseModel):
     token: str
+
+    @field_validator('token')
+    @classmethod
+    def validate_token(cls, v: str) -> str:
+        """Sanitize verification token."""
+        return sanitize_input(v, max_length=255)
 
 
 class VerifyEmailResponse(BaseModel):

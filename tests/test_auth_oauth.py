@@ -11,8 +11,8 @@ class TestOAuthAuthEndpoints:
             "/api/v1/auth/oauth/login",
             json={"provider": "unsupported", "access_token": "test_token"},
         )
-        assert response.status_code == 400
-        assert "Unsupported OAuth provider" in response.json()["detail"]
+        assert response.status_code == 422
+        assert "Provider must be 'google' or 'apple'" in str(response.json())
 
     def test_oauth_login_google_not_configured(self, client: TestClient) -> None:
         """Test OAuth login when Google is not configured."""

@@ -19,7 +19,7 @@ class TestEmailVerificationEndpoints:
                 json={
                     "email": "test@example.com",
                     "username": "testuser",
-                    "password": "testpassword123",
+                    "password": "TestPassword123!",
                 },
             )
             assert response.status_code == 201
@@ -38,7 +38,7 @@ class TestEmailVerificationEndpoints:
                 json={
                     "email": "test@example.com",
                     "username": "testuser",
-                    "password": "testpassword123",
+                    "password": "TestPassword123!",
                 },
             )
             assert response.status_code == 201
@@ -56,7 +56,7 @@ class TestEmailVerificationEndpoints:
         user = User(
             email="unverified@example.com",
             username="unverifieduser",
-            hashed_password=get_password_hash("testpassword123"),
+            hashed_password=get_password_hash("TestPassword123!"),
             is_verified=False,
         )
         sync_db_session.add(user)
@@ -64,10 +64,12 @@ class TestEmailVerificationEndpoints:
 
         response = client.post(
             "/api/v1/auth/login",
-            data={"username": "unverified@example.com", "password": "testpassword123"},
+            data={"username": "unverified@example.com",
+                  "password": "TestPassword123!"},
         )
         assert response.status_code == 401
-        assert "Please verify your email before logging in" in response.json()["detail"]
+        assert "Please verify your email before logging in" in response.json()[
+            "detail"]
 
     def test_login_verified_user(
         self, client: TestClient, sync_db_session: Session
@@ -80,7 +82,7 @@ class TestEmailVerificationEndpoints:
         user = User(
             email="verified@example.com",
             username="verifieduser",
-            hashed_password=get_password_hash("testpassword123"),
+            hashed_password=get_password_hash("TestPassword123!"),
             is_verified=True,
         )
         sync_db_session.add(user)
@@ -88,7 +90,8 @@ class TestEmailVerificationEndpoints:
 
         response = client.post(
             "/api/v1/auth/login",
-            data={"username": "verified@example.com", "password": "testpassword123"},
+            data={"username": "verified@example.com",
+                  "password": "TestPassword123!"},
         )
         assert response.status_code == 200
         token_data = response.json()
@@ -313,7 +316,8 @@ class TestEmailVerificationCRUDOperations:
         from app.crud import user as crud_user
 
         non_existent_uuid = str(uuid.uuid4())
-        success = crud_user.verify_user_sync(sync_db_session, non_existent_uuid)
+        success = crud_user.verify_user_sync(
+            sync_db_session, non_existent_uuid)
         assert success is False
 
 
@@ -334,7 +338,7 @@ class TestEmailVerificationIntegration:
                 json={
                     "email": "flow@example.com",
                     "username": "flowuser",
-                    "password": "testpassword123",
+                    "password": "TestPassword123!",
                 },
             )
             assert register_response.status_code == 201
@@ -344,7 +348,8 @@ class TestEmailVerificationIntegration:
             # Step 2: Try to login (should fail)
             login_response = client.post(
                 "/api/v1/auth/login",
-                data={"username": "flow@example.com", "password": "testpassword123"},
+                data={"username": "flow@example.com",
+                      "password": "TestPassword123!"},
             )
             assert login_response.status_code == 401
             assert (
@@ -363,23 +368,25 @@ class TestEmailVerificationIntegration:
             assert user is not None
 
             # Set verification token manually
-            user.verification_token = "test_verification_token"  # type: ignore[assignment]
-            user.verification_token_expires = datetime.utcnow() + timedelta(hours=1)  # type: ignore[assignment]
-            sync_db_session.commit()
+        user.verification_token = "test_verification_token"  # type: ignore[assignment]
+        user.verification_token_expires = datetime.utcnow(
+        ) + timedelta(hours=1)  # type: ignore[assignment]
+        sync_db_session.commit()
 
-            # Step 4: Verify email
-            verify_response = client.post(
-                "/api/v1/auth/verify-email", json={"token": "test_verification_token"}
-            )
-            assert verify_response.status_code == 200
-            verify_data = verify_response.json()
-            assert verify_data["verified"] is True
+        # Step 4: Verify email
+        verify_response = client.post(
+            "/api/v1/auth/verify-email", json={"token": "test_verification_token"}
+        )
+        assert verify_response.status_code == 200
+        verify_data = verify_response.json()
+        assert verify_data["verified"] is True
 
-            # Step 5: Login should now succeed
-            final_login_response = client.post(
-                "/api/v1/auth/login",
-                data={"username": "flow@example.com", "password": "testpassword123"},
-            )
-            assert final_login_response.status_code == 200
-            token_data = final_login_response.json()
-            assert "access_token" in token_data
+        # Step 5: Login should now succeed
+        final_login_response = client.post(
+            "/api/v1/auth/login",
+            data={"username": "flow@example.com",
+                  "password": "TestPassword123!"},
+        )
+        assert final_login_response.status_code == 200
+        token_data = final_login_response.json()
+        assert "access_token" in token_data

@@ -182,7 +182,7 @@ def test_user_data() -> dict[str, str]:
     return {
         "email": "test@example.com",
         "username": "testuser",
-        "password": "testpassword123",
+        "password": "TestPassword123!",
     }
 
 
@@ -192,5 +192,5 @@ def test_user_data_2() -> dict[str, str]:
     return {
         "email": "test2@example.com",
         "username": "testuser2",
-        "password": "testpassword456",
+        "password": "TestPassword456!",
     }
