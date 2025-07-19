@@ -56,11 +56,6 @@ jobs:
           sleep 10
           echo "PostgreSQL should be ready now"
 
-      - name: Run migrations
-        run: |
-          echo "Running alembic upgrade with DATABASE_URL: $DATABASE_URL"
-          alembic upgrade head
-
       - name: Run tests
         run: |
           echo "Database URL: $DATABASE_URL"
