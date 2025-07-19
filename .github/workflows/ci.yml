@@ -32,7 +32,7 @@ jobs:
       SECRET_KEY: test-secret-key-for-ci
       ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
-      BACKEND_CORS_ORIGINS: '["http://localhost:3000","http://localhost:8080"]'
+      BACKEND_CORS_ORIGINS: '["http://localhost:3000","http://localhost:8080","http://localhost:4200"]'
       FIRST_SUPERUSER: admin@example.com
       FIRST_SUPERUSER_PASSWORD: testpassword123
 
