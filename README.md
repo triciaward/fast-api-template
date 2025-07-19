@@ -46,7 +46,8 @@ fast-api-template/
 │   ├── schemas/            # Pydantic validation schemas
 │   ├── services/           # Optional service modules (Redis, WebSocket)
 │   └── main.py             # Application entry point
-├── tests/                  # Comprehensive test suite (230 tests)
+├── tests/                  # Test suite
+│   └── template_tests/     # Template-specific tests (230 tests)
 ├── docker-compose.yml      # Docker composition file
 ├── Dockerfile              # Docker image configuration
 └── requirements.txt        # Python dependencies
@@ -318,25 +319,30 @@ This template separates async and sync usage to avoid conflicts during testing w
 
 ## Testing
 
+### Test Structure
+The test suite is organized to separate template tests from your application-specific tests:
+- `tests/template_tests/` - Template-specific tests (authentication, validation, etc.)
+- `tests/` - Your application-specific tests (add your own test files here)
+
 ### Run Tests
 ```bash
-# All authentication tests (40 tests)
-pytest tests/test_api_auth.py tests/test_auth_email_verification.py tests/test_auth_oauth.py -v
+# All template tests (230 tests)
+pytest tests/template_tests/ -v --asyncio-mode=auto
 
-# All tests with proper async support (230 tests)
-pytest tests/ -v --asyncio-mode=auto
+# All authentication tests (40 tests)
+pytest tests/template_tests/test_api_auth.py tests/template_tests/test_auth_email_verification.py tests/template_tests/test_auth_oauth.py -v
 
 # With coverage (recommended for accurate results)
-pytest tests/ --asyncio-mode=auto --cov=app --cov-report=term-missing
+pytest tests/template_tests/ --asyncio-mode=auto --cov=app --cov-report=term-missing
 
 # Quick test run (may skip some async tests)
-pytest tests/ -v
+pytest tests/template_tests/ -v
 
 # Specific categories
-pytest tests/test_api_*.py -v  # API tests
-pytest tests/test_cors.py -v   # CORS tests
-pytest tests/test_auth_validation.py -v  # Validation tests (50+ tests)
-pytest tests/test_redis.py tests/test_websocket.py --asyncio-mode=auto -v  # Optional features
+pytest tests/template_tests/test_api_*.py -v  # API tests
+pytest tests/template_tests/test_cors.py -v   # CORS tests
+pytest tests/template_tests/test_auth_validation.py -v  # Validation tests (50+ tests)
+pytest tests/template_tests/test_redis.py tests/template_tests/test_websocket.py --asyncio-mode=auto -v  # Optional features
 ```
 
 ### Authentication Test Coverage
