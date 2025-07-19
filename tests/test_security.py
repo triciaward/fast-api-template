@@ -110,9 +110,7 @@ class TestJWTTokens:
 
         # Token should be expired and raise JWTError
         with pytest.raises(JWTError):
-            jwt.decode(
-                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-            )
+            jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
 
     def test_invalid_token_signature(self) -> None:
         """Test that tokens with invalid signatures are rejected."""
@@ -121,8 +119,7 @@ class TestJWTTokens:
 
         # Try to decode with wrong secret key
         with pytest.raises(JWTError):
-            jwt.decode(token, "wrong_secret_key",
-                       algorithms=[settings.ALGORITHM])
+            jwt.decode(token, "wrong_secret_key", algorithms=[settings.ALGORITHM])
 
     def test_different_subjects_different_tokens(self) -> None:
         """Test that different subjects produce different tokens."""

@@ -15,6 +15,6 @@ async def test_async_basic() -> None:
 async def test_async_session_type(db_session: AsyncSession) -> None:
     """Test that db_session fixture returns correct type."""
     assert isinstance(db_session, AsyncSession)
-    assert hasattr(db_session, 'add')
-    assert hasattr(db_session, 'commit')
-    assert hasattr(db_session, 'refresh')
+    assert hasattr(db_session, "add")
+    assert hasattr(db_session, "commit")
+    assert hasattr(db_session, "refresh")

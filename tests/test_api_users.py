@@ -8,11 +8,12 @@ from app.core.security import create_access_token
 class TestUserEndpoints:
     """Test user API endpoints."""
 
-    async def test_get_current_user_success(self, client: TestClient, test_user_data: dict[str, str]) -> None:
+    async def test_get_current_user_success(
+        self, client: TestClient, test_user_data: dict[str, str]
+    ) -> None:
         """Test successfully getting current user information."""
         # Create user via API instead of direct database access
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data)
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         # Get the created user's email for token creation
@@ -57,20 +58,21 @@ class TestUserEndpoints:
         assert response.status_code == 401
         assert "Could not validate credentials" in response.json()["detail"]
 
-    async def test_get_current_user_expired_token(self, client: TestClient, test_user_data: dict[str, str]) -> None:
+    async def test_get_current_user_expired_token(
+        self, client: TestClient, test_user_data: dict[str, str]
+    ) -> None:
         """Test getting current user with expired token."""
         # Create user via API
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data)
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         user_email = test_user_data["email"]
 
         # Create expired token (negative expiration)
         from datetime import timedelta
+
         access_token = create_access_token(
-            subject=user_email,
-            expires_delta=timedelta(seconds=-1)
+            subject=user_email, expires_delta=timedelta(seconds=-1)
         )
         headers = {"Authorization": f"Bearer {access_token}"}
 
@@ -80,11 +82,12 @@ class TestUserEndpoints:
         assert response.status_code == 401
         assert "Could not validate credentials" in response.json()["detail"]
 
-    async def test_get_current_user_wrong_secret_key(self, client: TestClient, test_user_data: dict[str, str]) -> None:
+    async def test_get_current_user_wrong_secret_key(
+        self, client: TestClient, test_user_data: dict[str, str]
+    ) -> None:
         """Test getting current user with token signed by wrong secret key."""
         # Create user via API
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data)
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         user_email = test_user_data["email"]
@@ -97,8 +100,7 @@ class TestUserEndpoints:
         expire = datetime.utcnow() + timedelta(minutes=30)
         to_encode = {"exp": expire, "sub": str(user_email)}
         # Use wrong secret key
-        malicious_token = jwt.encode(
-            to_encode, "wrong_secret_key", algorithm="HS256")
+        malicious_token = jwt.encode(to_encode, "wrong_secret_key", algorithm="HS256")
 
         headers = {"Authorization": f"Bearer {malicious_token}"}
 
@@ -127,11 +129,12 @@ class TestUserEndpoints:
         assert response.status_code == 401
         assert "Could not validate credentials" in response.json()["detail"]
 
-    async def test_get_current_user_wrong_auth_scheme(self, client: TestClient, test_user_data: dict[str, str]) -> None:
+    async def test_get_current_user_wrong_auth_scheme(
+        self, client: TestClient, test_user_data: dict[str, str]
+    ) -> None:
         """Test getting current user with wrong authentication scheme."""
         # Create user via API
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data)
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         user_email = test_user_data["email"]

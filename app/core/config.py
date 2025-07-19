@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=True,
-        extra='ignore'  # Ignore extra environment variables
+        extra="ignore",  # Ignore extra environment variables
     )
 
     PROJECT_NAME: str = "FastAPI Template"
@@ -27,7 +27,9 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_PASSWORD: Optional[str] = None
 
     # Database
-    DATABASE_URL: str = "postgresql://postgres:dev_password_123@localhost:5432/fastapi_template"
+    DATABASE_URL: str = (
+        "postgresql://postgres:dev_password_123@localhost:5432/fastapi_template"
+    )
 
     # CORS
     BACKEND_CORS_ORIGINS: list[str] = [

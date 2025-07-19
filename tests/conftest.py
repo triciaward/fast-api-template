@@ -21,7 +21,9 @@ os.environ["TESTING"] = "1"
 
 # Test database URLs
 TEST_DATABASE_URL = "postgresql+asyncpg://postgres:dev_password_123@localhost:5432/fastapi_template_test"
-SYNC_TEST_DATABASE_URL = "postgresql://postgres:dev_password_123@localhost:5432/fastapi_template_test"
+SYNC_TEST_DATABASE_URL = (
+    "postgresql://postgres:dev_password_123@localhost:5432/fastapi_template_test"
+)
 
 # Create async engine for direct database tests
 test_engine = create_async_engine(
@@ -30,16 +32,12 @@ test_engine = create_async_engine(
     pool_pre_ping=False,
     pool_size=5,
     max_overflow=10,
-    pool_recycle=300
+    pool_recycle=300,
 )
 
 # Create sync engine for TestClient tests
 sync_test_engine = create_engine(
-    SYNC_TEST_DATABASE_URL,
-    echo=False,
-    pool_pre_ping=False,
-    pool_size=1,
-    max_overflow=0
+    SYNC_TEST_DATABASE_URL, echo=False, pool_pre_ping=False, pool_size=1, max_overflow=0
 )
 
 # Create session makers
@@ -48,14 +46,11 @@ TestingAsyncSessionLocal = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,
     autocommit=False,
-    autoflush=False
+    autoflush=False,
 )
 
 TestingSyncSessionLocal = sessionmaker(
-    bind=sync_test_engine,
-    expire_on_commit=False,
-    autocommit=False,
-    autoflush=False
+    bind=sync_test_engine, expire_on_commit=False, autocommit=False, autoflush=False
 )
 
 
@@ -132,7 +127,7 @@ def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
         title=settings.PROJECT_NAME,
         version=settings.VERSION,
         description="FastAPI Template with Authentication",
-        openapi_url=f"{settings.API_V1_STR}/openapi.json"
+        openapi_url=f"{settings.API_V1_STR}/openapi.json",
     )
 
     # Configure CORS
@@ -182,7 +177,7 @@ def test_user_data() -> dict[str, str]:
     return {
         "email": "test@example.com",
         "username": "testuser",
-        "password": "testpassword123"
+        "password": "testpassword123",
     }
 
 
@@ -192,5 +187,5 @@ def test_user_data_2() -> dict[str, str]:
     return {
         "email": "test2@example.com",
         "username": "testuser2",
-        "password": "testpassword456"
+        "password": "testpassword456",
     }

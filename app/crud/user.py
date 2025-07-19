@@ -34,7 +34,7 @@ async def create_user(db: DBSession, user: UserCreate) -> User:
         email=user.email,
         username=user.username,
         hashed_password=hashed_password,
-        is_superuser=user.is_superuser
+        is_superuser=user.is_superuser,
     )
     db.add(db_user)
     if isinstance(db, AsyncSession):
@@ -78,7 +78,7 @@ def create_user_sync(db: Session, user: UserCreate) -> User:
         email=user.email,
         username=user.username,
         hashed_password=hashed_password,
-        is_superuser=user.is_superuser
+        is_superuser=user.is_superuser,
     )
     db.add(db_user)
     db.commit()
@@ -115,7 +115,7 @@ async def create_user_async(db: AsyncSession, user: UserCreate) -> User:
         email=user.email,
         username=user.username,
         hashed_password=hashed_password,
-        is_superuser=user.is_superuser
+        is_superuser=user.is_superuser,
     )
     db.add(db_user)
     await db.commit()
@@ -126,7 +126,9 @@ async def create_user_async(db: AsyncSession, user: UserCreate) -> User:
     return db_user
 
 
-async def authenticate_user_async(db: AsyncSession, email: str, password: str) -> Optional[User]:
+async def authenticate_user_async(
+    db: AsyncSession, email: str, password: str
+) -> Optional[User]:
     user = await get_user_by_email_async(db, email)
     if not user:
         return None

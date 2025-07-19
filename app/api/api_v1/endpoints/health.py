@@ -24,10 +24,7 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
         "timestamp": datetime.utcnow().isoformat(),
         "version": settings.VERSION,
         "environment": settings.ENVIRONMENT,
-        "checks": {
-            "database": "healthy",
-            "application": "healthy"
-        }
+        "checks": {"database": "healthy", "application": "healthy"},
     }
 
     # Check database connectivity
@@ -56,10 +53,7 @@ async def simple_health_check() -> dict[str, str]:
     Returns:
         dict: Basic health status
     """
-    return {
-        "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat()
-    }
+    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
 
 @router.get("/health/ready")
@@ -75,8 +69,8 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
         "timestamp": datetime.utcnow().isoformat(),
         "components": {
             "database": {"ready": True, "message": "Database connection successful"},
-            "application": {"ready": True, "message": "Application is running"}
-        }
+            "application": {"ready": True, "message": "Application is running"},
+        },
     }
 
     # Check database readiness
@@ -84,11 +78,14 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
         result = await db.execute(text("SELECT 1"))
         result.fetchone()
         readiness_status["components"]["database"]["ready"] = True
-        readiness_status["components"]["database"]["message"] = "Database connection successful"
+        readiness_status["components"]["database"][
+            "message"
+        ] = "Database connection successful"
     except Exception as e:
         readiness_status["components"]["database"]["ready"] = False
         readiness_status["components"]["database"][
-            "message"] = f"Database connection failed: {str(e)}"
+            "message"
+        ] = f"Database connection failed: {str(e)}"
         readiness_status["ready"] = False
 
     # Determine overall readiness
@@ -98,8 +95,8 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
             detail={
                 "ready": False,
                 "message": "Service not ready",
-                "components": readiness_status["components"]
-            }
+                "components": readiness_status["components"],
+            },
         )
 
     return readiness_status
@@ -113,7 +110,4 @@ async def liveness_check() -> dict[str, str]:
     Returns:
         dict: Liveness status
     """
-    return {
-        "alive": "true",
-        "timestamp": datetime.utcnow().isoformat()
-    }
+    return {"alive": "true", "timestamp": datetime.utcnow().isoformat()}

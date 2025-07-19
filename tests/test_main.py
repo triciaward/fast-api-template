@@ -62,7 +62,7 @@ class TestMainApp:
                 "Origin": "http://localhost:3000",
                 "Access-Control-Request-Method": "POST",
                 "Access-Control-Request-Headers": "Content-Type",
-            }
+            },
         )
 
         # Should allow the request

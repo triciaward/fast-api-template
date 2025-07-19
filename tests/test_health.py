@@ -87,7 +87,7 @@ class TestHealthEndpoints:
             "/api/v1/health",
             "/api/v1/health/simple",
             "/api/v1/health/ready",
-            "/api/v1/health/live"
+            "/api/v1/health/live",
         ]
 
         for endpoint in endpoints:
@@ -101,13 +101,12 @@ class TestHealthEndpoints:
             "/api/v1/health",
             "/api/v1/health/simple",
             "/api/v1/health/ready",
-            "/api/v1/health/live"
+            "/api/v1/health/live",
         ]
 
         for endpoint in endpoints:
             response = client.get(endpoint)
-            assert response.status_code in [
-                200, 503]  # 503 for readiness failure
+            assert response.status_code in [200, 503]  # 503 for readiness failure
             assert "application/json" in response.headers["content-type"]
 
             # Verify JSON is valid
@@ -120,7 +119,7 @@ class TestHealthEndpoints:
             "/api/v1/health",
             "/api/v1/health/simple",
             "/api/v1/health/ready",
-            "/api/v1/health/live"
+            "/api/v1/health/live",
         ]
 
         for endpoint in endpoints:
@@ -130,4 +129,8 @@ class TestHealthEndpoints:
                 assert "timestamp" in data
                 # Verify timestamp is in ISO format
                 assert "T" in data["timestamp"]
-                assert "Z" in data["timestamp"] or "+" in data["timestamp"] or "-" in data["timestamp"]
+                assert (
+                    "Z" in data["timestamp"]
+                    or "+" in data["timestamp"]
+                    or "-" in data["timestamp"]
+                )

@@ -17,7 +17,7 @@ async def test_create_superuser(db_session: AsyncSession) -> None:
         email="admin@test.com",
         username="admin",
         password="testpassword123",
-        is_superuser=True
+        is_superuser=True,
     )
 
     # Create superuser
@@ -44,7 +44,7 @@ async def test_create_regular_user(db_session: AsyncSession) -> None:
         email="user@test.com",
         username="user",
         password="testpassword123",
-        is_superuser=False
+        is_superuser=False,
     )
 
     # Create user
@@ -68,9 +68,7 @@ async def test_superuser_default_value(db_session: AsyncSession) -> None:
     """Test that is_superuser defaults to False when not specified."""
     # Create user data without specifying is_superuser
     user_data = UserCreate(
-        email="default@test.com",
-        username="default",
-        password="testpassword123"
+        email="default@test.com", username="default", password="testpassword123"
     )
 
     # Create user

@@ -1,6 +1,3 @@
-
-
-
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,7 +15,7 @@ class TestCRUD:
             email="test@example.com",
             username="testuser",
             password="testpassword123",
-            is_superuser=False
+            is_superuser=False,
         )
         user = await crud_user.create_user_async(db=db_session, user=user_create)
 
@@ -34,19 +31,27 @@ class TestCRUD:
             email="test@example.com",
             username="testuser",
             password="testpassword123",
-            is_superuser=False
+            is_superuser=False,
         )
-        created_user = await crud_user.create_user_async(db=db_session, user=user_create)
+        created_user = await crud_user.create_user_async(
+            db=db_session, user=user_create
+        )
 
         # Get user by email
-        user = await crud_user.get_user_by_email_async(db=db_session, email="test@example.com")
+        user = await crud_user.get_user_by_email_async(
+            db=db_session, email="test@example.com"
+        )
         assert user is not None
         assert user.email == "test@example.com"
         assert user.id == created_user.id
 
-    async def test_get_user_by_email_nonexistent(self, db_session: AsyncSession) -> None:
+    async def test_get_user_by_email_nonexistent(
+        self, db_session: AsyncSession
+    ) -> None:
         """Test getting user by non-existent email."""
-        user = await crud_user.get_user_by_email_async(db=db_session, email="nonexistent@example.com")
+        user = await crud_user.get_user_by_email_async(
+            db=db_session, email="nonexistent@example.com"
+        )
         assert user is None
 
     async def test_get_user_by_username(self, db_session: AsyncSession) -> None:
@@ -55,19 +60,27 @@ class TestCRUD:
             email="test@example.com",
             username="testuser",
             password="testpassword123",
-            is_superuser=False
+            is_superuser=False,
         )
-        created_user = await crud_user.create_user_async(db=db_session, user=user_create)
+        created_user = await crud_user.create_user_async(
+            db=db_session, user=user_create
+        )
 
         # Get user by username
-        user = await crud_user.get_user_by_username_async(db=db_session, username="testuser")
+        user = await crud_user.get_user_by_username_async(
+            db=db_session, username="testuser"
+        )
         assert user is not None
         assert user.username == "testuser"
         assert user.id == created_user.id
 
-    async def test_get_user_by_username_nonexistent(self, db_session: AsyncSession) -> None:
+    async def test_get_user_by_username_nonexistent(
+        self, db_session: AsyncSession
+    ) -> None:
         """Test getting user by non-existent username."""
-        user = await crud_user.get_user_by_username_async(db=db_session, username="nonexistentuser")
+        user = await crud_user.get_user_by_username_async(
+            db=db_session, username="nonexistentuser"
+        )
         assert user is None
 
     async def test_authenticate_user_success(self, db_session: AsyncSession) -> None:
@@ -76,7 +89,7 @@ class TestCRUD:
             email="test@example.com",
             username="testuser",
             password="testpassword123",
-            is_superuser=False
+            is_superuser=False,
         )
         await crud_user.create_user_async(db=db_session, user=user_create)
 
@@ -87,13 +100,15 @@ class TestCRUD:
         assert user is not None
         assert user.email == "test@example.com"
 
-    async def test_authenticate_user_wrong_password(self, db_session: AsyncSession) -> None:
+    async def test_authenticate_user_wrong_password(
+        self, db_session: AsyncSession
+    ) -> None:
         """Test login with wrong password."""
         user_create = UserCreate(
             email="test@example.com",
             username="testuser",
             password="testpassword123",
-            is_superuser=False
+            is_superuser=False,
         )
         await crud_user.create_user_async(db=db_session, user=user_create)
 
@@ -103,7 +118,9 @@ class TestCRUD:
         )
         assert user is None
 
-    async def test_authenticate_user_nonexistent(self, db_session: AsyncSession) -> None:
+    async def test_authenticate_user_nonexistent(
+        self, db_session: AsyncSession
+    ) -> None:
         """Test authentication with non-existent user."""
         user = await crud_user.authenticate_user_async(
             db=db_session, email="nonexistent@example.com", password="anypassword"
@@ -116,7 +133,7 @@ class TestCRUD:
             email="test@example.com",
             username="testuser",
             password="testpassword123",
-            is_superuser=False
+            is_superuser=False,
         )
         user = await crud_user.create_user_async(db=db_session, user=user_create)
 
@@ -130,14 +147,14 @@ class TestCRUD:
             email="test@example.com",
             username="testuser",
             password="testpassword123",
-            is_superuser=False
+            is_superuser=False,
         )
         user = await crud_user.create_user_async(db=db_session, user=user_create)
 
         # ID should be a UUID
         assert user.id is not None
         # Check if it has UUID-like attributes
-        assert hasattr(user.id, 'hex')
+        assert hasattr(user.id, "hex")
 
     async def test_user_timestamp_generation(self, db_session: AsyncSession) -> None:
         """Test that users get creation timestamps."""
@@ -145,7 +162,7 @@ class TestCRUD:
             email="test@example.com",
             username="testuser",
             password="testpassword123",
-            is_superuser=False
+            is_superuser=False,
         )
         user = await crud_user.create_user_async(db=db_session, user=user_create)
 

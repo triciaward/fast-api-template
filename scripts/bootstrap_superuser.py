@@ -22,14 +22,13 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # Set PYTHONPATH to include the project root
-os.environ['PYTHONPATH'] = str(project_root)
+os.environ["PYTHONPATH"] = str(project_root)
 
 # Now import app modules after path is set up
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -37,22 +36,15 @@ logger = logging.getLogger(__name__)
 async def main() -> None:
     """Main function for the CLI script."""
     parser = argparse.ArgumentParser(description="Bootstrap superuser account")
+    parser.add_argument("--email", help="Superuser email address")
+    parser.add_argument("--password", help="Superuser password")
     parser.add_argument(
-        "--email",
-        help="Superuser email address"
-    )
-    parser.add_argument(
-        "--password",
-        help="Superuser password"
-    )
-    parser.add_argument(
-        "--username",
-        help="Superuser username (optional, defaults to email prefix)"
+        "--username", help="Superuser username (optional, defaults to email prefix)"
     )
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Force creation even if superuser already exists"
+        help="Force creation even if superuser already exists",
     )
 
     args = parser.parse_args()
@@ -67,14 +59,13 @@ async def main() -> None:
                     db=db,
                     email=args.email,
                     password=args.password,
-                    username=args.username
+                    username=args.username,
                 )
 
                 if success:
                     logger.info("Superuser created successfully!")
                 else:
-                    logger.warning(
-                        "Superuser creation failed or user already exists")
+                    logger.warning("Superuser creation failed or user already exists")
                     if not args.force:
                         sys.exit(1)
 

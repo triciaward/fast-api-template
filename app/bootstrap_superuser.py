@@ -22,10 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 async def create_superuser(
-    db: AsyncSession,
-    email: str,
-    password: str,
-    username: Optional[str] = None
+    db: AsyncSession, email: str, password: str, username: Optional[str] = None
 ) -> bool:
     """
     Create a superuser account.
@@ -47,22 +44,20 @@ async def create_superuser(
 
     # Generate username from email if not provided
     if not username:
-        username = email.split('@')[0]
+        username = email.split("@")[0]
 
     # Create superuser
     from app.crud.user import create_user
 
     superuser_data = UserCreate(
-        email=email,
-        username=username,
-        password=password,
-        is_superuser=True
+        email=email, username=username, password=password, is_superuser=True
     )
 
     try:
         superuser = await create_user(db, superuser_data)
         logger.info(
-            f"Superuser created successfully: {superuser.email} (ID: {superuser.id})")
+            f"Superuser created successfully: {superuser.email} (ID: {superuser.id})"
+        )
         return True
     except Exception as e:
         logger.error(f"Failed to create superuser: {e}")
@@ -76,7 +71,8 @@ async def bootstrap_superuser() -> None:
     # Check if superuser environment variables are set
     if not settings.FIRST_SUPERUSER or not settings.FIRST_SUPERUSER_PASSWORD:
         logger.info(
-            "FIRST_SUPERUSER or FIRST_SUPERUSER_PASSWORD not set, skipping superuser creation")
+            "FIRST_SUPERUSER or FIRST_SUPERUSER_PASSWORD not set, skipping superuser creation"
+        )
         return
 
     logger.info("Checking for superuser bootstrap...")
@@ -94,14 +90,15 @@ async def bootstrap_superuser() -> None:
 
             if existing_superusers:
                 logger.info(
-                    f"Superuser(s) already exist: {[u.email for u in existing_superusers]}")
+                    f"Superuser(s) already exist: {[u.email for u in existing_superusers]}"
+                )
                 return
 
             # Create superuser
             success = await create_superuser(
                 db=db,
                 email=settings.FIRST_SUPERUSER,
-                password=settings.FIRST_SUPERUSER_PASSWORD
+                password=settings.FIRST_SUPERUSER_PASSWORD,
             )
 
             if success:

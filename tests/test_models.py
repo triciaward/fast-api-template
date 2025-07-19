@@ -22,7 +22,7 @@ class TestUserModel:
             email="test_model_creation@example.com",
             username="testuser_model_creation",
             hashed_password="hashed_password_123",
-            is_superuser=False
+            is_superuser=False,
         )
 
         db_session.add(user)
@@ -34,12 +34,12 @@ class TestUserModel:
         assert str(user.username) == "testuser_model_creation"
         assert str(user.hashed_password) == "hashed_password_123"
         # Handle both standard UUID and asyncpg UUID types
-        assert hasattr(user.id, 'hex')  # Both UUID types have hex attribute
+        assert hasattr(user.id, "hex")  # Both UUID types have hex attribute
         # Check date_created is not None and has datetime-like attributes
         assert user.date_created is not None
-        assert hasattr(user.date_created, 'year')
-        assert hasattr(user.date_created, 'month')
-        assert hasattr(user.date_created, 'day')
+        assert hasattr(user.date_created, "year")
+        assert hasattr(user.date_created, "month")
+        assert hasattr(user.date_created, "day")
 
         # Test string representation
         repr_str = repr(user)
@@ -55,7 +55,7 @@ class TestUserModel:
             email="test_model_unique_email@example.com",
             username="testuser1_unique_email",
             hashed_password="hashed_password_123",
-            is_superuser=False
+            is_superuser=False,
         )
         db_session.add(user1)
         await db_session.commit()
@@ -65,7 +65,7 @@ class TestUserModel:
             email="test_model_unique_email@example.com",  # Same email
             username="testuser2_unique_email",
             hashed_password="hashed_password_456",
-            is_superuser=False
+            is_superuser=False,
         )
         db_session.add(user2)
 
@@ -81,7 +81,7 @@ class TestUserModel:
             email="test1_model_unique_username@example.com",
             username="testuser_model_unique_username",
             hashed_password="hashed_password_123",
-            is_superuser=False
+            is_superuser=False,
         )
         db_session.add(user1)
         await db_session.commit()
@@ -91,7 +91,7 @@ class TestUserModel:
             email="test2_model_unique_username@example.com",
             username="testuser_model_unique_username",  # Same username
             hashed_password="hashed_password_456",
-            is_superuser=False
+            is_superuser=False,
         )
         db_session.add(user2)
 
@@ -100,13 +100,15 @@ class TestUserModel:
             await db_session.commit()
 
     @pytest.mark.asyncio
-    async def test_user_model_auto_generated_fields(self, db_session: AsyncSession) -> None:
+    async def test_user_model_auto_generated_fields(
+        self, db_session: AsyncSession
+    ) -> None:
         """Test that ID and date_created are auto-generated."""
         user = User(
             email="test_model_auto_generated@example.com",
             username="testuser_model_auto_generated",
             hashed_password="hashed_password_123",
-            is_superuser=False
+            is_superuser=False,
         )
 
         db_session.add(user)
@@ -115,12 +117,12 @@ class TestUserModel:
 
         # After commit, all fields should be set and auto-generated
         # Handle both standard UUID and asyncpg UUID types
-        assert hasattr(user.id, 'hex')  # Both UUID types have hex attribute
+        assert hasattr(user.id, "hex")  # Both UUID types have hex attribute
         # Check date_created is not None and has datetime-like attributes
         assert user.date_created is not None
-        assert hasattr(user.date_created, 'year')
-        assert hasattr(user.date_created, 'month')
-        assert hasattr(user.date_created, 'day')
+        assert hasattr(user.date_created, "year")
+        assert hasattr(user.date_created, "month")
+        assert hasattr(user.date_created, "day")
         # Verify these were auto-generated (not None)
         assert user.id is not None
         assert user.date_created is not None
@@ -135,7 +137,7 @@ class TestUserSchemas:
             email="test@example.com",
             username="testuser",
             password="testpassword123",
-            is_superuser=False
+            is_superuser=False,
         )
 
         assert user_create.email == "test@example.com"
@@ -150,7 +152,7 @@ class TestUserSchemas:
                 email="invalid-email",
                 username="testuser",
                 password="testpassword123",
-                is_superuser=False
+                is_superuser=False,
             )
 
     def test_user_create_schema_missing_fields(self) -> None:
@@ -169,7 +171,7 @@ class TestUserSchemas:
             email="test@example.com",
             username="testuser",
             is_superuser=False,
-            date_created=date_created
+            date_created=date_created,
         )
 
         assert user_response.id == user_id
@@ -180,10 +182,7 @@ class TestUserSchemas:
 
     def test_token_schema(self) -> None:
         """Test Token schema."""
-        token_data = {
-            "access_token": "sample_jwt_token_123",
-            "token_type": "bearer"
-        }
+        token_data = {"access_token": "sample_jwt_token_123", "token_type": "bearer"}
 
         token = Token(**token_data)
 
