@@ -8,11 +8,12 @@ from app.api.api_v1.api import api_router
 from app.bootstrap_superuser import bootstrap_superuser
 from app.core.config import settings
 from app.core.cors import configure_cors
-from app.database.database import engine
+from app.database.database import engine, sync_engine
 from app.models import models
 
-# Create database tables
-models.Base.metadata.create_all(bind=engine)
+# Create database tables only if not in testing mode
+if os.getenv("TESTING") != "1":
+    models.Base.metadata.create_all(bind=sync_engine)
 
 
 @asynccontextmanager

@@ -11,7 +11,7 @@ class TestMainApp:
         assert response.status_code == 200
         data = response.json()
         assert "message" in data
-        assert "FastAPI Template is running!" in data["message"]
+        assert "Welcome to FastAPI Template" in data["message"]
 
     def test_health_check_endpoint_moved_to_api(self, client: TestClient) -> None:
         """Test that health check endpoint is now available via API."""

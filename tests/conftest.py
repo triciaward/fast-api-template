@@ -4,20 +4,18 @@ from collections.abc import AsyncGenerator, Generator
 
 import pytest
 import pytest_asyncio
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.api.api_v1.api import api_router
-from app.core.config import settings
-from app.core.cors import configure_cors
 from app.database.database import Base, get_db
+from app.main import app
 
 # Set testing environment BEFORE importing any app modules
 os.environ["TESTING"] = "1"
 
+# Import the actual app from main.py
 
 # Test database URLs - use environment variables if available, otherwise fallback to defaults
 TEST_DATABASE_URL = os.getenv(
@@ -126,29 +124,6 @@ def setup_sync_test_db() -> Generator[None, None, None]:
 def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
     """Create a test client with synchronous database session override."""
 
-    # Create test app without lifespan to avoid conflicts
-    test_app = FastAPI(
-        title=settings.PROJECT_NAME,
-        version=settings.VERSION,
-        description="FastAPI Template with Authentication",
-        openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    )
-
-    # Configure CORS
-    configure_cors(test_app)
-
-    # Include API router
-    test_app.include_router(api_router, prefix=settings.API_V1_STR)
-
-    # Add health endpoints
-    @test_app.get("/")
-    async def root() -> dict[str, str]:
-        return {"message": "FastAPI Template is running!"}
-
-    @test_app.get("/health")
-    async def health_check() -> dict[str, str]:
-        return {"status": "healthy"}
-
     def override_get_db_sync() -> Generator:
         """Override to use our test-specific sync session."""
         with TestingSyncSessionLocal() as session:
@@ -158,13 +133,13 @@ def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
                 session.close()
 
     # Override the database dependency with our test-specific sync version
-    test_app.dependency_overrides[get_db] = override_get_db_sync
+    app.dependency_overrides[get_db] = override_get_db_sync
 
     # Clean the database before each test
     with sync_test_engine.begin() as conn:
         conn.execute(text("DELETE FROM users"))
 
-    with TestClient(test_app) as test_client:
+    with TestClient(app) as test_client:
         yield test_client
 
     # Clean the database after each test
@@ -172,7 +147,7 @@ def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
         conn.execute(text("DELETE FROM users"))
         conn.commit()
 
-    test_app.dependency_overrides.clear()
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture

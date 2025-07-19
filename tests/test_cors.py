@@ -32,7 +32,8 @@ class TestCORS:
         for origin in origins:
             response = client.get("/", headers={"Origin": origin})
             assert response.status_code == 200
-            assert response.headers.get("access-control-allow-origin") == origin
+            assert response.headers.get(
+                "access-control-allow-origin") == origin
 
     def test_cors_credentials_allowed(self, client: TestClient) -> None:
         """Test that credentials are allowed in CORS requests."""
@@ -46,7 +47,8 @@ class TestCORS:
         )
 
         assert response.status_code == 200
-        assert response.headers.get("access-control-allow-credentials") == "true"
+        assert response.headers.get(
+            "access-control-allow-credentials") == "true"
 
     def test_cors_all_methods_allowed(self, client: TestClient) -> None:
         """Test that all HTTP methods are allowed."""
@@ -84,7 +86,8 @@ class TestCORS:
     def test_cors_api_endpoints(self, client: TestClient) -> None:
         """Test CORS works on API endpoints."""
         # Test health endpoint
-        response = client.get("/health", headers={"Origin": "http://localhost:3000"})
+        response = client.get(
+            "/api/v1/health", headers={"Origin": "http://localhost:3000"})
         assert response.status_code == 200
         assert (
             response.headers.get("access-control-allow-origin")
@@ -212,5 +215,6 @@ class TestCORS:
         assert cors_middleware.options["allow_headers"] == ["*"]
 
         # Check that origins are properly configured
-        expected_origins = [str(origin) for origin in settings.BACKEND_CORS_ORIGINS]
+        expected_origins = [str(origin)
+                            for origin in settings.BACKEND_CORS_ORIGINS]
         assert cors_middleware.options["allow_origins"] == expected_origins
