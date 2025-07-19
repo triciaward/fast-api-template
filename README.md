@@ -57,8 +57,13 @@ fast-api-template/
 - Python 3.9+
 - Docker (optional, but recommended)
 - PostgreSQL
+- Alembic (for database migrations - included in requirements.txt)
 
 ## Quick Start
+
+> **📋 What You Need**: 
+> - **Required**: PostgreSQL database, Python 3.9+
+> - **Optional**: Redis (caching), WebSockets (real-time), OAuth (Google/Apple), Email verification
 
 1. **Clone and setup**
 ```bash
@@ -98,7 +103,7 @@ FROM_NAME=Your App Name
 VERIFICATION_TOKEN_EXPIRE_HOURS=24
 FRONTEND_URL=http://localhost:3000
 
-# Optional features:
+# Optional Features (Not Required)
 ENABLE_REDIS=false
 REDIS_URL=redis://localhost:6379/0
 ENABLE_WEBSOCKETS=false
@@ -106,6 +111,9 @@ ENABLE_WEBSOCKETS=false
 
 3. **Setup database**
 ```bash
+# Start PostgreSQL (if using Docker)
+docker-compose up -d
+
 # Create test database
 docker exec -it fast-api-template-postgres-1 createdb -U postgres fastapi_template_test
 
@@ -129,6 +137,8 @@ uvicorn app.main:app --reload
 ```
 
 ## 🚀 Creating a New Project from This Template
+
+> **💡 Pro Tip**: Most users will want to create a new project from this template rather than using it directly. This section shows you how to set up a clean project with your own Git history.
 
 This template is designed to be used as a starting point for new FastAPI projects. Here's how to create a new project based on this template:
 
@@ -173,6 +183,11 @@ source .venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
+
+> **Note**: Alembic is included in requirements.txt, but if you're not using Docker, you can also install it separately:
+> ```bash
+> pip install alembic
+> ```
 
 7. **Create a .env file**
 Make a copy of your environment settings. For now, just use a local dev version:
@@ -406,7 +421,7 @@ SECRET_KEY=dev_secret_key_change_in_production
 ACCESS_TOKEN_EXPIRE_MINUTES=43200
 BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://localhost:4200
 
-# Optional features:
+# Optional Features (Not Required)
 ENABLE_REDIS=false
 REDIS_URL=redis://redis:6379/0
 ENABLE_WEBSOCKETS=false
