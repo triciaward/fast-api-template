@@ -1,4 +1,4 @@
-import json  # This should trigger a linting error
+
 import os
 import sys
 from collections.abc import AsyncGenerator
@@ -51,5 +51,3 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 @app.get("/")
 async def root() -> dict[str, str]:
     return {"message": "Welcome to FastAPI Template"}
-
-# Test linting issue - unused import
