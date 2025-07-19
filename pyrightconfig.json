@@ -1,0 +1,23 @@
+{
+  "venvPath": ".",
+  "venv": "venv",
+  "include": [
+    "app",
+    "alembic",
+    "tests"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "**/node_modules"
+  ],
+  "reportMissingImports": "none",
+  "reportMissingTypeStubs": false,
+  "reportGeneralTypeIssues": "none",
+  "reportOptionalMemberAccess": "none",
+  "reportOptionalSubscript": "none",
+  "reportUndefinedVariable": "none",
+  "reportPrivateImportUsage": "none",
+  "pythonVersion": "3.9",
+  "typeCheckingMode": "off",
+  "pythonPlatform": "Darwin"
+} 
