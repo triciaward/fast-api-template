@@ -33,6 +33,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
         await init_redis()
 
+    # Initialize rate limiting if enabled
+    if settings.ENABLE_RATE_LIMITING:
+        from app.services.rate_limiter import init_rate_limiter
+
+        await init_rate_limiter()
+
     yield
 
     # Shutdown
@@ -56,6 +62,12 @@ app = FastAPI(
 # Configure CORS
 configure_cors(app)
 
+# Setup rate limiting
+if settings.ENABLE_RATE_LIMITING:
+    from app.services.rate_limiter import setup_rate_limiting
+
+    setup_rate_limiting(app)
+
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
@@ -72,4 +84,5 @@ async def get_features() -> dict[str, bool]:
     return {
         "redis": settings.ENABLE_REDIS,
         "websockets": settings.ENABLE_WEBSOCKETS,
+        "rate_limiting": settings.ENABLE_RATE_LIMITING,
     }

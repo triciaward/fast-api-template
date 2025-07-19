@@ -92,21 +92,21 @@ class EmailService:
 
         return token if success else None
 
-    async def verify_token(self, db: Session, token: str) -> bool:
-        """Verify a verification token and mark user as verified."""
+    async def verify_token(self, db: Session, token: str) -> Optional[str]:
+        """Verify a verification token and return user ID if valid."""
         user = crud_user.get_user_by_verification_token_sync(db, token=token)
         if not user:
-            return False
+            return None
 
         # Check if token is expired
         if (
             user.verification_token_expires
             and user.verification_token_expires < datetime.utcnow()
         ):
-            return False
+            return None
 
-        # Mark user as verified and clear token
-        return crud_user.verify_user_sync(db, user_id=str(user.id))
+        # Return user ID for verification
+        return str(user.id)
 
 
 email_service = EmailService()

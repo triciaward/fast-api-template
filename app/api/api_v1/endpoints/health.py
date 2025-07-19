@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -53,6 +53,22 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
             health_status["checks"]["redis"] = "unhealthy"
             health_status["status"] = "unhealthy"
             health_status["redis_error"] = str(e)
+
+    # Check rate limiting status if enabled
+    if settings.ENABLE_RATE_LIMITING:
+        try:
+            from app.services.rate_limiter import get_limiter
+
+            limiter = get_limiter()
+            if limiter:
+                health_status["checks"]["rate_limiting"] = "healthy"
+            else:
+                health_status["checks"]["rate_limiting"] = "unhealthy"
+                health_status["status"] = "unhealthy"
+        except Exception as e:
+            health_status["checks"]["rate_limiting"] = "unhealthy"
+            health_status["status"] = "unhealthy"
+            health_status["rate_limiting_error"] = str(e)
 
     # Determine overall status
     if health_status["checks"]["database"] == "unhealthy":
@@ -125,6 +141,27 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
             }
             readiness_status["ready"] = False
 
+    # Check rate limiting readiness if enabled
+    if settings.ENABLE_RATE_LIMITING:
+        try:
+            from app.services.rate_limiter import get_limiter
+
+            limiter = get_limiter()
+            readiness_status["components"]["rate_limiting"] = {
+                "ready": limiter is not None,
+                "message": "Rate limiting ready"
+                if limiter
+                else "Rate limiting not initialized",
+            }
+            if not limiter:
+                readiness_status["ready"] = False
+        except Exception as e:
+            readiness_status["components"]["rate_limiting"] = {
+                "ready": False,
+                "message": f"Rate limiting failed: {str(e)}",
+            }
+            readiness_status["ready"] = False
+
     # Determine overall readiness
     if not readiness_status["ready"]:
         raise HTTPException(
@@ -148,3 +185,29 @@ async def liveness_check() -> dict[str, str]:
         dict: Liveness status
     """
     return {"alive": "true", "timestamp": datetime.utcnow().isoformat()}
+
+
+@router.get("/health/rate-limit")
+async def rate_limit_info(request: Request) -> dict[str, Any]:
+    """
+    Get current rate limit information for the requesting client.
+
+    Returns:
+        dict: Rate limit information including remaining requests and reset time
+    """
+    if not settings.ENABLE_RATE_LIMITING:
+        return {
+            "enabled": False,
+            "message": "Rate limiting is disabled",
+        }
+
+    try:
+        from app.services.rate_limiter import get_rate_limit_info
+
+        return get_rate_limit_info(request)
+    except Exception as e:
+        return {
+            "enabled": True,
+            "error": str(e),
+            "message": "Failed to get rate limit information",
+        }

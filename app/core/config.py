@@ -38,6 +38,17 @@ class Settings(BaseSettings):
     # WebSockets (Optional)
     ENABLE_WEBSOCKETS: bool = False
 
+    # Rate Limiting
+    ENABLE_RATE_LIMITING: bool = False
+    RATE_LIMIT_STORAGE_BACKEND: str = "memory"  # "memory" or "redis"
+
+    # Rate Limit Defaults (requests per minute)
+    RATE_LIMIT_DEFAULT: str = "100/minute"
+    RATE_LIMIT_LOGIN: str = "5/minute"
+    RATE_LIMIT_REGISTER: str = "3/minute"
+    RATE_LIMIT_EMAIL_VERIFICATION: str = "3/minute"
+    RATE_LIMIT_OAUTH: str = "10/minute"
+
     # OAuth Configuration
     GOOGLE_CLIENT_ID: Optional[str] = None
     GOOGLE_CLIENT_SECRET: Optional[str] = None

@@ -13,6 +13,9 @@ pydantic[email]==2.5.0
 pydantic-settings==2.1.0
 redis==5.0.1
 
+# Rate Limiting
+slowapi==0.1.9
+
 # OAuth and Email dependencies
 authlib==1.2.1
 httpx==0.25.2

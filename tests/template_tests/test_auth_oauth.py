@@ -1,7 +1,16 @@
 from unittest.mock import patch
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
+
+pytestmark = pytest.mark.usefixtures("patch_email_service_is_configured")
+
+
+@pytest.fixture(autouse=True)
+def patch_email_service_is_configured(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.services.email import email_service
+    monkeypatch.setattr(email_service, "is_configured", lambda: True)
 
 
 class TestOAuthAuthEndpoints:
@@ -178,7 +187,7 @@ class TestOAuthAuthEndpoints:
             response = client.get("/api/v1/auth/oauth/providers")
             assert response.status_code == 200
             data = response.json()
-            assert data["providers"] == {}
+            assert data["providers"] == []
 
     def test_get_oauth_providers_google_configured(self, client: TestClient) -> None:
         """Test getting OAuth providers when Google is configured."""

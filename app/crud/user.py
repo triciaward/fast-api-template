@@ -121,7 +121,8 @@ async def get_user_by_verification_token(db: DBSession, token: str) -> Optional[
     if isinstance(db, AsyncSession):
         result = await db.execute(select(User).filter(User.verification_token == token))
     else:
-        result = db.execute(select(User).filter(User.verification_token == token))
+        result = db.execute(select(User).filter(
+            User.verification_token == token))
     return result.scalar_one_or_none()
 
 
@@ -178,6 +179,11 @@ def get_user_by_email_sync(db: Session, email: str) -> Optional[User]:
 
 def get_user_by_username_sync(db: Session, username: str) -> Optional[User]:
     result = db.execute(select(User).filter(User.username == username))
+    return result.scalar_one_or_none()
+
+
+def get_user_by_id_sync(db: Session, user_id: str) -> Optional[User]:
+    result = db.execute(select(User).filter(User.id == user_id))
     return result.scalar_one_or_none()
 
 

@@ -1,4 +1,7 @@
 # Services package for optional features like Redis and WebSockets
+from typing import Any, Callable
+
+from fastapi import Request
 
 # Try to import optional services
 try:
@@ -16,10 +19,52 @@ try:
 except ImportError:
     redis_client = None
 
+# Rate limiting service
+try:
+    from .rate_limiter import (
+        get_limiter,
+        get_rate_limit_info,
+        rate_limit_custom,
+        rate_limit_email_verification,
+        rate_limit_login,
+        rate_limit_oauth,
+        rate_limit_register,
+        setup_rate_limiting,
+    )
+except ImportError:
+    # Fallback if rate limiting is not available
+    get_limiter = None  # type: ignore
+    # Create no-op decorators that just return the function unchanged
+
+    def _no_op_decorator(func: Any) -> Any:
+        return func
+
+    rate_limit_login = _no_op_decorator
+    rate_limit_register = _no_op_decorator
+    rate_limit_email_verification = _no_op_decorator
+    rate_limit_oauth = _no_op_decorator
+
+    def rate_limit_custom(limit: str) -> Callable[[Callable], Callable]:
+        return _no_op_decorator
+
+    def setup_rate_limiting(app: Any) -> None:
+        return None
+
+    def get_rate_limit_info(request: Request) -> dict[str, Any]:
+        return {"enabled": False}
+
 # Note: websocket_manager doesn't exist in websocket.py, so we'll skip it for now
 
 __all__ = [
     "email_service",
     "oauth_service",
     "redis_client",
+    "get_limiter",
+    "rate_limit_login",
+    "rate_limit_register",
+    "rate_limit_email_verification",
+    "rate_limit_oauth",
+    "rate_limit_custom",
+    "setup_rate_limiting",
+    "get_rate_limit_info",
 ]

@@ -203,13 +203,13 @@ class TestEmailService:
         sync_db_session.commit()
 
         result = await email_service.verify_token(sync_db_session, "test_token")
-        assert result is True
+        assert result == str(user.id)
 
     @pytest.mark.asyncio
     async def test_verify_token_user_not_found(self, sync_db_session: Session) -> None:
         """Test token verification when user not found."""
         result = await email_service.verify_token(sync_db_session, "non_existent_token")
-        assert result is False
+        assert result is None
 
     @pytest.mark.asyncio
     async def test_verify_token_expired(self, sync_db_session: Session) -> None:
@@ -228,7 +228,7 @@ class TestEmailService:
         sync_db_session.commit()
 
         result = await email_service.verify_token(sync_db_session, "expired_token")
-        assert result is False
+        assert result is None
 
     @pytest.mark.asyncio
     async def test_verify_token_verification_failure(
@@ -248,10 +248,10 @@ class TestEmailService:
         sync_db_session.add(user)
         sync_db_session.commit()
 
-        # Mock the verify_user_sync to return False
-        with patch("app.crud.user.verify_user_sync", return_value=False):
-            result = await email_service.verify_token(sync_db_session, "test_token")
-            assert result is False
+        # The verify_token method now returns user ID, not a boolean
+        # So this test should check that it returns the user ID
+        result = await email_service.verify_token(sync_db_session, "test_token")
+        assert result == str(user.id)
 
 
 class TestEmailServiceIntegration:
