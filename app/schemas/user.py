@@ -17,7 +17,7 @@ class UserBase(BaseModel):
     email: EmailStr
     username: str
 
-    @field_validator('email')
+    @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
         """Validate email format and check for disposable domains."""
@@ -26,7 +26,7 @@ class UserBase(BaseModel):
             raise ValueError(error_msg)
         return v.lower().strip()
 
-    @field_validator('username')
+    @field_validator("username")
     @classmethod
     def validate_username(cls, v: str) -> str:
         """Validate username format and content."""
@@ -45,7 +45,7 @@ class UserCreate(UserBase):
     password: str
     is_superuser: bool = False
 
-    @field_validator('password')
+    @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
         """Validate password strength."""
@@ -59,7 +59,7 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-    @field_validator('email')
+    @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
         """Validate email format."""
@@ -93,11 +93,11 @@ class OAuthLogin(BaseModel):
     provider: str  # 'google' or 'apple'
     access_token: str
 
-    @field_validator('provider')
+    @field_validator("provider")
     @classmethod
     def validate_provider(cls, v: str) -> str:
         """Validate OAuth provider."""
-        if v.lower() not in ['google', 'apple']:
+        if v.lower() not in ["google", "apple"]:
             raise ValueError("Provider must be 'google' or 'apple'")
         return v.lower()
 
@@ -114,7 +114,7 @@ class OAuthUserInfo(BaseModel):
 class EmailVerificationRequest(BaseModel):
     email: EmailStr
 
-    @field_validator('email')
+    @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
         """Validate email format."""
@@ -132,7 +132,7 @@ class EmailVerificationResponse(BaseModel):
 class VerifyEmailRequest(BaseModel):
     token: str
 
-    @field_validator('token')
+    @field_validator("token")
     @classmethod
     def validate_token(cls, v: str) -> str:
         """Sanitize verification token."""
