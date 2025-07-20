@@ -1,8 +1,8 @@
 # FastAPI Project Template
 
-![Tests](https://img.shields.io/badge/tests-362%20tests%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-477%20tests%20passing-brightgreen)
 ![CI](https://github.com/triciaward/fast-api-template/actions/workflows/ci.yml/badge.svg)
-![Coverage](https://img.shields.io/badge/coverage-74%25-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-70%25-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 A production-ready FastAPI backend template with built-in authentication, CI/CD, testing, type checking, Docker support, and comprehensive background task processing.
@@ -11,7 +11,7 @@ A production-ready FastAPI backend template with built-in authentication, CI/CD,
 
 A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (362 tests with 100% success rate), secure authentication with email verification, OAuth, and password reset, comprehensive input validation, PostgreSQL integration, **complete background task processing**, and a fully working CI/CD pipeline.
 
-**Core Features**: JWT authentication, email verification, OAuth (Google/Apple), password reset, **password change with current password verification**, **GDPR-compliant account deletion with email confirmation and grace period**, **refresh token management with session control**, **comprehensive audit logging system**, input validation, rate limiting, structured logging, health checks, Alembic migrations, Docker support, and comprehensive testing.
+**Core Features**: JWT authentication, email verification, OAuth (Google/Apple), password reset, **password change with current password verification**, **GDPR-compliant account deletion with email confirmation and grace period**, **refresh token management with session control**, **comprehensive audit logging system**, input validation, rate limiting, structured logging, health checks, Alembic migrations, Docker support, comprehensive testing, and **automated error catching**.
 
 **Optional Features**: Redis caching, WebSocket real-time communication, background task processing, and advanced monitoring.
 
@@ -30,7 +30,7 @@ This template powers several production applications:
 - 📦 PostgreSQL Database Integration with Alembic Migrations
 - 🌐 CORS Support with Configurable Origins
 - 🐳 Docker Support with Multi-Service Composition
-- 🧪 Comprehensive Testing (419 tests with 100% success rate)
+- 🧪 Comprehensive Testing (477 tests with 100% success rate)
 - 📝 Alembic Migrations with Version Control
 - 🔍 Linting and Code Quality (ruff)
 - ✅ Type Safety (mypy + pyright)
@@ -61,11 +61,11 @@ This template powers several production applications:
 
 ## ✅ Test Suite
 
-- **419 core tests** with comprehensive coverage (100% success rate)
+- **477 core tests** with comprehensive coverage (100% success rate)
 - **32 complex tests deselected** (Celery and refresh token tests - isolated)
 - **14 pre-commit tests** covering configuration, installation, and functionality
 - **Full CI pipeline** (mypy, ruff, black, pytest) runs on every commit
-- **74% code coverage** with proper async testing
+- **70% code coverage** with proper async testing
 - **100% coverage for optional features** (Redis, WebSocket, and background task services)
 
 ## 📊 Audit Logging System
@@ -1004,7 +1004,7 @@ The hooks are configured in `.pre-commit-config.yaml`:
 
 - **ruff**: Runs with `--fix` to automatically fix formatting issues
 - **black**: Ensures consistent code formatting
-- **mypy**: Temporarily disabled (see configuration for details)
+- **mypy**: Fully enabled with comprehensive type checking and CI integration
 
 ### 🧪 Testing
 
@@ -1034,7 +1034,8 @@ pytest tests/template_tests/test_precommit.py -v
 **Common Issues:**
 - **Hooks not running**: Make sure you ran `pre-commit install`
 - **CI failures**: Ensure CI uses the same tools as pre-commit (see CI/CD section)
-- **Type errors**: Some SQLAlchemy/Alembic files may have known type issues
+- **Type errors**: Resolved with proper type stubs and smart mypy configuration
+- **Environment differences**: Local and CI environments now match with same dependencies
 
 **Reset hooks if needed:**
 ```bash
@@ -1058,7 +1059,7 @@ The project includes a comprehensive GitHub Actions CI/CD pipeline that runs on 
 - **Fast Execution**: Complete pipeline completes in under 2 minutes
 - **Environment Isolation**: Proper test database setup and cleanup
 - **Coverage Reporting**: Test coverage tracking and reporting
-- **Perfect Success Rate**: All 349 tests pass consistently
+- **Perfect Success Rate**: All 477 tests pass consistently
 - **🔄 Pre-commit Alignment**: CI uses the same tools as local pre-commit hooks
 
 ### Local Development
@@ -1611,9 +1612,10 @@ The project includes **automated error catching** that prevents commits with typ
 - **ruff**: Catches code style issues and unused imports
 
 **🔧 Configuration:**
-- **Lenient mypy settings**: Catches important errors without being too strict
-- **Proper exclusions**: Ignores Alembic migration files and problematic modules
-- **Type stubs**: Includes essential type definitions for external libraries
+- **Balanced mypy settings**: Catches important errors while being practical about existing code
+- **Smart exclusions**: Ignores Alembic migration files and handles SQLAlchemy Column type issues
+- **Complete type stubs**: Includes all essential type definitions (types-python-jose, types-authlib, etc.)
+- **CI integration**: Same type checking environment in local development and CI
 
 **🎯 How It Works:**
 1. **Before every commit**, the pre-commit hooks run automatically
