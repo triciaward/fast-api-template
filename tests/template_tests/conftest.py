@@ -21,6 +21,7 @@ os.environ["CELERY_TASK_EAGER_PROPAGATES"] = "true"
 # Try to load .env.test if it exists
 try:
     import dotenv
+
     dotenv.load_dotenv(dotenv_path=".env.test", override=True)
 except ImportError:
     # Fallback if python-dotenv is not installed
