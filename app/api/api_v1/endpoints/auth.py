@@ -1075,7 +1075,8 @@ async def get_account_deletion_status(
         return AccountDeletionStatusResponse(
             deletion_requested=deletion_requested,
             deletion_confirmed=deletion_confirmed,
-            deletion_scheduled_for=(  # type: ignore[arg-type]
+            # type: ignore[arg-type]
+            deletion_scheduled_for=(
                 user.deletion_scheduled_for if user.deletion_scheduled_for else None
             ),
             can_cancel=can_cancel,
@@ -1238,16 +1239,16 @@ async def get_user_sessions(
                 # Get all user sessions
         sessions = crud_get_user_sessions(
             db, current_user.id, current_session_id
-        )  # type: ignore
+        )  # type: ignore[arg-type]
 
         # Convert to response format
         session_info_list = []
         for session in sessions:
             session_info = SessionInfo(
-                id=session.id,  # type: ignore
-                created_at=session.created_at,  # type: ignore
-                device_info=session.device_info,  # type: ignore
-                ip_address=session.ip_address,  # type: ignore
+                id=session.id,  # type: ignore[arg-type]
+                created_at=session.created_at,  # type: ignore[arg-type]
+                device_info=session.device_info,  # type: ignore[arg-type]
+                ip_address=session.ip_address,  # type: ignore[arg-type]
                 is_current=getattr(session, "is_current", False),
             )
             session_info_list.append(session_info)

@@ -118,7 +118,7 @@ class TestPaginatedResponse:
         assert response.metadata.total == 100
         assert response.metadata.pages == 5
 
-    def test_response_with_empty_items(self):
+    def test_response_with_empty_items(self) -> None:
         """Test response with empty items list."""
         response: PaginatedResponse[list] = PaginatedResponse.create(
             items=[], page=1, size=20, total=0
