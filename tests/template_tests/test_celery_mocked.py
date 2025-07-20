@@ -6,23 +6,32 @@ These tests are separated from the main test suite due to complex mocking requir
 
 from unittest.mock import Mock, patch
 
+import pytest
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from app.main import app
 
 
+@pytest.mark.celery
 class TestCeleryMockedAPIs:
     """Test Celery APIs that require complex mocking of Redis/Celery internals."""
 
     def test_get_celery_status_enabled_mocked(self):
         """Test getting Celery status when enabled with proper mocking."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         with TestClient(app) as test_client:
             # Mock the inspect object to return proper dicts
             with patch("app.services.celery.get_celery_app") as mock_get_app:
                 mock_app = Mock()
                 mock_inspect = Mock()
-                mock_inspect.active.return_value = {"worker1": [], "worker2": []}
+                mock_inspect.active.return_value = {
+                    "worker1": [], "worker2": []}
                 mock_inspect.registered.return_value = {
                     "worker1": ["task1", "task2", "task3", "task4", "task5"]
                 }
@@ -52,6 +61,12 @@ class TestCeleryMockedAPIs:
 
     def test_get_task_status_enabled_mocked(self, client: TestClient):
         """Test getting task status when enabled with proper mocking."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         with patch("app.services.celery.is_celery_enabled") as mock_enabled:
             mock_enabled.return_value = True
 
@@ -68,7 +83,8 @@ class TestCeleryMockedAPIs:
                     "result": {"status": "completed"},
                 }
 
-                response = client.get("/api/v1/celery/tasks/test-task-id/status")
+                response = client.get(
+                    "/api/v1/celery/tasks/test-task-id/status")
 
                 assert response.status_code == 200
                 data = response.json()
@@ -81,6 +97,12 @@ class TestCeleryMockedAPIs:
 
     def test_get_active_tasks_enabled_mocked(self, client: TestClient):
         """Test getting active tasks when enabled with proper mocking."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         with patch("app.services.celery.is_celery_enabled") as mock_enabled:
             mock_enabled.return_value = True
 
@@ -125,13 +147,20 @@ class TestCeleryMockedAPIs:
 
     def test_cancel_task_enabled_success_mocked(self, client: TestClient):
         """Test cancelling a task when enabled and successful with proper mocking."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         with patch("app.services.celery.is_celery_enabled") as mock_enabled:
             mock_enabled.return_value = True
 
             with patch("app.api.api_v1.endpoints.celery.cancel_task") as mock_cancel:
                 mock_cancel.return_value = True
 
-                response = client.delete("/api/v1/celery/tasks/test-task-id/cancel")
+                response = client.delete(
+                    "/api/v1/celery/tasks/test-task-id/cancel")
 
                 assert response.status_code == 200
                 data = response.json()
@@ -141,13 +170,20 @@ class TestCeleryMockedAPIs:
 
     def test_cancel_task_enabled_failure_mocked(self, client: TestClient):
         """Test cancelling a task when enabled but fails with proper mocking."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         with patch("app.services.celery.is_celery_enabled") as mock_enabled:
             mock_enabled.return_value = True
 
             with patch("app.api.api_v1.endpoints.celery.cancel_task") as mock_cancel:
                 mock_cancel.return_value = False
 
-                response = client.delete("/api/v1/celery/tasks/test-task-id/cancel")
+                response = client.delete(
+                    "/api/v1/celery/tasks/test-task-id/cancel")
 
                 assert response.status_code == 200
                 data = response.json()
@@ -157,6 +193,12 @@ class TestCeleryMockedAPIs:
 
     def test_get_celery_status_error_mocked(self, client: TestClient):
         """Test getting Celery status with error using proper mocking."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         with patch("app.services.celery.is_celery_enabled") as mock_enabled:
             mock_enabled.return_value = True
 
@@ -168,14 +210,22 @@ class TestCeleryMockedAPIs:
                 response = client.get("/api/v1/celery/status")
 
                 assert response.status_code == 500
-                assert "Failed to get Celery status" in response.json()["detail"]
+                assert "Failed to get Celery status" in response.json()[
+                    "detail"]
 
 
+@pytest.mark.celery
 class TestCeleryDisabledMocked:
     """Test Celery APIs when disabled using proper dependency mocking."""
 
     def test_submit_celery_task_disabled_mocked(self, client: TestClient):
         """Test submitting a Celery task when disabled with proper mocking."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         with patch("app.services.celery.is_celery_enabled") as mock_enabled:
             mock_enabled.return_value = False
 
@@ -193,13 +243,20 @@ class TestCeleryDisabledMocked:
                     "kwargs": {},
                 }
 
-                response = client.post("/api/v1/celery/tasks/submit", json=task_data)
+                response = client.post(
+                    "/api/v1/celery/tasks/submit", json=task_data)
 
                 assert response.status_code == 503
                 assert "Celery is not enabled" in response.json()["detail"]
 
     def test_get_task_status_disabled_mocked(self, client: TestClient):
         """Test getting task status when disabled with proper mocking."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         with patch("app.services.celery.is_celery_enabled") as mock_enabled:
             mock_enabled.return_value = False
 
@@ -211,13 +268,20 @@ class TestCeleryDisabledMocked:
                     status_code=503, detail="Celery is not enabled"
                 )
 
-                response = client.get("/api/v1/celery/tasks/test-task-id/status")
+                response = client.get(
+                    "/api/v1/celery/tasks/test-task-id/status")
 
                 assert response.status_code == 503
                 assert "Celery is not enabled" in response.json()["detail"]
 
     def test_cancel_task_disabled_mocked(self, client: TestClient):
         """Test cancelling a task when disabled with proper mocking."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         with patch("app.services.celery.is_celery_enabled") as mock_enabled:
             mock_enabled.return_value = False
 
@@ -229,13 +293,20 @@ class TestCeleryDisabledMocked:
                     status_code=503, detail="Celery is not enabled"
                 )
 
-                response = client.delete("/api/v1/celery/tasks/test-task-id/cancel")
+                response = client.delete(
+                    "/api/v1/celery/tasks/test-task-id/cancel")
 
                 assert response.status_code == 503
                 assert "Celery is not enabled" in response.json()["detail"]
 
     def test_get_active_tasks_disabled_mocked(self, client: TestClient):
         """Test getting active tasks when disabled with proper mocking."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         with patch("app.services.celery.is_celery_enabled") as mock_enabled:
             mock_enabled.return_value = False
 

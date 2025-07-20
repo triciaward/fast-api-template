@@ -4,9 +4,11 @@ Unit tests for Celery health check integration.
 
 from unittest.mock import patch
 
+import pytest
 from fastapi.testclient import TestClient
 
 
+@pytest.mark.celery
 class TestCeleryHealthIntegration:
     """Test Celery integration with health check endpoints."""
 
@@ -16,6 +18,12 @@ class TestCeleryHealthIntegration:
         self, mock_stats, mock_enabled, client: TestClient
     ):
         """Test health check when Celery is enabled."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         mock_enabled.return_value = True
         mock_stats.return_value = {
             "enabled": True,
@@ -43,6 +51,12 @@ class TestCeleryHealthIntegration:
         self, mock_stats, mock_enabled, client: TestClient
     ):
         """Test health check when Celery is disabled."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         mock_enabled.return_value = False
         mock_stats.return_value = {"enabled": False}
 
@@ -62,8 +76,15 @@ class TestCeleryHealthIntegration:
         self, mock_stats, mock_enabled, client: TestClient
     ):
         """Test health check when Celery has an error."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         mock_enabled.return_value = True
-        mock_stats.return_value = {"enabled": False, "error": "Connection failed"}
+        mock_stats.return_value = {
+            "enabled": False, "error": "Connection failed"}
 
         response = client.get("/api/v1/health")
 
@@ -82,6 +103,12 @@ class TestCeleryHealthIntegration:
         self, mock_stats, mock_enabled, client: TestClient
     ):
         """Test health check when Celery stats raise an exception."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         mock_enabled.return_value = True
         mock_stats.side_effect = Exception("Test error")
 
@@ -161,6 +188,12 @@ class TestCeleryHealthIntegration:
         self, mock_enabled, client: TestClient
     ):
         """Test features endpoint when Celery is enabled."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         mock_enabled.return_value = True
 
         response = client.get("/features")
@@ -175,6 +208,12 @@ class TestCeleryHealthIntegration:
         self, mock_enabled, client: TestClient
     ):
         """Test features endpoint when Celery is disabled."""
+        # Skip test if Celery is disabled
+        from app.core.config import settings
+
+        if not settings.ENABLE_CELERY:
+            pytest.skip("Celery is disabled")
+
         mock_enabled.return_value = False
 
         response = client.get("/features")

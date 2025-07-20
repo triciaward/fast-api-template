@@ -14,13 +14,17 @@ from sqlalchemy.orm import sessionmaker
 from app.database.database import Base, get_db
 from app.main import app
 
+# Set environment variables for testing
 os.environ["ENABLE_CELERY"] = "true"
 os.environ["CELERY_TASK_ALWAYS_EAGER"] = "true"
 os.environ["CELERY_TASK_EAGER_PROPAGATES"] = "true"
 
+# Clear config cache to force reload with new environment variables
 sys.modules.pop("app.core.config", None)
+sys.modules.pop("app.main", None)
+sys.modules.pop("app.api.api_v1.api", None)
 
-# Now import everything else
+# Now import app AFTER environment variables are set
 
 
 # Try to load .env.test if it exists
