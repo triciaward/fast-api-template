@@ -12,6 +12,12 @@ from app.core.logging_config import get_app_logger, setup_logging
 from app.database.database import engine, sync_engine
 from app.models import models
 
+if settings.ENABLE_CELERY:
+    # Import celery tasks to register them with the worker
+    # Use a different approach to avoid naming conflicts
+    import importlib
+    importlib.import_module("app.services.celery_tasks")
+
 # Setup logging
 setup_logging()
 logger = get_app_logger()
@@ -99,4 +105,5 @@ async def get_features() -> dict[str, bool]:
         "redis": settings.ENABLE_REDIS,
         "websockets": settings.ENABLE_WEBSOCKETS,
         "rate_limiting": settings.ENABLE_RATE_LIMITING,
+        "celery": settings.ENABLE_CELERY,
     }

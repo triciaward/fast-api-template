@@ -19,6 +19,27 @@ try:
 except ImportError:
     redis_client = None
 
+# Celery service
+try:
+    from .celery import (
+        cancel_task,
+        get_active_tasks,
+        get_celery_app,
+        get_celery_stats,
+        get_task_status,
+        is_celery_enabled,
+        submit_task,
+    )
+except ImportError:
+    # Fallback if Celery is not available
+    get_celery_app = None  # type: ignore
+    def is_celery_enabled(): return False  # type: ignore
+    submit_task = None  # type: ignore
+    get_task_status = None  # type: ignore
+    cancel_task = None  # type: ignore
+    def get_active_tasks(): return []  # type: ignore
+    def get_celery_stats(): return {"enabled": False}  # type: ignore
+
 # Rate limiting service
 try:
     from .rate_limiter import (
@@ -59,6 +80,13 @@ __all__ = [
     "email_service",
     "oauth_service",
     "redis_client",
+    "get_celery_app",
+    "is_celery_enabled",
+    "submit_task",
+    "get_task_status",
+    "cancel_task",
+    "get_active_tasks",
+    "get_celery_stats",
     "get_limiter",
     "rate_limit_login",
     "rate_limit_register",

@@ -39,6 +39,9 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
       ENABLE_REDIS: ${ENABLE_REDIS:-false}
       ENABLE_WEBSOCKETS: ${ENABLE_WEBSOCKETS:-false}
+      ENABLE_CELERY: ${ENABLE_CELERY:-false}
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
     ports:
       - "${API_PORT}:8000"
     depends_on:
@@ -49,6 +52,62 @@ services:
     volumes:
       - .:/code  # Mount entire project for live code editing
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Optional Celery worker service - only used when ENABLE_CELERY=true
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      ENABLE_REDIS: ${ENABLE_REDIS:-false}
+      ENABLE_WEBSOCKETS: ${ENABLE_WEBSOCKETS:-false}
+      ENABLE_CELERY: ${ENABLE_CELERY:-false}
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+    restart: unless-stopped
+    volumes:
+      - .:/code
+    command: celery -A app.services.celery worker --loglevel=info
+    profiles:
+      - celery  # Only start when explicitly requested
+
+  # Optional Flower monitoring service - only used when ENABLE_CELERY=true
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      ENABLE_REDIS: ${ENABLE_REDIS:-false}
+      ENABLE_WEBSOCKETS: ${ENABLE_WEBSOCKETS:-false}
+      ENABLE_CELERY: ${ENABLE_CELERY:-false}
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    ports:
+      - "${FLOWER_PORT:-5555}:5555"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+    restart: unless-stopped
+    volumes:
+      - .:/code
+    command: celery -A app.services.celery flower --port=5555
+    profiles:
+      - celery  # Only start when explicitly requested
 
 volumes:
   postgres_data:

@@ -70,6 +70,25 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
             health_status["status"] = "unhealthy"
             health_status["rate_limiting_error"] = str(e)
 
+    # Check Celery status if enabled
+    if settings.ENABLE_CELERY:
+        try:
+            from app.services.celery import get_celery_stats
+
+            celery_stats = get_celery_stats()
+            if celery_stats.get("enabled", False):
+                health_status["checks"]["celery"] = "healthy"
+                health_status["celery_stats"] = celery_stats
+            else:
+                health_status["checks"]["celery"] = "unhealthy"
+                health_status["status"] = "unhealthy"
+                if "error" in celery_stats:
+                    health_status["celery_error"] = celery_stats["error"]
+        except Exception as e:
+            health_status["checks"]["celery"] = "unhealthy"
+            health_status["status"] = "unhealthy"
+            health_status["celery_error"] = str(e)
+
     # Determine overall status
     if health_status["checks"]["database"] == "unhealthy":
         health_status["status"] = "unhealthy"
@@ -159,6 +178,30 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
             readiness_status["components"]["rate_limiting"] = {
                 "ready": False,
                 "message": f"Rate limiting failed: {str(e)}",
+            }
+            readiness_status["ready"] = False
+
+    # Check Celery readiness if enabled
+    if settings.ENABLE_CELERY:
+        try:
+            from app.services.celery import get_celery_stats
+
+            celery_stats = get_celery_stats()
+            if celery_stats.get("enabled", False):
+                readiness_status["components"]["celery"] = {
+                    "ready": True,
+                    "message": "Celery ready"
+                }
+            else:
+                readiness_status["components"]["celery"] = {
+                    "ready": False,
+                    "message": "Celery not initialized"
+                }
+                readiness_status["ready"] = False
+        except Exception as e:
+            readiness_status["components"]["celery"] = {
+                "ready": False,
+                "message": f"Celery failed: {str(e)}",
             }
             readiness_status["ready"] = False
 

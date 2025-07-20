@@ -10,12 +10,34 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.orm import sessionmaker
 
 from app.database.database import Base, get_db
-from app.main import app
 
-# Set testing environment BEFORE importing any app modules
-os.environ["TESTING"] = "1"
+# Load test-specific environment variables BEFORE any other imports
+try:
+    import dotenv
+    dotenv.load_dotenv(dotenv_path=".env.test", override=True)
+except ImportError:
+    # Fallback if python-dotenv is not installed
+    os.environ["TESTING"] = "1"
+    os.environ["ENABLE_CELERY"] = "true"
+    os.environ["CELERY_TASK_ALWAYS_EAGER"] = "true"
+    os.environ["CELERY_TASK_EAGER_PROPAGATES"] = "true"
 
-# Import the actual app from main.py
+# Verify environment variables are set
+print(f"ENABLE_CELERY: {os.getenv('ENABLE_CELERY')}")
+print(f"CELERY_TASK_ALWAYS_EAGER: {os.getenv('CELERY_TASK_ALWAYS_EAGER')}")
+
+
+# Create a test app factory that ensures environment variables are set
+
+def create_test_app():
+    """Create a test app with proper environment variables set."""
+    # Import app after environment is set
+    from app.main import app
+    return app
+
+
+# Create the test app instance
+app = create_test_app()
 
 # Test database URLs - use environment variables if available, otherwise fallback to defaults
 TEST_DATABASE_URL = os.getenv(

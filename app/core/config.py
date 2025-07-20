@@ -38,6 +38,25 @@ class Settings(BaseSettings):
     # WebSockets (Optional)
     ENABLE_WEBSOCKETS: bool = False
 
+    # Celery Background Tasks (Optional)
+    ENABLE_CELERY: bool = False
+    CELERY_BROKER_URL: str = "redis://localhost:6379/1"
+    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/1"
+    CELERY_TASK_SERIALIZER: str = "json"
+    CELERY_RESULT_SERIALIZER: str = "json"
+    CELERY_ACCEPT_CONTENT: list[str] = ["json"]
+    CELERY_TIMEZONE: str = "UTC"
+    CELERY_ENABLE_UTC: bool = True
+    CELERY_TASK_TRACK_STARTED: bool = True
+    CELERY_TASK_TIME_LIMIT: int = 30 * 60  # 30 minutes
+    CELERY_TASK_SOFT_TIME_LIMIT: int = 25 * 60  # 25 minutes
+    CELERY_WORKER_PREFETCH_MULTIPLIER: int = 1
+    CELERY_WORKER_MAX_TASKS_PER_CHILD: int = 1000
+
+    # Celery Test Configuration (for eager execution)
+    CELERY_TASK_ALWAYS_EAGER: bool = False
+    CELERY_TASK_EAGER_PROPAGATES: bool = False
+
     # Rate Limiting
     ENABLE_RATE_LIMITING: bool = False
     RATE_LIMIT_STORAGE_BACKEND: str = "memory"  # "memory" or "redis"
