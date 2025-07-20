@@ -1,6 +1,6 @@
 # FastAPI Project Template
 
-![Tests](https://img.shields.io/badge/tests-319%20tests%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-353%20tests%20passing-brightgreen)
 ![CI](https://github.com/triciaward/fast-api-template/actions/workflows/ci.yml/badge.svg)
 ![Coverage](https://img.shields.io/badge/coverage-74%25-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -11,7 +11,7 @@ A production-ready FastAPI backend template with built-in authentication, CI/CD,
 
 A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (319 tests with 100% success rate), secure authentication with email verification, OAuth, and password reset, comprehensive input validation, PostgreSQL integration, **complete background task processing**, and a fully working CI/CD pipeline.
 
-**Core Features**: JWT authentication, email verification, OAuth (Google/Apple), password reset, **password change with current password verification**, **GDPR-compliant account deletion with email confirmation and grace period**, **refresh token management with session control**, input validation, rate limiting, structured logging, health checks, Alembic migrations, Docker support, and comprehensive testing.
+**Core Features**: JWT authentication, email verification, OAuth (Google/Apple), password reset, **password change with current password verification**, **GDPR-compliant account deletion with email confirmation and grace period**, **refresh token management with session control**, **comprehensive audit logging system**, input validation, rate limiting, structured logging, health checks, Alembic migrations, Docker support, and comprehensive testing.
 
 **Optional Features**: Redis caching, WebSocket real-time communication, background task processing, and advanced monitoring.
 
@@ -55,15 +55,82 @@ This template powers several production applications:
 - 🏗️ Hybrid Architecture (async production, sync testing)
 - 🔒 Input Validation System (SQL injection, XSS, boundary testing)
 - 📈 CI/CD Pipeline with PostgreSQL Integration
+- 📊 **Audit Logging System** (comprehensive user activity tracking with database persistence and real-time logging)
 
 ## ✅ Test Suite
 
-- **348 total tests** with comprehensive coverage
+- **353 total tests** with comprehensive coverage
 - **100% test success rate** (core and integration tests)
 - **5 complex mock tests excluded** (advanced Redis/background task mocking - isolated)
 - **Full CI pipeline** (mypy, ruff, pytest) runs on every commit
 - **74% code coverage** with proper async testing
 - **100% coverage for optional features** (Redis, WebSocket, and background task services)
+
+## 📊 Audit Logging System
+
+The template includes a comprehensive **audit logging system** that tracks user activities for security, compliance, and debugging purposes.
+
+### 🔍 What Gets Logged
+- **Authentication Events**: Login attempts (success/failure), OAuth logins, logout
+- **Security Events**: Password changes, account deletion requests
+- **User Actions**: All critical user interactions with timestamps and context
+- **System Events**: Background task executions, system health checks
+
+### 🏗️ Architecture
+- **Database Persistence**: All audit logs stored in PostgreSQL with proper indexing
+- **Real-time Logging**: Structured logging to stdout/console with structlog
+- **Hybrid Approach**: Both database storage and real-time monitoring
+- **Anonymous Support**: Tracks events for unauthenticated users
+
+### 📋 Key Features
+- **Comprehensive Tracking**: Event type, user ID, IP address, user agent, success status
+- **Context Storage**: JSON context field for additional event details
+- **Session Tracking**: Links events to user sessions for correlation
+- **Proxy Support**: Proper IP address extraction from X-Forwarded-For headers
+- **Type Safety**: Full mypy type checking and validation
+- **Performance Optimized**: Efficient database queries with proper indexing
+
+### 🔧 Implementation
+- **Database Model**: `AuditLog` with UUID primary keys and comprehensive fields
+- **CRUD Operations**: Async and sync functions for log creation and querying
+- **Service Layer**: Reusable `log_event()` function with convenience methods
+- **Auth Integration**: Seamlessly integrated into all authentication endpoints
+- **Testing**: 5 comprehensive tests covering all functionality
+
+### 📊 Usage Examples
+```python
+# Log a login attempt
+await log_login_attempt(
+    db=db,
+    request=request,
+    user=user,
+    success=True,
+    oauth_provider="google"
+)
+
+# Log a password change
+await log_password_change(
+    db=db,
+    request=request,
+    user=user,
+    change_type="password_change"
+)
+
+# Log account deletion
+await log_account_deletion(
+    db=db,
+    request=request,
+    user=user,
+    deletion_stage="deletion_requested"
+)
+```
+
+### 🎯 Benefits
+- **Security Monitoring**: Track suspicious login patterns and failed attempts
+- **Compliance**: Meet regulatory requirements for user activity logging
+- **Debugging**: Correlate user actions with system issues
+- **Analytics**: Understand user behavior and system usage patterns
+- **Forensics**: Investigate security incidents with detailed audit trails
 
 ## Project Structure
 
@@ -79,7 +146,8 @@ fast-api-template/
 │       ├── add_password_reset_fields.py
 │       ├── add_account_deletion_fields.py
 │       ├── add_refresh_tokens_table.py
-│       └── 8fc34fade26c_merge_account_deletion_and_password_.py
+│       ├── 8fc34fade26c_merge_account_deletion_and_password_.py
+│       └── c1da97bbb9a3_add_audit_logs_table.py
 ├── app/                        # Main application package
 │   ├── api/                    # API route definitions
 │   │   └── api_v1/
@@ -98,11 +166,12 @@ fast-api-template/
 │   │   └── logging_config.py   # Structured logging configuration
 │   ├── crud/                   # Database CRUD operations
 │   │   ├── user.py             # User CRUD operations (sync and async)
-│   │   └── refresh_token.py    # Refresh token CRUD operations
+│   │   ├── refresh_token.py    # Refresh token CRUD operations
+│   │   └── audit_log.py        # Audit log CRUD operations
 │   ├── database/               # Database connection and session management
 │   │   └── database.py         # Database engine and session configuration
 │   ├── models/                 # SQLAlchemy database models
-│   │   └── models.py           # User model and database schema
+│   │   └── models.py           # User and AuditLog models and database schema
 │   ├── schemas/                # Pydantic validation schemas
 │   │   └── user.py             # User schemas (request/response models)
 │   ├── services/               # Service modules
@@ -114,7 +183,8 @@ fast-api-template/
 │   │   ├── refresh_token.py    # Refresh token service (session management)
 │   │   ├── celery.py           # Background task service configuration
 │   │   ├── celery_app.py       # Background task application setup
-│   │   └── celery_tasks.py     # Background task definitions
+│   │   ├── celery_tasks.py     # Background task definitions
+│   │   └── audit.py            # Audit logging service (user activity tracking)
 │   ├── bootstrap_superuser.py  # Superuser bootstrap script
 │   └── main.py                 # Application entry point
 ├── tests/                      # Test suite
@@ -146,7 +216,8 @@ fast-api-template/
 │       ├── test_celery.py                # Core background task service tests (12 tests)
 │       ├── test_celery_api.py            # Background task API endpoint tests (9 tests)
 │       ├── test_celery_health.py         # Background task health integration tests (9 tests)
-│       └── test_celery_mocked.py         # Complex mock tests (separated)
+│       ├── test_celery_mocked.py         # Complex mock tests (separated)
+│       └── test_audit_log.py             # Audit logging tests (5 tests)
 ├── scripts/                    # Utility scripts
 │   ├── bootstrap_admin.py      # Admin user bootstrap script
 │   └── logging_demo.py         # Logging demonstration script

@@ -50,6 +50,13 @@ from app.services import (
     rate_limit_password_reset,
     rate_limit_register,
 )
+from app.services.audit import (
+    log_account_deletion,
+    log_login_attempt,
+    log_logout,
+    log_oauth_login,
+    log_password_change,
+)
 
 router = APIRouter()
 logger = get_auth_logger()
@@ -60,7 +67,8 @@ logger = get_auth_logger()
 async def register_user(
     user: UserCreate, db: Session = Depends(get_db)
 ) -> UserResponse:
-    logger.info("User registration attempt", email=user.email, username=user.username)
+    logger.info("User registration attempt",
+                email=user.email, username=user.username)
 
     try:
         # Check if user with email already exists
@@ -75,7 +83,8 @@ async def register_user(
             )
 
         # Check if username already exists
-        db_user = crud_user.get_user_by_username_sync(db, username=user.username)
+        db_user = crud_user.get_user_by_username_sync(
+            db, username=user.username)
         if db_user:
             logger.warning(
                 "Registration failed - username already taken", username=user.username
@@ -108,7 +117,8 @@ async def register_user(
                     "Failed to create verification token", user_id=str(db_user.id)
                 )
         else:
-            logger.warning("Email service not configured - skipping verification email")
+            logger.warning(
+                "Email service not configured - skipping verification email")
 
         return db_user
 
@@ -155,6 +165,8 @@ async def login_user(
             db, form_data.username, form_data.password
         )
         if not user:
+            # Log failed login attempt
+            await log_login_attempt(db, request, user=None, success=False)
             logger.warning(
                 "Login failed - invalid credentials", email=form_data.username
             )
@@ -166,6 +178,8 @@ async def login_user(
 
         # Check if user is verified (for non-OAuth users)
         if not user.is_verified and user.hashed_password:
+            # Log failed login attempt due to unverified email
+            await log_login_attempt(db, request, user=user, success=False)
             logger.warning(
                 "Login failed - email not verified",
                 user_id=str(user.id),
@@ -183,12 +197,17 @@ async def login_user(
             set_refresh_token_cookie,
         )
 
-        access_token, refresh_token_value = create_user_session(db, user, request)
+        access_token, refresh_token_value = create_user_session(
+            db, user, request)
 
         # Set refresh token as HttpOnly cookie
         set_refresh_token_cookie(response, refresh_token_value)
 
-        logger.info("Login successful", user_id=str(user.id), email=form_data.username)
+        # Log successful login
+        await log_login_attempt(db, request, user=user, success=True)
+
+        logger.info("Login successful", user_id=str(
+            user.id), email=form_data.username)
         return Token(access_token=access_token, token_type="bearer")
 
     except HTTPException:
@@ -219,13 +238,16 @@ async def oauth_login(
 
     if not oauth_service:
         logger.error("OAuth service not available")
-        raise HTTPException(status_code=503, detail="OAuth service not available")
+        raise HTTPException(
+            status_code=503, detail="OAuth service not available")
 
     provider = oauth_data.provider.lower()
 
     if provider not in ["google", "apple"]:
-        logger.warning("OAuth login failed - unsupported provider", provider=provider)
-        raise HTTPException(status_code=400, detail="Unsupported OAuth provider")
+        logger.warning(
+            "OAuth login failed - unsupported provider", provider=provider)
+        raise HTTPException(
+            status_code=400, detail="Unsupported OAuth provider")
 
     if not oauth_service.is_provider_configured(provider):
         logger.warning(
@@ -243,7 +265,8 @@ async def oauth_login(
                 logger.warning(
                     "OAuth login failed - invalid Google token", provider=provider
                 )
-                raise HTTPException(status_code=400, detail="Invalid Google token")
+                raise HTTPException(
+                    status_code=400, detail="Invalid Google token")
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
@@ -255,7 +278,8 @@ async def oauth_login(
                 logger.warning(
                     "OAuth login failed - invalid Apple token", provider=provider
                 )
-                raise HTTPException(status_code=400, detail="Invalid Apple token")
+                raise HTTPException(
+                    status_code=400, detail="Invalid Apple token")
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
@@ -268,7 +292,8 @@ async def oauth_login(
                 has_oauth_id=bool(oauth_id),
                 has_email=bool(email),
             )
-            raise HTTPException(status_code=400, detail="Invalid OAuth user info")
+            raise HTTPException(
+                status_code=400, detail="Invalid OAuth user info")
 
         logger.info(
             "OAuth token verified successfully",
@@ -278,7 +303,8 @@ async def oauth_login(
         )
 
         # Check if user already exists
-        existing_user = crud_user.get_user_by_oauth_id_sync(db, provider, oauth_id)
+        existing_user = crud_user.get_user_by_oauth_id_sync(
+            db, provider, oauth_id)
         if existing_user:
             # Create user session with refresh token
             from app.services.refresh_token import (
@@ -292,6 +318,9 @@ async def oauth_login(
 
             # Set refresh token as HttpOnly cookie
             set_refresh_token_cookie(response, refresh_token_value)
+
+            # Log successful OAuth login for existing user
+            await log_oauth_login(db, request, existing_user, provider, success=True)
 
             logger.info(
                 "OAuth login successful - existing user",
@@ -338,10 +367,14 @@ async def oauth_login(
             set_refresh_token_cookie,
         )
 
-        access_token, refresh_token_value = create_user_session(db, new_user, request)
+        access_token, refresh_token_value = create_user_session(
+            db, new_user, request)
 
         # Set refresh token as HttpOnly cookie
         set_refresh_token_cookie(response, refresh_token_value)
+
+        # Log successful OAuth login
+        await log_oauth_login(db, request, new_user, provider, success=True)
 
         logger.info(
             "OAuth login successful - new user",
@@ -360,7 +393,8 @@ async def oauth_login(
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(status_code=400, detail=f"OAuth login failed: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"OAuth login failed: {str(e)}")
 
 
 @router.post("/resend-verification", response_model=EmailVerificationResponse)
@@ -579,7 +613,8 @@ async def reset_password(
         # Get user
         user = crud_user.get_user_by_id_sync(db, user_id)
         if not user:
-            logger.warning("User not found for password reset", user_id=user_id)
+            logger.warning("User not found for password reset",
+                           user_id=user_id)
             return PasswordResetConfirmResponse(
                 message="User not found.", password_reset=False
             )
@@ -597,7 +632,8 @@ async def reset_password(
             )
 
         # Reset the password
-        success = crud_user.reset_user_password_sync(db, user_id, request.new_password)
+        success = crud_user.reset_user_password_sync(
+            db, user_id, request.new_password)
         if not success:
             logger.error("Failed to reset user password", user_id=user_id)
             return PasswordResetConfirmResponse(
@@ -605,7 +641,8 @@ async def reset_password(
                 password_reset=False,
             )
 
-        logger.info("Password reset successful", user_id=str(user.id), email=user.email)
+        logger.info("Password reset successful",
+                    user_id=str(user.id), email=user.email)
         return PasswordResetConfirmResponse(
             message="Password reset successfully. You can now log in with your new password.",
             password_reset=True,
@@ -625,7 +662,8 @@ async def reset_password(
 
 @router.post("/change-password", response_model=PasswordChangeResponse)
 async def change_password(
-    request: PasswordChangeRequest,
+    request: Request,
+    change_req: PasswordChangeRequest,
     current_user: UserResponse = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> PasswordChangeResponse:
@@ -647,29 +685,35 @@ async def change_password(
         # Get the actual user object from database to access hashed_password
         db_user = crud_user.get_user_by_email_sync(db, current_user.email)
         if not db_user:
-            logger.error("User not found in database", user_id=str(current_user.id))
+            logger.error("User not found in database",
+                         user_id=str(current_user.id))
             raise HTTPException(
                 status_code=500, detail="User not found. Please try again later."
             )
 
         # Verify the current password
-        if not verify_password(request.current_password, str(db_user.hashed_password)):
+        if not verify_password(change_req.current_password, str(db_user.hashed_password)):
             logger.warning(
                 "Password change failed - incorrect current password",
                 user_id=str(current_user.id),
             )
-            raise HTTPException(status_code=400, detail="Incorrect current password")
+            raise HTTPException(
+                status_code=400, detail="Incorrect current password")
 
         # Change the password
         success = crud_user.update_user_password_sync(
-            db, str(current_user.id), request.new_password
+            db, str(current_user.id), change_req.new_password
         )
         if not success:
-            logger.error("Failed to change user password", user_id=str(current_user.id))
+            logger.error("Failed to change user password",
+                         user_id=str(current_user.id))
             raise HTTPException(
                 status_code=500,
                 detail="Failed to change password. Please try again later.",
             )
+
+        # Log password change
+        await log_password_change(db, request=request, user=db_user, change_type="password_change")
 
         logger.info(
             "Password changed successfully",
@@ -696,18 +740,21 @@ async def change_password(
 @router.post("/request-deletion", response_model=AccountDeletionResponse)
 @rate_limit_account_deletion
 async def request_account_deletion(
-    request: AccountDeletionRequest, db: Session = Depends(get_db)
+    request: Request,
+    deletion_request: AccountDeletionRequest,
+    db: Session = Depends(get_db)
 ) -> AccountDeletionResponse:
     """Request account deletion."""
-    logger.info("Account deletion request", email=request.email)
+    logger.info("Account deletion request", email=deletion_request.email)
 
     try:
         # Check if user exists
-        user = crud_user.get_user_by_email_sync(db, email=request.email)
+        user = crud_user.get_user_by_email_sync(
+            db, email=deletion_request.email)
         if not user:
             # Don't reveal if user exists or not for security
             logger.info(
-                "Account deletion request for non-existent user", email=request.email
+                "Account deletion request for non-existent user", email=deletion_request.email
             )
             return AccountDeletionResponse(
                 message="If an account with that email exists, a deletion confirmation link has been sent.",
@@ -719,7 +766,7 @@ async def request_account_deletion(
             logger.warning(
                 "Account deletion requested for already deleted user",
                 user_id=str(user.id),
-                email=request.email,
+                email=deletion_request.email,
             )
             return AccountDeletionResponse(
                 message="If an account with that email exists, a deletion confirmation link has been sent.",
@@ -731,7 +778,7 @@ async def request_account_deletion(
             logger.info(
                 "Account deletion already requested",
                 user_id=str(user.id),
-                email=request.email,
+                email=deletion_request.email,
             )
             return AccountDeletionResponse(
                 message="If an account with that email exists, a deletion confirmation link has been sent.",
@@ -740,7 +787,7 @@ async def request_account_deletion(
 
         if not email_service or not email_service.is_configured():
             logger.warning(
-                "Email service not configured for account deletion", email=request.email
+                "Email service not configured for account deletion", email=deletion_request.email
             )
             return AccountDeletionResponse(
                 message="Account deletion service temporarily unavailable. Please try again later.",
@@ -753,7 +800,7 @@ async def request_account_deletion(
             logger.error(
                 "Failed to create deletion token",
                 user_id=str(user.id),
-                email=request.email,
+                email=deletion_request.email,
             )
             return AccountDeletionResponse(
                 message="Failed to create deletion token. Please try again later.",
@@ -766,7 +813,7 @@ async def request_account_deletion(
             logger.error(
                 "Failed to mark account for deletion",
                 user_id=str(user.id),
-                email=request.email,
+                email=deletion_request.email,
             )
             return AccountDeletionResponse(
                 message="Failed to process deletion request. Please try again later.",
@@ -779,10 +826,13 @@ async def request_account_deletion(
         )
 
         if email_sent:
+            # Log account deletion request
+            await log_account_deletion(db, request, user, deletion_stage="deletion_requested")
+
             logger.info(
                 "Account deletion email sent successfully",
                 user_id=str(user.id),
-                email=request.email,
+                email=deletion_request.email,
             )
             return AccountDeletionResponse(
                 message="If an account with that email exists, a deletion confirmation link has been sent.",
@@ -792,7 +842,7 @@ async def request_account_deletion(
             logger.error(
                 "Failed to send account deletion email",
                 user_id=str(user.id),
-                email=request.email,
+                email=deletion_request.email,
             )
             return AccountDeletionResponse(
                 message="Failed to send deletion confirmation email. Please try again later.",
@@ -802,7 +852,7 @@ async def request_account_deletion(
     except Exception as e:
         logger.error(
             "Account deletion request failed with unexpected error",
-            email=request.email,
+            email=deletion_request.email,
             error=str(e),
             exc_info=True,
         )
@@ -815,7 +865,9 @@ async def request_account_deletion(
 @router.post("/confirm-deletion", response_model=AccountDeletionConfirmResponse)
 @rate_limit_account_deletion
 async def confirm_account_deletion(
-    request: AccountDeletionConfirmRequest, db: Session = Depends(get_db)
+    request: Request,
+    deletion_request: AccountDeletionConfirmRequest,
+    db: Session = Depends(get_db)
 ) -> AccountDeletionConfirmResponse:
     """Confirm account deletion with token."""
     logger.info("Account deletion confirmation attempt")
@@ -832,7 +884,7 @@ async def confirm_account_deletion(
             )
 
         # Verify the deletion token
-        user_id = await email_service.verify_deletion_token(db, request.token)
+        user_id = await email_service.verify_deletion_token(db, deletion_request.token)
         if not user_id:
             logger.warning("Invalid or expired deletion token")
             return AccountDeletionConfirmResponse(
@@ -844,7 +896,8 @@ async def confirm_account_deletion(
         # Get user
         user = crud_user.get_user_by_id_sync(db, user_id)
         if not user:
-            logger.warning("User not found for account deletion", user_id=user_id)
+            logger.warning(
+                "User not found for account deletion", user_id=user_id)
             return AccountDeletionConfirmResponse(
                 message="User not found.",
                 deletion_confirmed=False,
@@ -880,6 +933,9 @@ async def confirm_account_deletion(
                 deletion_scheduled_for=datetime.utcnow(),
             )
 
+        # Log account deletion confirmation
+        await log_account_deletion(db, request, user, deletion_stage="deletion_confirmed")
+
         logger.info(
             "Account deletion confirmed successfully",
             user_id=str(user.id),
@@ -908,19 +964,23 @@ async def confirm_account_deletion(
 @router.post("/cancel-deletion", response_model=AccountDeletionCancelResponse)
 @rate_limit_account_deletion
 async def cancel_account_deletion(
-    request: AccountDeletionCancelRequest, db: Session = Depends(get_db)
+    request: Request,
+    deletion_request: AccountDeletionCancelRequest,
+    db: Session = Depends(get_db)
 ) -> AccountDeletionCancelResponse:
     """Cancel account deletion."""
-    logger.info("Account deletion cancellation request", email=request.email)
+    logger.info("Account deletion cancellation request",
+                email=deletion_request.email)
 
     try:
         # Check if user exists
-        user = crud_user.get_user_by_email_sync(db, email=request.email)
+        user = crud_user.get_user_by_email_sync(
+            db, email=deletion_request.email)
         if not user:
             # Don't reveal if user exists or not for security
             logger.info(
                 "Account deletion cancellation for non-existent user",
-                email=request.email,
+                email=deletion_request.email,
             )
             return AccountDeletionCancelResponse(
                 message="If an account with that email exists and has a pending deletion, it has been cancelled.",
@@ -932,7 +992,7 @@ async def cancel_account_deletion(
             logger.warning(
                 "Account deletion cancellation for already deleted user",
                 user_id=str(user.id),
-                email=request.email,
+                email=deletion_request.email,
             )
             return AccountDeletionCancelResponse(
                 message="If an account with that email exists and has a pending deletion, it has been cancelled.",
@@ -944,7 +1004,7 @@ async def cancel_account_deletion(
             logger.info(
                 "Account deletion cancellation for user without pending deletion",
                 user_id=str(user.id),
-                email=request.email,
+                email=deletion_request.email,
             )
             return AccountDeletionCancelResponse(
                 message="If an account with that email exists and has a pending deletion, it has been cancelled.",
@@ -957,17 +1017,20 @@ async def cancel_account_deletion(
             logger.error(
                 "Failed to cancel account deletion",
                 user_id=str(user.id),
-                email=request.email,
+                email=deletion_request.email,
             )
             return AccountDeletionCancelResponse(
                 message="Failed to cancel account deletion. Please try again later.",
                 deletion_cancelled=False,
             )
 
+        # Log account deletion cancellation
+        await log_account_deletion(db, request, user, deletion_stage="deletion_cancelled")
+
         logger.info(
             "Account deletion cancelled successfully",
             user_id=str(user.id),
-            email=request.email,
+            email=deletion_request.email,
         )
         return AccountDeletionCancelResponse(
             message="Account deletion has been cancelled. Your account is safe.",
@@ -977,7 +1040,7 @@ async def cancel_account_deletion(
     except Exception as e:
         logger.error(
             "Account deletion cancellation failed with unexpected error",
-            email=request.email,
+            email=deletion_request.email,
             error=str(e),
             exc_info=True,
         )
@@ -1123,13 +1186,25 @@ async def logout(
 
         # Get refresh token from cookie
         refresh_token_value = get_refresh_token_from_cookie(request)
+        user = None
+
         if refresh_token_value:
+            # Get user from refresh token for audit logging
+            from app.crud import verify_refresh_token_in_db
+            db_token = verify_refresh_token_in_db(db, refresh_token_value)
+            if db_token:
+                user = crud_user.get_user_by_id_sync(db, str(db_token.user_id))
+
             # Revoke the session
             revoke_session(db, refresh_token_value)
             logger.info("Session revoked during logout")
 
         # Clear the cookie
         clear_refresh_token_cookie(response)
+
+        # Log logout event if we have user info
+        if user:
+            await log_logout(db, request, user)
 
         logger.info("Logout successful")
         return {"message": "Successfully logged out"}
@@ -1172,7 +1247,8 @@ async def get_user_sessions(
                 current_session_id = db_token.id
 
                 # Get all user sessions
-        sessions = crud_get_user_sessions(db, current_user.id, current_session_id)  # type: ignore
+        sessions = crud_get_user_sessions(
+            db, current_user.id, current_session_id)  # type: ignore
 
         # Convert to response format
         session_info_list = []
