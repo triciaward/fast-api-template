@@ -5,6 +5,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.api_v1.api import api_router
+
+# Import API router dynamically based on settings
 from app.bootstrap_superuser import bootstrap_superuser
 from app.core.config import settings
 from app.core.cors import configure_cors
@@ -87,7 +89,7 @@ if settings.ENABLE_RATE_LIMITING:
 
     setup_rate_limiting(app)
 
-# Include API router
+# Include API router dynamically based on settings
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 

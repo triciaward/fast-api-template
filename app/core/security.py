@@ -1,3 +1,4 @@
+import secrets
 from datetime import datetime, timedelta
 from typing import Any, Optional, Union, cast
 
@@ -20,7 +21,8 @@ def create_access_token(
         )
     to_encode = {"exp": expire, "sub": str(subject)}
     encoded_jwt = cast(
-        str, jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+        str, jwt.encode(to_encode, settings.SECRET_KEY,
+                        algorithm=settings.ALGORITHM)
     )
     return encoded_jwt
 
@@ -31,3 +33,18 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
+
+
+def create_refresh_token() -> str:
+    """Create a cryptographically secure refresh token."""
+    return secrets.token_urlsafe(32)
+
+
+def hash_refresh_token(token: str) -> str:
+    """Hash a refresh token for secure storage."""
+    return pwd_context.hash(token)
+
+
+def verify_refresh_token(plain_token: str, hashed_token: str) -> bool:
+    """Verify a refresh token against its hash."""
+    return pwd_context.verify(plain_token, hashed_token)

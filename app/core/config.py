@@ -19,8 +19,20 @@ class Settings(BaseSettings):
 
     # JWT
     SECRET_KEY: str = "dev_secret_key_change_in_production"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15  # Short-lived access tokens
     ALGORITHM: str = "HS256"
+
+    # Refresh Token Configuration
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
+    REFRESH_TOKEN_COOKIE_NAME: str = "refresh_token"
+    REFRESH_TOKEN_COOKIE_SECURE: bool = False  # Set to True in production
+    REFRESH_TOKEN_COOKIE_HTTPONLY: bool = True
+    REFRESH_TOKEN_COOKIE_SAMESITE: str = "lax"
+    REFRESH_TOKEN_COOKIE_PATH: str = "/api/v1/auth"
+
+    # Session Management
+    MAX_SESSIONS_PER_USER: int = 5  # Limit concurrent sessions
+    SESSION_CLEANUP_INTERVAL_HOURS: int = 24
 
     # Superuser Bootstrap
     FIRST_SUPERUSER: Optional[str] = None

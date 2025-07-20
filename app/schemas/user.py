@@ -84,6 +84,27 @@ class Token(BaseModel):
     token_type: str
 
 
+class RefreshTokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+    expires_in: int  # seconds until access token expires
+
+
+class SessionInfo(BaseModel):
+    id: uuid.UUID
+    created_at: datetime
+    device_info: Optional[str] = None
+    ip_address: Optional[str] = None
+    is_current: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SessionListResponse(BaseModel):
+    sessions: list[SessionInfo]
+    total_sessions: int
+
+
 class TokenData(BaseModel):
     email: Optional[str] = None
 

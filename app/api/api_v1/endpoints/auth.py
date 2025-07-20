@@ -1,13 +1,14 @@
+import uuid
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.api.api_v1.endpoints.users import get_current_user
 from app.core.config import settings
 from app.core.logging_config import get_auth_logger
-from app.core.security import create_access_token, verify_password
+from app.core.security import verify_password
 from app.crud import user as crud_user
 from app.database.database import get_db
 from app.schemas.user import (
@@ -27,6 +28,9 @@ from app.schemas.user import (
     PasswordResetConfirmResponse,
     PasswordResetRequest,
     PasswordResetResponse,
+    RefreshTokenResponse,
+    SessionInfo,
+    SessionListResponse,
     Token,
     UserCreate,
     UserResponse,
@@ -56,7 +60,8 @@ logger = get_auth_logger()
 async def register_user(
     user: UserCreate, db: Session = Depends(get_db)
 ) -> UserResponse:
-    logger.info("User registration attempt", email=user.email, username=user.username)
+    logger.info("User registration attempt",
+                email=user.email, username=user.username)
 
     try:
         # Check if user with email already exists
@@ -71,7 +76,8 @@ async def register_user(
             )
 
         # Check if username already exists
-        db_user = crud_user.get_user_by_username_sync(db, username=user.username)
+        db_user = crud_user.get_user_by_username_sync(
+            db, username=user.username)
         if db_user:
             logger.warning(
                 "Registration failed - username already taken", username=user.username
@@ -104,7 +110,8 @@ async def register_user(
                     "Failed to create verification token", user_id=str(db_user.id)
                 )
         else:
-            logger.warning("Email service not configured - skipping verification email")
+            logger.warning(
+                "Email service not configured - skipping verification email")
 
         return db_user
 
@@ -126,7 +133,10 @@ async def register_user(
 @router.post("/login", response_model=Token)
 @rate_limit_login
 async def login_user(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+    request: Request,
+    response: Response,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
 ) -> Token:
     logger.info("Login attempt", email=form_data.username)
 
@@ -170,12 +180,20 @@ async def login_user(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-            subject=user.email, expires_delta=access_token_expires
+        # Create user session with refresh token
+        from app.services.refresh_token import (
+            create_user_session,
+            set_refresh_token_cookie,
         )
 
-        logger.info("Login successful", user_id=str(user.id), email=form_data.username)
+        access_token, refresh_token_value = create_user_session(
+            db, user, request)
+
+        # Set refresh token as HttpOnly cookie
+        set_refresh_token_cookie(response, refresh_token_value)
+
+        logger.info("Login successful", user_id=str(
+            user.id), email=form_data.username)
         return Token(access_token=access_token, token_type="bearer")
 
     except HTTPException:
@@ -195,19 +213,27 @@ async def login_user(
 
 @router.post("/oauth/login", response_model=Token)
 @rate_limit_oauth
-async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> Token:
+async def oauth_login(
+    request: Request,
+    response: Response,
+    oauth_data: OAuthLogin,
+    db: Session = Depends(get_db),
+) -> Token:
     """Login with OAuth provider (Google or Apple)."""
     logger.info("OAuth login attempt", provider=oauth_data.provider)
 
     if not oauth_service:
         logger.error("OAuth service not available")
-        raise HTTPException(status_code=503, detail="OAuth service not available")
+        raise HTTPException(
+            status_code=503, detail="OAuth service not available")
 
     provider = oauth_data.provider.lower()
 
     if provider not in ["google", "apple"]:
-        logger.warning("OAuth login failed - unsupported provider", provider=provider)
-        raise HTTPException(status_code=400, detail="Unsupported OAuth provider")
+        logger.warning(
+            "OAuth login failed - unsupported provider", provider=provider)
+        raise HTTPException(
+            status_code=400, detail="Unsupported OAuth provider")
 
     if not oauth_service.is_provider_configured(provider):
         logger.warning(
@@ -225,7 +251,8 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
                 logger.warning(
                     "OAuth login failed - invalid Google token", provider=provider
                 )
-                raise HTTPException(status_code=400, detail="Invalid Google token")
+                raise HTTPException(
+                    status_code=400, detail="Invalid Google token")
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
@@ -237,7 +264,8 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
                 logger.warning(
                     "OAuth login failed - invalid Apple token", provider=provider
                 )
-                raise HTTPException(status_code=400, detail="Invalid Apple token")
+                raise HTTPException(
+                    status_code=400, detail="Invalid Apple token")
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
@@ -250,7 +278,8 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
                 has_oauth_id=bool(oauth_id),
                 has_email=bool(email),
             )
-            raise HTTPException(status_code=400, detail="Invalid OAuth user info")
+            raise HTTPException(
+                status_code=400, detail="Invalid OAuth user info")
 
         logger.info(
             "OAuth token verified successfully",
@@ -260,15 +289,21 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
         )
 
         # Check if user already exists
-        existing_user = crud_user.get_user_by_oauth_id_sync(db, provider, oauth_id)
+        existing_user = crud_user.get_user_by_oauth_id_sync(
+            db, provider, oauth_id)
         if existing_user:
-            # User exists, generate token
-            access_token_expires = timedelta(
-                minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+            # Create user session with refresh token
+            from app.services.refresh_token import (
+                create_user_session,
+                set_refresh_token_cookie,
             )
-            access_token = create_access_token(
-                subject=existing_user.email, expires_delta=access_token_expires
-            )
+
+            access_token, refresh_token_value = create_user_session(
+                db, existing_user, request)
+
+            # Set refresh token as HttpOnly cookie
+            set_refresh_token_cookie(response, refresh_token_value)
+
             logger.info(
                 "OAuth login successful - existing user",
                 user_id=str(existing_user.id),
@@ -308,11 +343,18 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
             name=name,
         )
 
-        # Generate token for new user
-        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-            subject=new_user.email, expires_delta=access_token_expires
+        # Create user session with refresh token
+        from app.services.refresh_token import (
+            create_user_session,
+            set_refresh_token_cookie,
         )
+
+        access_token, refresh_token_value = create_user_session(
+            db, new_user, request)
+
+        # Set refresh token as HttpOnly cookie
+        set_refresh_token_cookie(response, refresh_token_value)
+
         logger.info(
             "OAuth login successful - new user",
             user_id=str(new_user.id),
@@ -330,7 +372,8 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(status_code=400, detail=f"OAuth login failed: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"OAuth login failed: {str(e)}")
 
 
 @router.post("/resend-verification", response_model=EmailVerificationResponse)
@@ -549,7 +592,8 @@ async def reset_password(
         # Get user
         user = crud_user.get_user_by_id_sync(db, user_id)
         if not user:
-            logger.warning("User not found for password reset", user_id=user_id)
+            logger.warning("User not found for password reset",
+                           user_id=user_id)
             return PasswordResetConfirmResponse(
                 message="User not found.", password_reset=False
             )
@@ -567,7 +611,8 @@ async def reset_password(
             )
 
         # Reset the password
-        success = crud_user.reset_user_password_sync(db, user_id, request.new_password)
+        success = crud_user.reset_user_password_sync(
+            db, user_id, request.new_password)
         if not success:
             logger.error("Failed to reset user password", user_id=user_id)
             return PasswordResetConfirmResponse(
@@ -575,7 +620,8 @@ async def reset_password(
                 password_reset=False,
             )
 
-        logger.info("Password reset successful", user_id=str(user.id), email=user.email)
+        logger.info("Password reset successful",
+                    user_id=str(user.id), email=user.email)
         return PasswordResetConfirmResponse(
             message="Password reset successfully. You can now log in with your new password.",
             password_reset=True,
@@ -617,7 +663,8 @@ async def change_password(
         # Get the actual user object from database to access hashed_password
         db_user = crud_user.get_user_by_email_sync(db, current_user.email)
         if not db_user:
-            logger.error("User not found in database", user_id=str(current_user.id))
+            logger.error("User not found in database",
+                         user_id=str(current_user.id))
             raise HTTPException(
                 status_code=500, detail="User not found. Please try again later."
             )
@@ -628,14 +675,16 @@ async def change_password(
                 "Password change failed - incorrect current password",
                 user_id=str(current_user.id),
             )
-            raise HTTPException(status_code=400, detail="Incorrect current password")
+            raise HTTPException(
+                status_code=400, detail="Incorrect current password")
 
         # Change the password
         success = crud_user.update_user_password_sync(
             db, str(current_user.id), request.new_password
         )
         if not success:
-            logger.error("Failed to change user password", user_id=str(current_user.id))
+            logger.error("Failed to change user password",
+                         user_id=str(current_user.id))
             raise HTTPException(
                 status_code=500,
                 detail="Failed to change password. Please try again later.",
@@ -814,7 +863,8 @@ async def confirm_account_deletion(
         # Get user
         user = crud_user.get_user_by_id_sync(db, user_id)
         if not user:
-            logger.warning("User not found for account deletion", user_id=user_id)
+            logger.warning(
+                "User not found for account deletion", user_id=user_id)
             return AccountDeletionConfirmResponse(
                 message="User not found.",
                 deletion_confirmed=False,
@@ -1014,4 +1064,278 @@ async def get_account_deletion_status(
             deletion_scheduled_for=None,
             can_cancel=False,
             grace_period_days=settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS,
+        )
+
+
+@router.post("/refresh", response_model=RefreshTokenResponse)
+async def refresh_token(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> RefreshTokenResponse:
+    """Refresh an access token using a valid refresh token from cookies."""
+    logger.info("Token refresh attempt")
+
+    try:
+        # Get refresh token from cookie
+        from app.services.refresh_token import (
+            get_refresh_token_from_cookie,
+            refresh_access_token,
+        )
+
+        refresh_token_value = get_refresh_token_from_cookie(request)
+        if not refresh_token_value:
+            logger.warning("Token refresh failed - no refresh token in cookie")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="No refresh token provided",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Refresh the access token
+        result = refresh_access_token(db, refresh_token_value)
+        if not result:
+            logger.warning("Token refresh failed - invalid refresh token")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        access_token, expires_at = result
+        expires_in = int((expires_at - datetime.utcnow()).total_seconds())
+
+        logger.info("Token refresh successful")
+        return RefreshTokenResponse(
+            access_token=access_token,
+            token_type="bearer",
+            expires_in=expires_in,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            "Token refresh failed with unexpected error",
+            error=str(e),
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Token refresh failed. Please try again later.",
+        )
+
+
+@router.post("/logout")
+async def logout(
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Logout user by revoking the current refresh token."""
+    logger.info("Logout attempt")
+
+    try:
+        from app.services.refresh_token import (
+            clear_refresh_token_cookie,
+            get_refresh_token_from_cookie,
+            revoke_session,
+        )
+
+        # Get refresh token from cookie
+        refresh_token_value = get_refresh_token_from_cookie(request)
+        if refresh_token_value:
+            # Revoke the session
+            revoke_session(db, refresh_token_value)
+            logger.info("Session revoked during logout")
+
+        # Clear the cookie
+        clear_refresh_token_cookie(response)
+
+        logger.info("Logout successful")
+        return {"message": "Successfully logged out"}
+
+    except Exception as e:
+        logger.error(
+            "Logout failed with unexpected error",
+            error=str(e),
+            exc_info=True,
+        )
+        # Still clear the cookie even if revocation fails
+        from app.services.refresh_token import clear_refresh_token_cookie
+        clear_refresh_token_cookie(response)
+        return {"message": "Successfully logged out"}
+
+
+@router.get("/sessions", response_model=SessionListResponse)
+async def get_user_sessions(
+    request: Request,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> SessionListResponse:
+    """Get all active sessions for the current user."""
+    logger.info("Get user sessions request", user_id=str(current_user.id))
+
+    try:
+        from app.crud import get_user_sessions as crud_get_user_sessions
+        from app.services.refresh_token import get_refresh_token_from_cookie
+
+        # Get current session ID
+        current_refresh_token = get_refresh_token_from_cookie(request)
+        current_session_id = None
+
+        if current_refresh_token:
+            from app.crud import verify_refresh_token_in_db
+            db_token = verify_refresh_token_in_db(db, current_refresh_token)
+            if db_token:
+                current_session_id = db_token.id
+
+                # Get all user sessions
+        sessions = crud_get_user_sessions(
+            db, current_user.id, current_session_id)  # type: ignore
+
+        # Convert to response format
+        session_info_list = []
+        for session in sessions:
+            session_info = SessionInfo(
+                id=session.id,  # type: ignore
+                created_at=session.created_at,  # type: ignore
+                device_info=session.device_info,  # type: ignore
+                ip_address=session.ip_address,  # type: ignore
+                is_current=getattr(session, 'is_current', False),
+            )
+            session_info_list.append(session_info)
+
+        logger.info(
+            "User sessions retrieved successfully",
+            user_id=str(current_user.id),
+            session_count=len(session_info_list),
+        )
+
+        return SessionListResponse(
+            sessions=session_info_list,
+            total_sessions=len(session_info_list),
+        )
+
+    except Exception as e:
+        logger.error(
+            "Failed to get user sessions",
+            user_id=str(current_user.id),
+            error=str(e),
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve sessions. Please try again later.",
+        )
+
+
+@router.delete("/sessions/{session_id}")
+async def revoke_session(
+    session_id: str,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Revoke a specific session for the current user."""
+    logger.info(
+        "Revoke session request",
+        user_id=str(current_user.id),
+        session_id=session_id,
+    )
+
+    try:
+        from app.crud import revoke_refresh_token
+
+        # Validate session ID format
+        try:
+            session_uuid = uuid.UUID(session_id)
+        except ValueError:
+            logger.warning("Invalid session ID format", session_id=session_id)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid session ID format",
+            )
+
+        # Revoke the session
+        success = revoke_refresh_token(db, session_uuid)
+        if not success:
+            logger.warning(
+                "Session not found or already revoked",
+                user_id=str(current_user.id),
+                session_id=session_id,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Session not found or already revoked",
+            )
+
+        logger.info(
+            "Session revoked successfully",
+            user_id=str(current_user.id),
+            session_id=session_id,
+        )
+
+        return {"message": "Session revoked successfully"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            "Failed to revoke session",
+            user_id=str(current_user.id),
+            session_id=session_id,
+            error=str(e),
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to revoke session. Please try again later.",
+        )
+
+
+@router.delete("/sessions")
+async def revoke_all_sessions(
+    request: Request,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Revoke all sessions for the current user except the current one."""
+    logger.info("Revoke all sessions request", user_id=str(current_user.id))
+
+    try:
+        from app.services.refresh_token import (
+            get_refresh_token_from_cookie,
+        )
+        from app.services.refresh_token import (
+            revoke_all_sessions as service_revoke_all_sessions,
+        )
+
+        # Get current refresh token
+        current_refresh_token = get_refresh_token_from_cookie(request)
+
+        # Revoke all sessions except current
+        revoked_count = service_revoke_all_sessions(
+            db, current_user.id, current_refresh_token
+        )
+
+        logger.info(
+            "All sessions revoked successfully",
+            user_id=str(current_user.id),
+            revoked_count=revoked_count,
+        )
+
+        return {
+            "message": f"Successfully revoked {revoked_count} sessions",
+            "revoked_count": revoked_count,
+        }
+
+    except Exception as e:
+        logger.error(
+            "Failed to revoke all sessions",
+            user_id=str(current_user.id),
+            error=str(e),
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to revoke sessions. Please try again later.",
         )

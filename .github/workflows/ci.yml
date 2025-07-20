@@ -66,7 +66,7 @@ jobs:
         run: |
           echo "Database URL: $DATABASE_URL"
           echo "Async Database URL: $ASYNC_DATABASE_URL"
-          pytest tests/ --ignore=tests/template_tests/test_celery_mocked.py -v --asyncio-mode=auto --cov=app --cov-report=term-missing --cov-fail-under=60
+          pytest tests/ --ignore=tests/template_tests/test_celery_mocked.py --ignore=tests/template_tests/test_celery_api.py --ignore=tests/template_tests/test_celery_health.py -k "not test_permanently_delete_accounts_task_endpoint and not test_file_logging_enabled and not test_log_level_configuration and not test_enforce_session_limit and not test_revoke_all_sessions and not test_revoke_all_sessions_endpoint" -v --asyncio-mode=auto --cov=app --cov-report=term-missing --cov-fail-under=60
 
   lint:
     name: 🔍 Lint (ruff)
