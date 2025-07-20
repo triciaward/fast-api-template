@@ -10,8 +10,7 @@ from app.database.database import Base
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True,
-                default=uuid.uuid4, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=True)  # Nullable for OAuth users
@@ -48,8 +47,7 @@ class User(Base):
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
 
-    id = Column(UUID(as_uuid=True), primary_key=True,
-                default=uuid.uuid4, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     user_id = Column(UUID(as_uuid=True), nullable=False, index=True)
     token_hash = Column(String(255), nullable=False, index=True)
     expires_at = Column(DateTime, nullable=False, index=True)
@@ -65,12 +63,11 @@ class RefreshToken(Base):
 class AuditLog(Base):
     __tablename__ = "audit_logs"
 
-    id = Column(UUID(as_uuid=True), primary_key=True,
-                default=uuid.uuid4, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow,
-                       nullable=False, index=True)
-    user_id = Column(UUID(as_uuid=True), nullable=True,
-                     index=True)  # Nullable for anonymous events
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    user_id = Column(
+        UUID(as_uuid=True), nullable=True, index=True
+    )  # Nullable for anonymous events
     # e.g., 'login_success', 'password_change'
     event_type = Column(String(100), nullable=False, index=True)
     ip_address = Column(String(45), nullable=True)

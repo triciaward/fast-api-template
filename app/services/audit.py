@@ -64,10 +64,7 @@ async def log_event(
         log_context.update(context)
     if session_id:
         log_context["session_id"] = session_id
-    auth_logger.info(
-        "Audit log event",
-        **log_context
-    )
+    auth_logger.info("Audit log event", **log_context)
 
 
 def log_event_sync(
@@ -103,10 +100,7 @@ def log_event_sync(
         log_context.update(context)
     if session_id:
         log_context["session_id"] = session_id
-    auth_logger.info(
-        "Audit log event",
-        **log_context
-    )
+    auth_logger.info("Audit log event", **log_context)
 
 
 # Convenience functions for common audit events

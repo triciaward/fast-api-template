@@ -156,8 +156,7 @@ async def get_failed_login_attempts(
 ) -> list[AuditLog]:
     """Get failed login attempts, optionally filtered by user, IP, or time."""
     query = select(AuditLog).filter(
-        AuditLog.event_type == "login_failed",
-        ~AuditLog.success
+        AuditLog.event_type == "login_failed", ~AuditLog.success
     )
     if user_id:
         query = query.filter(AuditLog.user_id == user_id)
@@ -247,8 +246,7 @@ def get_failed_login_attempts_sync(
 ) -> list[AuditLog]:
     """Get failed login attempts (sync version)."""
     query = select(AuditLog).filter(
-        AuditLog.event_type == "login_failed",
-        ~AuditLog.success
+        AuditLog.event_type == "login_failed", ~AuditLog.success
     )
     if user_id:
         query = query.filter(AuditLog.user_id == user_id)

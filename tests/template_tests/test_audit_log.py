@@ -54,16 +54,18 @@ def test_log_event_sync(sync_db_session: Session, client: TestClient):
     from fastapi import Request
 
     # Create a mock request
-    request = Request(scope={
-        "type": "http",
-        "method": "POST",
-        "path": "/test",
-        "headers": [
-            (b"user-agent", b"test-agent"),
-            (b"x-forwarded-for", b"192.168.1.1"),
-        ],
-        "client": ("127.0.0.1", 12345),
-    })
+    request = Request(
+        scope={
+            "type": "http",
+            "method": "POST",
+            "path": "/test",
+            "headers": [
+                (b"user-agent", b"test-agent"),
+                (b"x-forwarded-for", b"192.168.1.1"),
+            ],
+            "client": ("127.0.0.1", 12345),
+        }
+    )
 
     # Test logging an event
     log_event_sync(
@@ -77,8 +79,7 @@ def test_log_event_sync(sync_db_session: Session, client: TestClient):
     )
 
     # Verify the log was created
-    logs = get_audit_logs_by_user_sync(
-        sync_db_session, "")  # Get anonymous logs
+    logs = get_audit_logs_by_user_sync(sync_db_session, "")  # Get anonymous logs
     assert len(logs) == 1
     assert logs[0].event_type == "test_event"
     assert logs[0].ip_address == "192.168.1.1"  # Should use X-Forwarded-For
@@ -93,13 +94,15 @@ def test_log_login_attempt_sync(sync_db_session: Session, client: TestClient):
     from fastapi import Request
 
     # Create a mock request
-    request = Request(scope={
-        "type": "http",
-        "method": "POST",
-        "path": "/login",
-        "headers": [(b"user-agent", b"test-agent")],
-        "client": ("127.0.0.1", 12345),
-    })
+    request = Request(
+        scope={
+            "type": "http",
+            "method": "POST",
+            "path": "/login",
+            "headers": [(b"user-agent", b"test-agent")],
+            "client": ("127.0.0.1", 12345),
+        }
+    )
 
     # Test successful login
     log_login_attempt_sync(
@@ -119,21 +122,19 @@ def test_log_login_attempt_sync(sync_db_session: Session, client: TestClient):
     )
 
     # Verify the logs were created - filter by event type to avoid other test logs
-    all_logs = get_audit_logs_by_user_sync(
-        sync_db_session, "")  # Get anonymous logs
-    login_logs = [log for log in all_logs if log.event_type in [
-        "login_success", "login_failed"]]
+    all_logs = get_audit_logs_by_user_sync(sync_db_session, "")  # Get anonymous logs
+    login_logs = [
+        log for log in all_logs if log.event_type in ["login_success", "login_failed"]
+    ]
     assert len(login_logs) == 2
 
     # Check successful login
-    success_log = next(
-        log for log in login_logs if log.event_type == "login_success")
+    success_log = next(log for log in login_logs if log.event_type == "login_success")
     assert success_log.success is True
     assert success_log.context == {"oauth_provider": "google"}
 
     # Check failed login
-    failed_log = next(
-        log for log in login_logs if log.event_type == "login_failed")
+    failed_log = next(log for log in login_logs if log.event_type == "login_failed")
     assert failed_log.success is False
     assert failed_log.context == {}
 
