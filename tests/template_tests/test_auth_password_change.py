@@ -19,14 +19,12 @@ class TestPasswordChange:
         }
 
         # Register the user
-        register_response = client.post(
-            "/api/v1/auth/register", json=user_data)
+        register_response = client.post("/api/v1/auth/register", json=user_data)
         assert register_response.status_code == 201
 
         # Verify the user manually (simulate email verification)
         with TestingSyncSessionLocal() as db:
-            user = crud_user.get_user_by_email_sync(
-                db, str(user_data["email"]))
+            user = crud_user.get_user_by_email_sync(db, str(user_data["email"]))
             assert user is not None
             crud_user.verify_user_sync(db, str(user.id))
 
@@ -86,14 +84,12 @@ class TestPasswordChange:
         }
 
         # Register the user
-        register_response = client.post(
-            "/api/v1/auth/register", json=user_data)
+        register_response = client.post("/api/v1/auth/register", json=user_data)
         assert register_response.status_code == 201
 
         # Verify the user manually (simulate email verification)
         with TestingSyncSessionLocal() as db:
-            user = crud_user.get_user_by_email_sync(
-                db, str(user_data["email"]))
+            user = crud_user.get_user_by_email_sync(db, str(user_data["email"]))
             assert user is not None
             crud_user.verify_user_sync(db, str(user.id))
 
@@ -143,14 +139,12 @@ class TestPasswordChange:
         }
 
         # Register the user
-        register_response = client.post(
-            "/api/v1/auth/register", json=user_data)
+        register_response = client.post("/api/v1/auth/register", json=user_data)
         assert register_response.status_code == 201
 
         # Verify the user manually (simulate email verification)
         with TestingSyncSessionLocal() as db:
-            user = crud_user.get_user_by_email_sync(
-                db, str(user_data["email"]))
+            user = crud_user.get_user_by_email_sync(db, str(user_data["email"]))
             assert user is not None
             crud_user.verify_user_sync(db, str(user.id))
 
@@ -178,8 +172,10 @@ class TestPasswordChange:
 
         assert response.status_code == 422  # Validation error
         error_detail = response.json()["detail"]
-        assert any("Password must be at least 8 characters long" in str(error)
-                   for error in error_detail)
+        assert any(
+            "Password must be at least 8 characters long" in str(error)
+            for error in error_detail
+        )
 
     def test_change_password_oauth_user(self, client: TestClient) -> None:
         """Test password change attempt by OAuth user."""
@@ -208,8 +204,7 @@ class TestPasswordChange:
         )
 
         assert response.status_code == 400
-        assert response.json() == {
-            "detail": "OAuth users cannot change password"}
+        assert response.json() == {"detail": "OAuth users cannot change password"}
 
     def test_change_password_oauth_user_regular_user(self, client: TestClient) -> None:
         """Test password change for regular user (should work)."""
@@ -222,14 +217,12 @@ class TestPasswordChange:
         }
 
         # Register the user
-        register_response = client.post(
-            "/api/v1/auth/register", json=user_data)
+        register_response = client.post("/api/v1/auth/register", json=user_data)
         assert register_response.status_code == 201
 
         # Verify the user manually (simulate email verification)
         with TestingSyncSessionLocal() as db:
-            user = crud_user.get_user_by_email_sync(
-                db, str(user_data["email"]))
+            user = crud_user.get_user_by_email_sync(db, str(user_data["email"]))
             assert user is not None
             crud_user.verify_user_sync(db, str(user.id))
 
@@ -296,14 +289,12 @@ class TestPasswordChange:
         }
 
         # Register the user
-        register_response = client.post(
-            "/api/v1/auth/register", json=user_data)
+        register_response = client.post("/api/v1/auth/register", json=user_data)
         assert register_response.status_code == 201
 
         # Verify the user manually (simulate email verification)
         with TestingSyncSessionLocal() as db:
-            user = crud_user.get_user_by_email_sync(
-                db, str(user_data["email"]))
+            user = crud_user.get_user_by_email_sync(db, str(user_data["email"]))
             assert user is not None
             crud_user.verify_user_sync(db, str(user.id))
 
