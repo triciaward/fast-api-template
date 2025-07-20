@@ -12,9 +12,10 @@ repos:
       - id: black
         types: [python]
 
-  # Temporarily disabled due to Alembic migration file type issues
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: v1.9.0
-  #   hooks:
-  #     - id: mypy
-  #       types: [python] 
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.9.0
+    hooks:
+      - id: mypy
+        types: [python]
+        exclude: ^alembic/versions/
+        additional_dependencies: [types-requests, types-redis, types-PyYAML] 
