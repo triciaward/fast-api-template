@@ -37,7 +37,6 @@ class TestCeleryAPI:
 
         # Create test client with the new app
         with TestClient(app) as client:
-
             # Check if the route exists
             response = client.get("/api/v1/celery/status")
             # Should not be 404 - either 200 (if Celery is enabled) or 503 (if disabled)
@@ -62,8 +61,7 @@ class TestCeleryAPI:
                 "kwargs": {"priority": "high"},
             }
 
-            response = client.post(
-                "/api/v1/celery/tasks/submit", json=task_data)
+            response = client.post("/api/v1/celery/tasks/submit", json=task_data)
 
             assert response.status_code == 200
             data = response.json()
@@ -94,8 +92,7 @@ class TestCeleryAPI:
                 "kwargs": {},
             }
 
-            response = client.post(
-                "/api/v1/celery/tasks/submit", json=task_data)
+            response = client.post("/api/v1/celery/tasks/submit", json=task_data)
 
             assert response.status_code == 500
             assert "Failed to submit task" in response.json()["detail"]
@@ -108,8 +105,7 @@ class TestCeleryAPI:
         with patch("app.api.api_v1.endpoints.celery.get_task_status") as mock_status:
             mock_status.return_value = None
 
-            response = client.get(
-                "/api/v1/celery/tasks/non-existent-id/status")
+            response = client.get("/api/v1/celery/tasks/non-existent-id/status")
 
             assert response.status_code == 404
             assert "Task not found" in response.json()["detail"]
@@ -163,8 +159,7 @@ class TestCeleryAPI:
 
             data = [{"id": 1, "name": "item1"}, {"id": 2, "name": "item2"}]
 
-            response = client.post(
-                "/api/v1/celery/tasks/process-data", json=data)
+            response = client.post("/api/v1/celery/tasks/process-data", json=data)
 
             assert response.status_code == 200
             data_response = response.json()

@@ -45,10 +45,14 @@ def verify_refresh_token_in_db(db: Session, token: str) -> Optional[RefreshToken
     """Verify a refresh token against the database."""
     # Get all active tokens and verify each one
     # This is necessary because bcrypt generates different hashes for the same input
-    active_tokens = db.query(RefreshToken).filter(
-        RefreshToken.is_revoked == False,  # noqa: E712
-        RefreshToken.expires_at > datetime.utcnow(),
-    ).all()
+    active_tokens = (
+        db.query(RefreshToken)
+        .filter(
+            RefreshToken.is_revoked == False,  # noqa: E712
+            RefreshToken.expires_at > datetime.utcnow(),
+        )
+        .all()
+    )
 
     for db_token in active_tokens:
         if verify_refresh_token(token, str(db_token.token_hash)):
@@ -59,8 +63,7 @@ def verify_refresh_token_in_db(db: Session, token: str) -> Optional[RefreshToken
 
 def revoke_refresh_token(db: Session, token_id: uuid.UUID) -> bool:
     """Revoke a specific refresh token."""
-    db_token = db.query(RefreshToken).filter(
-        RefreshToken.id == token_id).first()
+    db_token = db.query(RefreshToken).filter(RefreshToken.id == token_id).first()
     if db_token:
         db_token.is_revoked = True  # type: ignore
         db.commit()
@@ -75,7 +78,9 @@ def revoke_refresh_token_by_hash(db: Session, token_hash: str) -> bool:
     return False
 
 
-def revoke_all_user_sessions(db: Session, user_id: uuid.UUID, except_token_id: Optional[uuid.UUID] = None) -> int:
+def revoke_all_user_sessions(
+    db: Session, user_id: uuid.UUID, except_token_id: Optional[uuid.UUID] = None
+) -> int:
     """Revoke all refresh tokens for a user, optionally excepting one."""
     query = db.query(RefreshToken).filter(
         RefreshToken.user_id == user_id,
@@ -90,13 +95,19 @@ def revoke_all_user_sessions(db: Session, user_id: uuid.UUID, except_token_id: O
     return revoked_count
 
 
-def get_user_sessions(db: Session, user_id: uuid.UUID, current_token_id: Optional[uuid.UUID] = None) -> list[RefreshToken]:
+def get_user_sessions(
+    db: Session, user_id: uuid.UUID, current_token_id: Optional[uuid.UUID] = None
+) -> list[RefreshToken]:
     """Get all active sessions for a user."""
-    query = db.query(RefreshToken).filter(
-        RefreshToken.user_id == user_id,
-        RefreshToken.is_revoked == False,  # noqa: E712
-        RefreshToken.expires_at > datetime.utcnow(),
-    ).order_by(RefreshToken.created_at.desc())
+    query = (
+        db.query(RefreshToken)
+        .filter(
+            RefreshToken.user_id == user_id,
+            RefreshToken.is_revoked == False,  # noqa: E712
+            RefreshToken.expires_at > datetime.utcnow(),
+        )
+        .order_by(RefreshToken.created_at.desc())
+    )
 
     sessions = query.all()
 
@@ -112,28 +123,38 @@ def get_user_sessions(db: Session, user_id: uuid.UUID, current_token_id: Optiona
 
 def get_user_session_count(db: Session, user_id: uuid.UUID) -> int:
     """Get the count of active sessions for a user."""
-    return db.query(RefreshToken).filter(
-        RefreshToken.user_id == user_id,
-        RefreshToken.is_revoked == False,  # noqa: E712
-        RefreshToken.expires_at > datetime.utcnow(),
-    ).count()
+    return (
+        db.query(RefreshToken)
+        .filter(
+            RefreshToken.user_id == user_id,
+            RefreshToken.is_revoked == False,  # noqa: E712
+            RefreshToken.expires_at > datetime.utcnow(),
+        )
+        .count()
+    )
 
 
 def cleanup_expired_tokens(db: Session) -> int:
     """Remove expired refresh tokens from the database."""
-    deleted_count = db.query(RefreshToken).filter(
-        RefreshToken.expires_at <= datetime.utcnow(),
-    ).delete()
+    deleted_count = (
+        db.query(RefreshToken)
+        .filter(
+            RefreshToken.expires_at <= datetime.utcnow(),
+        )
+        .delete()
+    )
     db.commit()
     return deleted_count
 
 
-def enforce_session_limit(db: Session, user_id: uuid.UUID, new_token_id: uuid.UUID) -> None:
+def enforce_session_limit(
+    db: Session, user_id: uuid.UUID, new_token_id: uuid.UUID
+) -> None:
     """Enforce the maximum sessions per user limit by revoking oldest sessions."""
     active_sessions = get_user_sessions(db, user_id, new_token_id)
 
     if len(active_sessions) > settings.MAX_SESSIONS_PER_USER:
         # Sort by creation date (oldest first) and revoke excess sessions
-        sessions_to_revoke = active_sessions[settings.MAX_SESSIONS_PER_USER:]
+        sessions_to_revoke = active_sessions[settings.MAX_SESSIONS_PER_USER :]
         for session in sessions_to_revoke:
             revoke_refresh_token(db, session.id)  # type: ignore

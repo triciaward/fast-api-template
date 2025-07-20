@@ -68,8 +68,10 @@ def set_refresh_token_cookie(response: Response, token: str) -> None:
     response.set_cookie(
         key=settings.REFRESH_TOKEN_COOKIE_NAME,
         value=token,
-        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS *
-        24 * 60 * 60,  # Convert days to seconds
+        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS
+        * 24
+        * 60
+        * 60,  # Convert days to seconds
         httponly=settings.REFRESH_TOKEN_COOKIE_HTTPONLY,
         secure=settings.REFRESH_TOKEN_COOKIE_SECURE,
         samesite=settings.REFRESH_TOKEN_COOKIE_SAMESITE,  # type: ignore
@@ -116,8 +118,7 @@ def create_user_session(
     enforce_session_limit(db, user.id, db_refresh_token.id)  # type: ignore
 
     # Create access token
-    access_token_expires = timedelta(
-        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         subject=user.email,
         expires_delta=access_token_expires,
@@ -142,8 +143,7 @@ def refresh_access_token(
         return None
 
     # Create new access token
-    access_token_expires = timedelta(
-        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         subject=user.email,
         expires_delta=access_token_expires,
@@ -167,6 +167,7 @@ def revoke_session(
 
     # Revoke the token
     from app.crud import revoke_refresh_token
+
     return revoke_refresh_token(db, uuid.UUID(str(db_refresh_token.id)))
 
 
@@ -183,6 +184,7 @@ def revoke_all_sessions(
     if except_token_value:
         token_hash = hash_refresh_token(except_token_value)
         from app.crud import get_refresh_token_by_hash
+
         db_token = get_refresh_token_by_hash(db, token_hash)
         if db_token:
             except_token_id = uuid.UUID(str(db_token.id))

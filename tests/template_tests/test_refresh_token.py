@@ -83,8 +83,7 @@ class TestRefreshTokenCRUD:
 
         token = create_refresh_token()
         db_refresh_token = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(
-                str(user.id)), token, "Test Device", "127.0.0.1"
+            sync_db_session, uuid.UUID(str(user.id)), token, "Test Device", "127.0.0.1"
         )
 
         assert db_refresh_token.user_id == user.id
@@ -108,7 +107,8 @@ class TestRefreshTokenCRUD:
 
         token = create_refresh_token()
         db_refresh_token = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token)
+            sync_db_session, uuid.UUID(str(user.id)), token
+        )
 
         # Test valid token - use verify_refresh_token_in_db instead
         retrieved = verify_refresh_token_in_db(sync_db_session, token)
@@ -131,8 +131,7 @@ class TestRefreshTokenCRUD:
         sync_db_session.commit()
 
         token = create_refresh_token()
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token)
+        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token)
 
         # Test valid token
         result = verify_refresh_token_in_db(sync_db_session, token)
@@ -156,11 +155,13 @@ class TestRefreshTokenCRUD:
 
         token = create_refresh_token()
         db_refresh_token = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token)
+            sync_db_session, uuid.UUID(str(user.id)), token
+        )
 
         # Revoke token
         success = revoke_refresh_token(
-            sync_db_session, uuid.UUID(str(db_refresh_token.id)))
+            sync_db_session, uuid.UUID(str(db_refresh_token.id))
+        )
         assert success is True
 
         # Verify token is revoked
@@ -183,8 +184,7 @@ class TestRefreshTokenCRUD:
         sync_db_session.commit()
 
         token = create_refresh_token()
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token)
+        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token)
 
         # Revoke token - use revoke_session instead
         success = revoke_session(sync_db_session, token)
@@ -209,20 +209,23 @@ class TestRefreshTokenCRUD:
         token1 = create_refresh_token()
         token2 = create_refresh_token()
         db_token1 = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token1, "Device 1")
+            sync_db_session, uuid.UUID(str(user.id)), token1, "Device 1"
+        )
         crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token2, "Device 2")
+            sync_db_session, uuid.UUID(str(user.id)), token2, "Device 2"
+        )
 
         sessions = get_user_sessions(sync_db_session, uuid.UUID(str(user.id)))
         assert len(sessions) == 2
 
         # Test with current session ID
-        sessions = get_user_sessions(sync_db_session, uuid.UUID(
-            str(user.id)), uuid.UUID(str(db_token1.id)))
+        sessions = get_user_sessions(
+            sync_db_session, uuid.UUID(str(user.id)), uuid.UUID(str(db_token1.id))
+        )
         assert len(sessions) == 2
         # Check that current session is marked
         current_session = next(s for s in sessions if s.id == db_token1.id)
-        assert getattr(current_session, 'is_current', False) is True
+        assert getattr(current_session, "is_current", False) is True
 
     def test_get_user_session_count(self, sync_db_session: Session):
         """Test getting user session count."""
@@ -237,12 +240,13 @@ class TestRefreshTokenCRUD:
 
         # Create sessions
         crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), create_refresh_token())
+            sync_db_session, uuid.UUID(str(user.id)), create_refresh_token()
+        )
         crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), create_refresh_token())
+            sync_db_session, uuid.UUID(str(user.id)), create_refresh_token()
+        )
 
-        count = get_user_session_count(
-            sync_db_session, uuid.UUID(str(user.id)))
+        count = get_user_session_count(sync_db_session, uuid.UUID(str(user.id)))
         assert count == 2
 
     def test_cleanup_expired_tokens(self, sync_db_session: Session):
@@ -272,8 +276,11 @@ class TestRefreshTokenCRUD:
         assert deleted_count == 1
 
         # Verify token is deleted
-        result = sync_db_session.query(RefreshToken).filter_by(
-            id=db_refresh_token.id).first()
+        result = (
+            sync_db_session.query(RefreshToken)
+            .filter_by(id=db_refresh_token.id)
+            .first()
+        )
         assert result is None
 
     def test_enforce_session_limit(self, sync_db_session: Session):
@@ -298,15 +305,19 @@ class TestRefreshTokenCRUD:
             token3 = create_refresh_token()
 
             db_token1 = crud_create_refresh_token(
-                sync_db_session, uuid.UUID(str(user.id)), token1)
+                sync_db_session, uuid.UUID(str(user.id)), token1
+            )
             db_token2 = crud_create_refresh_token(
-                sync_db_session, uuid.UUID(str(user.id)), token2)
+                sync_db_session, uuid.UUID(str(user.id)), token2
+            )
             db_token3 = crud_create_refresh_token(
-                sync_db_session, uuid.UUID(str(user.id)), token3)
+                sync_db_session, uuid.UUID(str(user.id)), token3
+            )
 
             # Enforce limit with the newest token
-            enforce_session_limit(sync_db_session, uuid.UUID(
-                str(user.id)), uuid.UUID(str(db_token3.id)))
+            enforce_session_limit(
+                sync_db_session, uuid.UUID(str(user.id)), uuid.UUID(str(db_token3.id))
+            )
 
             # Check that oldest session is revoked
             sync_db_session.refresh(db_token1)
@@ -336,13 +347,16 @@ class TestRefreshTokenCRUD:
         token1 = create_refresh_token()
         token2 = create_refresh_token()
         db_token1 = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token1)
+            sync_db_session, uuid.UUID(str(user.id)), token1
+        )
         db_token2 = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token2)
+            sync_db_session, uuid.UUID(str(user.id)), token2
+        )
 
         # Revoke all sessions except one
         revoked_count = revoke_all_user_sessions(
-            sync_db_session, uuid.UUID(str(user.id)), uuid.UUID(str(db_token1.id)))
+            sync_db_session, uuid.UUID(str(user.id)), uuid.UUID(str(db_token1.id))
+        )
         assert revoked_count == 1
 
         # Check that one session is revoked
@@ -362,13 +376,15 @@ class TestRefreshTokenService:
         # Test Chrome on Windows
         request = Mock()
         request.headers = {
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
         device_info = get_device_info(request)
         assert device_info == "Chrome on Windows"
 
         # Test Firefox on macOS
         request.headers = {
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0"}
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0"
+        }
         device_info = get_device_info(request)
         assert device_info == "Firefox on macOS"
 
@@ -441,12 +457,14 @@ class TestRefreshTokenService:
 
         request = Mock()
         request.headers = {
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124"}
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124"
+        }
         request.client = Mock()
         request.client.host = "127.0.0.1"
 
         access_token, refresh_token = create_user_session(
-            sync_db_session, user, request)
+            sync_db_session, user, request
+        )
 
         assert access_token is not None
         assert refresh_token is not None
@@ -470,8 +488,7 @@ class TestRefreshTokenService:
 
         # Create a session
         token = create_refresh_token()
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token)
+        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token)
 
         # Refresh access token
         result = refresh_access_token(sync_db_session, token)
@@ -498,8 +515,7 @@ class TestRefreshTokenService:
 
         # Create a session
         token = create_refresh_token()
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token)
+        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token)
 
         # Revoke session
         success = revoke_session(sync_db_session, token)
@@ -523,14 +539,13 @@ class TestRefreshTokenService:
         # Create multiple sessions
         token1 = create_refresh_token()
         token2 = create_refresh_token()
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token1)
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token2)
+        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token1)
+        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token2)
 
         # Revoke all sessions except one
         revoked_count = revoke_all_sessions(
-            sync_db_session, uuid.UUID(str(user.id)), token1)
+            sync_db_session, uuid.UUID(str(user.id)), token1
+        )
         assert revoked_count == 1
 
         # Verify one token is still valid (current session)
@@ -559,13 +574,11 @@ class TestRefreshTokenAPI:
 
         # Create session and get refresh token
         token = create_refresh_token()
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token)
+        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token)
 
         # Make request with refresh token cookie
         response = client.post(
-            "/api/v1/auth/refresh",
-            cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token}
+            "/api/v1/auth/refresh", cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token}
         )
 
         assert response.status_code == 200
@@ -587,7 +600,7 @@ class TestRefreshTokenAPI:
         """Test token refresh with invalid token."""
         response = client.post(
             "/api/v1/auth/refresh",
-            cookies={settings.REFRESH_TOKEN_COOKIE_NAME: "invalid_token"}
+            cookies={settings.REFRESH_TOKEN_COOKIE_NAME: "invalid_token"},
         )
 
         assert response.status_code == 401
@@ -608,13 +621,11 @@ class TestRefreshTokenAPI:
 
         # Create session and get refresh token
         token = create_refresh_token()
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token)
+        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token)
 
         # Make logout request
         response = client.post(
-            "/api/v1/auth/logout",
-            cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token}
+            "/api/v1/auth/logout", cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token}
         )
 
         assert response.status_code == 200
@@ -648,19 +659,21 @@ class TestRefreshTokenAPI:
         # Create session and get access token
         token = create_refresh_token()
         db_refresh_token = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token)
+            sync_db_session, uuid.UUID(str(user.id)), token
+        )
 
-        access_token_expires = timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         from app.core.security import create_access_token
+
         access_token = create_access_token(
-            subject=user.email, expires_delta=access_token_expires)
+            subject=user.email, expires_delta=access_token_expires
+        )
 
         # Make request with access token
         response = client.get(
             "/api/v1/auth/sessions",
             headers={"Authorization": f"Bearer {access_token}"},
-            cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token}
+            cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token},
         )
 
         assert response.status_code == 200
@@ -689,18 +702,20 @@ class TestRefreshTokenAPI:
         # Create session and get access token
         token = create_refresh_token()
         db_refresh_token = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token)
+            sync_db_session, uuid.UUID(str(user.id)), token
+        )
 
-        access_token_expires = timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         from app.core.security import create_access_token
+
         access_token = create_access_token(
-            subject=user.email, expires_delta=access_token_expires)
+            subject=user.email, expires_delta=access_token_expires
+        )
 
         # Make request to revoke session
         response = client.delete(
             f"/api/v1/auth/sessions/{db_refresh_token.id}",
-            headers={"Authorization": f"Bearer {access_token}"}
+            headers={"Authorization": f"Bearer {access_token}"},
         )
 
         assert response.status_code == 200
@@ -726,23 +741,22 @@ class TestRefreshTokenAPI:
         # Create multiple sessions
         token1 = create_refresh_token()
         token2 = create_refresh_token()
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token1)
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token2)
+        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token1)
+        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token2)
 
         # Get access token
-        access_token_expires = timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         from app.core.security import create_access_token
+
         access_token = create_access_token(
-            subject=user.email, expires_delta=access_token_expires)
+            subject=user.email, expires_delta=access_token_expires
+        )
 
         # Make request to revoke all sessions except current
         response = client.delete(
             "/api/v1/auth/sessions",
             headers={"Authorization": f"Bearer {access_token}"},
-            cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token1}
+            cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token1},
         )
 
         assert response.status_code == 200
