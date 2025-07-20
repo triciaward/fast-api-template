@@ -6,7 +6,7 @@ All endpoints require superuser privileges.
 """
 
 import logging
-from typing import Optional
+from typing import Any, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -26,7 +26,7 @@ from app.schemas.admin import (
     AdminUserUpdate,
 )
 from app.schemas.user import UserResponse
-from app.utils.pagination import PaginationParams
+from app.utils.pagination import PaginatedResponse, PaginationParams
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ async def list_users(
     oauth_provider: Optional[str] = Query(None, description="Filter by OAuth provider"),
     current_admin: UserResponse = Depends(require_superuser),
     db: Session = Depends(get_db),
-) -> AdminUserListResponse:
+) -> PaginatedResponse[AdminUserResponse]:
     """
     List all users with optional filtering and pagination.
 
@@ -62,13 +62,13 @@ async def list_users(
     )
 
     # Build filters
-    filters = {}
+    filters: dict[str, Any] = {}
     if is_superuser is not None:
-        filters["is_superuser"] = is_superuser
+        filters["is_superuser"] = bool(is_superuser)
     if is_verified is not None:
-        filters["is_verified"] = is_verified
+        filters["is_verified"] = bool(is_verified)
     if is_deleted is not None:
-        filters["is_deleted"] = is_deleted
+        filters["is_deleted"] = bool(is_deleted)
     if oauth_provider is not None:
         filters["oauth_provider"] = oauth_provider
 

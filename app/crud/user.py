@@ -714,7 +714,7 @@ async def get_users(
     else:
         result = db.execute(query)
 
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def count_users(
@@ -746,7 +746,7 @@ async def count_users(
     else:
         result = db.execute(query)
 
-    return result.scalar()
+    return result.scalar() or 0
 
 
 def get_users_sync(
@@ -781,7 +781,7 @@ def get_users_sync(
     query = query.offset(skip).limit(limit)
 
     result = db.execute(query)
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 def count_users_sync(
@@ -809,4 +809,4 @@ def count_users_sync(
         query = query.filter(User.oauth_provider == oauth_provider)
 
     result = db.execute(query)
-    return result.scalar()
+    return result.scalar() or 0

@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.crud import user as crud_user
 from app.database.database import get_db
 from app.schemas.user import TokenData, UserListResponse, UserResponse
-from app.utils.pagination import PaginationParams
+from app.utils.pagination import PaginatedResponse, PaginationParams
 
 router = APIRouter()
 
@@ -60,7 +60,7 @@ async def list_users(
     oauth_provider: Optional[str] = Query(None, description="Filter by OAuth provider"),
     current_user: UserResponse = Depends(get_current_user),
     db: Session = Depends(get_db),
-) -> UserListResponse:
+) -> PaginatedResponse[UserResponse]:
     """
     List users with optional filtering and pagination.
 

@@ -8,7 +8,7 @@ pagination across all API endpoints.
 import math
 from typing import Generic, Optional, TypeVar
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field
 
 T = TypeVar("T")
 
@@ -19,13 +19,11 @@ class PaginationParams(BaseModel):
     page: int = Field(default=1, ge=1, description="Page number (1-based)")
     size: int = Field(default=20, ge=1, le=100, description="Number of items per page")
 
-    @computed_field
     @property
     def skip(self) -> int:
         """Calculate the number of items to skip."""
         return (self.page - 1) * self.size
 
-    @computed_field
     @property
     def limit(self) -> int:
         """Get the limit (same as size for consistency)."""
@@ -132,7 +130,7 @@ def create_pagination_links(
     Returns:
         Dictionary with pagination links
     """
-    links = {}
+    links: dict[str, Optional[str]] = {}
 
     # Build query string
     query_parts = []
