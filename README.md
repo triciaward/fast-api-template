@@ -761,6 +761,91 @@ ruff check .
 mypy . && ruff check .
 ```
 
+## 🔍 Code Quality (Pre-commit Hooks)
+
+This project uses pre-commit hooks to ensure code quality and consistency across all commits. The hooks run automatically on every commit and will prevent commits if any checks fail.
+
+### Available Hooks
+
+- **ruff**: Fast Python linter and formatter (runs with `--fix` to auto-fix issues)
+- **mypy**: Static type checking for Python
+- **black**: Code formatting (ensures consistent style)
+- **detect-secrets**: Scans for potential secrets and credentials in code
+
+### Installation
+
+1. **Install pre-commit and all hooks:**
+```bash
+./install_precommit.sh
+```
+
+This script will:
+- Install pre-commit with pip
+- Install all configured hooks
+- Run the hooks on all files once to check current state
+
+### Manual Installation
+
+If you prefer to install manually:
+
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Install all hooks
+pre-commit install
+
+# Run hooks on all files (optional)
+pre-commit run --all-files
+```
+
+### Usage
+
+Once installed, the hooks run automatically on every commit:
+
+```bash
+# Make changes to your code
+git add .
+git commit -m "Add new feature"  # Hooks run automatically here
+```
+
+If any hook fails, the commit will be blocked until you fix the issues.
+
+### Manual Hook Execution
+
+You can run hooks manually at any time:
+
+```bash
+# Run all hooks on staged files
+pre-commit run
+
+# Run all hooks on all files
+pre-commit run --all-files
+
+# Run a specific hook
+pre-commit run ruff --all-files
+pre-commit run mypy --all-files
+pre-commit run black --all-files
+pre-commit run detect-secrets --all-files
+```
+
+### Hook Configuration
+
+The hooks are configured in `.pre-commit-config.yaml`:
+
+- **ruff**: Runs with `--fix` to automatically fix formatting issues
+- **mypy**: Only runs on Python files for type checking
+- **black**: Ensures consistent code formatting
+- **detect-secrets**: Scans for potential secrets in all files
+
+### Benefits
+
+- **Consistent Code Style**: Automatic formatting with black and ruff
+- **Type Safety**: Static type checking with mypy
+- **Security**: Automatic secret detection to prevent credential leaks
+- **Quality Assurance**: All code is automatically checked before commits
+- **Team Collaboration**: Ensures all team members follow the same standards
+
 ## CI/CD Pipeline
 
 The project includes a comprehensive GitHub Actions CI/CD pipeline that runs on every push and pull request:
