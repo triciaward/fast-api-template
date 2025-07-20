@@ -78,6 +78,18 @@ class Settings(BaseSettings):
         "http://localhost:4200",  # Angular default
     ]
 
+    # Logging Configuration
+    LOG_LEVEL: str = "INFO"
+    LOG_FORMAT: str = "json"  # "json" or "text"
+    ENABLE_FILE_LOGGING: bool = False
+    LOG_FILE_PATH: str = "logs/app.log"
+    LOG_FILE_MAX_SIZE: str = "10MB"
+    LOG_FILE_BACKUP_COUNT: int = 5
+    ENABLE_COLORED_LOGS: bool = True
+    LOG_INCLUDE_TIMESTAMP: bool = True
+    LOG_INCLUDE_PID: bool = True
+    LOG_INCLUDE_THREAD: bool = True
+
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, list[str]]) -> list[str]:

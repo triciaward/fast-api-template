@@ -13,6 +13,9 @@ pydantic[email]==2.5.0
 pydantic-settings==2.1.0
 redis==5.0.1
 
+# Logging
+structlog==23.2.0
+
 # Rate Limiting
 slowapi==0.1.9
 

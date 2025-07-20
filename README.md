@@ -1,6 +1,6 @@
 # FastAPI Project Template
 
-![Tests](https://img.shields.io/badge/tests-254%20tests%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-262%20tests%20passing-brightgreen)
 ![CI](https://github.com/triciaward/fast-api-template/actions/workflows/ci.yml/badge.svg)
 ![Coverage](https://img.shields.io/badge/coverage-74%25-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
@@ -9,7 +9,7 @@ A production-ready FastAPI backend template with built-in authentication, CI/CD,
 
 ## Overview
 
-A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (254 tests with complete coverage), secure authentication with email verification and OAuth, comprehensive input validation, PostgreSQL integration, and a fully working CI/CD pipeline.
+A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (262 tests with complete coverage), secure authentication with email verification and OAuth, comprehensive input validation, PostgreSQL integration, and a fully working CI/CD pipeline.
 
 ## Features
 
@@ -19,7 +19,7 @@ A robust FastAPI project template with **hybrid async/sync architecture** optimi
 - 📦 PostgreSQL Database Integration
 - 🌐 CORS Support
 - 🐳 Docker Support
-- 🧪 Comprehensive Testing (254 tests with 100% success rate)
+- 🧪 Comprehensive Testing (262 tests with 100% success rate)
 - 📝 Alembic Migrations
 - 🔍 Linting and Code Quality (ruff)
 - ✅ Type Safety (mypy)
@@ -31,6 +31,7 @@ A robust FastAPI project template with **hybrid async/sync architecture** optimi
 - 🔐 OAuth Support (Google & Apple)
 - 🚫 Zero Warnings (completely clean test output)
 - 🛡️ Rate Limiting (configurable per endpoint with Redis support)
+- 📊 Structured Logging (JSON/colored console, file rotation, ELK stack ready)
 
 ## Project Structure
 
@@ -110,6 +111,18 @@ FRONTEND_URL=http://localhost:3000
 ENABLE_REDIS=false
 REDIS_URL=redis://localhost:6379/0
 ENABLE_WEBSOCKETS=false
+
+# Logging Configuration (Optional)
+LOG_LEVEL=INFO
+LOG_FORMAT=json
+ENABLE_FILE_LOGGING=false
+LOG_FILE_PATH=logs/app.log
+LOG_FILE_MAX_SIZE=10MB
+LOG_FILE_BACKUP_COUNT=5
+ENABLE_COLORED_LOGS=true
+LOG_INCLUDE_TIMESTAMP=true
+LOG_INCLUDE_PID=true
+LOG_INCLUDE_THREAD=true
 ```
 
 3. **Setup database**
@@ -244,13 +257,14 @@ pytest tests/ --asyncio-mode=auto --cov=app --cov-report=term-missing
 ## 🛠️ Recent Improvements (July 2025)
 
 ### ✅ Complete Type Safety and Code Quality Overhaul
-- **Zero mypy Errors**: Fixed all 8 type checking issues across the codebase
+- **Zero mypy Errors**: Fixed all 57 type checking issues across the codebase
 - **Zero ruff Linting Issues**: Complete code quality with proper formatting and imports
-- **Perfect Test Success Rate**: 254/254 tests passing (100% success rate)
+- **Perfect Test Success Rate**: 262/262 tests passing (100% success rate)
 - **Zero Warnings**: Completely eliminated all test warnings and runtime warnings
 - **Type Annotations**: Added proper type annotations for all pytest fixtures
 - **SQLAlchemy Model Testing**: Fixed type ignore comments for model attribute assignments
 - **Import Organization**: Properly sorted and formatted all import statements
+- **Logging Type Safety**: Fixed structlog type annotations for proper mypy compliance
 
 ### ✅ Test Suite Enhancements and Fixes
 - **Email Verification Tests**: Fixed 3 failing tests by adding proper email service patching
@@ -340,7 +354,7 @@ The test suite is organized to separate template tests from your application-spe
 
 ### Run Tests
 ```bash
-# All template tests (254 tests)
+# All template tests (262 tests)
 pytest tests/template_tests/ -v --asyncio-mode=auto
 
 # All authentication tests (40 tests)
@@ -360,7 +374,7 @@ pytest tests/template_tests/test_redis.py tests/template_tests/test_websocket.py
 ```
 
 ### Authentication Test Coverage
-- **254 Total Tests** covering all scenarios:
+- **262 Total Tests** covering all scenarios:
   - User registration and login (11 tests)
   - Email verification flow (16 tests)
   - OAuth authentication (13 tests)
@@ -390,8 +404,8 @@ pytest tests/template_tests/test_redis.py tests/template_tests/test_websocket.py
 ### Coverage Notes
 - **74% overall coverage** with proper async testing
 - **100% coverage for optional features** (Redis and WebSocket services)
-- **Complete async test execution** - All 254 tests run properly with @pytest.mark.asyncio
-- **Perfect test success rate** - 254/254 tests passing (100%)
+- **Complete async test execution** - All 262 tests run properly with @pytest.mark.asyncio
+- **Perfect test success rate** - 262/262 tests passing (100%)
 - **CI runs with `--asyncio-mode=auto`** for accurate coverage reporting
 - **Local development**: Use `--asyncio-mode=auto` for full test execution
 
@@ -412,7 +426,7 @@ mypy . && ruff check .
 The project includes a comprehensive GitHub Actions CI/CD pipeline that runs on every push and pull request:
 
 ### Pipeline Jobs
-- **🧪 Run Tests**: Executes all 254 tests with PostgreSQL integration
+- **🧪 Run Tests**: Executes all 262 tests with PostgreSQL integration
 - **🔍 Lint (ruff)**: Performs code linting and format checking
 - **🧠 Type Check (mypy)**: Validates type safety across the codebase
 
@@ -422,7 +436,7 @@ The project includes a comprehensive GitHub Actions CI/CD pipeline that runs on 
 - **Fast Execution**: Complete pipeline completes in under 2 minutes
 - **Environment Isolation**: Proper test database setup and cleanup
 - **Coverage Reporting**: Test coverage tracking and reporting
-- **Perfect Success Rate**: All 254 tests pass consistently
+- **Perfect Success Rate**: All 262 tests pass consistently
 
 ### Local Development
 The CI pipeline mirrors your local development environment:
@@ -628,6 +642,130 @@ RATE_LIMIT_OAUTH=10/minute
 ### Redis Integration
 When Redis is enabled and configured as the storage backend, rate limiting becomes distributed and persistent across multiple application instances.
 
+## Structured Logging
+
+The application includes a comprehensive structured logging system using structlog with support for both development and production environments.
+
+### Features
+- **Structured Logging**: JSON format for production, colored console for development
+- **Contextual Information**: Automatic inclusion of PID, thread, environment, and service name
+- **File Rotation**: Optional file logging with configurable rotation and backup count
+- **ELK Stack Ready**: JSON format compatible with Elasticsearch, Logstash, and Kibana
+- **Multiple Logger Types**: Specialized loggers for different components (app, auth, database)
+- **Exception Handling**: Automatic stack trace inclusion with `exc_info=True`
+- **Performance Monitoring**: Built-in timing and performance logging capabilities
+
+### Configuration
+```bash
+# Logging Configuration
+LOG_LEVEL=INFO                    # DEBUG, INFO, WARNING, ERROR, CRITICAL
+LOG_FORMAT=json                   # "json" or "text"
+ENABLE_FILE_LOGGING=false         # Enable file logging
+LOG_FILE_PATH=logs/app.log        # Log file path
+LOG_FILE_MAX_SIZE=10MB            # Max file size before rotation
+LOG_FILE_BACKUP_COUNT=5           # Number of backup files to keep
+ENABLE_COLORED_LOGS=true          # Enable colored console output
+LOG_INCLUDE_TIMESTAMP=true        # Include timestamps in logs
+LOG_INCLUDE_PID=true              # Include process ID in logs
+LOG_INCLUDE_THREAD=true           # Include thread name in logs
+```
+
+### Usage Examples
+
+#### Basic Logging
+```python
+from app.core.logging_config import get_app_logger, get_auth_logger, get_db_logger
+
+# Get specialized loggers
+app_logger = get_app_logger()
+auth_logger = get_auth_logger()
+db_logger = get_db_logger()
+
+# Basic logging
+app_logger.info("Application started", version="1.0.0")
+auth_logger.warning("Failed login attempt", email="user@example.com")
+db_logger.error("Database connection failed", error="timeout")
+```
+
+#### Structured Logging with Context
+```python
+# Authentication logging with context
+auth_logger.info("User login attempt", 
+                user_id="12345", 
+                email="user@example.com", 
+                ip_address="192.168.1.100",
+                user_agent="Mozilla/5.0...")
+
+# Database operation logging
+db_logger.info("Query executed", 
+               query_type="SELECT", 
+               table="users",
+               execution_time_ms=15.5)
+
+# Error logging with exception information
+try:
+    result = 10 / 0
+except ZeroDivisionError as e:
+    app_logger.error("Division by zero error", 
+                    operation="division",
+                    dividend=10,
+                    divisor=0,
+                    exc_info=True)
+```
+
+### Log Formats
+
+#### JSON Format (Production)
+```json
+{
+  "timestamp": "2025-07-19T17:41:11.635810",
+  "level": "info",
+  "logger": "auth",
+  "event": "User login attempt",
+  "user_id": "12345",
+  "email": "user@example.com",
+  "ip_address": "192.168.1.100",
+  "pid": 12345,
+  "thread": "MainThread",
+  "environment": "production",
+  "service": "fastapi_template"
+}
+```
+
+#### Text Format (Development)
+```
+2025-07-19 17:41:11.635810 [info] [auth] User login attempt user_id=12345 email=user@example.com ip_address=192.168.1.100
+```
+
+### File Logging
+When file logging is enabled, logs are written to rotating files:
+```bash
+# Enable file logging
+ENABLE_FILE_LOGGING=true
+LOG_FILE_PATH=logs/app.log
+LOG_FILE_MAX_SIZE=10MB
+LOG_FILE_BACKUP_COUNT=5
+```
+
+This creates:
+- `logs/app.log` - Current log file
+- `logs/app.log.1` - First backup
+- `logs/app.log.2` - Second backup
+- etc.
+
+### Demo Script
+Run the logging demo to see all features in action:
+```bash
+python scripts/logging_demo.py
+```
+
+### Integration with Monitoring
+The structured logging system is designed to work seamlessly with:
+- **ELK Stack**: JSON format is directly compatible with Elasticsearch
+- **Docker Logs**: JSON format works well with Docker's logging drivers
+- **Cloud Logging**: Compatible with AWS CloudWatch, Google Cloud Logging, etc.
+- **APM Tools**: Structured logs work well with application performance monitoring tools
+
 ## Health Check Endpoints
 
 The application provides comprehensive health monitoring endpoints for container orchestration and uptime monitoring:
@@ -819,7 +957,7 @@ PYTHONPATH=. python scripts/bootstrap_superuser.py --email admin@example.com --p
 ## Code Quality and Coverage
 
 ### Current Status
-- **254 tests passing, 0 failures**
+- **262 tests passing, 0 failures**
 - **74% code coverage** - **100% for optional features**
 - **100% test success rate**
 - **Zero deprecation warnings**
@@ -833,9 +971,10 @@ PYTHONPATH=. python scripts/bootstrap_superuser.py --email admin@example.com --p
 We recently resolved all mypy type checking issues across the entire codebase:
 - **SQLAlchemy Model Testing**: Added proper `# type: ignore` comments for model attribute assignments
 - **Test Reliability**: Fixed type errors that were preventing proper test execution
-- **Zero mypy Errors**: All 8 type checking issues resolved across the codebase
+- **Zero mypy Errors**: All 57 type checking issues resolved across the codebase
 - **Perfect Type Safety**: Complete type safety with zero errors
 - **Import Organization**: Properly sorted and formatted all import statements
+- **Logging Type Safety**: Fixed structlog type annotations for proper mypy compliance
 
 ### 🛠️ Why main.py Was Previously 0% Covered
 
