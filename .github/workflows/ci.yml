@@ -86,12 +86,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Ruff
+      - name: Run Ruff and Black
         run: |
           echo "Running ruff check..."
           ruff check .
-          echo "Running ruff format check..."
-          ruff format --check .
+          echo "Running black format check..."
+          black --check .
 
   type-check:
     name: 🧠 Type Check (mypy)
