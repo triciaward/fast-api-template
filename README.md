@@ -258,11 +258,11 @@ fast-api-template/
 ├── mypy.ini                   # MyPy type checking configuration
 ├── pyrightconfig.json         # Pyright configuration
 ├── alembic.ini                # Alembic configuration
-├── celery_config.py           # Background task configuration
-├── setup.sh                   # Project setup script
-├── bootstrap_superuser.sh     # Superuser bootstrap shell script
-├── admin_cli.sh               # Admin CLI wrapper script
-├── lint.sh                    # Linting script
+├── scripts/celery_config.py   # Background task configuration
+├── scripts/setup.sh           # Project setup script
+├── scripts/bootstrap_superuser.sh # Superuser bootstrap shell script
+├── scripts/admin_cli.sh       # Admin CLI wrapper script
+├── scripts/lint.sh            # Linting script
 ├── .gitignore                 # Git ignore patterns
 ├── LICENSE                    # MIT License
 └── README.md                  # This documentation file
@@ -364,7 +364,7 @@ alembic upgrade head
 # FIRST_SUPERUSER_PASSWORD=change_this_in_prod
 
 # Or run manually:
-./bootstrap_superuser.sh --email admin@example.com --password secret123
+./scripts/bootstrap_superuser.sh --email admin@example.com --password secret123
 ```
 
 5. **Run the application**
@@ -451,7 +451,7 @@ alembic upgrade head
 
 10. **Bootstrap a superuser**
 ```bash
-./bootstrap_superuser.sh
+./scripts/bootstrap_superuser.sh
 ```
 
 11. **Run the app**
@@ -789,7 +789,7 @@ Your Code → Pre-commit Hooks → Local Commit → Push → CI → GitHub
 
 1. **Install pre-commit and all hooks:**
 ```bash
-./install_precommit.sh
+./scripts/install_precommit.sh
 ```
 
 This script will:
@@ -1406,39 +1406,39 @@ python scripts/bootstrap_admin.py --email admin@example.com --password secret123
 #### Admin CLI Usage
 ```bash
 # List all users
-./admin_cli.sh list
+./scripts/admin_cli.sh list
 
 # List users with filters
-./admin_cli.sh list --superuser true --verified false
+./scripts/admin_cli.sh list --superuser true --verified false
 
 # Get specific user
-./admin_cli.sh get <user_id>
+./scripts/admin_cli.sh get <user_id>
 
 # Create new user
-./admin_cli.sh create user@example.com username password --superuser --verified
+./scripts/admin_cli.sh create user@example.com username password --superuser --verified
 
 # Update user
-./admin_cli.sh update <user_id> --email newemail@example.com --verified true
+./scripts/admin_cli.sh update <user_id> --email newemail@example.com --verified true
 
 # Delete user
-./admin_cli.sh delete <user_id>
+./scripts/admin_cli.sh delete <user_id>
 
 # Toggle superuser status
-./admin_cli.sh toggle-superuser <user_id>
+./scripts/admin_cli.sh toggle-superuser <user_id>
 
 # Toggle verification status
-./admin_cli.sh toggle-verification <user_id>
+./scripts/admin_cli.sh toggle-verification <user_id>
 
 # Get user statistics
-./admin_cli.sh stats
+./scripts/admin_cli.sh stats
 ```
 #### Development Setup
 ```bash
 # Run setup script
-./setup.sh
+./scripts/setup.sh
 
 # Run linting
-./lint.sh
+./scripts/lint.sh
 
 # Demo logging features
 python scripts/logging_demo.py
@@ -2220,19 +2220,19 @@ FIRST_SUPERUSER_PASSWORD=change_this_in_prod
 Create a superuser manually using the CLI script:
 ```bash
 # Using the wrapper script (recommended)
-./bootstrap_superuser.sh --help
+./scripts/bootstrap_superuser.sh --help
 
 # Using environment variables
-./bootstrap_superuser.sh
+./scripts/bootstrap_superuser.sh
 
 # Using command line arguments
-./bootstrap_superuser.sh --email admin@example.com --password secret123
+./scripts/bootstrap_superuser.sh --email admin@example.com --password secret123
 
 # With custom username
-./bootstrap_superuser.sh --email admin@example.com --password secret123 --username admin
+./scripts/bootstrap_superuser.sh --email admin@example.com --password secret123 --username admin
 
 # Force creation (overwrites existing user)
-./bootstrap_superuser.sh --email admin@example.com --password secret123 --force
+./scripts/bootstrap_superuser.sh --email admin@example.com --password secret123 --force
 
 # Alternative: Using PYTHONPATH directly
 PYTHONPATH=. python scripts/bootstrap_superuser.py --email admin@example.com --password secret123
@@ -2333,13 +2333,13 @@ response = await client.post("/api/v1/admin/bulk-operations", json=bulk_data)
 #### CLI Management
 ```bash
 # Create a new admin user
-./admin_cli.sh create admin@example.com adminuser password --superuser --verified
+./scripts/admin_cli.sh create admin@example.com adminuser password --superuser --verified
 
 # List all unverified users
-./admin_cli.sh list --verified false
+./scripts/admin_cli.sh list --verified false
 
 # Toggle superuser status
-./admin_cli.sh toggle-superuser <user_id>
+./scripts/admin_cli.sh toggle-superuser <user_id>
 ```
 
 ## Code Quality and Coverage

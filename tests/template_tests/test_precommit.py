@@ -45,15 +45,15 @@ class TestPreCommitConfiguration:
 
     def test_install_script_exists(self):
         """Test that install_precommit.sh exists and is executable."""
-        script_path = Path("install_precommit.sh")
-        assert script_path.exists(), "install_precommit.sh should exist"
+        script_path = Path("scripts/install_precommit.sh")
+        assert script_path.exists(), "scripts/install_precommit.sh should exist"
         assert os.access(
             script_path, os.X_OK
-        ), "install_precommit.sh should be executable"
+        ), "scripts/install_precommit.sh should be executable"
 
     def test_install_script_content(self):
         """Test that install script contains required commands."""
-        with open("install_precommit.sh") as f:
+        with open("scripts/install_precommit.sh") as f:
             content = f.read()
 
         assert "pip install pre-commit" in content, "Script should install pre-commit"
@@ -122,7 +122,7 @@ class TestPreCommitConfiguration:
         """Test that the installation script can be executed (integration test)."""
         # This test would actually run the script in a real environment
         # We'll mock it for safety in CI/CD
-        script_path = Path("install_precommit.sh")
+        script_path = Path("scripts/install_precommit.sh")
 
         # Verify script syntax is valid
         try:
