@@ -241,6 +241,25 @@ class AccountDeletionCancelResponse(BaseModel):
     deletion_cancelled: bool
 
 
+# Password change schemas
+class PasswordChangeRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        """Validate new password strength."""
+        is_valid, error_msg = validate_password(v)
+        if not is_valid:
+            raise ValueError(error_msg)
+        return v
+
+
+class PasswordChangeResponse(BaseModel):
+    detail: str
+
+
 class AccountDeletionStatusResponse(BaseModel):
     deletion_requested: bool
     deletion_confirmed: bool

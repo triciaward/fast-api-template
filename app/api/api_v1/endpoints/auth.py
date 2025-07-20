@@ -4,9 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
+from app.api.api_v1.endpoints.users import get_current_user
 from app.core.config import settings
 from app.core.logging_config import get_auth_logger
-from app.core.security import create_access_token
+from app.core.security import create_access_token, verify_password
 from app.crud import user as crud_user
 from app.database.database import get_db
 from app.schemas.user import (
@@ -20,6 +21,8 @@ from app.schemas.user import (
     EmailVerificationRequest,
     EmailVerificationResponse,
     OAuthLogin,
+    PasswordChangeRequest,
+    PasswordChangeResponse,
     PasswordResetConfirmRequest,
     PasswordResetConfirmResponse,
     PasswordResetRequest,
@@ -53,7 +56,8 @@ logger = get_auth_logger()
 async def register_user(
     user: UserCreate, db: Session = Depends(get_db)
 ) -> UserResponse:
-    logger.info("User registration attempt", email=user.email, username=user.username)
+    logger.info("User registration attempt",
+                email=user.email, username=user.username)
 
     try:
         # Check if user with email already exists
@@ -68,7 +72,8 @@ async def register_user(
             )
 
         # Check if username already exists
-        db_user = crud_user.get_user_by_username_sync(db, username=user.username)
+        db_user = crud_user.get_user_by_username_sync(
+            db, username=user.username)
         if db_user:
             logger.warning(
                 "Registration failed - username already taken", username=user.username
@@ -101,7 +106,8 @@ async def register_user(
                     "Failed to create verification token", user_id=str(db_user.id)
                 )
         else:
-            logger.warning("Email service not configured - skipping verification email")
+            logger.warning(
+                "Email service not configured - skipping verification email")
 
         return db_user
 
@@ -167,12 +173,14 @@ async def login_user(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expires = timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
             subject=user.email, expires_delta=access_token_expires
         )
 
-        logger.info("Login successful", user_id=str(user.id), email=form_data.username)
+        logger.info("Login successful", user_id=str(
+            user.id), email=form_data.username)
         return Token(access_token=access_token, token_type="bearer")
 
     except HTTPException:
@@ -198,13 +206,16 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
 
     if not oauth_service:
         logger.error("OAuth service not available")
-        raise HTTPException(status_code=503, detail="OAuth service not available")
+        raise HTTPException(
+            status_code=503, detail="OAuth service not available")
 
     provider = oauth_data.provider.lower()
 
     if provider not in ["google", "apple"]:
-        logger.warning("OAuth login failed - unsupported provider", provider=provider)
-        raise HTTPException(status_code=400, detail="Unsupported OAuth provider")
+        logger.warning(
+            "OAuth login failed - unsupported provider", provider=provider)
+        raise HTTPException(
+            status_code=400, detail="Unsupported OAuth provider")
 
     if not oauth_service.is_provider_configured(provider):
         logger.warning(
@@ -222,7 +233,8 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
                 logger.warning(
                     "OAuth login failed - invalid Google token", provider=provider
                 )
-                raise HTTPException(status_code=400, detail="Invalid Google token")
+                raise HTTPException(
+                    status_code=400, detail="Invalid Google token")
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
@@ -234,7 +246,8 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
                 logger.warning(
                     "OAuth login failed - invalid Apple token", provider=provider
                 )
-                raise HTTPException(status_code=400, detail="Invalid Apple token")
+                raise HTTPException(
+                    status_code=400, detail="Invalid Apple token")
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
@@ -247,7 +260,8 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
                 has_oauth_id=bool(oauth_id),
                 has_email=bool(email),
             )
-            raise HTTPException(status_code=400, detail="Invalid OAuth user info")
+            raise HTTPException(
+                status_code=400, detail="Invalid OAuth user info")
 
         logger.info(
             "OAuth token verified successfully",
@@ -257,7 +271,8 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
         )
 
         # Check if user already exists
-        existing_user = crud_user.get_user_by_oauth_id_sync(db, provider, oauth_id)
+        existing_user = crud_user.get_user_by_oauth_id_sync(
+            db, provider, oauth_id)
         if existing_user:
             # User exists, generate token
             access_token_expires = timedelta(
@@ -306,7 +321,8 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
         )
 
         # Generate token for new user
-        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expires = timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
             subject=new_user.email, expires_delta=access_token_expires
         )
@@ -327,7 +343,8 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(status_code=400, detail=f"OAuth login failed: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"OAuth login failed: {str(e)}")
 
 
 @router.post("/resend-verification", response_model=EmailVerificationResponse)
@@ -546,7 +563,8 @@ async def reset_password(
         # Get user
         user = crud_user.get_user_by_id_sync(db, user_id)
         if not user:
-            logger.warning("User not found for password reset", user_id=user_id)
+            logger.warning("User not found for password reset",
+                           user_id=user_id)
             return PasswordResetConfirmResponse(
                 message="User not found.", password_reset=False
             )
@@ -564,7 +582,8 @@ async def reset_password(
             )
 
         # Reset the password
-        success = crud_user.reset_user_password_sync(db, user_id, request.new_password)
+        success = crud_user.reset_user_password_sync(
+            db, user_id, request.new_password)
         if not success:
             logger.error("Failed to reset user password", user_id=user_id)
             return PasswordResetConfirmResponse(
@@ -572,7 +591,8 @@ async def reset_password(
                 password_reset=False,
             )
 
-        logger.info("Password reset successful", user_id=str(user.id), email=user.email)
+        logger.info("Password reset successful",
+                    user_id=str(user.id), email=user.email)
         return PasswordResetConfirmResponse(
             message="Password reset successfully. You can now log in with your new password.",
             password_reset=True,
@@ -587,6 +607,79 @@ async def reset_password(
         return PasswordResetConfirmResponse(
             message="Password reset failed. Please try again later.",
             password_reset=False,
+        )
+
+
+@router.post("/change-password", response_model=PasswordChangeResponse)
+async def change_password(
+    request: PasswordChangeRequest,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> PasswordChangeResponse:
+    """Change user password."""
+    logger.info("Password change attempt", user_id=str(current_user.id))
+
+    try:
+        # Don't allow password change for OAuth users
+        if current_user.oauth_provider:
+            logger.warning(
+                "Password change attempted for OAuth user",
+                user_id=str(current_user.id),
+                oauth_provider=current_user.oauth_provider,
+            )
+            raise HTTPException(
+                status_code=400,
+                detail="OAuth users cannot change password"
+            )
+
+        # Get the actual user object from database to access hashed_password
+        db_user = crud_user.get_user_by_email_sync(db, current_user.email)
+        if not db_user:
+            logger.error("User not found in database",
+                         user_id=str(current_user.id))
+            raise HTTPException(
+                status_code=500,
+                detail="User not found. Please try again later."
+            )
+
+        # Verify the current password
+        if not verify_password(request.current_password, str(db_user.hashed_password)):
+            logger.warning(
+                "Password change failed - incorrect current password",
+                user_id=str(current_user.id)
+            )
+            raise HTTPException(
+                status_code=400,
+                detail="Incorrect current password"
+            )
+
+        # Change the password
+        success = crud_user.update_user_password_sync(
+            db, str(current_user.id), request.new_password)
+        if not success:
+            logger.error("Failed to change user password",
+                         user_id=str(current_user.id))
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to change password. Please try again later."
+            )
+
+        logger.info("Password changed successfully", user_id=str(
+            current_user.id), email=current_user.email)
+        return PasswordChangeResponse(detail="Password updated successfully")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            "Password change failed with unexpected error",
+            user_id=str(current_user.id),
+            error=str(e),
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="Password change failed. Please try again later."
         )
 
 
@@ -742,7 +835,8 @@ async def confirm_account_deletion(
         # Get user
         user = crud_user.get_user_by_id_sync(db, user_id)
         if not user:
-            logger.warning("User not found for account deletion", user_id=user_id)
+            logger.warning(
+                "User not found for account deletion", user_id=user_id)
             return AccountDeletionConfirmResponse(
                 message="User not found.",
                 deletion_confirmed=False,

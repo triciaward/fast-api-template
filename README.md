@@ -11,7 +11,7 @@ A production-ready FastAPI backend template with built-in authentication, CI/CD,
 
 A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (319 tests with 100% success rate), secure authentication with email verification, OAuth, and password reset, comprehensive input validation, PostgreSQL integration, **complete background task processing**, and a fully working CI/CD pipeline.
 
-**Core Features**: JWT authentication, email verification, OAuth (Google/Apple), password reset, **GDPR-compliant account deletion with email confirmation and grace period**, input validation, rate limiting, structured logging, health checks, Alembic migrations, Docker support, and comprehensive testing.
+**Core Features**: JWT authentication, email verification, OAuth (Google/Apple), password reset, **password change with current password verification**, **GDPR-compliant account deletion with email confirmation and grace period**, input validation, rate limiting, structured logging, health checks, Alembic migrations, Docker support, and comprehensive testing.
 
 **Optional Features**: Redis caching, WebSocket real-time communication, background task processing, and advanced monitoring.
 
@@ -41,6 +41,7 @@ This template powers several production applications:
 - 📧 Email Service (verification, password reset with HTML templates)
 - 🔐 OAuth Support (Google & Apple with proper user management)
 - 🔑 Password Reset System with Email Integration and Security Features
+- 🔐 Password Change System with Current Password Verification
 - 🗑️ **GDPR-Compliant Account Deletion System** with Email Confirmation, Grace Period, and Reminder Emails
 - 🚫 Zero Warnings (completely clean test output)
 - 🛡️ Rate Limiting (configurable per endpoint with Redis support)
@@ -56,7 +57,7 @@ This template powers several production applications:
 
 ## ✅ Test Suite
 
-- **340 total tests** with comprehensive coverage
+- **348 total tests** with comprehensive coverage
 - **100% test success rate** (core and integration tests)
 - **5 complex mock tests excluded** (advanced Redis/background task mocking - isolated)
 - **Full CI pipeline** (mypy, ruff, pytest) runs on every commit
@@ -118,6 +119,7 @@ fast-api-template/
 │       ├── test_auth_email_verification.py # Email verification tests (16 tests)
 │       ├── test_auth_oauth.py            # OAuth authentication tests (13 tests)
 │       ├── test_auth_password_reset.py   # Password reset tests (27 tests)
+│       ├── test_auth_password_change.py  # Password change tests (8 tests)
 │       ├── test_auth_account_deletion.py # Account deletion tests (21 tests)
 │       ├── test_auth_validation.py       # Input validation tests (50+ tests)
 │       ├── test_api_users.py             # User API tests
@@ -518,7 +520,7 @@ ENABLE_CELERY=true CELERY_TASK_ALWAYS_EAGER=true CELERY_TASK_EAGER_PROPAGATES=tr
 # All tests except complex mocks (340 tests, 100% success rate)
 ENABLE_CELERY=true CELERY_TASK_ALWAYS_EAGER=true CELERY_TASK_EAGER_PROPAGATES=true python -m pytest tests/template_tests/ --ignore=tests/template_tests/test_celery_mocked.py -v
 
-# All authentication tests (67+ tests)
+# All authentication tests (75+ tests)
 pytest tests/template_tests/test_api_auth.py tests/template_tests/test_auth_email_verification.py tests/template_tests/test_auth_oauth.py tests/template_tests/test_auth_password_reset.py -v
 
 # With coverage (recommended for accurate results)
@@ -537,11 +539,12 @@ pytest tests/template_tests/test_celery.py tests/template_tests/test_celery_api.
 ```
 
 ### Test Coverage Summary
-- **340 Total Tests** covering all scenarios (5 complex mock tests separated):
+- **348 Total Tests** covering all scenarios (5 complex mock tests separated):
   - User registration and login (11 tests)
   - Email verification flow (16 tests)
   - OAuth authentication (13 tests)
   - **Password reset functionality (27 tests)**
+  - **Password change functionality (8 tests)**
   - **Input validation and security (50+ tests)**
   - CRUD operations and models
   - CORS handling and health checks
@@ -558,7 +561,7 @@ pytest tests/template_tests/test_celery.py tests/template_tests/test_celery_api.
 - **Background Tasks**: Complete asynchronous task processing with eager mode testing
 
 ### Test Coverage Includes
-- Authentication (JWT, registration, login, email verification, OAuth, password reset, **account deletion with GDPR compliance**)
+- Authentication (JWT, registration, login, email verification, OAuth, password reset, **password change with current password verification**, **account deletion with GDPR compliance**)
 - **Input validation and security** (SQL injection, XSS, boundary testing, reserved words)
 - CRUD operations and models
 - CORS handling
@@ -1145,6 +1148,9 @@ curl http://localhost:8000/features
 ##### Password Reset
 - `POST /api/v1/auth/forgot-password` - Request password reset email
 - `POST /api/v1/auth/reset-password` - Reset password with token
+
+##### Password Change
+- `POST /api/v1/auth/change-password` - Change password (requires current password + authentication)
 
 ##### Account Deletion (GDPR Compliance)
 - `POST /api/v1/auth/request-deletion` - Request account deletion with email confirmation
@@ -1734,6 +1740,74 @@ Support for third-party authentication providers:
 - Requires `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, and `APPLE_PRIVATE_KEY`
 - Supports name and email scopes
 - JWT token verification with expiration checking
+
+### Password Change System
+
+The application includes a secure password change system for authenticated users:
+
+#### Features
+- **Current Password Verification**: Users must provide their current password to change it
+- **OAuth User Restriction**: OAuth users (Google/Apple) cannot change passwords through this endpoint
+- **Password Strength Validation**: New passwords must meet security requirements
+- **Token Invalidation**: Any existing password reset tokens are invalidated when the password is changed
+- **Secure Hashing**: Passwords are hashed using bcrypt before storage
+
+#### Password Change API Endpoint
+- `POST /api/v1/auth/change-password` - Change password (requires authentication + current password)
+
+#### Request Format
+```json
+{
+  "current_password": "your_current_password",
+  "new_password": "your_new_password"
+}
+```
+
+#### Security Requirements
+The new password must meet the following criteria:
+- At least 8 characters long
+- Maximum 128 characters
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one number
+- At least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?)
+- Cannot be a common weak password
+
+#### Response Examples
+**Success (200 OK):**
+```json
+{
+  "detail": "Password updated successfully"
+}
+```
+
+**Error - Incorrect Current Password (400 Bad Request):**
+```json
+{
+  "detail": "Incorrect current password"
+}
+```
+
+**Error - OAuth User (400 Bad Request):**
+```json
+{
+  "detail": "OAuth users cannot change password"
+}
+```
+
+**Error - Weak Password (422 Unprocessable Entity):**
+```json
+{
+  "detail": [
+    {
+      "type": "value_error",
+      "msg": "Password must be at least 8 characters long",
+      "input": "weak",
+      "loc": ["body", "new_password"]
+    }
+  ]
+}
+```
 
 ### Superuser Bootstrap
 

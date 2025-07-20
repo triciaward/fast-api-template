@@ -121,7 +121,8 @@ async def get_user_by_verification_token(db: DBSession, token: str) -> Optional[
     if isinstance(db, AsyncSession):
         result = await db.execute(select(User).filter(User.verification_token == token))
     else:
-        result = db.execute(select(User).filter(User.verification_token == token))
+        result = db.execute(select(User).filter(
+            User.verification_token == token))
     return result.scalar_one_or_none()
 
 
@@ -177,7 +178,8 @@ async def get_user_by_password_reset_token(db: DBSession, token: str) -> Optiona
             select(User).filter(User.password_reset_token == token)
         )
     else:
-        result = db.execute(select(User).filter(User.password_reset_token == token))
+        result = db.execute(select(User).filter(
+            User.password_reset_token == token))
     return result.scalar_one_or_none()
 
 
@@ -215,6 +217,31 @@ async def reset_user_password(db: DBSession, user_id: str, new_password: str) ->
         return False
 
     user.hashed_password = get_password_hash(new_password)  # type: ignore
+    user.password_reset_token = None  # type: ignore
+    user.password_reset_token_expires = None  # type: ignore
+
+    if isinstance(db, AsyncSession):
+        await db.commit()
+    else:
+        db.commit()
+
+    return True
+
+
+# Password change CRUD operations
+async def update_user_password(db: DBSession, user_id: str, new_password: str) -> bool:
+    """Update user password and invalidate any reset tokens."""
+    if isinstance(db, AsyncSession):
+        result = await db.execute(select(User).filter(User.id == user_id))
+    else:
+        result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.hashed_password = get_password_hash(new_password)  # type: ignore
+    # Invalidate any existing reset tokens
     user.password_reset_token = None  # type: ignore
     user.password_reset_token_expires = None  # type: ignore
 
@@ -348,7 +375,8 @@ def verify_user_sync(db: Session, user_id: str) -> bool:
 
 # Sync password reset operations
 def get_user_by_password_reset_token_sync(db: Session, token: str) -> Optional[User]:
-    result = db.execute(select(User).filter(User.password_reset_token == token))
+    result = db.execute(select(User).filter(
+        User.password_reset_token == token))
     return result.scalar_one_or_none()
 
 
@@ -382,6 +410,23 @@ def reset_user_password_sync(db: Session, user_id: str, new_password: str) -> bo
 
     db.commit()
 
+    return True
+
+
+def update_user_password_sync(db: Session, user_id: str, new_password: str) -> bool:
+    """Update user password and invalidate any reset tokens (sync version)."""
+    result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.hashed_password = get_password_hash(new_password)  # type: ignore
+    # Invalidate any existing reset tokens
+    user.password_reset_token = None  # type: ignore
+    user.password_reset_token_expires = None  # type: ignore
+
+    db.commit()
     return True
 
 
