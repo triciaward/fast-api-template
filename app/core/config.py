@@ -66,6 +66,7 @@ class Settings(BaseSettings):
     RATE_LIMIT_LOGIN: str = "5/minute"
     RATE_LIMIT_REGISTER: str = "3/minute"
     RATE_LIMIT_EMAIL_VERIFICATION: str = "3/minute"
+    RATE_LIMIT_PASSWORD_RESET: str = "3/minute"
     RATE_LIMIT_OAUTH: str = "10/minute"
 
     # OAuth Configuration
@@ -89,6 +90,9 @@ class Settings(BaseSettings):
     # Email Verification
     VERIFICATION_TOKEN_EXPIRE_HOURS: int = 24
     FRONTEND_URL: str = "http://localhost:3000"
+
+    # Password Reset
+    PASSWORD_RESET_TOKEN_EXPIRE_HOURS: int = 1  # 1 hour for security
 
     # CORS
     BACKEND_CORS_ORIGINS: list[str] = [

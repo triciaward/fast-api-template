@@ -1,15 +1,19 @@
 # FastAPI Project Template
 
-![Tests](https://img.shields.io/badge/tests-292%20tests%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-319%20tests%20passing-brightgreen)
 ![CI](https://github.com/triciaward/fast-api-template/actions/workflows/ci.yml/badge.svg)
 ![Coverage](https://img.shields.io/badge/coverage-74%25-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-A production-ready FastAPI backend template with built-in authentication, CI/CD, testing, type checking, Docker support, and **complete Celery integration**.
+A production-ready FastAPI backend template with built-in authentication, CI/CD, testing, type checking, Docker support, and comprehensive background task processing.
 
 ## Overview
 
-A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (292 tests with 100% success rate), secure authentication with email verification and OAuth, comprehensive input validation, PostgreSQL integration, **complete Celery background task processing**, and a fully working CI/CD pipeline.
+A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (319 tests with 100% success rate), secure authentication with email verification, OAuth, and password reset, comprehensive input validation, PostgreSQL integration, **complete background task processing**, and a fully working CI/CD pipeline.
+
+**Core Features**: JWT authentication, email verification, OAuth (Google/Apple), password reset, input validation, rate limiting, structured logging, health checks, Alembic migrations, Docker support, and comprehensive testing.
+
+**Optional Features**: Redis caching, WebSocket real-time communication, background task processing, and advanced monitoring.
 
 ## 🚀 Live Examples
 
@@ -21,60 +25,136 @@ This template powers several production applications:
 ## Features
 
 - 🚀 FastAPI Backend with Hybrid Async/Sync Architecture
-- 🔒 Secure Authentication System (JWT + bcrypt + Email Verification + OAuth)
+- 🔒 Secure Authentication System (JWT + bcrypt + Email Verification + OAuth + Password Reset)
 - 👑 Superuser Bootstrap for Easy Setup
-- 📦 PostgreSQL Database Integration
-- 🌐 CORS Support
-- 🐳 Docker Support
-- 🧪 Comprehensive Testing (292 tests with 100% success rate)
-- 📝 Alembic Migrations
+- 📦 PostgreSQL Database Integration with Alembic Migrations
+- 🌐 CORS Support with Configurable Origins
+- 🐳 Docker Support with Multi-Service Composition
+- 🧪 Comprehensive Testing (319 tests with 100% success rate)
+- 📝 Alembic Migrations with Version Control
 - 🔍 Linting and Code Quality (ruff)
-- ✅ Type Safety (mypy)
+- ✅ Type Safety (mypy + pyright)
 - 🎯 Modern Dependencies (SQLAlchemy 2.0, Pydantic V2)
 - ✅ Zero Deprecation Warnings
-- 🏥 Health Check Endpoints for Monitoring
+- 🏥 Health Check Endpoints for Monitoring (comprehensive, simple, readiness, liveness)
 - 🚀 Automated tests, linting, and type checks on every commit (via GitHub Actions)
-- 📧 Email Verification System
-- 🔐 OAuth Support (Google & Apple)
+- 📧 Email Service (verification, password reset with HTML templates)
+- 🔐 OAuth Support (Google & Apple with proper user management)
+- 🔑 Password Reset System with Email Integration and Security Features
 - 🚫 Zero Warnings (completely clean test output)
 - 🛡️ Rate Limiting (configurable per endpoint with Redis support)
 - 📊 Structured Logging (JSON/colored console, file rotation, ELK stack ready)
-- **🔄 Complete Celery Integration** (background task processing with eager mode testing - no Redis required for development)
+- 🎯 Redis Service (caching, sessions, rate limiting backend)
+- 🌐 WebSocket Service (real-time communication with room support)
+- 🔄 Background Task Processing (Celery with eager mode testing)
+- 🔧 Utility Scripts (bootstrap admin, logging demo)
+- 📋 Feature Status Endpoint for Service Discovery
+- 🏗️ Hybrid Architecture (async production, sync testing)
+- 🔒 Input Validation System (SQL injection, XSS, boundary testing)
+- 📈 CI/CD Pipeline with PostgreSQL Integration
 
 ## ✅ Test Suite
 
-- **292 total tests** with comprehensive coverage
+- **319 total tests** with comprehensive coverage
 - **100% test success rate** (core and integration tests)
-- **5 complex mock tests excluded** (advanced Redis/Celery mocking - isolated)
+- **5 complex mock tests excluded** (advanced Redis/background task mocking - isolated)
 - **Full CI pipeline** (mypy, ruff, pytest) runs on every commit
 - **74% code coverage** with proper async testing
-- **100% coverage for optional features** (Redis, WebSocket, and Celery services)
+- **100% coverage for optional features** (Redis, WebSocket, and background task services)
 
 ## Project Structure
 
 ```
 fast-api-template/
-├── alembic/                # Database migration scripts
-├── app/
-│   ├── api/                # API route definitions
+├── alembic/                    # Database migration scripts
+│   ├── env.py                  # Alembic environment configuration
+│   ├── script.py.mako          # Migration template
+│   └── versions/               # Migration files
+│       ├── 157866a0839e_create_users_table.py
+│       ├── 2b2d3cd4001a_add_oauth_and_email_verification_fields.py
+│       ├── baa1c45958ec_add_is_superuser_field_to_user_model.py
+│       └── add_password_reset_fields.py
+├── app/                        # Main application package
+│   ├── api/                    # API route definitions
 │   │   └── api_v1/
-│   │       └── endpoints/  # Specific endpoint implementations (auth, users, health, ws_demo, celery)
-│   ├── core/               # Core configuration and security
-│   ├── crud/               # Database CRUD operations
-│   ├── database/           # Database connection and session management
-│   ├── models/             # SQLAlchemy database models
-│   ├── schemas/            # Pydantic validation schemas
-│   ├── services/           # Service modules (Redis, WebSocket, Celery)
-│   └── main.py             # Application entry point
-├── tests/                  # Test suite
-│   └── template_tests/     # Template-specific tests (292 tests)
-│       ├── test_celery.py              # Core Celery service tests (12 tests)
-│       ├── test_celery_api.py          # Celery API endpoint tests (9 tests)
-│       ├── test_celery_health.py       # Celery health integration tests (9 tests)
-│       └── test_celery_mocked.py       # Complex mock tests (separated)
-├── [docker-compose.yml](docker-compose.yml)      # Docker composition file
-├── [Dockerfile](Dockerfile)                      # Docker image configuration
-└── requirements.txt        # Python dependencies
+│   │       ├── api.py          # API router configuration
+│   │       └── endpoints/      # Specific endpoint implementations
+│   │           ├── auth.py     # Authentication endpoints (login, register, OAuth, password reset)
+│   │           ├── users.py    # User management endpoints
+│   │           ├── health.py   # Health check endpoints (comprehensive, simple, readiness, liveness)
+│   │           ├── ws_demo.py  # WebSocket demo endpoints
+│   │           └── celery.py   # Background task management endpoints
+│   ├── core/                   # Core configuration and security
+│   │   ├── config.py           # Application configuration and settings
+│   │   ├── security.py         # Security utilities (JWT, password hashing)
+│   │   ├── cors.py             # CORS configuration
+│   │   ├── validation.py       # Input validation utilities
+│   │   └── logging_config.py   # Structured logging configuration
+│   ├── crud/                   # Database CRUD operations
+│   │   └── user.py             # User CRUD operations (sync and async)
+│   ├── database/               # Database connection and session management
+│   │   └── database.py         # Database engine and session configuration
+│   ├── models/                 # SQLAlchemy database models
+│   │   └── models.py           # User model and database schema
+│   ├── schemas/                # Pydantic validation schemas
+│   │   └── user.py             # User schemas (request/response models)
+│   ├── services/               # Service modules
+│   │   ├── email.py            # Email service (verification, password reset)
+│   │   ├── oauth.py            # OAuth service (Google, Apple)
+│   │   ├── redis.py            # Redis service (caching, sessions)
+│   │   ├── websocket.py        # WebSocket service (real-time communication)
+│   │   ├── rate_limiter.py     # Rate limiting service
+│   │   ├── celery.py           # Background task service configuration
+│   │   ├── celery_app.py       # Background task application setup
+│   │   └── celery_tasks.py     # Background task definitions
+│   ├── bootstrap_superuser.py  # Superuser bootstrap script
+│   └── main.py                 # Application entry point
+├── tests/                      # Test suite
+│   └── template_tests/         # Template-specific tests (319 tests)
+│       ├── test_api_auth.py              # Authentication API tests (11 tests)
+│       ├── test_auth_email_verification.py # Email verification tests (16 tests)
+│       ├── test_auth_oauth.py            # OAuth authentication tests (13 tests)
+│       ├── test_auth_password_reset.py   # Password reset tests (27 tests)
+│       ├── test_auth_validation.py       # Input validation tests (50+ tests)
+│       ├── test_api_users.py             # User API tests
+│       ├── test_crud.py                  # CRUD operation tests
+│       ├── test_models.py                # Database model tests
+│       ├── test_security.py              # Security utility tests
+│       ├── test_health.py                # Health check tests
+│       ├── test_cors.py                  # CORS tests
+│       ├── test_main.py                  # Main application tests
+│       ├── test_async_basic.py           # Basic async tests
+│       ├── test_superuser.py             # Superuser bootstrap tests
+│       ├── test_email.py                 # Email service tests
+│       ├── test_oauth.py                 # OAuth service tests
+│       ├── test_redis.py                 # Redis service tests (optional feature)
+│       ├── test_websocket.py             # WebSocket tests (optional feature)
+│       ├── test_rate_limiting.py         # Rate limiting tests
+│       ├── test_logging.py               # Logging configuration tests
+│       ├── test_optional_features.py     # Optional features integration tests
+│       ├── test_celery.py                # Core background task service tests (12 tests)
+│       ├── test_celery_api.py            # Background task API endpoint tests (9 tests)
+│       ├── test_celery_health.py         # Background task health integration tests (9 tests)
+│       └── test_celery_mocked.py         # Complex mock tests (separated)
+├── scripts/                    # Utility scripts
+│   ├── bootstrap_admin.py      # Admin user bootstrap script
+│   └── logging_demo.py         # Logging demonstration script
+├── .github/                    # GitHub Actions CI/CD
+│   └── workflows/
+│       └── ci.yml              # Continuous integration workflow
+├── docker-compose.yml          # Docker composition file (PostgreSQL, Redis, Background Tasks, Flower)
+├── Dockerfile                  # Docker image configuration
+├── requirements.txt            # Python dependencies
+├── pyproject.toml              # Project configuration (ruff, mypy)
+├── pytest.ini                 # Pytest configuration
+├── mypy.ini                   # MyPy type checking configuration
+├── pyrightconfig.json         # Pyright configuration
+├── alembic.ini                # Alembic configuration
+├── celery_config.py           # Background task configuration
+├── setup.sh                   # Project setup script
+├── bootstrap_superuser.sh     # Superuser bootstrap shell script
+├── lint.sh                    # Linting script
+└── README.md                  # This documentation file
 ```
 
 ## Prerequisites
@@ -126,6 +206,7 @@ SMTP_SSL=false
 FROM_EMAIL=noreply@example.com
 FROM_NAME=Your App Name
 VERIFICATION_TOKEN_EXPIRE_HOURS=24
+PASSWORD_RESET_TOKEN_EXPIRE_HOURS=1
 FRONTEND_URL=http://localhost:3000
 
 # Optional Features (Not Required)
@@ -284,15 +365,25 @@ pytest tests/ --asyncio-mode=auto --cov=app --cov-report=term-missing
 
 ## 🛠️ Recent Improvements (July 2025)
 
-### ✅ Complete Celery Integration
-- **Background Task Processing**: Full Celery integration with Redis backend support
+### ✅ Complete Password Reset System
+- **Secure Password Reset**: Complete password reset functionality with email integration
+- **Token Management**: Secure token generation, validation, and expiration (1 hour default)
+- **Email Integration**: HTML email templates with reset links and proper error handling
+- **Security Features**: Rate limiting (3 requests/minute), OAuth user protection, security through obscurity
+- **Comprehensive Testing**: 27/27 tests passing (100% success rate) covering all scenarios
+- **Input Validation**: New password strength validation and token sanitization
+- **Database Integration**: Proper token storage, user lookup, and password updates
+- **Production Ready**: Complete error handling, logging, and monitoring integration
+
+### ✅ Complete Background Task Processing
+- **Asynchronous Task Processing**: Full background task system with Redis backend support
 - **Eager Mode Testing**: Tasks run synchronously during testing (no Redis dependency)
 - **Task Management**: Submit, monitor, and cancel background tasks
 - **Pre-built Tasks**: Email, data processing, cleanup, and long-running tasks
-- **Health Integration**: Celery status included in health checks and monitoring
+- **Health Integration**: Background task status included in health checks and monitoring
 - **API Endpoints**: Complete REST API for task management
 - **Error Handling**: Comprehensive error handling and logging
-- **Test Coverage**: 30/30 Celery tests passing (100% success rate)
+- **Test Coverage**: 30/30 background task tests passing (100% success rate)
 
 ### ✅ Complete Type Safety and Code Quality Overhaul
 - **Zero mypy Errors**: Fixed all 57 type checking issues across the codebase
@@ -387,7 +478,7 @@ This template separates async and sync usage to avoid conflicts during testing w
 ### Test Structure
 The test suite is organized to separate template tests from your application-specific tests:
 - `tests/` - All test files (run with `pytest tests/`)
-- `tests/template_tests/` - Template-specific tests (authentication, validation, Celery, etc.)
+- `tests/template_tests/` - Template-specific tests (authentication, validation, Celery, password reset, etc.)
 - `tests/your_module/` - Your application-specific tests (add your own test files here)
 
 **Note**: All tests are located in the `tests/` directory. Template tests are grouped under `tests/template_tests/`, and you should add your own test files in `tests/your_module/` or directly in `tests/`.
@@ -396,14 +487,14 @@ The test suite is organized to separate template tests from your application-spe
 
 ### Run Tests
 ```bash
-# All template tests (292 tests with 100% success rate)
+# All template tests (319 tests with 100% success rate)
 ENABLE_CELERY=true CELERY_TASK_ALWAYS_EAGER=true CELERY_TASK_EAGER_PROPAGATES=true python -m pytest tests/template_tests/ --ignore=tests/template_tests/test_celery_mocked.py -v --asyncio-mode=auto
 
-# All tests except complex mocks (292 tests, 100% success rate)
+# All tests except complex mocks (319 tests, 100% success rate)
 ENABLE_CELERY=true CELERY_TASK_ALWAYS_EAGER=true CELERY_TASK_EAGER_PROPAGATES=true python -m pytest tests/template_tests/ --ignore=tests/template_tests/test_celery_mocked.py -v
 
-# All authentication tests (40+ tests)
-pytest tests/template_tests/test_api_auth.py tests/template_tests/test_auth_email_verification.py tests/template_tests/test_auth_oauth.py -v
+# All authentication tests (67+ tests)
+pytest tests/template_tests/test_api_auth.py tests/template_tests/test_auth_email_verification.py tests/template_tests/test_auth_oauth.py tests/template_tests/test_auth_password_reset.py -v
 
 # With coverage (recommended for accurate results)
 ENABLE_CELERY=true CELERY_TASK_ALWAYS_EAGER=true CELERY_TASK_EAGER_PROPAGATES=true python -m pytest tests/template_tests/ --ignore=tests/template_tests/test_celery_mocked.py --asyncio-mode=auto --cov=app --cov-report=term-missing
@@ -415,30 +506,33 @@ pytest tests/template_tests/ --ignore=tests/template_tests/test_celery_mocked.py
 pytest tests/template_tests/test_api_*.py -v  # API tests
 pytest tests/template_tests/test_cors.py -v   # CORS tests
 pytest tests/template_tests/test_auth_validation.py -v  # Validation tests (50+ tests)
+pytest tests/template_tests/test_auth_password_reset.py -v  # Password reset tests (27 tests)
 pytest tests/template_tests/test_redis.py tests/template_tests/test_websocket.py --asyncio-mode=auto -v  # Optional features
-pytest tests/template_tests/test_celery.py tests/template_tests/test_celery_api.py tests/template_tests/test_celery_health.py -v  # Celery tests
+pytest tests/template_tests/test_celery.py tests/template_tests/test_celery_api.py tests/template_tests/test_celery_health.py -v  # Background task tests
 ```
 
 ### Test Coverage Summary
-- **292 Total Tests** covering all scenarios (5 complex mock tests separated):
+- **319 Total Tests** covering all scenarios (5 complex mock tests separated):
   - User registration and login (11 tests)
   - Email verification flow (16 tests)
   - OAuth authentication (13 tests)
+  - **Password reset functionality (27 tests)**
   - **Input validation and security (50+ tests)**
   - CRUD operations and models
   - CORS handling and health checks
   - Optional Redis and WebSocket features
-  - **Complete Celery integration (30 tests)**
+  - **Background task processing (30 tests)**
 - **Email Verification**: Registration, verification tokens, resend functionality
+- **Password Reset**: Request, token generation, email sending, password reset confirmation
 - **OAuth Support**: Google and Apple OAuth with proper error handling
 - **Security**: Unverified user restrictions, duplicate handling, validation
 - **Input Validation**: Comprehensive security testing with SQL injection, XSS, and boundary testing
 - **CRUD Operations**: Both sync and async database operations
 - **Integration**: End-to-end authentication flows
-- **Celery Integration**: Complete background task processing with eager mode testing
+- **Background Tasks**: Complete asynchronous task processing with eager mode testing
 
 ### Test Coverage Includes
-- Authentication (JWT, registration, login, email verification, OAuth)
+- Authentication (JWT, registration, login, email verification, OAuth, password reset)
 - **Input validation and security** (SQL injection, XSS, boundary testing, reserved words)
 - CRUD operations and models
 - CORS handling
@@ -448,16 +542,16 @@ pytest tests/template_tests/test_celery.py tests/template_tests/test_celery_api.
 - **Optional Redis integration** (100% coverage - initialization, health checks, error handling)
 - **Optional WebSocket functionality** (100% coverage - connection management, messaging, rooms)
 - **Feature flag testing** (conditional loading of optional features)
-- **Complete Celery integration** (100% coverage - task submission, status tracking, cancellation, health integration)
+- **Background task processing** (100% coverage - task submission, status tracking, cancellation, health integration)
 
 ### Coverage Notes
 - **74% overall coverage** with proper async testing
-- **100% coverage for optional features** (Redis, WebSocket, and Celery services)
-- **Complete async test execution** - All 292 tests run properly with @pytest.mark.asyncio
-- **100% test success rate** - 292/292 tests passing (5 complex mock tests excluded)
+- **100% coverage for optional features** (Redis, WebSocket, and background task services)
+- **Complete async test execution** - All 319 tests run properly with @pytest.mark.asyncio
+- **100% test success rate** - 319/319 tests passing (5 complex mock tests excluded)
 - **CI runs with `--asyncio-mode=auto`** for accurate coverage reporting
 - **Local development**: Use `--asyncio-mode=auto` for full test execution
-- **Celery testing**: Uses eager mode for reliable testing without Redis dependency
+- **Background task testing**: Uses eager mode for reliable testing without Redis dependency
 
 ### Code Quality Checks
 ```bash
@@ -476,7 +570,7 @@ mypy . && ruff check .
 The project includes a comprehensive GitHub Actions CI/CD pipeline that runs on every push and pull request:
 
 ### Pipeline Jobs
-- **🧪 Run Tests**: Executes all 262 tests with PostgreSQL integration
+- **🧪 Run Tests**: Executes all 319 tests with PostgreSQL integration
 - **🔍 Lint (ruff)**: Performs code linting and format checking
 - **🧠 Type Check (mypy)**: Validates type safety across the codebase
 
@@ -486,7 +580,7 @@ The project includes a comprehensive GitHub Actions CI/CD pipeline that runs on 
 - **Fast Execution**: Complete pipeline completes in under 2 minutes
 - **Environment Isolation**: Proper test database setup and cleanup
 - **Coverage Reporting**: Test coverage tracking and reporting
-- **Perfect Success Rate**: All 262 tests pass consistently
+- **Perfect Success Rate**: All 319 tests pass consistently
 
 ### Local Development
 The CI pipeline mirrors your local development environment:
@@ -499,6 +593,54 @@ The CI pipeline mirrors your local development environment:
 ## Docker Deployment
 
 Docker Compose uses profiles to conditionally start optional services like Redis. This allows you to run only the services you need.
+
+### Available Docker Services
+
+The template includes a complete Docker Compose setup with the following services:
+
+#### Core Services (Always Running)
+- **postgres**: PostgreSQL 15 database with persistent storage
+- **api**: FastAPI application with hot reload for development
+
+#### Optional Services (Profile-based)
+- **redis**: Redis 7 for caching, sessions, and rate limiting backend
+- **celery-worker**: Celery worker for background task processing
+- **flower**: Celery monitoring dashboard (port 5555)
+
+### Docker Service Profiles
+
+```bash
+# Basic setup (PostgreSQL + API only)
+docker-compose --env-file .env.docker up -d
+
+# With Redis support
+docker-compose --env-file .env.docker --profile redis up -d
+
+# With Celery background processing
+docker-compose --env-file .env.docker --profile redis --profile celery up -d
+
+# Full stack (all services)
+docker-compose --env-file .env.docker --profile redis --profile celery up -d
+```
+
+### Service Ports and Access
+
+| Service | Port | Description | Profile |
+|---------|------|-------------|---------|
+| **API** | 8000 | FastAPI application | Always |
+| **PostgreSQL** | 5432 | Database | Always |
+| **Redis** | 6379 | Cache/Sessions | redis |
+| **Flower** | 5555 | Celery monitoring | celery |
+
+### Service Dependencies
+
+```
+api → postgres (required)
+celery-worker → postgres + redis (required)
+flower → postgres + redis (required)
+redis → (standalone)
+postgres → (standalone)
+```
 
 ### Local Development
 ```bash
@@ -532,6 +674,58 @@ docker-compose --env-file .env.docker --profile redis up -d
 ### Production
 ```bash
 docker-compose --env-file .env.prod up -d --build
+```
+
+## 🛠️ Services Overview
+
+The template includes a comprehensive set of services that can be enabled or disabled based on your needs:
+
+### Core Services (Always Available)
+- **Authentication Service**: JWT-based auth with email verification, OAuth, and password reset
+- **Database Service**: PostgreSQL with SQLAlchemy ORM and Alembic migrations
+- **Email Service**: SMTP-based email sending for verification and password reset
+- **Health Check Service**: Multiple health endpoints for monitoring and Kubernetes
+- **Logging Service**: Structured logging with JSON/console output and file rotation
+- **Rate Limiting Service**: Configurable rate limiting with memory or Redis backend
+- **Validation Service**: Comprehensive input validation and sanitization
+
+### Optional Services (Feature Flags)
+- **Redis Service**: Caching, sessions, and rate limiting backend
+- **WebSocket Service**: Real-time communication with room support
+- **Background Task Service**: Asynchronous task processing with monitoring
+- **OAuth Service**: Google and Apple OAuth integration
+
+### Service Configuration
+
+All services are controlled via environment variables with sensible defaults:
+
+```bash
+# Core services (always enabled)
+ENABLE_RATE_LIMITING=true
+ENABLE_LOGGING=true
+
+# Optional services (disabled by default)
+ENABLE_REDIS=false
+ENABLE_WEBSOCKETS=false
+ENABLE_CELERY=false
+ENABLE_OAUTH=false
+```
+
+### Service Discovery
+
+Check which services are enabled:
+```bash
+curl http://localhost:8000/features
+```
+
+Response:
+```json
+{
+  "redis": false,
+  "websockets": false,
+  "rate_limiting": true,
+  "celery": false
+}
 ```
 
 ## Optional Features
@@ -603,10 +797,79 @@ ws.send(JSON.stringify({
 }));
 ```
 
-### Celery Background Task Processing
-Celery is a complete background task processing system that's fully integrated and tested.
+### Password Reset System
+The template includes a complete password reset system with email integration and security features.
 
-**Enable Celery:**
+**Enable Password Reset:**
+```bash
+# Set in your .env file (requires email configuration)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+SMTP_TLS=true
+SMTP_SSL=false
+FROM_EMAIL=noreply@example.com
+FROM_NAME=Your App Name
+FRONTEND_URL=http://localhost:3000
+PASSWORD_RESET_TOKEN_EXPIRE_HOURS=1
+```
+
+**Available Endpoints:**
+- `POST /api/v1/auth/forgot-password` - Request password reset email
+- `POST /api/v1/auth/reset-password` - Reset password with token
+
+**Password Reset Flow:**
+1. User requests password reset with email address
+2. System generates secure token and sends email with reset link
+3. User clicks link and enters new password
+4. System validates token and updates password
+5. Token is invalidated after use
+
+**Security Features:**
+- **Rate Limited**: 3 requests per minute per IP address
+- **Token Expiration**: Reset tokens expire after 1 hour (configurable)
+- **OAuth Protection**: OAuth users cannot reset passwords (they don't have passwords)
+- **Security Through Obscurity**: Consistent responses regardless of email existence
+- **Token Invalidation**: Reset tokens are cleared after successful password reset
+- **Input Validation**: New passwords must meet strength requirements
+
+**Example Usage:**
+```bash
+# Request password reset
+curl -X POST "http://localhost:8000/api/v1/auth/forgot-password" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
+
+# Reset password with token
+curl -X POST "http://localhost:8000/api/v1/auth/reset-password" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "reset_token_from_email",
+    "new_password": "NewSecurePassword123!"
+  }'
+```
+
+**Testing Password Reset:**
+```bash
+# Run all password reset tests (27 tests, 100% passing)
+pytest tests/template_tests/test_auth_password_reset.py -v
+
+# Run all authentication tests including password reset (67+ tests)
+pytest tests/template_tests/test_api_auth.py tests/template_tests/test_auth_email_verification.py tests/template_tests/test_auth_oauth.py tests/template_tests/test_auth_password_reset.py -v
+```
+
+**Password Reset Test Coverage:**
+- **Endpoint Tests**: 15/15 tests passing (100%)
+- **CRUD Operations**: 5/5 tests passing (100%)
+- **Email Service**: 6/6 tests passing (100%)
+- **Integration Tests**: 1/1 tests passing (100%)
+- **Total**: 27/27 tests passing (100%)
+
+### Background Task Processing
+Background task processing is an optional feature for handling asynchronous operations.
+
+**Enable Background Tasks:**
 ```bash
 # Set in your .env file
 ENABLE_CELERY=true
@@ -618,12 +881,12 @@ CELERY_TASK_ALWAYS_EAGER=true
 CELERY_TASK_EAGER_PROPAGATES=true
 ```
 
-**Available Celery Endpoints:**
+**Available Background Task Endpoints:**
 - `POST /api/v1/celery/tasks/submit` - Submit a custom task
 - `GET /api/v1/celery/tasks/{task_id}/status` - Get task status
 - `DELETE /api/v1/celery/tasks/{task_id}/cancel` - Cancel a task
 - `GET /api/v1/celery/tasks/active` - Get active tasks
-- `GET /api/v1/celery/status` - Get Celery system status
+- `GET /api/v1/celery/status` - Get background task system status
 
 **Pre-built Task Endpoints:**
 - `POST /api/v1/celery/tasks/send-email` - Send email task
@@ -653,30 +916,90 @@ curl -X POST "http://localhost:8000/api/v1/celery/tasks/send-email" \
 curl "http://localhost:8000/api/v1/celery/tasks/{task_id}/status"
 ```
 
-**Celery Features:**
+**Background Task Features:**
 - **Eager Mode Testing**: Tasks run synchronously during testing (no Redis required)
 - **Task Status Tracking**: Monitor task progress and results
 - **Task Cancellation**: Cancel running tasks
-- **Health Integration**: Celery status included in health checks
+- **Health Integration**: Background task status included in health checks
 - **Error Handling**: Comprehensive error handling and logging
 - **Task Types**: Email, data processing, cleanup, and long-running tasks
 - **Priority Support**: Task priority levels
 - **Result Backend**: Task results stored in Redis
 
-**Testing Celery:**
+**Testing Background Tasks:**
 ```bash
-# Run all Celery tests (30 tests, 100% passing)
+# Run all background task tests (30 tests, 100% passing)
 ENABLE_CELERY=true CELERY_TASK_ALWAYS_EAGER=true CELERY_TASK_EAGER_PROPAGATES=true python -m pytest tests/template_tests/test_celery.py tests/template_tests/test_celery_api.py tests/template_tests/test_celery_health.py -v
 
-# Run all tests except complex mocks (292 tests, 100% passing)
+# Run all tests except complex mocks (319 tests, 100% passing)
 ENABLE_CELERY=true CELERY_TASK_ALWAYS_EAGER=true CELERY_TASK_EAGER_PROPAGATES=true python -m pytest tests/template_tests/ --ignore=tests/template_tests/test_celery_mocked.py -v
 ```
 
-**Celery Test Coverage:**
+**Background Task Test Coverage:**
 - **Core Service**: 12/12 tests passing (100%)
 - **API Endpoints**: 9/9 tests passing (100%)
 - **Health Integration**: 9/9 tests passing (100%)
 - **Total**: 30/30 tests passing (100%)
+
+## 🔧 Utility Scripts and Tools
+
+The template includes several utility scripts and tools to help with development and deployment:
+
+### Bootstrap Scripts
+- **`bootstrap_superuser.sh`**: Shell script to create a superuser account
+- **`bootstrap_superuser.py`**: Python script for superuser creation (imported by main.py)
+- **`scripts/bootstrap_admin.py`**: Alternative admin user creation script
+
+### Development Tools
+- **`setup.sh`**: Project setup script for initial configuration
+- **`lint.sh`**: Linting script using ruff
+- **`scripts/logging_demo.py`**: Demonstration of structured logging features
+
+### Configuration Files
+- **`pyproject.toml`**: Project configuration (ruff, dependencies)
+- **`pytest.ini`**: Pytest configuration
+- **`mypy.ini`**: MyPy type checking configuration
+- **`pyrightconfig.json`**: Pyright configuration
+- **`alembic.ini`**: Alembic migration configuration
+- **`celery_config.py`**: Background task configuration
+
+### Usage Examples
+
+#### Bootstrap Superuser
+```bash
+# Using shell script
+./bootstrap_superuser.sh --email admin@example.com --password secret123
+
+# Using Python script directly
+python -m app.bootstrap_superuser --email admin@example.com --password secret123
+
+# Using alternative script
+python scripts/bootstrap_admin.py --email admin@example.com --password secret123
+```
+
+#### Development Setup
+```bash
+# Run setup script
+./setup.sh
+
+# Run linting
+./lint.sh
+
+# Demo logging features
+python scripts/logging_demo.py
+```
+
+#### Code Quality Checks
+```bash
+# Type checking
+mypy .
+
+# Linting
+ruff check .
+
+# Both
+mypy . && ruff check .
+```
 
 ### Feature Status
 Check which features are enabled:
@@ -689,22 +1012,58 @@ curl http://localhost:8000/features
 - Swagger UI: http://localhost:8000/docs
 - Redoc: http://localhost:8000/redoc
 
-### Authentication Endpoints
+### Core Endpoints
 
-#### User Registration & Login
+#### Root and Status
+- `GET /` - Root endpoint with welcome message
+- `GET /features` - Get status of optional features
+
+#### Authentication Endpoints
+
+##### User Registration & Login
 - `POST /api/v1/auth/register` - Register new user (returns 201 Created)
 - `POST /api/v1/auth/login` - Login with email/password
 
-#### Email Verification
+##### Email Verification
 - `POST /api/v1/auth/resend-verification` - Resend verification email
 - `POST /api/v1/auth/verify-email` - Verify email with token
 
-#### OAuth Authentication
+##### Password Reset
+- `POST /api/v1/auth/forgot-password` - Request password reset email
+- `POST /api/v1/auth/reset-password` - Reset password with token
+
+##### OAuth Authentication
 - `POST /api/v1/auth/oauth/login` - OAuth login with Google or Apple
 - `GET /api/v1/auth/oauth/providers` - Get available OAuth providers
 
-#### User Management
+##### User Management
 - `GET /api/v1/users/me` - Get current user information (requires authentication)
+
+#### Health Check Endpoints
+- `GET /api/v1/health/` - Comprehensive health check (database, Redis, Celery)
+- `GET /api/v1/health/simple` - Simple health check
+- `GET /api/v1/health/readiness` - Kubernetes readiness probe
+- `GET /api/v1/health/liveness` - Kubernetes liveness probe
+- `GET /api/v1/health/rate-limit` - Rate limiting status for current IP
+
+### Optional Feature Endpoints
+
+#### WebSocket Endpoints (when ENABLE_WEBSOCKETS=true)
+- `ws://localhost:8000/api/v1/ws/demo` - WebSocket demo endpoint
+- `GET /api/v1/ws/status` - WebSocket connection status
+
+#### Celery Endpoints (when ENABLE_CELERY=true)
+- `POST /api/v1/celery/tasks/submit` - Submit a custom task
+- `GET /api/v1/celery/tasks/{task_id}/status` - Get task status
+- `DELETE /api/v1/celery/tasks/{task_id}/cancel` - Cancel a task
+- `GET /api/v1/celery/tasks/active` - Get active tasks
+- `GET /api/v1/celery/status` - Get Celery system status
+
+##### Pre-built Celery Task Endpoints
+- `POST /api/v1/celery/tasks/send-email` - Send email task
+- `POST /api/v1/celery/tasks/process-data` - Data processing task
+- `POST /api/v1/celery/tasks/cleanup` - Cleanup task
+- `POST /api/v1/celery/tasks/long-running` - Long-running task
 
 ## Security Model
 
@@ -757,6 +1116,7 @@ RATE_LIMIT_DEFAULT=100/minute
 RATE_LIMIT_LOGIN=5/minute
 RATE_LIMIT_REGISTER=3/minute
 RATE_LIMIT_EMAIL_VERIFICATION=3/minute
+RATE_LIMIT_PASSWORD_RESET=3/minute
 RATE_LIMIT_OAUTH=10/minute
 ```
 
@@ -764,6 +1124,7 @@ RATE_LIMIT_OAUTH=10/minute
 - **Login**: 5 requests per minute
 - **Registration**: 3 requests per minute
 - **Email Verification**: 3 requests per minute
+- **Password Reset**: 3 requests per minute
 - **OAuth**: 10 requests per minute
 - **Custom Limits**: Use `@rate_limit_custom("10/hour")` decorator
 
@@ -1222,6 +1583,7 @@ The application includes a complete email verification system:
 - `FROM_NAME` - Sender name
 - `FRONTEND_URL` - Frontend URL for verification links
 - `VERIFICATION_TOKEN_EXPIRE_HOURS` - Token expiration time (default: 24 hours)
+- `PASSWORD_RESET_TOKEN_EXPIRE_HOURS` - Password reset token expiration time (default: 1 hour)
 
 **Features:**
 - HTML email templates with verification links

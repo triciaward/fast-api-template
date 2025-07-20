@@ -28,5 +28,9 @@ class User(Base):
     verification_token = Column(String, nullable=True)
     verification_token_expires = Column(DateTime, nullable=True)
 
+    # Password reset
+    password_reset_token = Column(String, nullable=True)
+    password_reset_token_expires = Column(DateTime, nullable=True)
+
     def __repr__(self) -> str:
         return f"<User(id={self.id}, email={self.email}, username={self.username}, is_superuser={self.is_superuser}, is_verified={self.is_verified})>"

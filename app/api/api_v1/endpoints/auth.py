@@ -13,6 +13,10 @@ from app.schemas.user import (
     EmailVerificationRequest,
     EmailVerificationResponse,
     OAuthLogin,
+    PasswordResetConfirmRequest,
+    PasswordResetConfirmResponse,
+    PasswordResetRequest,
+    PasswordResetResponse,
     Token,
     UserCreate,
     UserResponse,
@@ -28,6 +32,7 @@ from app.services import (
     rate_limit_email_verification,
     rate_limit_login,
     rate_limit_oauth,
+    rate_limit_password_reset,
     rate_limit_register,
 )
 
@@ -406,3 +411,172 @@ async def get_oauth_providers() -> dict:
         providers.append("apple")
 
     return {"providers": providers}
+
+
+@router.post("/forgot-password", response_model=PasswordResetResponse)
+@rate_limit_password_reset
+async def forgot_password(
+    request: PasswordResetRequest, db: Session = Depends(get_db)
+) -> PasswordResetResponse:
+    """Request password reset."""
+    logger.info("Password reset request", email=request.email)
+
+    try:
+        # Check if user exists
+        user = crud_user.get_user_by_email_sync(db, email=request.email)
+        if not user:
+            # Don't reveal if user exists or not for security
+            logger.info(
+                "Password reset request for non-existent user", email=request.email
+            )
+            return PasswordResetResponse(
+                message="If an account with that email exists, a password reset link has been sent.",
+                email_sent=True,
+            )
+
+        # Don't allow password reset for OAuth users
+        if user.oauth_provider:
+            logger.warning(
+                "Password reset attempted for OAuth user",
+                user_id=str(user.id),
+                email=request.email,
+                oauth_provider=user.oauth_provider,
+            )
+            return PasswordResetResponse(
+                message="If an account with that email exists, a password reset link has been sent.",
+                email_sent=True,
+            )
+
+        if not email_service or not email_service.is_configured():
+            logger.warning(
+                "Email service not configured for password reset", email=request.email
+            )
+            return PasswordResetResponse(
+                message="Password reset service temporarily unavailable. Please try again later.",
+                email_sent=False,
+            )
+
+        # Create password reset token
+        reset_token = await email_service.create_password_reset_token(db, str(user.id))
+        if not reset_token:
+            logger.error(
+                "Failed to create password reset token",
+                user_id=str(user.id),
+                email=request.email,
+            )
+            return PasswordResetResponse(
+                message="Failed to create password reset token. Please try again later.",
+                email_sent=False,
+            )
+
+        # Send password reset email
+        email_sent = email_service.send_password_reset_email(
+            str(user.email), str(user.username), reset_token
+        )
+
+        if email_sent:
+            logger.info(
+                "Password reset email sent successfully",
+                user_id=str(user.id),
+                email=request.email,
+            )
+            return PasswordResetResponse(
+                message="If an account with that email exists, a password reset link has been sent.",
+                email_sent=True,
+            )
+        else:
+            logger.error(
+                "Failed to send password reset email",
+                user_id=str(user.id),
+                email=request.email,
+            )
+            return PasswordResetResponse(
+                message="Failed to send password reset email. Please try again later.",
+                email_sent=False,
+            )
+
+    except Exception as e:
+        logger.error(
+            "Password reset request failed with unexpected error",
+            email=request.email,
+            error=str(e),
+            exc_info=True,
+        )
+        return PasswordResetResponse(
+            message="Password reset request failed. Please try again later.",
+            email_sent=False,
+        )
+
+
+@router.post("/reset-password", response_model=PasswordResetConfirmResponse)
+@rate_limit_password_reset
+async def reset_password(
+    request: PasswordResetConfirmRequest, db: Session = Depends(get_db)
+) -> PasswordResetConfirmResponse:
+    """Reset password with token."""
+    logger.info("Password reset confirmation attempt")
+
+    try:
+        if not email_service or not email_service.is_configured():
+            logger.warning(
+                "Email service not configured for password reset confirmation"
+            )
+            return PasswordResetConfirmResponse(
+                message="Password reset service temporarily unavailable. Please try again later.",
+                password_reset=False,
+            )
+
+        # Verify the reset token
+        user_id = await email_service.verify_password_reset_token(db, request.token)
+        if not user_id:
+            logger.warning("Invalid or expired password reset token")
+            return PasswordResetConfirmResponse(
+                message="Invalid or expired password reset token. Please request a new one.",
+                password_reset=False,
+            )
+
+        # Get user
+        user = crud_user.get_user_by_id_sync(db, user_id)
+        if not user:
+            logger.warning("User not found for password reset", user_id=user_id)
+            return PasswordResetConfirmResponse(
+                message="User not found.", password_reset=False
+            )
+
+        # Don't allow password reset for OAuth users
+        if user.oauth_provider:
+            logger.warning(
+                "Password reset attempted for OAuth user",
+                user_id=str(user.id),
+                oauth_provider=user.oauth_provider,
+            )
+            return PasswordResetConfirmResponse(
+                message="Invalid or expired password reset token. Please request a new one.",
+                password_reset=False,
+            )
+
+        # Reset the password
+        success = crud_user.reset_user_password_sync(db, user_id, request.new_password)
+        if not success:
+            logger.error("Failed to reset user password", user_id=user_id)
+            return PasswordResetConfirmResponse(
+                message="Failed to reset password. Please try again later.",
+                password_reset=False,
+            )
+
+        logger.info("Password reset successful", user_id=str(user.id), email=user.email)
+        return PasswordResetConfirmResponse(
+            message="Password reset successfully. You can now log in with your new password.",
+            password_reset=True,
+        )
+
+    except Exception as e:
+        logger.error(
+            "Password reset confirmation failed with unexpected error",
+            error=str(e),
+            exc_info=True,
+        )
+        return PasswordResetConfirmResponse(
+            message="Password reset failed. Please try again later.",
+            password_reset=False,
+        )

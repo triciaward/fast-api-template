@@ -108,5 +108,80 @@ class EmailService:
         # Return user ID for verification
         return str(user.id)
 
+    def send_password_reset_email(
+        self, email: str, username: str, reset_token: str
+    ) -> bool:
+        """Send password reset email."""
+        if not self.is_configured():
+            return False
+
+        reset_url = f"{settings.FRONTEND_URL}/reset-password?token={reset_token}"
+
+        # Simple HTML template
+        html_content = f"""
+        <html>
+        <body>
+            <h2>Password Reset Request - {settings.PROJECT_NAME}</h2>
+            <p>Hi {username},</p>
+            <p>We received a request to reset your password. Click the link below to create a new password:</p>
+            <p><a href="{reset_url}">Reset Password</a></p>
+            <p>If the link doesn't work, copy and paste this URL into your browser:</p>
+            <p>{reset_url}</p>
+            <p>This link will expire in {settings.PASSWORD_RESET_TOKEN_EXPIRE_HOURS} hour(s).</p>
+            <p>If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+            <br>
+            <p>Best regards,<br>{settings.FROM_NAME}</p>
+        </body>
+        </html>
+        """
+
+        message = emails.Message(
+            subject=f"Password Reset Request - {settings.PROJECT_NAME}",
+            html=html_content,
+            mail_from=(settings.FROM_NAME, settings.FROM_EMAIL),
+        )
+
+        try:
+            response = message.send(
+                to=email,
+                smtp=self.smtp_config,
+            )
+            return response.status_code == 250  # type: ignore
+        except Exception:
+            return False
+
+    async def create_password_reset_token(
+        self, db: Session, user_id: str
+    ) -> Optional[str]:
+        """Create and store password reset token for a user."""
+        token = self.generate_verification_token()
+        expires = datetime.utcnow() + timedelta(
+            hours=settings.PASSWORD_RESET_TOKEN_EXPIRE_HOURS
+        )
+
+        success = crud_user.update_password_reset_token_sync(
+            db, user_id=user_id, token=token, expires=expires
+        )
+
+        return token if success else None
+
+    async def verify_password_reset_token(
+        self, db: Session, token: str
+    ) -> Optional[str]:
+        """Verify a password reset token and return user ID if valid."""
+        user = crud_user.get_user_by_password_reset_token_sync(db, token=token)
+        if not user:
+            return None
+
+        # Check if token is expired
+        if (
+            user.password_reset_token_expires
+            and user.password_reset_token_expires < datetime.utcnow()
+        ):
+            return None
+
+        # Return user ID for password reset
+        return str(user.id)
+
 
 email_service = EmailService()

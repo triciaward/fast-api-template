@@ -142,3 +142,47 @@ class VerifyEmailRequest(BaseModel):
 class VerifyEmailResponse(BaseModel):
     message: str
     verified: bool
+
+
+# Password reset schemas
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        """Validate email format."""
+        is_valid, error_msg = validate_email_format(v)
+        if not is_valid:
+            raise ValueError(error_msg)
+        return v.lower().strip()
+
+
+class PasswordResetResponse(BaseModel):
+    message: str
+    email_sent: bool
+
+
+class PasswordResetConfirmRequest(BaseModel):
+    token: str
+    new_password: str
+
+    @field_validator("token")
+    @classmethod
+    def validate_token(cls, v: str) -> str:
+        """Sanitize reset token."""
+        return sanitize_input(v, max_length=255)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        """Validate new password strength."""
+        is_valid, error_msg = validate_password(v)
+        if not is_valid:
+            raise ValueError(error_msg)
+        return v
+
+
+class PasswordResetConfirmResponse(BaseModel):
+    message: str
+    password_reset: bool

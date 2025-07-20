@@ -97,6 +97,15 @@ def rate_limit_email_verification(func: Callable) -> Callable:
     return get_limiter().limit(settings.RATE_LIMIT_EMAIL_VERIFICATION)(func)  # type: ignore
 
 
+def rate_limit_password_reset(func: Callable) -> Callable:
+    """Rate limit decorator for password reset endpoints."""
+    if not settings.ENABLE_RATE_LIMITING:
+        return _no_op_decorator(func)
+
+    # Use slowapi's limit decorator
+    return get_limiter().limit(settings.RATE_LIMIT_PASSWORD_RESET)(func)  # type: ignore
+
+
 def rate_limit_oauth(func: Callable) -> Callable:
     """Rate limit decorator for OAuth endpoints."""
     if not settings.ENABLE_RATE_LIMITING:
