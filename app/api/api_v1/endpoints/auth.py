@@ -1072,13 +1072,12 @@ async def get_account_deletion_status(
         deletion_confirmed = user.deletion_confirmed_at is not None
         can_cancel = deletion_requested and not user.is_deleted
 
-        return AccountDeletionStatusResponse(
+        return AccountDeletionStatusResponse(  # type: ignore[arg-type]
             deletion_requested=deletion_requested,
             deletion_confirmed=deletion_confirmed,
-            # type: ignore[arg-type]
             deletion_scheduled_for=(
                 user.deletion_scheduled_for if user.deletion_scheduled_for else None
-            ),
+            ),  # type: ignore[arg-type]
             can_cancel=can_cancel,
             grace_period_days=settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS,
         )
@@ -1238,8 +1237,8 @@ async def get_user_sessions(
 
                 # Get all user sessions
         sessions = crud_get_user_sessions(
-            db, current_user.id, current_session_id
-        )  # type: ignore[arg-type]
+            db, current_user.id, current_session_id  # type: ignore[arg-type]
+        )
 
         # Convert to response format
         session_info_list = []
