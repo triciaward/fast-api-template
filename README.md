@@ -713,6 +713,211 @@ except ZeroDivisionError as e:
                     exc_info=True)
 ```
 
+## 📜 Logger Usage
+
+This project includes a comprehensive structured logging system using **structlog** for tracking events during development and production.
+
+### 🛠 How it works
+- **Console & File Logging**: Logs are written to both the console and a file at `logs/app.log`
+- **Automatic Rotation**: Logs automatically rotate daily and retain the last 7 logs by default
+- **Structured Format**: Uses structlog for structured, searchable logging with context
+- **Environment Aware**: Different formats for development (text) vs production (JSON)
+
+### 🧪 How to use it
+
+#### Import and Setup
+```python
+from app.core.logging_config import get_app_logger, get_auth_logger, get_db_logger
+
+# Get specialized loggers for different components
+app_logger = get_app_logger()      # General application logging
+auth_logger = get_auth_logger()    # Authentication-specific logging
+db_logger = get_db_logger()        # Database operation logging
+```
+
+#### Basic Logging Methods
+```python
+# Different log levels
+app_logger.debug("Debug information", debug_data="some debug info")
+app_logger.info("Information message", user_action="login")
+app_logger.warning("Warning message", warning_type="rate_limit")
+app_logger.error("Error message", error_code="DB_CONNECTION_FAILED")
+app_logger.critical("Critical error", system_component="database")
+```
+
+### 🔍 Example Output
+
+**Development (Text Format):**
+```
+2025-07-19 17:41:11 [info] [auth] User login user_id=123 email=user@example.com
+2025-07-19 17:41:12 [error] [db] Database connection failed retry_count=3
+```
+
+**Production (JSON Format):**
+```json
+{
+  "timestamp": "2025-07-19T17:41:11.635810",
+  "level": "info",
+  "logger": "auth",
+  "event": "User login",
+  "user_id": "123",
+  "email": "user@example.com",
+  "pid": 12345,
+  "thread": "MainThread",
+  "environment": "production",
+  "service": "fastapi_template"
+}
+```
+
+### 🔒 Log Levels
+
+| Level | Use For | Example |
+|-------|---------|---------|
+| **DEBUG** | Detailed internal info (dev only) | `logger.debug("Processing user data", user_id=123)` |
+| **INFO** | Routine events and operations | `logger.info("User registered", email="user@example.com")` |
+| **WARNING** | Recoverable issues or bad input | `logger.warning("Rate limit approaching", user_id=123)` |
+| **ERROR** | Major issues or failed operations | `logger.error("Database connection failed", retry_count=3)` |
+| **CRITICAL** | Serious errors, app may crash | `logger.critical("System out of memory", available_mb=50)` |
+
+### 📁 Log File Location and Rotation
+
+- **Default Location**: `logs/app.log` (relative to project root)
+- **Rotation**: Logs rotate daily at midnight
+- **Retention**: Keeps 7 backup files by default
+- **File Pattern**: `app.log`, `app.log.1`, `app.log.2`, etc.
+
+### 🌍 Environment Behavior
+
+**Development:**
+- Logs are printed to both console and `logs/app.log`
+- Human-readable text format with colors
+- Includes debug information
+
+**Production:**
+- JSON format for easy parsing by log aggregation systems
+- Compatible with ELK Stack, Docker logging drivers, and cloud logging services
+- Optimized for performance and centralized logging
+
+### 💡 Best Practices
+
+**✅ Do:**
+```python
+# Use structured logging with context
+auth_logger.info("User registered", 
+                user_id=user.id,
+                email=user.email,
+                registration_method="email")
+
+# Log exceptions with full stack traces
+try:
+    result = risky_operation()
+except Exception as e:
+    app_logger.error("Operation failed", 
+                    operation="user_update",
+                    user_id=user.id,
+                    exc_info=True)
+
+# Use appropriate log levels
+app_logger.debug("Processing user data", user_id=user.id)  # Detailed debugging
+app_logger.info("User action completed", action="profile_update")  # General info
+app_logger.warning("Rate limit approaching", user_id=user.id)  # Potential issues
+app_logger.error("Database connection failed", retry_count=3)  # Errors
+```
+
+**❌ Don't:**
+```python
+# Avoid unstructured logging
+app_logger.info("User 123 did something with email user@example.com")  # Hard to parse
+
+# Don't log sensitive information
+auth_logger.info("User login", password="secret123")  # Never log passwords!
+
+# Don't use print statements
+print("User logged in")  # Use the logger instead
+
+# Don't log without context
+app_logger.error("Error occurred")  # Add context about what failed
+```
+
+### 🔧 Real-World Examples
+
+**API Endpoints:**
+```python
+from app.core.logging_config import get_auth_logger
+
+auth_logger = get_auth_logger()
+
+@router.post("/login")
+async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
+    auth_logger.info("Login attempt", email=form_data.username)
+    
+    try:
+        # ... login logic ...
+        auth_logger.info("Login successful", user_id=user.id, email=form_data.username)
+        return {"access_token": token}
+    except Exception as e:
+        auth_logger.error("Login failed", 
+                         email=form_data.username,
+                         error=str(e),
+                         exc_info=True)
+        raise
+```
+
+**Database Operations:**
+```python
+from app.core.logging_config import get_db_logger
+
+db_logger = get_db_logger()
+
+def create_user(db: Session, user: UserCreate):
+    db_logger.info("Creating user", email=user.email)
+    
+    try:
+        # ... database operation ...
+        db_logger.info("User created successfully", user_id=db_user.id, email=user.email)
+        return db_user
+    except Exception as e:
+        db_logger.error("User creation failed", 
+                       email=user.email,
+                       error=str(e),
+                       exc_info=True)
+        raise
+```
+
+**Performance Monitoring:**
+```python
+import time
+from app.core.logging_config import get_app_logger
+
+app_logger = get_app_logger()
+
+def expensive_operation():
+    start_time = time.time()
+    # ... operation logic ...
+    execution_time = (time.time() - start_time) * 1000  # Convert to milliseconds
+    
+    app_logger.info("Operation completed",
+                    operation="data_processing",
+                    execution_time_ms=execution_time,
+                    result_count=len(result),
+                    success=True)
+```
+
+### 🚀 Integration with Monitoring Systems
+
+The structured logging system is designed to work seamlessly with:
+- **ELK Stack**: JSON format is directly compatible with Elasticsearch
+- **Docker Logs**: JSON format works well with Docker's logging drivers
+- **Cloud Logging**: Compatible with AWS CloudWatch, Google Cloud Logging, etc.
+- **APM Tools**: Structured logs work well with application performance monitoring tools
+
+### 🎯 Demo Script
+
+Run the logging demo to see all features in action:
+```bash
+python scripts/logging_demo.py
+```
+
 ### Log Formats
 
 #### JSON Format (Production)
