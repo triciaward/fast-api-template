@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, Union
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
@@ -675,3 +675,138 @@ def permanently_delete_user_sync(db: Session, user_id: str) -> bool:
     db.commit()
 
     return True
+
+
+# User listing operations
+async def get_users(
+    db: DBSession,
+    skip: int = 0,
+    limit: int = 100,
+    is_verified: Optional[bool] = None,
+    oauth_provider: Optional[str] = None,
+) -> list[User]:
+    """
+    Get users with optional filtering and pagination.
+
+    Args:
+        db: Database session
+        skip: Number of users to skip
+        limit: Maximum number of users to return
+        is_verified: Filter by verification status
+        oauth_provider: Filter by OAuth provider
+
+    Returns:
+        List[User]: List of users matching criteria
+    """
+    query = select(User)
+
+    # Apply filters
+    if is_verified is not None:
+        query = query.filter(User.is_verified == is_verified)
+    if oauth_provider is not None:
+        query = query.filter(User.oauth_provider == oauth_provider)
+
+    # Apply pagination
+    query = query.offset(skip).limit(limit)
+
+    if isinstance(db, AsyncSession):
+        result = await db.execute(query)
+    else:
+        result = db.execute(query)
+
+    return result.scalars().all()
+
+
+async def count_users(
+    db: DBSession,
+    is_verified: Optional[bool] = None,
+    oauth_provider: Optional[str] = None,
+) -> int:
+    """
+    Count users with optional filtering.
+
+    Args:
+        db: Database session
+        is_verified: Filter by verification status
+        oauth_provider: Filter by OAuth provider
+
+    Returns:
+        int: Number of users matching criteria
+    """
+    query = select(func.count(User.id))
+
+    # Apply filters
+    if is_verified is not None:
+        query = query.filter(User.is_verified == is_verified)
+    if oauth_provider is not None:
+        query = query.filter(User.oauth_provider == oauth_provider)
+
+    if isinstance(db, AsyncSession):
+        result = await db.execute(query)
+    else:
+        result = db.execute(query)
+
+    return result.scalar()
+
+
+def get_users_sync(
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    is_verified: Optional[bool] = None,
+    oauth_provider: Optional[str] = None,
+) -> list[User]:
+    """
+    Get users with optional filtering and pagination (sync version).
+
+    Args:
+        db: Database session
+        skip: Number of users to skip
+        limit: Maximum number of users to return
+        is_verified: Filter by verification status
+        oauth_provider: Filter by OAuth provider
+
+    Returns:
+        List[User]: List of users matching criteria
+    """
+    query = select(User)
+
+    # Apply filters
+    if is_verified is not None:
+        query = query.filter(User.is_verified == is_verified)
+    if oauth_provider is not None:
+        query = query.filter(User.oauth_provider == oauth_provider)
+
+    # Apply pagination
+    query = query.offset(skip).limit(limit)
+
+    result = db.execute(query)
+    return result.scalars().all()
+
+
+def count_users_sync(
+    db: Session,
+    is_verified: Optional[bool] = None,
+    oauth_provider: Optional[str] = None,
+) -> int:
+    """
+    Count users with optional filtering (sync version).
+
+    Args:
+        db: Database session
+        is_verified: Filter by verification status
+        oauth_provider: Filter by OAuth provider
+
+    Returns:
+        int: Number of users matching criteria
+    """
+    query = select(func.count(User.id))
+
+    # Apply filters
+    if is_verified is not None:
+        query = query.filter(User.is_verified == is_verified)
+    if oauth_provider is not None:
+        query = query.filter(User.oauth_provider == oauth_provider)
+
+    result = db.execute(query)
+    return result.scalar()

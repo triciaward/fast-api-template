@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -6,7 +8,8 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.crud import user as crud_user
 from app.database.database import get_db
-from app.schemas.user import TokenData, UserResponse
+from app.schemas.user import TokenData, UserListResponse, UserResponse
+from app.utils.pagination import PaginationParams
 
 router = APIRouter()
 
@@ -46,3 +49,57 @@ async def read_current_user(
     current_user: UserResponse = Depends(get_current_user),
 ) -> UserResponse:
     return current_user
+
+
+@router.get("", response_model=UserListResponse)
+async def list_users(
+    pagination: PaginationParams = Depends(),
+    is_verified: Optional[bool] = Query(
+        None, description="Filter by verification status"
+    ),
+    oauth_provider: Optional[str] = Query(None, description="Filter by OAuth provider"),
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> UserListResponse:
+    """
+    List users with optional filtering and pagination.
+
+    This endpoint allows authenticated users to view other users in the system.
+    Note: This is a basic listing - for admin operations, use the admin endpoints.
+    """
+    # Get users with pagination
+    users = await crud_user.get_users(
+        db=db,
+        skip=pagination.skip,
+        limit=pagination.limit,
+        is_verified=is_verified,
+        oauth_provider=oauth_provider,
+    )
+
+    # Get total count with same filters
+    total = await crud_user.count_users(
+        db=db,
+        is_verified=is_verified,
+        oauth_provider=oauth_provider,
+    )
+
+    # Convert to response models
+    user_responses = [
+        UserResponse(
+            id=user.id,  # type: ignore
+            email=user.email,  # type: ignore
+            username=user.username,  # type: ignore
+            is_superuser=user.is_superuser,  # type: ignore
+            is_verified=user.is_verified,  # type: ignore
+            date_created=user.date_created,  # type: ignore
+            oauth_provider=user.oauth_provider,  # type: ignore
+        )
+        for user in users
+    ]
+
+    return UserListResponse.create(
+        items=user_responses,
+        page=pagination.page,
+        size=pagination.size,
+        total=total,
+    )

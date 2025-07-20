@@ -11,6 +11,7 @@ from app.core.validation import (
     validate_password,
     validate_username,
 )
+from app.utils.pagination import PaginatedResponse
 
 
 class UserBase(BaseModel):
@@ -287,3 +288,7 @@ class AccountDeletionStatusResponse(BaseModel):
     deletion_scheduled_for: Optional[datetime] = None
     can_cancel: bool
     grace_period_days: int
+
+
+class UserListResponse(PaginatedResponse[UserResponse]):
+    """Schema for paginated user list responses."""

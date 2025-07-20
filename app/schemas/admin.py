@@ -10,6 +10,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.utils.pagination import PaginatedResponse
+
 
 class AdminUserCreate(BaseModel):
     """Schema for creating users via admin interface."""
@@ -61,13 +63,8 @@ class AdminUserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class AdminUserListResponse(BaseModel):
-    """Schema for paginated user list responses."""
-
-    users: list[AdminUserResponse] = Field(..., description="List of users")
-    total: int = Field(..., description="Total number of users")
-    skip: int = Field(..., description="Number of users skipped")
-    limit: int = Field(..., description="Maximum number of users returned")
+class AdminUserListResponse(PaginatedResponse[AdminUserResponse]):
+    """Schema for paginated user list responses using the generic pagination system."""
 
 
 class AdminUserFilters(BaseModel):

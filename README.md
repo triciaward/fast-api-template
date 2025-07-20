@@ -30,7 +30,7 @@ This template powers several production applications:
 - 📦 PostgreSQL Database Integration with Alembic Migrations
 - 🌐 CORS Support with Configurable Origins
 - 🐳 Docker Support with Multi-Service Composition
-- 🧪 Comprehensive Testing (362 tests with 100% success rate)
+- 🧪 Comprehensive Testing (383 tests with 100% success rate)
 - 📝 Alembic Migrations with Version Control
 - 🔍 Linting and Code Quality (ruff)
 - ✅ Type Safety (mypy + pyright)
@@ -60,7 +60,7 @@ This template powers several production applications:
 
 ## ✅ Test Suite
 
-- **362 core tests** with comprehensive coverage (100% success rate)
+- **383 core tests** with comprehensive coverage (100% success rate)
 - **32 complex tests deselected** (Celery and refresh token tests - isolated)
 - **14 pre-commit tests** covering configuration, installation, and functionality
 - **Full CI pipeline** (mypy, ruff, black, pytest) runs on every commit
@@ -133,6 +133,145 @@ await log_account_deletion(
 - **Analytics**: Understand user behavior and system usage patterns
 - **Forensics**: Investigate security incidents with detailed audit trails
 
+## 📄 Pagination System
+
+The template includes a comprehensive **pagination system** that provides consistent, type-safe pagination across all API endpoints with rich metadata and HATEOAS support.
+
+### 🔍 Key Features
+- **Generic Pagination Helper**: Reusable `paginate()` function for SQLAlchemy queries
+- **Type-Safe Schemas**: `PaginatedResponse[T]` with full type safety and validation
+- **Rich Metadata**: Page info, total counts, navigation links, and pagination state
+- **HATEOAS Support**: Optional pagination links for RESTful API navigation
+- **Validation**: Built-in parameter validation with sensible defaults and limits
+- **Consistent API**: Standardized pagination across all endpoints
+
+### 🏗️ Architecture
+- **Generic Design**: Type-safe `PaginatedResponse[T]` for any data type
+- **Metadata Rich**: Comprehensive pagination metadata with navigation info
+- **Validation**: Pydantic validation with configurable limits and defaults
+- **Performance**: Efficient SQLAlchemy integration with proper counting
+- **Flexible**: Support for both basic pagination and HATEOAS links
+
+### 📋 Core Components
+- **PaginationParams**: Query parameters with validation (page, size, skip, limit)
+- **PaginationMetadata**: Rich metadata with page info, totals, and navigation
+- **PaginatedResponse[T]**: Generic response wrapper with items and metadata
+- **PaginatedResponseWithLinks**: HATEOAS version with navigation links
+- **paginate()**: Generic helper function for SQLAlchemy queries
+
+### 🔧 Implementation
+- **Location**: `app/utils/pagination.py` - Centralized pagination utilities
+- **Schemas**: Integrated into admin and user response schemas
+- **Endpoints**: Applied to admin user listing and user listing endpoints
+- **Validation**: Automatic parameter validation with Pydantic
+- **Testing**: 21 comprehensive tests covering all functionality
+
+### 📊 Usage Examples
+
+#### Basic Pagination
+```python
+from app.utils.pagination import PaginationParams, PaginatedResponse
+
+@router.get("/items", response_model=PaginatedResponse[ItemResponse])
+async def list_items(
+    pagination: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
+) -> PaginatedResponse[ItemResponse]:
+    items = await get_items(db, skip=pagination.skip, limit=pagination.limit)
+    total = await count_items(db)
+    
+    return PaginatedResponse.create(
+        items=items,
+        page=pagination.page,
+        size=pagination.size,
+        total=total,
+    )
+```
+
+#### With Filters
+```python
+@router.get("/users", response_model=PaginatedResponse[UserResponse])
+async def list_users(
+    pagination: PaginationParams = Depends(),
+    is_verified: Optional[bool] = Query(None),
+    db: Session = Depends(get_db),
+) -> PaginatedResponse[UserResponse]:
+    # Apply filters
+    filters = {}
+    if is_verified is not None:
+        filters["is_verified"] = is_verified
+    
+    users = await get_users(db, skip=pagination.skip, limit=pagination.limit, **filters)
+    total = await count_users(db, **filters)
+    
+    return PaginatedResponse.create(
+        items=users,
+        page=pagination.page,
+        size=pagination.size,
+        total=total,
+    )
+```
+
+#### HATEOAS Links
+```python
+from app.utils.pagination import PaginatedResponseWithLinks
+
+@router.get("/items", response_model=PaginatedResponseWithLinks[ItemResponse])
+async def list_items_with_links(
+    pagination: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
+) -> PaginatedResponseWithLinks[ItemResponse]:
+    items = await get_items(db, skip=pagination.skip, limit=pagination.limit)
+    total = await count_items(db)
+    
+    return PaginatedResponseWithLinks.create_with_links(
+        items=items,
+        page=pagination.page,
+        size=pagination.size,
+        total=total,
+        base_url="/api/v1/items",
+        category="electronics"  # Additional query params
+    )
+```
+
+### 📄 Response Format
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "name": "Item Name",
+      "description": "Item description"
+    }
+  ],
+  "metadata": {
+    "page": 1,
+    "size": 20,
+    "total": 100,
+    "pages": 5,
+    "has_next": true,
+    "has_prev": false,
+    "next_page": 2,
+    "prev_page": null
+  },
+  "links": {
+    "first": "/api/v1/items?page=1&size=20",
+    "self": "/api/v1/items?page=1&size=20",
+    "next": "/api/v1/items?page=2&size=20",
+    "last": "/api/v1/items?page=5&size=20",
+    "prev": null
+  }
+}
+```
+
+### 🎯 Benefits
+- **Performance**: Efficient pagination with proper database optimization
+- **UX**: Rich metadata for frontend pagination controls
+- **Consistency**: Standardized pagination across all endpoints
+- **Type Safety**: Full type checking and validation
+- **Flexibility**: Support for filters, sorting, and custom metadata
+- **RESTful**: HATEOAS support for proper API navigation
+
 ## Project Structure
 
 ```
@@ -175,6 +314,8 @@ fast-api-template/
 │   │   └── models.py           # User and AuditLog models and database schema
 │   ├── schemas/                # Pydantic validation schemas
 │   │   └── user.py             # User schemas (request/response models)
+│   ├── utils/                  # Utility modules
+│   │   └── pagination.py       # Pagination utilities and schemas
 │   ├── services/               # Service modules
 │   │   ├── email.py            # Email service (verification, password reset)
 │   │   ├── oauth.py            # OAuth service (Google, Apple)
@@ -245,8 +386,15 @@ fast-api-template/
 │       ├── test_audit_log.py             # Audit logging tests (5 tests)
 │       └── test_admin.py                 # Admin functionality tests
 ├── scripts/                    # Utility scripts
+│   ├── admin_cli.py            # Command-line admin utility for user operations
+│   ├── admin_cli.sh            # Admin CLI wrapper script
 │   ├── bootstrap_admin.py      # Admin user bootstrap script
-│   └── logging_demo.py         # Logging demonstration script
+│   ├── bootstrap_superuser.sh  # Superuser bootstrap shell script
+│   ├── celery_config.py        # Background task configuration
+│   ├── install_precommit.sh    # Pre-commit hooks installation script
+│   ├── lint.sh                 # Linting script
+│   ├── logging_demo.py         # Logging demonstration script
+│   └── setup.sh                # Project setup script
 ├── .github/                    # GitHub Actions CI/CD
 │   └── workflows/
 │       └── ci.yml              # Continuous integration workflow
@@ -258,11 +406,6 @@ fast-api-template/
 ├── mypy.ini                   # MyPy type checking configuration
 ├── pyrightconfig.json         # Pyright configuration
 ├── alembic.ini                # Alembic configuration
-├── scripts/celery_config.py   # Background task configuration
-├── scripts/setup.sh           # Project setup script
-├── scripts/bootstrap_superuser.sh # Superuser bootstrap shell script
-├── scripts/admin_cli.sh       # Admin CLI wrapper script
-├── scripts/lint.sh            # Linting script
 ├── .gitignore                 # Git ignore patterns
 ├── LICENSE                    # MIT License
 └── README.md                  # This documentation file

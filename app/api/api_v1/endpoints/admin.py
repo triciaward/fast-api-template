@@ -26,6 +26,7 @@ from app.schemas.admin import (
     AdminUserUpdate,
 )
 from app.schemas.user import UserResponse
+from app.utils.pagination import PaginationParams
 
 logger = logging.getLogger(__name__)
 
@@ -34,10 +35,7 @@ router = APIRouter()
 
 @router.get("/users", response_model=AdminUserListResponse)
 async def list_users(
-    skip: int = Query(0, ge=0, description="Number of users to skip"),
-    limit: int = Query(
-        100, ge=1, le=1000, description="Maximum number of users to return"
-    ),
+    pagination: PaginationParams = Depends(),
     is_superuser: Optional[bool] = Query(
         None, description="Filter by superuser status"
     ),
@@ -56,20 +54,37 @@ async def list_users(
     """
     logger.info(
         "Admin user list requested",
-        extra={"admin_id": str(current_admin.id), "skip": skip, "limit": limit},
+        extra={
+            "admin_id": str(current_admin.id),
+            "page": pagination.page,
+            "size": pagination.size,
+        },
     )
 
+    # Build filters
+    filters = {}
+    if is_superuser is not None:
+        filters["is_superuser"] = is_superuser
+    if is_verified is not None:
+        filters["is_verified"] = is_verified
+    if is_deleted is not None:
+        filters["is_deleted"] = is_deleted
+    if oauth_provider is not None:
+        filters["oauth_provider"] = oauth_provider
+
+    # Get users with pagination
     users = await admin_user_crud.get_users(
         db=db,
-        skip=skip,
-        limit=limit,
+        skip=pagination.skip,
+        limit=pagination.limit,
         is_superuser=is_superuser,
         is_verified=is_verified,
         is_deleted=is_deleted,
         oauth_provider=oauth_provider,
     )
 
-    total = await admin_user_crud.count(db)
+    # Get total count with same filters
+    total = await admin_user_crud.count(db, filters=filters)
 
     # Convert to response models
     user_responses = [
@@ -91,11 +106,11 @@ async def list_users(
         for user in users
     ]
 
-    return AdminUserListResponse(
-        users=user_responses,
+    return AdminUserListResponse.create(
+        items=user_responses,
+        page=pagination.page,
+        size=pagination.size,
         total=total,
-        skip=skip,
-        limit=limit,
     )
 
 
