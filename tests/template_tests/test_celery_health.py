@@ -12,7 +12,9 @@ class TestCeleryHealthIntegration:
 
     @patch("app.services.celery.is_celery_enabled")
     @patch("app.services.celery.get_celery_stats")
-    def test_health_check_with_celery_enabled(self, mock_stats, mock_enabled, client: TestClient):
+    def test_health_check_with_celery_enabled(
+        self, mock_stats, mock_enabled, client: TestClient
+    ):
         """Test health check when Celery is enabled."""
         mock_enabled.return_value = True
         mock_stats.return_value = {
@@ -37,7 +39,9 @@ class TestCeleryHealthIntegration:
 
     @patch("app.services.celery.is_celery_enabled")
     @patch("app.services.celery.get_celery_stats")
-    def test_health_check_with_celery_disabled(self, mock_stats, mock_enabled, client: TestClient):
+    def test_health_check_with_celery_disabled(
+        self, mock_stats, mock_enabled, client: TestClient
+    ):
         """Test health check when Celery is disabled."""
         mock_enabled.return_value = False
         mock_stats.return_value = {"enabled": False}
@@ -54,13 +58,12 @@ class TestCeleryHealthIntegration:
 
     @patch("app.services.celery.is_celery_enabled")
     @patch("app.services.celery.get_celery_stats")
-    def test_health_check_with_celery_error(self, mock_stats, mock_enabled, client: TestClient):
+    def test_health_check_with_celery_error(
+        self, mock_stats, mock_enabled, client: TestClient
+    ):
         """Test health check when Celery has an error."""
         mock_enabled.return_value = True
-        mock_stats.return_value = {
-            "enabled": False,
-            "error": "Connection failed"
-        }
+        mock_stats.return_value = {"enabled": False, "error": "Connection failed"}
 
         response = client.get("/api/v1/health")
 
@@ -75,7 +78,9 @@ class TestCeleryHealthIntegration:
 
     @patch("app.services.celery.is_celery_enabled")
     @patch("app.services.celery.get_celery_stats")
-    def test_health_check_with_celery_exception(self, mock_stats, mock_enabled, client: TestClient):
+    def test_health_check_with_celery_exception(
+        self, mock_stats, mock_enabled, client: TestClient
+    ):
         """Test health check when Celery stats raise an exception."""
         mock_enabled.return_value = True
         mock_stats.side_effect = Exception("Test error")
@@ -93,7 +98,9 @@ class TestCeleryHealthIntegration:
 
     @patch("app.services.celery.is_celery_enabled")
     @patch("app.services.celery.get_celery_stats")
-    def test_readiness_check_with_celery_enabled(self, mock_stats, mock_enabled, client: TestClient):
+    def test_readiness_check_with_celery_enabled(
+        self, mock_stats, mock_enabled, client: TestClient
+    ):
         """Test readiness check when Celery is enabled."""
         mock_enabled.return_value = True
         mock_stats.return_value = {
@@ -119,7 +126,9 @@ class TestCeleryHealthIntegration:
 
     @patch("app.services.celery.is_celery_enabled")
     @patch("app.services.celery.get_celery_stats")
-    def test_readiness_check_with_celery_disabled(self, mock_stats, mock_enabled, client: TestClient):
+    def test_readiness_check_with_celery_disabled(
+        self, mock_stats, mock_enabled, client: TestClient
+    ):
         """Test readiness check when Celery is disabled."""
         mock_enabled.return_value = False
         mock_stats.return_value = {"enabled": False}
@@ -133,7 +142,9 @@ class TestCeleryHealthIntegration:
 
     @patch("app.services.celery.is_celery_enabled")
     @patch("app.services.celery.get_celery_stats")
-    def test_readiness_check_with_celery_error(self, mock_stats, mock_enabled, client: TestClient):
+    def test_readiness_check_with_celery_error(
+        self, mock_stats, mock_enabled, client: TestClient
+    ):
         """Test readiness check when Celery has an error."""
         mock_enabled.return_value = True
         mock_stats.side_effect = Exception("Test error")
@@ -146,7 +157,9 @@ class TestCeleryHealthIntegration:
         assert "components" in data["detail"]
 
     @patch("app.services.celery.is_celery_enabled")
-    def test_features_endpoint_with_celery_enabled(self, mock_enabled, client: TestClient):
+    def test_features_endpoint_with_celery_enabled(
+        self, mock_enabled, client: TestClient
+    ):
         """Test features endpoint when Celery is enabled."""
         mock_enabled.return_value = True
 
@@ -158,7 +171,9 @@ class TestCeleryHealthIntegration:
         assert data["celery"] is True
 
     @patch("app.services.celery.is_celery_enabled")
-    def test_features_endpoint_with_celery_disabled(self, mock_enabled, client: TestClient):
+    def test_features_endpoint_with_celery_disabled(
+        self, mock_enabled, client: TestClient
+    ):
         """Test features endpoint when Celery is disabled."""
         mock_enabled.return_value = False
 

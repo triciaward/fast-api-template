@@ -190,12 +190,12 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
             if celery_stats.get("enabled", False):
                 readiness_status["components"]["celery"] = {
                     "ready": True,
-                    "message": "Celery ready"
+                    "message": "Celery ready",
                 }
             else:
                 readiness_status["components"]["celery"] = {
                     "ready": False,
-                    "message": "Celery not initialized"
+                    "message": "Celery not initialized",
                 }
                 readiness_status["ready"] = False
         except Exception as e:

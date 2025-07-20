@@ -1,3 +1,4 @@
+# Set environment variables BEFORE any other imports
 import asyncio
 import os
 from collections.abc import AsyncGenerator, Generator
@@ -11,16 +12,19 @@ from sqlalchemy.orm import sessionmaker
 
 from app.database.database import Base, get_db
 
-# Load test-specific environment variables BEFORE any other imports
+# Set test environment variables
+os.environ["TESTING"] = "1"
+os.environ["ENABLE_CELERY"] = "true"
+os.environ["CELERY_TASK_ALWAYS_EAGER"] = "true"
+os.environ["CELERY_TASK_EAGER_PROPAGATES"] = "true"
+
+# Try to load .env.test if it exists
 try:
     import dotenv
     dotenv.load_dotenv(dotenv_path=".env.test", override=True)
 except ImportError:
     # Fallback if python-dotenv is not installed
-    os.environ["TESTING"] = "1"
-    os.environ["ENABLE_CELERY"] = "true"
-    os.environ["CELERY_TASK_ALWAYS_EAGER"] = "true"
-    os.environ["CELERY_TASK_EAGER_PROPAGATES"] = "true"
+    pass
 
 # Verify environment variables are set
 print(f"ENABLE_CELERY: {os.getenv('ENABLE_CELERY')}")
@@ -29,10 +33,12 @@ print(f"CELERY_TASK_ALWAYS_EAGER: {os.getenv('CELERY_TASK_ALWAYS_EAGER')}")
 
 # Create a test app factory that ensures environment variables are set
 
+
 def create_test_app():
     """Create a test app with proper environment variables set."""
     # Import app after environment is set
     from app.main import app
+
     return app
 
 

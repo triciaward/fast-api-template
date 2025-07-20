@@ -33,12 +33,20 @@ try:
 except ImportError:
     # Fallback if Celery is not available
     get_celery_app = None  # type: ignore
-    def is_celery_enabled(): return False  # type: ignore
+
+    def is_celery_enabled() -> bool:
+        return False
+
     submit_task = None  # type: ignore
     get_task_status = None  # type: ignore
     cancel_task = None  # type: ignore
-    def get_active_tasks(): return []  # type: ignore
-    def get_celery_stats(): return {"enabled": False}  # type: ignore
+
+    def get_active_tasks() -> list[dict[str, Any]]:
+        return []
+
+    def get_celery_stats() -> dict[str, Any]:
+        return {"enabled": False}
+
 
 # Rate limiting service
 try:

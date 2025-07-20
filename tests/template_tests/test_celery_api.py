@@ -2,13 +2,9 @@
 Unit tests for Celery API endpoints.
 """
 
-import os
 from unittest.mock import Mock, PropertyMock, patch
 
 from fastapi.testclient import TestClient
-
-# Set environment variable before importing app
-os.environ["ENABLE_CELERY"] = "true"
 
 
 class TestCeleryAPI:
@@ -38,7 +34,7 @@ class TestCeleryAPI:
             task_data = {
                 "task_name": "app.services.celery_tasks.send_email_task",
                 "args": ["test@example.com", "Test Subject", "Test Body"],
-                "kwargs": {"priority": "high"}
+                "kwargs": {"priority": "high"},
             }
 
             response = client.post(
@@ -53,8 +49,10 @@ class TestCeleryAPI:
 
             mock_submit.assert_called_once_with(
                 "app.services.celery_tasks.send_email_task",
-                "test@example.com", "Test Subject", "Test Body",
-                priority="high"
+                "test@example.com",
+                "Test Subject",
+                "Test Body",
+                priority="high",
             )
 
     @patch("app.services.celery.is_celery_enabled")
@@ -68,7 +66,7 @@ class TestCeleryAPI:
             task_data = {
                 "task_name": "app.services.celery_tasks.send_email_task",
                 "args": ["test@example.com", "Test Subject", "Test Body"],
-                "kwargs": {}
+                "kwargs": {},
             }
 
             response = client.post(
@@ -107,8 +105,8 @@ class TestCeleryAPI:
                 params={
                     "to_email": "test@example.com",
                     "subject": "Test Subject",
-                    "body": "Test Body"
-                }
+                    "body": "Test Body",
+                },
             )
 
             assert response.status_code == 200
@@ -120,11 +118,15 @@ class TestCeleryAPI:
 
             mock_submit.assert_called_once_with(
                 "app.services.celery_tasks.send_email_task",
-                "test@example.com", "Test Subject", "Test Body"
+                "test@example.com",
+                "Test Subject",
+                "Test Body",
             )
 
     @patch("app.services.celery.is_celery_enabled")
-    def test_submit_data_processing_task_enabled(self, mock_enabled, client: TestClient):
+    def test_submit_data_processing_task_enabled(
+        self, mock_enabled, client: TestClient
+    ):
         """Test submitting data processing task when enabled."""
         mock_enabled.return_value = True
 
@@ -137,9 +139,7 @@ class TestCeleryAPI:
             data = [{"id": 1, "name": "item1"}, {"id": 2, "name": "item2"}]
 
             response = client.post(
-                "/api/v1/celery/tasks/process-data",
-                json=data
-            )
+                "/api/v1/celery/tasks/process-data", json=data)
 
             assert response.status_code == 200
             data_response = response.json()
@@ -150,7 +150,7 @@ class TestCeleryAPI:
 
             mock_submit.assert_called_once_with(
                 "app.services.celery_tasks.process_data_task",
-                [{"id": 1, "name": "item1"}, {"id": 2, "name": "item2"}]
+                [{"id": 1, "name": "item1"}, {"id": 2, "name": "item2"}],
             )
 
     @patch("app.services.celery.is_celery_enabled")
@@ -174,7 +174,8 @@ class TestCeleryAPI:
             assert data["message"] == "Cleanup task submitted successfully"
 
             mock_submit.assert_called_once_with(
-                "app.services.celery_tasks.cleanup_task")
+                "app.services.celery_tasks.cleanup_task"
+            )
 
     @patch("app.services.celery.is_celery_enabled")
     def test_submit_long_running_task_enabled(self, mock_enabled, client: TestClient):
@@ -188,8 +189,7 @@ class TestCeleryAPI:
             mock_submit.return_value = mock_result
 
             response = client.post(
-                "/api/v1/celery/tasks/long-running",
-                params={"duration": 120}
+                "/api/v1/celery/tasks/long-running", params={"duration": 120}
             )
 
             assert response.status_code == 200
@@ -200,12 +200,13 @@ class TestCeleryAPI:
             assert "120s" in data["message"]
 
             mock_submit.assert_called_once_with(
-                "app.services.celery_tasks.long_running_task",
-                120
+                "app.services.celery_tasks.long_running_task", 120
             )
 
     @patch("app.services.celery.is_celery_enabled")
-    def test_submit_long_running_task_default_duration(self, mock_enabled, client: TestClient):
+    def test_submit_long_running_task_default_duration(
+        self, mock_enabled, client: TestClient
+    ):
         """Test submitting long running task with default duration."""
         mock_enabled.return_value = True
 
@@ -222,6 +223,5 @@ class TestCeleryAPI:
             assert "60s" in data["message"]
 
             mock_submit.assert_called_once_with(
-                "app.services.celery_tasks.long_running_task",
-                60
+                "app.services.celery_tasks.long_running_task", 60
             )

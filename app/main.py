@@ -16,6 +16,7 @@ if settings.ENABLE_CELERY:
     # Import celery tasks to register them with the worker
     # Use a different approach to avoid naming conflicts
     import importlib
+
     importlib.import_module("app.services.celery_tasks")
 
 # Setup logging

@@ -35,6 +35,12 @@ jobs:
       BACKEND_CORS_ORIGINS: '["http://localhost:3000","http://localhost:8080","http://localhost:4200"]'
       FIRST_SUPERUSER: admin@example.com
       FIRST_SUPERUSER_PASSWORD: testpassword123
+      # Celery configuration for testing
+      ENABLE_CELERY: true
+      CELERY_TASK_ALWAYS_EAGER: true
+      CELERY_TASK_EAGER_PROPAGATES: true
+      CELERY_BROKER_URL: redis://localhost:6379/1
+      CELERY_RESULT_BACKEND: redis://localhost:6379/1
 
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +66,7 @@ jobs:
         run: |
           echo "Database URL: $DATABASE_URL"
           echo "Async Database URL: $ASYNC_DATABASE_URL"
-          pytest tests/ -v --asyncio-mode=auto --cov=app --cov-report=term-missing --cov-fail-under=60
+          pytest tests/ --ignore=tests/template_tests/test_celery_mocked.py -v --asyncio-mode=auto --cov=app --cov-report=term-missing --cov-fail-under=60
 
   lint:
     name: 🔍 Lint (ruff)

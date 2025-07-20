@@ -4,16 +4,12 @@ They're non-critical and depend on accurate mocking of Redis/Celery internals.
 These tests are separated from the main test suite due to complex mocking requirements.
 """
 
-# Set environment variable before importing app
-import os
 from unittest.mock import Mock, patch
 
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from app.main import app
-
-os.environ["ENABLE_CELERY"] = "true"
 
 
 class TestCeleryMockedAPIs:
@@ -29,7 +25,8 @@ class TestCeleryMockedAPIs:
                 mock_inspect.active.return_value = {
                     "worker1": [], "worker2": []}
                 mock_inspect.registered.return_value = {
-                    "worker1": ["task1", "task2", "task3", "task4", "task5"]}
+                    "worker1": ["task1", "task2", "task3", "task4", "task5"]
+                }
                 mock_app.control.inspect.return_value = mock_inspect
                 mock_get_app.return_value = mock_app
 
@@ -59,7 +56,9 @@ class TestCeleryMockedAPIs:
         with patch("app.services.celery.is_celery_enabled") as mock_enabled:
             mock_enabled.return_value = True
 
-            with patch("app.api.api_v1.endpoints.celery.get_task_status") as mock_status:
+            with patch(
+                "app.api.api_v1.endpoints.celery.get_task_status"
+            ) as mock_status:
                 # Mock the entire function to return the expected dict
                 mock_status.return_value = {
                     "task_id": "test-task-id",
@@ -67,7 +66,7 @@ class TestCeleryMockedAPIs:
                     "ready": True,
                     "successful": True,
                     "failed": False,
-                    "result": {"status": "completed"}
+                    "result": {"status": "completed"},
                 }
 
                 response = client.get(
@@ -98,7 +97,7 @@ class TestCeleryMockedAPIs:
                             "name": "send_email_task",
                             "args": ["test@example.com"],
                             "kwargs": {},
-                            "time_start": 1234567890.0
+                            "time_start": 1234567890.0,
                         }
                     ]
                 }
@@ -113,7 +112,7 @@ class TestCeleryMockedAPIs:
                             "worker": "worker1",
                             "args": ["test@example.com"],
                             "kwargs": {},
-                            "time_start": 1234567890.0
+                            "time_start": 1234567890.0,
                         }
                     ]
 
@@ -165,7 +164,9 @@ class TestCeleryMockedAPIs:
         with patch("app.services.celery.is_celery_enabled") as mock_enabled:
             mock_enabled.return_value = True
 
-            with patch("app.api.api_v1.endpoints.celery.get_celery_stats") as mock_stats:
+            with patch(
+                "app.api.api_v1.endpoints.celery.get_celery_stats"
+            ) as mock_stats:
                 mock_stats.side_effect = Exception("Test error")
 
                 response = client.get("/api/v1/celery/status")
@@ -184,14 +185,17 @@ class TestCeleryDisabledMocked:
             mock_enabled.return_value = False
 
             # Mock the dependency check to raise HTTPException
-            with patch("app.api.api_v1.endpoints.celery.check_celery_enabled") as mock_check:
+            with patch(
+                "app.api.api_v1.endpoints.celery.check_celery_enabled"
+            ) as mock_check:
                 mock_check.side_effect = HTTPException(
-                    status_code=503, detail="Celery is not enabled")
+                    status_code=503, detail="Celery is not enabled"
+                )
 
                 task_data = {
                     "task_name": "app.services.celery_tasks.send_email_task",
                     "args": ["test@example.com", "Test Subject", "Test Body"],
-                    "kwargs": {}
+                    "kwargs": {},
                 }
 
                 response = client.post(
@@ -206,9 +210,12 @@ class TestCeleryDisabledMocked:
             mock_enabled.return_value = False
 
             # Mock the dependency check to raise HTTPException
-            with patch("app.api.api_v1.endpoints.celery.check_celery_enabled") as mock_check:
+            with patch(
+                "app.api.api_v1.endpoints.celery.check_celery_enabled"
+            ) as mock_check:
                 mock_check.side_effect = HTTPException(
-                    status_code=503, detail="Celery is not enabled")
+                    status_code=503, detail="Celery is not enabled"
+                )
 
                 response = client.get(
                     "/api/v1/celery/tasks/test-task-id/status")
@@ -222,9 +229,12 @@ class TestCeleryDisabledMocked:
             mock_enabled.return_value = False
 
             # Mock the dependency check to raise HTTPException
-            with patch("app.api.api_v1.endpoints.celery.check_celery_enabled") as mock_check:
+            with patch(
+                "app.api.api_v1.endpoints.celery.check_celery_enabled"
+            ) as mock_check:
                 mock_check.side_effect = HTTPException(
-                    status_code=503, detail="Celery is not enabled")
+                    status_code=503, detail="Celery is not enabled"
+                )
 
                 response = client.delete(
                     "/api/v1/celery/tasks/test-task-id/cancel")
@@ -238,9 +248,12 @@ class TestCeleryDisabledMocked:
             mock_enabled.return_value = False
 
             # Mock the dependency check to raise HTTPException
-            with patch("app.api.api_v1.endpoints.celery.check_celery_enabled") as mock_check:
+            with patch(
+                "app.api.api_v1.endpoints.celery.check_celery_enabled"
+            ) as mock_check:
                 mock_check.side_effect = HTTPException(
-                    status_code=503, detail="Celery is not enabled")
+                    status_code=503, detail="Celery is not enabled"
+                )
 
                 response = client.get("/api/v1/celery/tasks/active")
 

@@ -29,10 +29,10 @@ router = APIRouter()
 # Pydantic models for request/response
 class TaskSubmitRequest(BaseModel):
     task_name: str = Field(..., description="Name of the task to execute")
-    args: list[Any] = Field(
-        default=[], description="Positional arguments for the task")
+    args: list[Any] = Field(default=[], description="Positional arguments for the task")
     kwargs: dict[str, Any] = Field(
-        default={}, description="Keyword arguments for the task")
+        default={}, description="Keyword arguments for the task"
+    )
 
 
 class TaskSubmitResponse(BaseModel):
@@ -46,19 +46,19 @@ class TaskStatusResponse(BaseModel):
     task_id: str = Field(..., description="ID of the task")
     status: str = Field(..., description="Current status of the task")
     ready: bool = Field(..., description="Whether the task is complete")
-    successful: bool = Field(...,
-                             description="Whether the task completed successfully")
+    successful: bool = Field(..., description="Whether the task completed successfully")
     failed: bool = Field(..., description="Whether the task failed")
     result: Optional[Any] = Field(
-        None, description="Task result if completed successfully")
-    error: Optional[str] = Field(
-        None, description="Error message if task failed")
+        None, description="Task result if completed successfully"
+    )
+    error: Optional[str] = Field(None, description="Error message if task failed")
 
 
 class TaskCancelResponse(BaseModel):
     task_id: str = Field(..., description="ID of the cancelled task")
-    cancelled: bool = Field(...,
-                            description="Whether the task was cancelled successfully")
+    cancelled: bool = Field(
+        ..., description="Whether the task was cancelled successfully"
+    )
     message: str = Field(..., description="Response message")
 
 
@@ -74,16 +74,15 @@ class ActiveTaskResponse(BaseModel):
 class CeleryStatsResponse(BaseModel):
     enabled: bool = Field(..., description="Whether Celery is enabled")
     broker_url: Optional[str] = Field(None, description="Celery broker URL")
-    result_backend: Optional[str] = Field(
-        None, description="Celery result backend")
-    active_workers: Optional[int] = Field(
-        None, description="Number of active workers")
+    result_backend: Optional[str] = Field(None, description="Celery result backend")
+    active_workers: Optional[int] = Field(None, description="Number of active workers")
     registered_tasks: Optional[int] = Field(
-        None, description="Number of registered tasks")
-    active_tasks: Optional[int] = Field(
-        None, description="Number of active tasks")
+        None, description="Number of registered tasks"
+    )
+    active_tasks: Optional[int] = Field(None, description="Number of active tasks")
     error: Optional[str] = Field(
-        None, description="Error message if stats retrieval failed")
+        None, description="Error message if stats retrieval failed"
+    )
 
 
 def check_celery_enabled() -> None:
@@ -91,7 +90,7 @@ def check_celery_enabled() -> None:
     if not is_celery_enabled():
         raise HTTPException(
             status_code=503,
-            detail="Celery is not enabled. Set ENABLE_CELERY=true to enable background tasks."
+            detail="Celery is not enabled. Set ENABLE_CELERY=true to enable background tasks.",
         )
 
 
@@ -107,16 +106,13 @@ async def get_celery_status() -> CeleryStatsResponse:
         stats = get_celery_stats()
         return CeleryStatsResponse(**stats)
     except Exception as e:
-        app_logger.error("Failed to get Celery status",
-                         error=str(e), exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to get Celery status")
+        app_logger.error("Failed to get Celery status", error=str(e), exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to get Celery status")
 
 
 @router.post("/tasks/submit", response_model=TaskSubmitResponse)
 async def submit_celery_task(
-    request: TaskSubmitRequest,
-    _: None = Depends(check_celery_enabled)
+    request: TaskSubmitRequest, _: None = Depends(check_celery_enabled)
 ) -> TaskSubmitResponse:
     """
     Submit a new Celery task.
@@ -128,45 +124,48 @@ async def submit_celery_task(
         TaskSubmitResponse: Task submission result
     """
     try:
-        app_logger.info("Submitting Celery task",
-                        task_name=request.task_name,
-                        args=request.args,
-                        kwargs=request.kwargs)
+        app_logger.info(
+            "Submitting Celery task",
+            task_name=request.task_name,
+            args=request.args,
+            kwargs=request.kwargs,
+        )
 
-        result = submit_task(request.task_name, *
-                             request.args, **request.kwargs)
+        result = submit_task(request.task_name, *request.args, **request.kwargs)
 
         if result is None:
-            raise HTTPException(
-                status_code=500, detail="Failed to submit task")
+            raise HTTPException(status_code=500, detail="Failed to submit task")
 
         response = TaskSubmitResponse(
             task_id=result.id,
             task_name=request.task_name,
             status="PENDING",
-            message="Task submitted successfully"
+            message="Task submitted successfully",
         )
 
-        app_logger.info("Celery task submitted successfully",
-                        task_id=result.id,
-                        task_name=request.task_name)
+        app_logger.info(
+            "Celery task submitted successfully",
+            task_id=result.id,
+            task_name=request.task_name,
+        )
 
         return response
 
     except HTTPException:
         raise
     except Exception as e:
-        app_logger.error("Failed to submit Celery task",
-                         task_name=request.task_name,
-                         error=str(e),
-                         exc_info=True)
+        app_logger.error(
+            "Failed to submit Celery task",
+            task_name=request.task_name,
+            error=str(e),
+            exc_info=True,
+        )
         raise HTTPException(status_code=500, detail="Failed to submit task")
 
 
 @router.get("/tasks/{task_id}/status", response_model=TaskStatusResponse)
 async def get_celery_task_status(
-    task_id: str,
-    _: None = Depends(check_celery_enabled)
+    task_id: str, _: None = Depends(check_celery_enabled)
 ) -> TaskStatusResponse:
     """
     Get the status of a Celery task.
@@ -188,18 +187,15 @@ async def get_celery_task_status(
     except HTTPException:
         raise
     except Exception as e:
-        app_logger.error("Failed to get task status",
-                         task_id=task_id,
-                         error=str(e),
-                         exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to get task status")
+        app_logger.error(
+            "Failed to get task status", task_id=task_id, error=str(e), exc_info=True
+        )
+        raise HTTPException(status_code=500, detail="Failed to get task status")
 
 
 @router.delete("/tasks/{task_id}/cancel", response_model=TaskCancelResponse)
 async def cancel_celery_task(
-    task_id: str,
-    _: None = Depends(check_celery_enabled)
+    task_id: str, _: None = Depends(check_celery_enabled)
 ) -> TaskCancelResponse:
     """
     Cancel a running Celery task.
@@ -217,33 +213,29 @@ async def cancel_celery_task(
 
         if cancelled:
             response = TaskCancelResponse(
-                task_id=task_id,
-                cancelled=True,
-                message="Task cancelled successfully"
+                task_id=task_id, cancelled=True, message="Task cancelled successfully"
             )
-            app_logger.info(
-                "Celery task cancelled successfully", task_id=task_id)
+            app_logger.info("Celery task cancelled successfully", task_id=task_id)
         else:
             response = TaskCancelResponse(
                 task_id=task_id,
                 cancelled=False,
-                message="Failed to cancel task or task not found"
+                message="Failed to cancel task or task not found",
             )
             app_logger.warning("Failed to cancel Celery task", task_id=task_id)
 
         return response
 
     except Exception as e:
-        app_logger.error("Failed to cancel task",
-                         task_id=task_id,
-                         error=str(e),
-                         exc_info=True)
+        app_logger.error(
+            "Failed to cancel task", task_id=task_id, error=str(e), exc_info=True
+        )
         raise HTTPException(status_code=500, detail="Failed to cancel task")
 
 
 @router.get("/tasks/active", response_model=list[ActiveTaskResponse])
 async def get_active_celery_tasks(
-    _: None = Depends(check_celery_enabled)
+    _: None = Depends(check_celery_enabled),
 ) -> list[ActiveTaskResponse]:
     """
     Get list of currently active Celery tasks.
@@ -257,20 +249,14 @@ async def get_active_celery_tasks(
         return [ActiveTaskResponse(**task) for task in active_tasks]
 
     except Exception as e:
-        app_logger.error("Failed to get active tasks",
-                         error=str(e),
-                         exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to get active tasks")
+        app_logger.error("Failed to get active tasks", error=str(e), exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to get active tasks")
 
 
 # Convenience endpoints for common tasks
 @router.post("/tasks/send-email", response_model=TaskSubmitResponse)
 async def submit_email_task(
-    to_email: str,
-    subject: str,
-    body: str,
-    _: None = Depends(check_celery_enabled)
+    to_email: str, subject: str, body: str, _: None = Depends(check_celery_enabled)
 ) -> TaskSubmitResponse:
     """
     Submit an email sending task.
@@ -284,35 +270,35 @@ async def submit_email_task(
         TaskSubmitResponse: Task submission result
     """
     try:
-        result = submit_task("app.services.celery_tasks.send_email_task",
-                             to_email, subject, body)
+        result = submit_task(
+            "app.services.celery_tasks.send_email_task", to_email, subject, body
+        )
 
         if result is None:
-            raise HTTPException(
-                status_code=500, detail="Failed to submit email task")
+            raise HTTPException(status_code=500, detail="Failed to submit email task")
 
         return TaskSubmitResponse(
             task_id=result.id,
             task_name="send_email_task",
             status="PENDING",
-            message="Email task submitted successfully"
+            message="Email task submitted successfully",
         )
 
     except HTTPException:
         raise
     except Exception as e:
-        app_logger.error("Failed to submit email task",
-                         to_email=to_email,
-                         error=str(e),
-                         exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to submit email task")
+        app_logger.error(
+            "Failed to submit email task",
+            to_email=to_email,
+            error=str(e),
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Failed to submit email task")
 
 
 @router.post("/tasks/process-data", response_model=TaskSubmitResponse)
 async def submit_data_processing_task(
-    data: list[dict[str, Any]],
-    _: None = Depends(check_celery_enabled)
+    data: list[dict[str, Any]], _: None = Depends(check_celery_enabled)
 ) -> TaskSubmitResponse:
     """
     Submit a data processing task.
@@ -324,34 +310,37 @@ async def submit_data_processing_task(
         TaskSubmitResponse: Task submission result
     """
     try:
-        result = submit_task(
-            "app.services.celery_tasks.process_data_task", data)
+        result = submit_task("app.services.celery_tasks.process_data_task", data)
 
         if result is None:
             raise HTTPException(
-                status_code=500, detail="Failed to submit data processing task")
+                status_code=500, detail="Failed to submit data processing task"
+            )
 
         return TaskSubmitResponse(
             task_id=result.id,
             task_name="process_data_task",
             status="PENDING",
-            message=f"Data processing task submitted successfully for {len(data)} items"
+            message=f"Data processing task submitted successfully for {len(data)} items",
         )
 
     except HTTPException:
         raise
     except Exception as e:
-        app_logger.error("Failed to submit data processing task",
-                         data_count=len(data),
-                         error=str(e),
-                         exc_info=True)
+        app_logger.error(
+            "Failed to submit data processing task",
+            data_count=len(data),
+            error=str(e),
+            exc_info=True,
+        )
         raise HTTPException(
-            status_code=500, detail="Failed to submit data processing task")
+            status_code=500, detail="Failed to submit data processing task"
+        )
 
 
 @router.post("/tasks/cleanup", response_model=TaskSubmitResponse)
 async def submit_cleanup_task(
-    _: None = Depends(check_celery_enabled)
+    _: None = Depends(check_celery_enabled),
 ) -> TaskSubmitResponse:
     """
     Submit a cleanup task.
@@ -363,30 +352,25 @@ async def submit_cleanup_task(
         result = submit_task("app.services.celery_tasks.cleanup_task")
 
         if result is None:
-            raise HTTPException(
-                status_code=500, detail="Failed to submit cleanup task")
+            raise HTTPException(status_code=500, detail="Failed to submit cleanup task")
 
         return TaskSubmitResponse(
             task_id=result.id,
             task_name="cleanup_task",
             status="PENDING",
-            message="Cleanup task submitted successfully"
+            message="Cleanup task submitted successfully",
         )
 
     except HTTPException:
         raise
     except Exception as e:
-        app_logger.error("Failed to submit cleanup task",
-                         error=str(e),
-                         exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to submit cleanup task")
+        app_logger.error("Failed to submit cleanup task", error=str(e), exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to submit cleanup task")
 
 
 @router.post("/tasks/long-running", response_model=TaskSubmitResponse)
 async def submit_long_running_task(
-    duration: int = 60,
-    _: None = Depends(check_celery_enabled)
+    duration: int = 60, _: None = Depends(check_celery_enabled)
 ) -> TaskSubmitResponse:
     """
     Submit a long-running task for testing purposes.
@@ -398,26 +382,29 @@ async def submit_long_running_task(
         TaskSubmitResponse: Task submission result
     """
     try:
-        result = submit_task(
-            "app.services.celery_tasks.long_running_task", duration)
+        result = submit_task("app.services.celery_tasks.long_running_task", duration)
 
         if result is None:
             raise HTTPException(
-                status_code=500, detail="Failed to submit long-running task")
+                status_code=500, detail="Failed to submit long-running task"
+            )
 
         return TaskSubmitResponse(
             task_id=result.id,
             task_name="long_running_task",
             status="PENDING",
-            message=f"Long-running task submitted successfully (duration: {duration}s)"
+            message=f"Long-running task submitted successfully (duration: {duration}s)",
         )
 
     except HTTPException:
         raise
     except Exception as e:
-        app_logger.error("Failed to submit long-running task",
-                         duration=duration,
-                         error=str(e),
-                         exc_info=True)
+        app_logger.error(
+            "Failed to submit long-running task",
+            duration=duration,
+            error=str(e),
+            exc_info=True,
+        )
         raise HTTPException(
-            status_code=500, detail="Failed to submit long-running task")
+            status_code=500, detail="Failed to submit long-running task"
+        )

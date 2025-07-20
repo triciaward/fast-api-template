@@ -153,7 +153,9 @@ class TestCeleryService:
     @patch("app.services.celery.is_celery_enabled")
     @patch("app.services.celery.get_celery_app")
     @patch("app.services.celery.AsyncResult")
-    def test_get_task_status_success(self, mock_async_result, mock_get_app, mock_enabled):
+    def test_get_task_status_success(
+        self, mock_async_result, mock_get_app, mock_enabled
+    ):
         """Test successful task status retrieval."""
         mock_enabled.return_value = True
         mock_app = Mock(spec=Celery)
@@ -196,8 +198,7 @@ class TestCeleryService:
         result = cancel_task("test-task-id")
 
         assert result is True
-        mock_app.control.revoke.assert_called_once_with(
-            "test-task-id", terminate=True)
+        mock_app.control.revoke.assert_called_once_with("test-task-id", terminate=True)
         # The actual logging happens, but we don't need to mock it for this test
 
     @patch("app.services.celery.is_celery_enabled")

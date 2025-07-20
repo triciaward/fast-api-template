@@ -63,17 +63,24 @@ def is_celery_enabled() -> bool:
 def submit_task(task_name: str, *args: Any, **kwargs: Any) -> Optional[AsyncResult]:
     if not is_celery_enabled():
         app_logger.warning(
-            "Attempted to submit task but Celery is disabled", task_name=task_name)
+            "Attempted to submit task but Celery is disabled", task_name=task_name
+        )
         return None
     try:
         app = get_celery_app()
         result = app.send_task(task_name, args=args, kwargs=kwargs)
-        app_logger.info("Task submitted successfully", task_name=task_name,
-                        task_id=result.id, args=args, kwargs=kwargs)
+        app_logger.info(
+            "Task submitted successfully",
+            task_name=task_name,
+            task_id=result.id,
+            args=args,
+            kwargs=kwargs,
+        )
         return result
     except Exception as e:
-        app_logger.error("Failed to submit task",
-                         task_name=task_name, error=str(e), exc_info=True)
+        app_logger.error(
+            "Failed to submit task", task_name=task_name, error=str(e), exc_info=True
+        )
         return None
 
 
@@ -97,8 +104,9 @@ def get_task_status(task_id: str) -> Optional[dict[str, Any]]:
                 status_info["error"] = str(result.info)
         return status_info
     except Exception as e:
-        app_logger.error("Failed to get task status",
-                         task_id=task_id, error=str(e), exc_info=True)
+        app_logger.error(
+            "Failed to get task status", task_id=task_id, error=str(e), exc_info=True
+        )
         return None
 
 
@@ -111,8 +119,9 @@ def cancel_task(task_id: str) -> bool:
         app_logger.info("Task cancelled successfully", task_id=task_id)
         return True
     except Exception as e:
-        app_logger.error("Failed to cancel task",
-                         task_id=task_id, error=str(e), exc_info=True)
+        app_logger.error(
+            "Failed to cancel task", task_id=task_id, error=str(e), exc_info=True
+        )
         return False
 
 
@@ -127,18 +136,19 @@ def get_active_tasks() -> list[dict[str, Any]]:
         tasks = []
         for worker, worker_tasks in active_tasks.items():
             for task in worker_tasks:
-                tasks.append({
-                    "task_id": task["id"],
-                    "name": task["name"],
-                    "worker": worker,
-                    "args": task.get("args", []),
-                    "kwargs": task.get("kwargs", {}),
-                    "time_start": task.get("time_start"),
-                })
+                tasks.append(
+                    {
+                        "task_id": task["id"],
+                        "name": task["name"],
+                        "worker": worker,
+                        "args": task.get("args", []),
+                        "kwargs": task.get("kwargs", {}),
+                        "time_start": task.get("time_start"),
+                    }
+                )
         return tasks
     except Exception as e:
-        app_logger.error("Failed to get active tasks",
-                         error=str(e), exc_info=True)
+        app_logger.error("Failed to get active tasks", error=str(e), exc_info=True)
         return []
 
 
@@ -158,6 +168,5 @@ def get_celery_stats() -> dict[str, Any]:
         }
         return stats
     except Exception as e:
-        app_logger.error("Failed to get Celery stats",
-                         error=str(e), exc_info=True)
+        app_logger.error("Failed to get Celery stats", error=str(e), exc_info=True)
         return {"enabled": False, "error": str(e)}
