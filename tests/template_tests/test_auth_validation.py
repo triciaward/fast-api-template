@@ -303,8 +303,8 @@ class TestInputSanitization:
                 assert response.status_code == 422, f"Username '{username}' should fail"
                 if expected_error:
                     data = response.json()
-                    assert (
-                        expected_error in str(data)
+                    assert expected_error in str(
+                        data
                     ), f"Expected error '{expected_error}' not found for username '{username}'"
 
     def test_password_edge_cases(
@@ -339,8 +339,8 @@ class TestInputSanitization:
                 assert response.status_code == 422, f"Password '{password}' should fail"
                 if expected_error:
                     data = response.json()
-                    assert (
-                        expected_error in str(data)
+                    assert expected_error in str(
+                        data
                     ), f"Expected error '{expected_error}' not found for password '{password}'"
 
 

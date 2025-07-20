@@ -147,9 +147,11 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
             redis_ready = await health_check_redis()
             readiness_status["components"]["redis"] = {
                 "ready": redis_ready,
-                "message": "Redis connection successful"
-                if redis_ready
-                else "Redis connection failed",
+                "message": (
+                    "Redis connection successful"
+                    if redis_ready
+                    else "Redis connection failed"
+                ),
             }
             if not redis_ready:
                 readiness_status["ready"] = False
@@ -168,9 +170,11 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
             limiter = get_limiter()
             readiness_status["components"]["rate_limiting"] = {
                 "ready": limiter is not None,
-                "message": "Rate limiting ready"
-                if limiter
-                else "Rate limiting not initialized",
+                "message": (
+                    "Rate limiting ready"
+                    if limiter
+                    else "Rate limiting not initialized"
+                ),
             }
             if not limiter:
                 readiness_status["ready"] = False

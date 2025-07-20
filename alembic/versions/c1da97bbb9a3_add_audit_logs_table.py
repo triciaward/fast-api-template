@@ -5,6 +5,7 @@ Revises: add_refresh_tokens_table
 Create Date: 2025-07-20 13:01:50.738378
 
 """
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 

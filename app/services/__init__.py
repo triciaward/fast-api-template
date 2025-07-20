@@ -86,6 +86,7 @@ except ImportError:
     def get_rate_limit_info(request: Request) -> dict[str, Any]:
         return {"enabled": False}
 
+
 # Note: websocket_manager doesn't exist in websocket.py, so we'll skip it for now
 
 __all__ = [
