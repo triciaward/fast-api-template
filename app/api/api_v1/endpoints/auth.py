@@ -53,8 +53,7 @@ logger = get_auth_logger()
 async def register_user(
     user: UserCreate, db: Session = Depends(get_db)
 ) -> UserResponse:
-    logger.info("User registration attempt",
-                email=user.email, username=user.username)
+    logger.info("User registration attempt", email=user.email, username=user.username)
 
     try:
         # Check if user with email already exists
@@ -69,8 +68,7 @@ async def register_user(
             )
 
         # Check if username already exists
-        db_user = crud_user.get_user_by_username_sync(
-            db, username=user.username)
+        db_user = crud_user.get_user_by_username_sync(db, username=user.username)
         if db_user:
             logger.warning(
                 "Registration failed - username already taken", username=user.username
@@ -103,8 +101,7 @@ async def register_user(
                     "Failed to create verification token", user_id=str(db_user.id)
                 )
         else:
-            logger.warning(
-                "Email service not configured - skipping verification email")
+            logger.warning("Email service not configured - skipping verification email")
 
         return db_user
 
@@ -170,14 +167,12 @@ async def login_user(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        access_token_expires = timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
             subject=user.email, expires_delta=access_token_expires
         )
 
-        logger.info("Login successful", user_id=str(
-            user.id), email=form_data.username)
+        logger.info("Login successful", user_id=str(user.id), email=form_data.username)
         return Token(access_token=access_token, token_type="bearer")
 
     except HTTPException:
@@ -203,16 +198,13 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
 
     if not oauth_service:
         logger.error("OAuth service not available")
-        raise HTTPException(
-            status_code=503, detail="OAuth service not available")
+        raise HTTPException(status_code=503, detail="OAuth service not available")
 
     provider = oauth_data.provider.lower()
 
     if provider not in ["google", "apple"]:
-        logger.warning(
-            "OAuth login failed - unsupported provider", provider=provider)
-        raise HTTPException(
-            status_code=400, detail="Unsupported OAuth provider")
+        logger.warning("OAuth login failed - unsupported provider", provider=provider)
+        raise HTTPException(status_code=400, detail="Unsupported OAuth provider")
 
     if not oauth_service.is_provider_configured(provider):
         logger.warning(
@@ -230,8 +222,7 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
                 logger.warning(
                     "OAuth login failed - invalid Google token", provider=provider
                 )
-                raise HTTPException(
-                    status_code=400, detail="Invalid Google token")
+                raise HTTPException(status_code=400, detail="Invalid Google token")
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
@@ -243,8 +234,7 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
                 logger.warning(
                     "OAuth login failed - invalid Apple token", provider=provider
                 )
-                raise HTTPException(
-                    status_code=400, detail="Invalid Apple token")
+                raise HTTPException(status_code=400, detail="Invalid Apple token")
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
@@ -257,8 +247,7 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
                 has_oauth_id=bool(oauth_id),
                 has_email=bool(email),
             )
-            raise HTTPException(
-                status_code=400, detail="Invalid OAuth user info")
+            raise HTTPException(status_code=400, detail="Invalid OAuth user info")
 
         logger.info(
             "OAuth token verified successfully",
@@ -268,8 +257,7 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
         )
 
         # Check if user already exists
-        existing_user = crud_user.get_user_by_oauth_id_sync(
-            db, provider, oauth_id)
+        existing_user = crud_user.get_user_by_oauth_id_sync(db, provider, oauth_id)
         if existing_user:
             # User exists, generate token
             access_token_expires = timedelta(
@@ -318,8 +306,7 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
         )
 
         # Generate token for new user
-        access_token_expires = timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
             subject=new_user.email, expires_delta=access_token_expires
         )
@@ -340,8 +327,7 @@ async def oauth_login(oauth_data: OAuthLogin, db: Session = Depends(get_db)) -> 
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(
-            status_code=400, detail=f"OAuth login failed: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"OAuth login failed: {str(e)}")
 
 
 @router.post("/resend-verification", response_model=EmailVerificationResponse)
@@ -560,8 +546,7 @@ async def reset_password(
         # Get user
         user = crud_user.get_user_by_id_sync(db, user_id)
         if not user:
-            logger.warning("User not found for password reset",
-                           user_id=user_id)
+            logger.warning("User not found for password reset", user_id=user_id)
             return PasswordResetConfirmResponse(
                 message="User not found.", password_reset=False
             )
@@ -579,8 +564,7 @@ async def reset_password(
             )
 
         # Reset the password
-        success = crud_user.reset_user_password_sync(
-            db, user_id, request.new_password)
+        success = crud_user.reset_user_password_sync(db, user_id, request.new_password)
         if not success:
             logger.error("Failed to reset user password", user_id=user_id)
             return PasswordResetConfirmResponse(
@@ -588,8 +572,7 @@ async def reset_password(
                 password_reset=False,
             )
 
-        logger.info("Password reset successful",
-                    user_id=str(user.id), email=user.email)
+        logger.info("Password reset successful", user_id=str(user.id), email=user.email)
         return PasswordResetConfirmResponse(
             message="Password reset successfully. You can now log in with your new password.",
             password_reset=True,
@@ -759,8 +742,7 @@ async def confirm_account_deletion(
         # Get user
         user = crud_user.get_user_by_id_sync(db, user_id)
         if not user:
-            logger.warning(
-                "User not found for account deletion", user_id=user_id)
+            logger.warning("User not found for account deletion", user_id=user_id)
             return AccountDeletionConfirmResponse(
                 message="User not found.",
                 deletion_confirmed=False,
@@ -835,7 +817,8 @@ async def cancel_account_deletion(
         if not user:
             # Don't reveal if user exists or not for security
             logger.info(
-                "Account deletion cancellation for non-existent user", email=request.email
+                "Account deletion cancellation for non-existent user",
+                email=request.email,
             )
             return AccountDeletionCancelResponse(
                 message="If an account with that email exists and has a pending deletion, it has been cancelled.",
@@ -939,7 +922,9 @@ async def get_account_deletion_status(
         return AccountDeletionStatusResponse(
             deletion_requested=deletion_requested,
             deletion_confirmed=deletion_confirmed,
-            deletion_scheduled_for=user.deletion_scheduled_for if user.deletion_scheduled_for else None,  # type: ignore
+            deletion_scheduled_for=user.deletion_scheduled_for
+            if user.deletion_scheduled_for
+            else None,  # type: ignore
             can_cancel=can_cancel,
             grace_period_days=settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS,
         )

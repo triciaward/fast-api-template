@@ -121,8 +121,7 @@ async def get_user_by_verification_token(db: DBSession, token: str) -> Optional[
     if isinstance(db, AsyncSession):
         result = await db.execute(select(User).filter(User.verification_token == token))
     else:
-        result = db.execute(select(User).filter(
-            User.verification_token == token))
+        result = db.execute(select(User).filter(User.verification_token == token))
     return result.scalar_one_or_none()
 
 
@@ -178,8 +177,7 @@ async def get_user_by_password_reset_token(db: DBSession, token: str) -> Optiona
             select(User).filter(User.password_reset_token == token)
         )
     else:
-        result = db.execute(select(User).filter(
-            User.password_reset_token == token))
+        result = db.execute(select(User).filter(User.password_reset_token == token))
     return result.scalar_one_or_none()
 
 
@@ -350,8 +348,7 @@ def verify_user_sync(db: Session, user_id: str) -> bool:
 
 # Sync password reset operations
 def get_user_by_password_reset_token_sync(db: Session, token: str) -> Optional[User]:
-    result = db.execute(select(User).filter(
-        User.password_reset_token == token))
+    result = db.execute(select(User).filter(User.password_reset_token == token))
     return result.scalar_one_or_none()
 
 

@@ -29,8 +29,7 @@ router = APIRouter()
 # Pydantic models for request/response
 class TaskSubmitRequest(BaseModel):
     task_name: str = Field(..., description="Name of the task to execute")
-    args: list[Any] = Field(
-        default=[], description="Positional arguments for the task")
+    args: list[Any] = Field(default=[], description="Positional arguments for the task")
     kwargs: dict[str, Any] = Field(
         default={}, description="Keyword arguments for the task"
     )
@@ -47,14 +46,12 @@ class TaskStatusResponse(BaseModel):
     task_id: str = Field(..., description="ID of the task")
     status: str = Field(..., description="Current status of the task")
     ready: bool = Field(..., description="Whether the task is complete")
-    successful: bool = Field(...,
-                             description="Whether the task completed successfully")
+    successful: bool = Field(..., description="Whether the task completed successfully")
     failed: bool = Field(..., description="Whether the task failed")
     result: Optional[Any] = Field(
         None, description="Task result if completed successfully"
     )
-    error: Optional[str] = Field(
-        None, description="Error message if task failed")
+    error: Optional[str] = Field(None, description="Error message if task failed")
 
 
 class TaskCancelResponse(BaseModel):
@@ -77,15 +74,12 @@ class ActiveTaskResponse(BaseModel):
 class CeleryStatsResponse(BaseModel):
     enabled: bool = Field(..., description="Whether Celery is enabled")
     broker_url: Optional[str] = Field(None, description="Celery broker URL")
-    result_backend: Optional[str] = Field(
-        None, description="Celery result backend")
-    active_workers: Optional[int] = Field(
-        None, description="Number of active workers")
+    result_backend: Optional[str] = Field(None, description="Celery result backend")
+    active_workers: Optional[int] = Field(None, description="Number of active workers")
     registered_tasks: Optional[int] = Field(
         None, description="Number of registered tasks"
     )
-    active_tasks: Optional[int] = Field(
-        None, description="Number of active tasks")
+    active_tasks: Optional[int] = Field(None, description="Number of active tasks")
     error: Optional[str] = Field(
         None, description="Error message if stats retrieval failed"
     )
@@ -112,10 +106,8 @@ async def get_celery_status() -> CeleryStatsResponse:
         stats = get_celery_stats()
         return CeleryStatsResponse(**stats)
     except Exception as e:
-        app_logger.error("Failed to get Celery status",
-                         error=str(e), exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to get Celery status")
+        app_logger.error("Failed to get Celery status", error=str(e), exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to get Celery status")
 
 
 @router.post("/tasks/submit", response_model=TaskSubmitResponse)
@@ -139,12 +131,10 @@ async def submit_celery_task(
             kwargs=request.kwargs,
         )
 
-        result = submit_task(request.task_name, *
-                             request.args, **request.kwargs)
+        result = submit_task(request.task_name, *request.args, **request.kwargs)
 
         if result is None:
-            raise HTTPException(
-                status_code=500, detail="Failed to submit task")
+            raise HTTPException(status_code=500, detail="Failed to submit task")
 
         response = TaskSubmitResponse(
             task_id=result.id,
@@ -200,8 +190,7 @@ async def get_celery_task_status(
         app_logger.error(
             "Failed to get task status", task_id=task_id, error=str(e), exc_info=True
         )
-        raise HTTPException(
-            status_code=500, detail="Failed to get task status")
+        raise HTTPException(status_code=500, detail="Failed to get task status")
 
 
 @router.delete("/tasks/{task_id}/cancel", response_model=TaskCancelResponse)
@@ -226,8 +215,7 @@ async def cancel_celery_task(
             response = TaskCancelResponse(
                 task_id=task_id, cancelled=True, message="Task cancelled successfully"
             )
-            app_logger.info(
-                "Celery task cancelled successfully", task_id=task_id)
+            app_logger.info("Celery task cancelled successfully", task_id=task_id)
         else:
             response = TaskCancelResponse(
                 task_id=task_id,
@@ -261,10 +249,8 @@ async def get_active_celery_tasks(
         return [ActiveTaskResponse(**task) for task in active_tasks]
 
     except Exception as e:
-        app_logger.error("Failed to get active tasks",
-                         error=str(e), exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to get active tasks")
+        app_logger.error("Failed to get active tasks", error=str(e), exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to get active tasks")
 
 
 # Convenience endpoints for common tasks
@@ -289,8 +275,7 @@ async def submit_email_task(
         )
 
         if result is None:
-            raise HTTPException(
-                status_code=500, detail="Failed to submit email task")
+            raise HTTPException(status_code=500, detail="Failed to submit email task")
 
         return TaskSubmitResponse(
             task_id=result.id,
@@ -308,8 +293,7 @@ async def submit_email_task(
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(
-            status_code=500, detail="Failed to submit email task")
+        raise HTTPException(status_code=500, detail="Failed to submit email task")
 
 
 @router.post("/tasks/process-data", response_model=TaskSubmitResponse)
@@ -326,8 +310,7 @@ async def submit_data_processing_task(
         TaskSubmitResponse: Task submission result
     """
     try:
-        result = submit_task(
-            "app.services.celery_tasks.process_data_task", data)
+        result = submit_task("app.services.celery_tasks.process_data_task", data)
 
         if result is None:
             raise HTTPException(
@@ -369,8 +352,7 @@ async def submit_cleanup_task(
         result = submit_task("app.services.celery_tasks.cleanup_task")
 
         if result is None:
-            raise HTTPException(
-                status_code=500, detail="Failed to submit cleanup task")
+            raise HTTPException(status_code=500, detail="Failed to submit cleanup task")
 
         return TaskSubmitResponse(
             task_id=result.id,
@@ -382,10 +364,8 @@ async def submit_cleanup_task(
     except HTTPException:
         raise
     except Exception as e:
-        app_logger.error("Failed to submit cleanup task",
-                         error=str(e), exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to submit cleanup task")
+        app_logger.error("Failed to submit cleanup task", error=str(e), exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to submit cleanup task")
 
 
 @router.post("/tasks/long-running", response_model=TaskSubmitResponse)
@@ -402,8 +382,7 @@ async def submit_long_running_task(
         TaskSubmitResponse: Task submission result
     """
     try:
-        result = submit_task(
-            "app.services.celery_tasks.long_running_task", duration)
+        result = submit_task("app.services.celery_tasks.long_running_task", duration)
 
         if result is None:
             raise HTTPException(
@@ -445,11 +424,11 @@ async def submit_permanently_delete_accounts_task(
         app_logger.info("Submitting permanent account deletion task")
 
         result = submit_task(
-            "app.services.celery_tasks.permanently_delete_accounts_task")
+            "app.services.celery_tasks.permanently_delete_accounts_task"
+        )
 
         if result is None:
-            raise HTTPException(
-                status_code=500, detail="Failed to submit task")
+            raise HTTPException(status_code=500, detail="Failed to submit task")
 
         response = TaskSubmitResponse(
             task_id=result.id,

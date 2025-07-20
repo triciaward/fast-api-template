@@ -190,7 +190,9 @@ class EmailService:
         if not self.is_configured():
             return False
 
-        deletion_url = f"{settings.FRONTEND_URL}/confirm-deletion?token={deletion_token}"
+        deletion_url = (
+            f"{settings.FRONTEND_URL}/confirm-deletion?token={deletion_token}"
+        )
 
         # HTML template for account deletion confirmation
         html_content = f"""
@@ -267,9 +269,7 @@ class EmailService:
         except Exception:
             return False
 
-    async def create_deletion_token(
-        self, db: Session, user_id: str
-    ) -> Optional[str]:
+    async def create_deletion_token(self, db: Session, user_id: str) -> Optional[str]:
         """Create and store deletion token for a user."""
         token = self.generate_verification_token()
         expires = datetime.utcnow() + timedelta(
@@ -282,9 +282,7 @@ class EmailService:
 
         return token if success else None
 
-    async def verify_deletion_token(
-        self, db: Session, token: str
-    ) -> Optional[str]:
+    async def verify_deletion_token(self, db: Session, token: str) -> Optional[str]:
         """Verify a deletion token and return user ID if valid."""
         user = crud_user.get_user_by_deletion_token_sync(db, token=token)
         if not user:

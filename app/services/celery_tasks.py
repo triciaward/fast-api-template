@@ -65,19 +65,22 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
         reminder_sent_count = 0
 
         # Find accounts scheduled for deletion that have passed their grace period
-        accounts_to_delete = db.execute(
-            select(User).filter(
-                User.deletion_scheduled_for <= datetime.utcnow(),
-                User.is_deleted == False,  # noqa: E712
-                User.deletion_confirmed_at.isnot(None),
+        accounts_to_delete = (
+            db.execute(
+                select(User).filter(
+                    User.deletion_scheduled_for <= datetime.utcnow(),
+                    User.is_deleted == False,  # noqa: E712
+                    User.deletion_confirmed_at.isnot(None),
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
         for user in accounts_to_delete:
             try:
                 # Mark as permanently deleted
-                success = crud_user.permanently_delete_user_sync(
-                    db, str(user.id))
+                success = crud_user.permanently_delete_user_sync(db, str(user.id))
                 if success:
                     deleted_count += 1
                     logger.info(
@@ -107,20 +110,25 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
         for reminder_days in settings.ACCOUNT_DELETION_REMINDER_DAYS:
             reminder_date = datetime.utcnow() + timedelta(days=reminder_days)
 
-            accounts_for_reminder = db.execute(
-                select(User).filter(
-                    User.deletion_scheduled_for <= reminder_date,
-                    User.deletion_scheduled_for > datetime.utcnow(),
-                    User.is_deleted == False,  # noqa: E712
-                    User.deletion_confirmed_at.isnot(None),
+            accounts_for_reminder = (
+                db.execute(
+                    select(User).filter(
+                        User.deletion_scheduled_for <= reminder_date,
+                        User.deletion_scheduled_for > datetime.utcnow(),
+                        User.is_deleted == False,  # noqa: E712
+                        User.deletion_confirmed_at.isnot(None),
+                    )
                 )
-            ).scalars().all()
+                .scalars()
+                .all()
+            )
 
             for user in accounts_for_reminder:
                 try:
                     # Calculate days remaining
                     days_remaining = (
-                        user.deletion_scheduled_for - datetime.utcnow()).days
+                        user.deletion_scheduled_for - datetime.utcnow()
+                    ).days
 
                     # Send reminder email
                     if email_service and email_service.is_configured():
@@ -129,7 +137,8 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
                             str(user.username),
                             days_remaining,
                             user.deletion_scheduled_for.strftime(
-                                '%Y-%m-%d %H:%M:%S UTC'),
+                                "%Y-%m-%d %H:%M:%S UTC"
+                            ),
                         )
 
                         if email_sent:
