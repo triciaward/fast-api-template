@@ -53,6 +53,7 @@ try:
     from .rate_limiter import (
         get_limiter,
         get_rate_limit_info,
+        rate_limit_account_deletion,
         rate_limit_custom,
         rate_limit_email_verification,
         rate_limit_login,
@@ -74,6 +75,7 @@ except ImportError:
     rate_limit_email_verification = _no_op_decorator
     rate_limit_password_reset = _no_op_decorator
     rate_limit_oauth = _no_op_decorator
+    rate_limit_account_deletion = _no_op_decorator
 
     def rate_limit_custom(limit: str) -> Callable[[Callable], Callable]:
         return _no_op_decorator
@@ -103,6 +105,7 @@ __all__ = [
     "rate_limit_email_verification",
     "rate_limit_password_reset",
     "rate_limit_oauth",
+    "rate_limit_account_deletion",
     "rate_limit_custom",
     "setup_rate_limiting",
     "get_rate_limit_info",

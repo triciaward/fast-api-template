@@ -10,7 +10,8 @@ from app.database.database import Base
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True,
+                default=uuid.uuid4, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=True)  # Nullable for OAuth users
@@ -32,5 +33,13 @@ class User(Base):
     password_reset_token = Column(String, nullable=True)
     password_reset_token_expires = Column(DateTime, nullable=True)
 
+    # Account deletion (GDPR compliance)
+    deletion_requested_at = Column(DateTime, nullable=True)
+    deletion_confirmed_at = Column(DateTime, nullable=True)
+    deletion_scheduled_for = Column(DateTime, nullable=True)
+    deletion_token = Column(String, nullable=True)
+    deletion_token_expires = Column(DateTime, nullable=True)
+    is_deleted = Column(Boolean, default=False, nullable=False)
+
     def __repr__(self) -> str:
-        return f"<User(id={self.id}, email={self.email}, username={self.username}, is_superuser={self.is_superuser}, is_verified={self.is_verified})>"
+        return f"<User(id={self.id}, email={self.email}, username={self.username}, is_superuser={self.is_superuser}, is_verified={self.is_verified}, is_deleted={self.is_deleted})>"

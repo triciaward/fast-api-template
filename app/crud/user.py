@@ -121,7 +121,8 @@ async def get_user_by_verification_token(db: DBSession, token: str) -> Optional[
     if isinstance(db, AsyncSession):
         result = await db.execute(select(User).filter(User.verification_token == token))
     else:
-        result = db.execute(select(User).filter(User.verification_token == token))
+        result = db.execute(select(User).filter(
+            User.verification_token == token))
     return result.scalar_one_or_none()
 
 
@@ -177,7 +178,8 @@ async def get_user_by_password_reset_token(db: DBSession, token: str) -> Optiona
             select(User).filter(User.password_reset_token == token)
         )
     else:
-        result = db.execute(select(User).filter(User.password_reset_token == token))
+        result = db.execute(select(User).filter(
+            User.password_reset_token == token))
     return result.scalar_one_or_none()
 
 
@@ -348,7 +350,8 @@ def verify_user_sync(db: Session, user_id: str) -> bool:
 
 # Sync password reset operations
 def get_user_by_password_reset_token_sync(db: Session, token: str) -> Optional[User]:
-    result = db.execute(select(User).filter(User.password_reset_token == token))
+    result = db.execute(select(User).filter(
+        User.password_reset_token == token))
     return result.scalar_one_or_none()
 
 
@@ -422,3 +425,214 @@ async def authenticate_user_async(
     if not verify_password(password, str(user.hashed_password)):
         return None
     return user
+
+
+# Account deletion CRUD operations (GDPR compliance)
+async def get_user_by_deletion_token(db: DBSession, token: str) -> Optional[User]:
+    if isinstance(db, AsyncSession):
+        result = await db.execute(select(User).filter(User.deletion_token == token))
+    else:
+        result = db.execute(select(User).filter(User.deletion_token == token))
+    return result.scalar_one_or_none()
+
+
+async def update_deletion_token(
+    db: DBSession, user_id: str, token: str, expires: datetime
+) -> bool:
+    if isinstance(db, AsyncSession):
+        result = await db.execute(select(User).filter(User.id == user_id))
+    else:
+        result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.deletion_token = token  # type: ignore
+    user.deletion_token_expires = expires  # type: ignore
+
+    if isinstance(db, AsyncSession):
+        await db.commit()
+    else:
+        db.commit()
+
+    return True
+
+
+async def request_account_deletion(db: DBSession, user_id: str) -> bool:
+    if isinstance(db, AsyncSession):
+        result = await db.execute(select(User).filter(User.id == user_id))
+    else:
+        result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.deletion_requested_at = datetime.utcnow()  # type: ignore
+
+    if isinstance(db, AsyncSession):
+        await db.commit()
+    else:
+        db.commit()
+
+    return True
+
+
+async def confirm_account_deletion(
+    db: DBSession, user_id: str, deletion_scheduled_for: datetime
+) -> bool:
+    if isinstance(db, AsyncSession):
+        result = await db.execute(select(User).filter(User.id == user_id))
+    else:
+        result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.deletion_confirmed_at = datetime.utcnow()  # type: ignore
+    user.deletion_scheduled_for = deletion_scheduled_for  # type: ignore
+    user.deletion_token = None  # type: ignore
+    user.deletion_token_expires = None  # type: ignore
+
+    if isinstance(db, AsyncSession):
+        await db.commit()
+    else:
+        db.commit()
+
+    return True
+
+
+async def cancel_account_deletion(db: DBSession, user_id: str) -> bool:
+    if isinstance(db, AsyncSession):
+        result = await db.execute(select(User).filter(User.id == user_id))
+    else:
+        result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.deletion_requested_at = None  # type: ignore
+    user.deletion_confirmed_at = None  # type: ignore
+    user.deletion_scheduled_for = None  # type: ignore
+    user.deletion_token = None  # type: ignore
+    user.deletion_token_expires = None  # type: ignore
+
+    if isinstance(db, AsyncSession):
+        await db.commit()
+    else:
+        db.commit()
+
+    return True
+
+
+async def permanently_delete_user(db: DBSession, user_id: str) -> bool:
+    if isinstance(db, AsyncSession):
+        result = await db.execute(select(User).filter(User.id == user_id))
+    else:
+        result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    # Mark as deleted (soft delete for audit purposes)
+    user.is_deleted = True  # type: ignore
+
+    if isinstance(db, AsyncSession):
+        await db.commit()
+    else:
+        db.commit()
+
+    return True
+
+
+# Sync versions for account deletion operations
+def get_user_by_deletion_token_sync(db: Session, token: str) -> Optional[User]:
+    result = db.execute(select(User).filter(User.deletion_token == token))
+    return result.scalar_one_or_none()
+
+
+def update_deletion_token_sync(
+    db: Session, user_id: str, token: str, expires: datetime
+) -> bool:
+    result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.deletion_token = token  # type: ignore
+    user.deletion_token_expires = expires  # type: ignore
+
+    db.commit()
+
+    return True
+
+
+def request_account_deletion_sync(db: Session, user_id: str) -> bool:
+    result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.deletion_requested_at = datetime.utcnow()  # type: ignore
+
+    db.commit()
+
+    return True
+
+
+def confirm_account_deletion_sync(
+    db: Session, user_id: str, deletion_scheduled_for: datetime
+) -> bool:
+    result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.deletion_confirmed_at = datetime.utcnow()  # type: ignore
+    user.deletion_scheduled_for = deletion_scheduled_for  # type: ignore
+    user.deletion_token = None  # type: ignore
+    user.deletion_token_expires = None  # type: ignore
+
+    db.commit()
+
+    return True
+
+
+def cancel_account_deletion_sync(db: Session, user_id: str) -> bool:
+    result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.deletion_requested_at = None  # type: ignore
+    user.deletion_confirmed_at = None  # type: ignore
+    user.deletion_scheduled_for = None  # type: ignore
+    user.deletion_token = None  # type: ignore
+    user.deletion_token_expires = None  # type: ignore
+
+    db.commit()
+
+    return True
+
+
+def permanently_delete_user_sync(db: Session, user_id: str) -> bool:
+    result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    # Mark as deleted (soft delete for audit purposes)
+    user.is_deleted = True  # type: ignore
+
+    db.commit()
+
+    return True

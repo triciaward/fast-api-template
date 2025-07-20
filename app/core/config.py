@@ -68,6 +68,7 @@ class Settings(BaseSettings):
     RATE_LIMIT_EMAIL_VERIFICATION: str = "3/minute"
     RATE_LIMIT_PASSWORD_RESET: str = "3/minute"
     RATE_LIMIT_OAUTH: str = "10/minute"
+    RATE_LIMIT_ACCOUNT_DELETION: str = "3/minute"
 
     # OAuth Configuration
     GOOGLE_CLIENT_ID: Optional[str] = None
@@ -93,6 +94,14 @@ class Settings(BaseSettings):
 
     # Password Reset
     PASSWORD_RESET_TOKEN_EXPIRE_HOURS: int = 1  # 1 hour for security
+
+    # Account Deletion (GDPR compliance)
+    # 24 hours for deletion confirmation
+    ACCOUNT_DELETION_TOKEN_EXPIRE_HOURS: int = 24
+    # 7 days grace period before permanent deletion
+    ACCOUNT_DELETION_GRACE_PERIOD_DAYS: int = 7
+    # Send reminders 3 and 1 days before deletion
+    ACCOUNT_DELETION_REMINDER_DAYS: list[int] = [3, 1]
 
     # CORS
     BACKEND_CORS_ORIGINS: list[str] = [

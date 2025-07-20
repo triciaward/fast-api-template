@@ -115,6 +115,15 @@ def rate_limit_oauth(func: Callable) -> Callable:
     return get_limiter().limit(settings.RATE_LIMIT_OAUTH)(func)  # type: ignore
 
 
+def rate_limit_account_deletion(func: Callable) -> Callable:
+    """Rate limit decorator for account deletion endpoints."""
+    if not settings.ENABLE_RATE_LIMITING:
+        return _no_op_decorator(func)
+
+    # Use slowapi's limit decorator
+    return get_limiter().limit(settings.RATE_LIMIT_ACCOUNT_DELETION)(func)  # type: ignore
+
+
 def rate_limit_custom(limit: str) -> Callable[[Callable], Callable]:
     """Custom rate limit decorator with specified limit."""
 

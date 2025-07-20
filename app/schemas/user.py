@@ -186,3 +186,64 @@ class PasswordResetConfirmRequest(BaseModel):
 class PasswordResetConfirmResponse(BaseModel):
     message: str
     password_reset: bool
+
+
+# Account deletion schemas (GDPR compliance)
+class AccountDeletionRequest(BaseModel):
+    email: EmailStr
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        """Validate email format."""
+        is_valid, error_msg = validate_email_format(v)
+        if not is_valid:
+            raise ValueError(error_msg)
+        return v.lower().strip()
+
+
+class AccountDeletionResponse(BaseModel):
+    message: str
+    email_sent: bool
+
+
+class AccountDeletionConfirmRequest(BaseModel):
+    token: str
+
+    @field_validator("token")
+    @classmethod
+    def validate_token(cls, v: str) -> str:
+        """Sanitize deletion token."""
+        return sanitize_input(v, max_length=255)
+
+
+class AccountDeletionConfirmResponse(BaseModel):
+    message: str
+    deletion_confirmed: bool
+    deletion_scheduled_for: datetime
+
+
+class AccountDeletionCancelRequest(BaseModel):
+    email: EmailStr
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        """Validate email format."""
+        is_valid, error_msg = validate_email_format(v)
+        if not is_valid:
+            raise ValueError(error_msg)
+        return v.lower().strip()
+
+
+class AccountDeletionCancelResponse(BaseModel):
+    message: str
+    deletion_cancelled: bool
+
+
+class AccountDeletionStatusResponse(BaseModel):
+    deletion_requested: bool
+    deletion_confirmed: bool
+    deletion_scheduled_for: Optional[datetime] = None
+    can_cancel: bool
+    grace_period_days: int
