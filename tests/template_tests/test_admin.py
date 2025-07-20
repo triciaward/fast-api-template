@@ -71,22 +71,30 @@ async def test_admin_user_toggle_operations(db_session: AsyncSession) -> None:
     user = await create_user(db_session, user_data)
 
     # Test toggle superuser status
-    updated_user = await admin_user_crud.toggle_superuser_status(db_session, str(user.id))
+    updated_user = await admin_user_crud.toggle_superuser_status(
+        db_session, str(user.id)
+    )
     assert updated_user is not None
     assert updated_user.is_superuser is True
 
     # Toggle back
-    updated_user = await admin_user_crud.toggle_superuser_status(db_session, str(user.id))
+    updated_user = await admin_user_crud.toggle_superuser_status(
+        db_session, str(user.id)
+    )
     assert updated_user is not None
     assert updated_user.is_superuser is False
 
     # Test toggle verification status
-    updated_user = await admin_user_crud.toggle_verification_status(db_session, str(user.id))
+    updated_user = await admin_user_crud.toggle_verification_status(
+        db_session, str(user.id)
+    )
     assert updated_user is not None
     assert updated_user.is_verified is True
 
     # Toggle back
-    updated_user = await admin_user_crud.toggle_verification_status(db_session, str(user.id))
+    updated_user = await admin_user_crud.toggle_verification_status(
+        db_session, str(user.id)
+    )
     assert updated_user is not None
     assert updated_user.is_verified is False
 
@@ -121,7 +129,9 @@ async def test_admin_user_statistics(db_session: AsyncSession) -> None:
     assert stats["unverified_users"] == 2
 
 
-def test_admin_endpoints_require_superuser(client: TestClient, sync_db_session: Session) -> None:
+def test_admin_endpoints_require_superuser(
+    client: TestClient, sync_db_session: Session
+) -> None:
     """Test that admin endpoints require superuser privileges."""
     # Test without authentication
     response = client.get("/api/v1/admin/users")
@@ -157,7 +167,9 @@ def test_admin_endpoints_require_superuser(client: TestClient, sync_db_session: 
     assert response.status_code == 403
 
 
-def test_admin_endpoints_with_superuser(client: TestClient, sync_db_session: Session) -> None:
+def test_admin_endpoints_with_superuser(
+    client: TestClient, sync_db_session: Session
+) -> None:
     """Test admin endpoints with superuser authentication."""
     # Create a superuser directly in database
     from app.crud import user as crud_user
@@ -230,8 +242,7 @@ def test_admin_user_management(client: TestClient, sync_db_session: Session) -> 
         "is_superuser": False,
         "is_verified": True,
     }
-    response = client.post("/api/v1/admin/users",
-                           json=new_user_data, headers=headers)
+    response = client.post("/api/v1/admin/users", json=new_user_data, headers=headers)
     assert response.status_code == 201
     user_id = response.json()["id"]
 
@@ -246,20 +257,23 @@ def test_admin_user_management(client: TestClient, sync_db_session: Session) -> 
         "is_verified": False,
     }
     response = client.put(
-        f"/api/v1/admin/users/{user_id}", json=update_data, headers=headers)
+        f"/api/v1/admin/users/{user_id}", json=update_data, headers=headers
+    )
     assert response.status_code == 200
     assert response.json()["username"] == "updateduser"
     assert response.json()["is_verified"] is False
 
     # Toggle superuser status
     response = client.post(
-        f"/api/v1/admin/users/{user_id}/toggle-superuser", headers=headers)
+        f"/api/v1/admin/users/{user_id}/toggle-superuser", headers=headers
+    )
     assert response.status_code == 200
     assert response.json()["new_value"] is True
 
     # Toggle verification status
     response = client.post(
-        f"/api/v1/admin/users/{user_id}/toggle-verification", headers=headers)
+        f"/api/v1/admin/users/{user_id}/toggle-verification", headers=headers
+    )
     assert response.status_code == 200
     assert response.json()["new_value"] is True
 
@@ -305,8 +319,9 @@ def test_admin_bulk_operations(client: TestClient, sync_db_session: Session) -> 
             "is_superuser": False,
             "is_verified": False,
         }
-        response = client.post("/api/v1/admin/users",
-                               json=new_user_data, headers=headers)
+        response = client.post(
+            "/api/v1/admin/users", json=new_user_data, headers=headers
+        )
         assert response.status_code == 201
         user_ids.append(response.json()["id"])
 
@@ -315,8 +330,9 @@ def test_admin_bulk_operations(client: TestClient, sync_db_session: Session) -> 
         "user_ids": user_ids,
         "operation": "verify",
     }
-    response = client.post("/api/v1/admin/bulk-operations",
-                           json=bulk_data, headers=headers)
+    response = client.post(
+        "/api/v1/admin/bulk-operations", json=bulk_data, headers=headers
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["operation"] == "verify"
@@ -329,8 +345,9 @@ def test_admin_bulk_operations(client: TestClient, sync_db_session: Session) -> 
         "user_ids": user_ids,
         "operation": "unverify",
     }
-    response = client.post("/api/v1/admin/bulk-operations",
-                           json=bulk_data, headers=headers)
+    response = client.post(
+        "/api/v1/admin/bulk-operations", json=bulk_data, headers=headers
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["operation"] == "unverify"
@@ -374,7 +391,7 @@ def test_admin_self_protection(client: TestClient, sync_db_session: Session) -> 
 
     # Try to toggle own superuser status
     response = client.post(
-        f"/api/v1/admin/users/{user_id}/toggle-superuser", headers=headers)
+        f"/api/v1/admin/users/{user_id}/toggle-superuser", headers=headers
+    )
     assert response.status_code == 400
-    assert "Cannot modify your own superuser status" in response.json()[
-        "detail"]
+    assert "Cannot modify your own superuser status" in response.json()["detail"]

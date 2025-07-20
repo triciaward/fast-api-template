@@ -46,23 +46,27 @@ async def list_users(
 
     user_list = []
     for user in users:
-        user_list.append({
-            "id": str(user.id),
-            "email": user.email,
-            "username": user.username,
-            "is_superuser": user.is_superuser,
-            "is_verified": user.is_verified,
-            "is_deleted": user.is_deleted,
-            "date_created": user.date_created,
-            "oauth_provider": user.oauth_provider,
-        })
+        user_list.append(
+            {
+                "id": str(user.id),
+                "email": user.email,
+                "username": user.username,
+                "is_superuser": user.is_superuser,
+                "is_verified": user.is_verified,
+                "is_deleted": user.is_deleted,
+                "date_created": user.date_created,
+                "oauth_provider": user.oauth_provider,
+            }
+        )
 
-    print_json({
-        "users": user_list,
-        "total": len(user_list),
-        "skip": skip,
-        "limit": limit,
-    })
+    print_json(
+        {
+            "users": user_list,
+            "total": len(user_list),
+            "skip": skip,
+            "limit": limit,
+        }
+    )
 
 
 async def get_user(db: AsyncSession, user_id: str) -> None:
@@ -78,21 +82,23 @@ async def get_user(db: AsyncSession, user_id: str) -> None:
         print("Error: User not found")
         sys.exit(1)
 
-    print_json({
-        "id": str(user.id),
-        "email": user.email,
-        "username": user.username,
-        "is_superuser": user.is_superuser,
-        "is_verified": user.is_verified,
-        "is_deleted": user.is_deleted,
-        "date_created": user.date_created,
-        "oauth_provider": user.oauth_provider,
-        "oauth_id": user.oauth_id,
-        "oauth_email": user.oauth_email,
-        "deletion_requested_at": user.deletion_requested_at,
-        "deletion_confirmed_at": user.deletion_confirmed_at,
-        "deletion_scheduled_for": user.deletion_scheduled_for,
-    })
+    print_json(
+        {
+            "id": str(user.id),
+            "email": user.email,
+            "username": user.username,
+            "is_superuser": user.is_superuser,
+            "is_verified": user.is_verified,
+            "is_deleted": user.is_deleted,
+            "date_created": user.date_created,
+            "oauth_provider": user.oauth_provider,
+            "oauth_id": user.oauth_id,
+            "oauth_email": user.oauth_email,
+            "deletion_requested_at": user.deletion_requested_at,
+            "deletion_confirmed_at": user.deletion_confirmed_at,
+            "deletion_scheduled_for": user.deletion_scheduled_for,
+        }
+    )
 
 
 async def create_user(
@@ -113,16 +119,18 @@ async def create_user(
 
     try:
         user = await admin_user_crud.create_user(db, user_data)
-        print_json({
-            "message": "User created successfully",
-            "user": {
-                "id": str(user.id),
-                "email": user.email,
-                "username": user.username,
-                "is_superuser": user.is_superuser,
-                "is_verified": user.is_verified,
+        print_json(
+            {
+                "message": "User created successfully",
+                "user": {
+                    "id": str(user.id),
+                    "email": user.email,
+                    "username": user.username,
+                    "is_superuser": user.is_superuser,
+                    "is_verified": user.is_verified,
+                },
             }
-        })
+        )
     except Exception as e:
         print(f"Error creating user: {e}")
         sys.exit(1)
@@ -145,6 +153,7 @@ async def update_user(
         sys.exit(1)
 
     from app.schemas.admin import AdminUserUpdate
+
     update_data: dict = {}
     if email is not None:
         update_data["email"] = email
@@ -165,16 +174,18 @@ async def update_user(
             print("Error: User not found")
             sys.exit(1)
 
-        print_json({
-            "message": "User updated successfully",
-            "user": {
-                "id": str(user.id),
-                "email": user.email,
-                "username": user.username,
-                "is_superuser": user.is_superuser,
-                "is_verified": user.is_verified,
+        print_json(
+            {
+                "message": "User updated successfully",
+                "user": {
+                    "id": str(user.id),
+                    "email": user.email,
+                    "username": user.username,
+                    "is_superuser": user.is_superuser,
+                    "is_verified": user.is_verified,
+                },
             }
-        })
+        )
     except Exception as e:
         print(f"Error updating user: {e}")
         sys.exit(1)
@@ -214,11 +225,13 @@ async def toggle_superuser(db: AsyncSession, user_id: str) -> None:
             print("Error: User not found")
             sys.exit(1)
 
-        print_json({
-            "message": f"Superuser status {'enabled' if user.is_superuser else 'disabled'} successfully",
-            "user_id": str(user.id),
-            "is_superuser": user.is_superuser,
-        })
+        print_json(
+            {
+                "message": f"Superuser status {'enabled' if user.is_superuser else 'disabled'} successfully",
+                "user_id": str(user.id),
+                "is_superuser": user.is_superuser,
+            }
+        )
     except Exception as e:
         print(f"Error toggling superuser status: {e}")
         sys.exit(1)
@@ -238,11 +251,13 @@ async def toggle_verification(db: AsyncSession, user_id: str) -> None:
             print("Error: User not found")
             sys.exit(1)
 
-        print_json({
-            "message": f"Verification status {'enabled' if user.is_verified else 'disabled'} successfully",
-            "user_id": str(user.id),
-            "is_verified": user.is_verified,
-        })
+        print_json(
+            {
+                "message": f"Verification status {'enabled' if user.is_verified else 'disabled'} successfully",
+                "user_id": str(user.id),
+                "is_verified": user.is_verified,
+            }
+        )
     except Exception as e:
         print(f"Error toggling verification status: {e}")
         sys.exit(1)
@@ -261,23 +276,26 @@ async def get_statistics(db: AsyncSession) -> None:
 def main() -> None:
     """Main CLI function."""
     parser = argparse.ArgumentParser(description="Admin CLI utility")
-    subparsers = parser.add_subparsers(
-        dest="command", help="Available commands")
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # List users command
     list_parser = subparsers.add_parser("list", help="List users")
     list_parser.add_argument(
-        "--skip", type=int, default=0, help="Number of users to skip")
+        "--skip", type=int, default=0, help="Number of users to skip"
+    )
     list_parser.add_argument(
-        "--limit", type=int, default=100, help="Maximum number of users to return")
-    list_parser.add_argument("--superuser", type=bool,
-                             help="Filter by superuser status")
-    list_parser.add_argument("--verified", type=bool,
-                             help="Filter by verification status")
-    list_parser.add_argument("--deleted", type=bool,
-                             help="Filter by deletion status")
-    list_parser.add_argument("--oauth-provider", type=str,
-                             help="Filter by OAuth provider")
+        "--limit", type=int, default=100, help="Maximum number of users to return"
+    )
+    list_parser.add_argument(
+        "--superuser", type=bool, help="Filter by superuser status"
+    )
+    list_parser.add_argument(
+        "--verified", type=bool, help="Filter by verification status"
+    )
+    list_parser.add_argument("--deleted", type=bool, help="Filter by deletion status")
+    list_parser.add_argument(
+        "--oauth-provider", type=str, help="Filter by OAuth provider"
+    )
 
     # Get user command
     get_parser = subparsers.add_parser("get", help="Get a specific user")
@@ -289,9 +307,11 @@ def main() -> None:
     create_parser.add_argument("username", help="Username")
     create_parser.add_argument("password", help="Password")
     create_parser.add_argument(
-        "--superuser", action="store_true", help="Make user a superuser")
+        "--superuser", action="store_true", help="Make user a superuser"
+    )
     create_parser.add_argument(
-        "--verified", action="store_true", help="Mark user as verified")
+        "--verified", action="store_true", help="Mark user as verified"
+    )
 
     # Update user command
     update_parser = subparsers.add_parser("update", help="Update a user")
@@ -299,10 +319,8 @@ def main() -> None:
     update_parser.add_argument("--email", help="New email")
     update_parser.add_argument("--username", help="New username")
     update_parser.add_argument("--password", help="New password")
-    update_parser.add_argument(
-        "--superuser", type=bool, help="Superuser status")
-    update_parser.add_argument(
-        "--verified", type=bool, help="Verification status")
+    update_parser.add_argument("--superuser", type=bool, help="Superuser status")
+    update_parser.add_argument("--verified", type=bool, help="Verification status")
 
     # Delete user command
     delete_parser = subparsers.add_parser("delete", help="Delete a user")
@@ -310,12 +328,14 @@ def main() -> None:
 
     # Toggle superuser command
     toggle_superuser_parser = subparsers.add_parser(
-        "toggle-superuser", help="Toggle superuser status")
+        "toggle-superuser", help="Toggle superuser status"
+    )
     toggle_superuser_parser.add_argument("user_id", help="User ID")
 
     # Toggle verification command
     toggle_verification_parser = subparsers.add_parser(
-        "toggle-verification", help="Toggle verification status")
+        "toggle-verification", help="Toggle verification status"
+    )
     toggle_verification_parser.add_argument("user_id", help="User ID")
 
     # Statistics command

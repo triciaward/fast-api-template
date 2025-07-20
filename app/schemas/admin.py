@@ -17,10 +17,8 @@ class AdminUserCreate(BaseModel):
     email: str = Field(..., description="User's email address")
     username: str = Field(..., description="User's username")
     password: str = Field(..., description="User's password")
-    is_superuser: bool = Field(
-        default=False, description="Whether user is a superuser")
-    is_verified: bool = Field(
-        default=False, description="Whether user is verified")
+    is_superuser: bool = Field(default=False, description="Whether user is a superuser")
+    is_verified: bool = Field(default=False, description="Whether user is verified")
 
 
 class AdminUserUpdate(BaseModel):
@@ -30,9 +28,9 @@ class AdminUserUpdate(BaseModel):
     username: Optional[str] = Field(None, description="User's username")
     password: Optional[str] = Field(None, description="User's password")
     is_superuser: Optional[bool] = Field(
-        None, description="Whether user is a superuser")
-    is_verified: Optional[bool] = Field(
-        None, description="Whether user is verified")
+        None, description="Whether user is a superuser"
+    )
+    is_verified: Optional[bool] = Field(None, description="Whether user is verified")
 
 
 class AdminUserResponse(BaseModel):
@@ -46,17 +44,19 @@ class AdminUserResponse(BaseModel):
     is_deleted: bool = Field(..., description="Whether user is deleted")
     date_created: datetime = Field(..., description="When user was created")
     oauth_provider: Optional[str] = Field(
-        None, description="OAuth provider if applicable")
-    oauth_id: Optional[str] = Field(
-        None, description="OAuth provider's user ID")
-    oauth_email: Optional[str] = Field(
-        None, description="Email from OAuth provider")
+        None, description="OAuth provider if applicable"
+    )
+    oauth_id: Optional[str] = Field(None, description="OAuth provider's user ID")
+    oauth_email: Optional[str] = Field(None, description="Email from OAuth provider")
     deletion_requested_at: Optional[datetime] = Field(
-        None, description="When deletion was requested")
+        None, description="When deletion was requested"
+    )
     deletion_confirmed_at: Optional[datetime] = Field(
-        None, description="When deletion was confirmed")
+        None, description="When deletion was confirmed"
+    )
     deletion_scheduled_for: Optional[datetime] = Field(
-        None, description="When user will be deleted")
+        None, description="When user will be deleted"
+    )
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -73,14 +73,12 @@ class AdminUserListResponse(BaseModel):
 class AdminUserFilters(BaseModel):
     """Schema for filtering users in admin interface."""
 
-    is_superuser: Optional[bool] = Field(
-        None, description="Filter by superuser status")
+    is_superuser: Optional[bool] = Field(None, description="Filter by superuser status")
     is_verified: Optional[bool] = Field(
-        None, description="Filter by verification status")
-    is_deleted: Optional[bool] = Field(
-        None, description="Filter by deletion status")
-    oauth_provider: Optional[str] = Field(
-        None, description="Filter by OAuth provider")
+        None, description="Filter by verification status"
+    )
+    is_deleted: Optional[bool] = Field(None, description="Filter by deletion status")
+    oauth_provider: Optional[str] = Field(None, description="Filter by OAuth provider")
 
 
 class AdminUserStatistics(BaseModel):
@@ -92,8 +90,7 @@ class AdminUserStatistics(BaseModel):
     oauth_users: int = Field(..., description="Number of OAuth users")
     deleted_users: int = Field(..., description="Number of deleted users")
     regular_users: int = Field(..., description="Number of regular users")
-    unverified_users: int = Field(...,
-                                  description="Number of unverified users")
+    unverified_users: int = Field(..., description="Number of unverified users")
 
 
 class AdminUserToggleResponse(BaseModel):
@@ -108,22 +105,20 @@ class AdminUserToggleResponse(BaseModel):
 class AdminBulkOperationRequest(BaseModel):
     """Schema for bulk operations on users."""
 
-    user_ids: list[UUID] = Field(...,
-                                 description="List of user IDs to operate on")
-    operation: str = Field(...,
-                           description="Operation to perform (delete, verify, etc.)")
+    user_ids: list[UUID] = Field(..., description="List of user IDs to operate on")
+    operation: str = Field(
+        ..., description="Operation to perform (delete, verify, etc.)"
+    )
 
 
 class AdminBulkOperationResponse(BaseModel):
     """Schema for bulk operation responses."""
 
     operation: str = Field(..., description="Operation that was performed")
-    total_users: int = Field(...,
-                             description="Total number of users processed")
+    total_users: int = Field(..., description="Total number of users processed")
     successful: int = Field(..., description="Number of successful operations")
     failed: int = Field(..., description="Number of failed operations")
-    failed_user_ids: list[UUID] = Field(
-        default=[], description="User IDs that failed")
+    failed_user_ids: list[UUID] = Field(default=[], description="User IDs that failed")
 
 
 class AdminSessionInfo(BaseModel):
@@ -141,8 +136,7 @@ class AdminSessionInfo(BaseModel):
 class AdminSessionListResponse(BaseModel):
     """Schema for session list responses."""
 
-    sessions: list[AdminSessionInfo] = Field(...,
-                                             description="List of sessions")
+    sessions: list[AdminSessionInfo] = Field(..., description="List of sessions")
     total: int = Field(..., description="Total number of sessions")
 
 
@@ -153,5 +147,4 @@ class AdminSystemInfo(BaseModel):
     active_sessions: int = Field(..., description="Number of active sessions")
     system_uptime: str = Field(..., description="System uptime")
     database_size: Optional[str] = Field(None, description="Database size")
-    last_backup: Optional[datetime] = Field(
-        None, description="Last backup time")
+    last_backup: Optional[datetime] = Field(None, description="Last backup time")

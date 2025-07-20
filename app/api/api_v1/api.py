@@ -7,8 +7,7 @@ from app.core.config import settings
 def create_api_router() -> APIRouter:
     """Create the API router dynamically based on current settings."""
     api_router = APIRouter()
-    api_router.include_router(
-        auth.router, prefix="/auth", tags=["authentication"])
+    api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
     api_router.include_router(users.router, prefix="/users", tags=["users"])
     api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
     api_router.include_router(health.router, tags=["health"])
@@ -23,8 +22,7 @@ def create_api_router() -> APIRouter:
     if settings.ENABLE_CELERY:
         from app.api.api_v1.endpoints import celery
 
-        api_router.include_router(
-            celery.router, prefix="/celery", tags=["celery"])
+        api_router.include_router(celery.router, prefix="/celery", tags=["celery"])
 
     return api_router
 

@@ -88,7 +88,9 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
             result = db.execute(select(User).filter(User.email == email))
         return result.scalar_one_or_none()
 
-    async def get_user_by_username(self, db: DBSession, username: str) -> Optional[User]:
+    async def get_user_by_username(
+        self, db: DBSession, username: str
+    ) -> Optional[User]:
         """
         Get user by username.
 
@@ -136,10 +138,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         return db_user
 
     async def update_user(
-        self,
-        db: DBSession,
-        user_id: Union[str, UUID],
-        user_data: AdminUserUpdate
+        self, db: DBSession, user_id: Union[str, UUID], user_data: AdminUserUpdate
     ) -> Optional[User]:
         """
         Update user data (admin-only).
@@ -161,7 +160,8 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         # Handle password hashing if password is being updated
         if "password" in update_data:
             update_data["hashed_password"] = get_password_hash(
-                update_data.pop("password"))
+                update_data.pop("password")
+            )
 
         for field, value in update_data.items():
             if hasattr(user, field):
@@ -249,9 +249,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
 
         return user
 
-    async def force_delete_user(
-        self, db: DBSession, user_id: Union[str, UUID]
-    ) -> bool:
+    async def force_delete_user(self, db: DBSession, user_id: Union[str, UUID]) -> bool:
         """
         Force delete a user (bypasses normal deletion flow).
 
@@ -301,8 +299,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         total_users = total_result.scalar() or 0
 
         # Superusers
-        superuser_query = select(func.count(User.id)).where(
-            User.is_superuser == True)  # type: ignore # noqa: E712
+        superuser_query = select(func.count(User.id)).where(User.is_superuser == True)  # type: ignore # noqa: E712
         if isinstance(db, AsyncSession):
             superuser_result = await db.execute(superuser_query)
         else:
@@ -310,8 +307,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         superusers = superuser_result.scalar() or 0
 
         # Verified users
-        verified_query = select(func.count(User.id)).where(
-            User.is_verified == True)  # type: ignore # noqa: E712
+        verified_query = select(func.count(User.id)).where(User.is_verified == True)  # type: ignore # noqa: E712
         if isinstance(db, AsyncSession):
             verified_result = await db.execute(verified_query)
         else:
@@ -319,8 +315,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         verified_users = verified_result.scalar() or 0
 
         # OAuth users
-        oauth_query = select(func.count(User.id)).where(
-            User.oauth_provider.isnot(None))
+        oauth_query = select(func.count(User.id)).where(User.oauth_provider.isnot(None))
         if isinstance(db, AsyncSession):
             oauth_result = await db.execute(oauth_query)
         else:
@@ -328,8 +323,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         oauth_users = oauth_result.scalar() or 0
 
         # Deleted users
-        deleted_query = select(func.count(User.id)).where(
-            User.is_deleted == True)  # type: ignore # noqa: E712
+        deleted_query = select(func.count(User.id)).where(User.is_deleted == True)  # type: ignore # noqa: E712
         if isinstance(db, AsyncSession):
             deleted_result = await db.execute(deleted_query)
         else:

@@ -35,16 +35,17 @@ router = APIRouter()
 @router.get("/users", response_model=AdminUserListResponse)
 async def list_users(
     skip: int = Query(0, ge=0, description="Number of users to skip"),
-    limit: int = Query(100, ge=1, le=1000,
-                       description="Maximum number of users to return"),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of users to return"
+    ),
     is_superuser: Optional[bool] = Query(
-        None, description="Filter by superuser status"),
+        None, description="Filter by superuser status"
+    ),
     is_verified: Optional[bool] = Query(
-        None, description="Filter by verification status"),
-    is_deleted: Optional[bool] = Query(
-        None, description="Filter by deletion status"),
-    oauth_provider: Optional[str] = Query(
-        None, description="Filter by OAuth provider"),
+        None, description="Filter by verification status"
+    ),
+    is_deleted: Optional[bool] = Query(None, description="Filter by deletion status"),
+    oauth_provider: Optional[str] = Query(None, description="Filter by OAuth provider"),
     current_admin: UserResponse = Depends(require_superuser),
     db: Session = Depends(get_db),
 ) -> AdminUserListResponse:
@@ -53,8 +54,10 @@ async def list_users(
 
     This endpoint allows admins to view all users in the system with various filters.
     """
-    logger.info("Admin user list requested",
-                extra={"admin_id": str(current_admin.id), "skip": skip, "limit": limit})
+    logger.info(
+        "Admin user list requested",
+        extra={"admin_id": str(current_admin.id), "skip": skip, "limit": limit},
+    )
 
     users = await admin_user_crud.get_users(
         db=db,
@@ -107,8 +110,10 @@ async def get_user(
 
     This endpoint allows admins to view detailed information about a specific user.
     """
-    logger.info("Admin user details requested",
-                extra={"admin_id": str(current_admin.id), "user_id": str(user_id)})
+    logger.info(
+        "Admin user details requested",
+        extra={"admin_id": str(current_admin.id), "user_id": str(user_id)},
+    )
 
     user = await admin_user_crud.get(db, user_id)
     if not user:
@@ -134,7 +139,9 @@ async def get_user(
     )
 
 
-@router.post("/users", response_model=AdminUserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/users", response_model=AdminUserResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_user(
     user_data: AdminUserCreate,
     current_admin: UserResponse = Depends(require_superuser),
@@ -151,7 +158,7 @@ async def create_user(
             "admin_id": str(current_admin.id),
             "user_email": user_data.email,
             "is_superuser": user_data.is_superuser,
-        }
+        },
     )
 
     # Check if user already exists
@@ -162,7 +169,9 @@ async def create_user(
             detail="User with this email already exists",
         )
 
-    existing_username = await admin_user_crud.get_user_by_username(db, user_data.username)
+    existing_username = await admin_user_crud.get_user_by_username(
+        db, user_data.username
+    )
     if existing_username:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -171,6 +180,7 @@ async def create_user(
 
     # Convert AdminUserCreate to UserCreate
     from app.schemas.user import UserCreate
+
     user_create = UserCreate(
         email=user_data.email,
         username=user_data.username,
@@ -214,8 +224,10 @@ async def update_user(
 
     This endpoint allows admins to update user information and privileges.
     """
-    logger.info("Admin user update requested",
-                extra={"admin_id": str(current_admin.id), "user_id": str(user_id)})
+    logger.info(
+        "Admin user update requested",
+        extra={"admin_id": str(current_admin.id), "user_id": str(user_id)},
+    )
 
     # Check if user exists
     existing_user = await admin_user_crud.get(db, user_id)
@@ -236,7 +248,9 @@ async def update_user(
 
     # Check for username conflicts if username is being updated
     if user_data.username and user_data.username != existing_user.username:
-        username_user = await admin_user_crud.get_user_by_username(db, user_data.username)
+        username_user = await admin_user_crud.get_user_by_username(
+            db, user_data.username
+        )
         if username_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -278,8 +292,10 @@ async def delete_user(
 
     This endpoint allows admins to delete users from the system.
     """
-    logger.info("Admin user deletion requested",
-                extra={"admin_id": str(current_admin.id), "user_id": str(user_id)})
+    logger.info(
+        "Admin user deletion requested",
+        extra={"admin_id": str(current_admin.id), "user_id": str(user_id)},
+    )
 
     # Prevent admins from deleting their own account
     if user_id == current_admin.id:
@@ -304,7 +320,9 @@ async def delete_user(
         )
 
 
-@router.post("/users/{user_id}/toggle-superuser", response_model=AdminUserToggleResponse)
+@router.post(
+    "/users/{user_id}/toggle-superuser", response_model=AdminUserToggleResponse
+)
 async def toggle_superuser_status(
     user_id: UUID,
     current_admin: UserResponse = Depends(require_superuser),
@@ -315,8 +333,10 @@ async def toggle_superuser_status(
 
     This endpoint allows admins to grant or revoke superuser privileges.
     """
-    logger.info("Admin superuser toggle requested",
-                extra={"admin_id": str(current_admin.id), "user_id": str(user_id)})
+    logger.info(
+        "Admin superuser toggle requested",
+        extra={"admin_id": str(current_admin.id), "user_id": str(user_id)},
+    )
 
     # Prevent admins from modifying their own superuser status
     if user_id == current_admin.id:
@@ -340,7 +360,9 @@ async def toggle_superuser_status(
     )
 
 
-@router.post("/users/{user_id}/toggle-verification", response_model=AdminUserToggleResponse)
+@router.post(
+    "/users/{user_id}/toggle-verification", response_model=AdminUserToggleResponse
+)
 async def toggle_verification_status(
     user_id: UUID,
     current_admin: UserResponse = Depends(require_superuser),
@@ -351,8 +373,10 @@ async def toggle_verification_status(
 
     This endpoint allows admins to verify or unverify users.
     """
-    logger.info("Admin verification toggle requested",
-                extra={"admin_id": str(current_admin.id), "user_id": str(user_id)})
+    logger.info(
+        "Admin verification toggle requested",
+        extra={"admin_id": str(current_admin.id), "user_id": str(user_id)},
+    )
 
     user = await admin_user_crud.toggle_verification_status(db, user_id)
     if not user:
@@ -381,8 +405,10 @@ async def force_delete_user(
     This endpoint allows admins to permanently delete users from the system.
     Use with caution as this action cannot be undone.
     """
-    logger.info("Admin force delete requested",
-                extra={"admin_id": str(current_admin.id), "user_id": str(user_id)})
+    logger.info(
+        "Admin force delete requested",
+        extra={"admin_id": str(current_admin.id), "user_id": str(user_id)},
+    )
 
     # Check if user exists
     existing_user = await admin_user_crud.get(db, user_id)
@@ -410,8 +436,7 @@ async def get_user_statistics(
 
     This endpoint provides statistics about users in the system.
     """
-    logger.info("Admin statistics requested", extra={
-                "admin_id": str(current_admin.id)})
+    logger.info("Admin statistics requested", extra={"admin_id": str(current_admin.id)})
 
     stats = await admin_user_crud.get_user_statistics(db)
     return AdminUserStatistics(**stats)
@@ -428,8 +453,10 @@ async def bulk_operations(
 
     This endpoint allows admins to perform operations on multiple users at once.
     """
-    logger.info("Admin bulk operation requested",
-                extra={"admin_id": str(current_admin.id), "operation": request.operation})
+    logger.info(
+        "Admin bulk operation requested",
+        extra={"admin_id": str(current_admin.id), "operation": request.operation},
+    )
 
     successful = 0
     failed = 0

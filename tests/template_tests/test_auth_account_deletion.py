@@ -317,8 +317,7 @@ class TestAccountDeletionStatus:
         sync_db_session.add(user)
         sync_db_session.commit()
 
-        response = client.get(
-            "/api/v1/auth/deletion-status?email=status@example.com")
+        response = client.get("/api/v1/auth/deletion-status?email=status@example.com")
 
         assert response.status_code == 200
         data = response.json()
@@ -497,8 +496,7 @@ class TestAccountDeletionCeleryTask:
             mock_result.id = "task_123"
             mock_submit_task.return_value = mock_result
 
-            response = client.post(
-                "/api/v1/celery/tasks/permanently-delete-accounts")
+            response = client.post("/api/v1/celery/tasks/permanently-delete-accounts")
 
         assert response.status_code == 200
         data = response.json()

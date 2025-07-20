@@ -109,7 +109,9 @@ async def require_superuser(
     return current_user
 
 
-class BaseAdminCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType, ResponseSchemaType]):
+class BaseAdminCRUD(
+    Generic[ModelType, CreateSchemaType, UpdateSchemaType, ResponseSchemaType]
+):
     """
     Base class for admin CRUD operations.
 
@@ -137,7 +139,7 @@ class BaseAdminCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType, Respo
         db: DBSession,
         skip: int = 0,
         limit: int = 100,
-        filters: Optional[dict[str, Any]] = None
+        filters: Optional[dict[str, Any]] = None,
     ) -> list[ModelType]:
         """
         Get multiple records with optional filtering and pagination.
@@ -184,15 +186,10 @@ class BaseAdminCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType, Respo
             # type: ignore
             result = await db.execute(select(self.model).filter(self.model.id == id))  # type: ignore
         else:
-            result = db.execute(select(self.model).filter(
-                self.model.id == id))  # type: ignore
+            result = db.execute(select(self.model).filter(self.model.id == id))  # type: ignore
         return result.scalar_one_or_none()
 
-    async def create(
-        self,
-        db: DBSession,
-        obj_in: CreateSchemaType
-    ) -> ModelType:
+    async def create(self, db: DBSession, obj_in: CreateSchemaType) -> ModelType:
         """
         Create a new record.
 
@@ -220,7 +217,7 @@ class BaseAdminCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType, Respo
         self,
         db: DBSession,
         db_obj: ModelType,
-        obj_in: Union[UpdateSchemaType, dict[str, Any]]
+        obj_in: Union[UpdateSchemaType, dict[str, Any]],
     ) -> ModelType:
         """
         Update an existing record.
@@ -277,7 +274,9 @@ class BaseAdminCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType, Respo
 
         return True
 
-    async def count(self, db: DBSession, filters: Optional[dict[str, Any]] = None) -> int:
+    async def count(
+        self, db: DBSession, filters: Optional[dict[str, Any]] = None
+    ) -> int:
         """
         Count records with optional filtering.
 

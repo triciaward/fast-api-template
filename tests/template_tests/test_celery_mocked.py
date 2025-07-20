@@ -30,8 +30,7 @@ class TestCeleryMockedAPIs:
             with patch("app.services.celery.get_celery_app") as mock_get_app:
                 mock_app = Mock()
                 mock_inspect = Mock()
-                mock_inspect.active.return_value = {
-                    "worker1": [], "worker2": []}
+                mock_inspect.active.return_value = {"worker1": [], "worker2": []}
                 mock_inspect.registered.return_value = {
                     "worker1": ["task1", "task2", "task3", "task4", "task5"]
                 }
@@ -83,8 +82,7 @@ class TestCeleryMockedAPIs:
                     "result": {"status": "completed"},
                 }
 
-                response = client.get(
-                    "/api/v1/celery/tasks/test-task-id/status")
+                response = client.get("/api/v1/celery/tasks/test-task-id/status")
 
                 assert response.status_code == 200
                 data = response.json()
@@ -159,8 +157,7 @@ class TestCeleryMockedAPIs:
             with patch("app.api.api_v1.endpoints.celery.cancel_task") as mock_cancel:
                 mock_cancel.return_value = True
 
-                response = client.delete(
-                    "/api/v1/celery/tasks/test-task-id/cancel")
+                response = client.delete("/api/v1/celery/tasks/test-task-id/cancel")
 
                 assert response.status_code == 200
                 data = response.json()
@@ -182,8 +179,7 @@ class TestCeleryMockedAPIs:
             with patch("app.api.api_v1.endpoints.celery.cancel_task") as mock_cancel:
                 mock_cancel.return_value = False
 
-                response = client.delete(
-                    "/api/v1/celery/tasks/test-task-id/cancel")
+                response = client.delete("/api/v1/celery/tasks/test-task-id/cancel")
 
                 assert response.status_code == 200
                 data = response.json()
@@ -210,8 +206,7 @@ class TestCeleryMockedAPIs:
                 response = client.get("/api/v1/celery/status")
 
                 assert response.status_code == 500
-                assert "Failed to get Celery status" in response.json()[
-                    "detail"]
+                assert "Failed to get Celery status" in response.json()["detail"]
 
 
 @pytest.mark.celery
@@ -243,8 +238,7 @@ class TestCeleryDisabledMocked:
                     "kwargs": {},
                 }
 
-                response = client.post(
-                    "/api/v1/celery/tasks/submit", json=task_data)
+                response = client.post("/api/v1/celery/tasks/submit", json=task_data)
 
                 assert response.status_code == 503
                 assert "Celery is not enabled" in response.json()["detail"]
@@ -268,8 +262,7 @@ class TestCeleryDisabledMocked:
                     status_code=503, detail="Celery is not enabled"
                 )
 
-                response = client.get(
-                    "/api/v1/celery/tasks/test-task-id/status")
+                response = client.get("/api/v1/celery/tasks/test-task-id/status")
 
                 assert response.status_code == 503
                 assert "Celery is not enabled" in response.json()["detail"]
@@ -293,8 +286,7 @@ class TestCeleryDisabledMocked:
                     status_code=503, detail="Celery is not enabled"
                 )
 
-                response = client.delete(
-                    "/api/v1/celery/tasks/test-task-id/cancel")
+                response = client.delete("/api/v1/celery/tasks/test-task-id/cancel")
 
                 assert response.status_code == 503
                 assert "Celery is not enabled" in response.json()["detail"]

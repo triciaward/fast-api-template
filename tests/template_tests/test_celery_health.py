@@ -83,8 +83,7 @@ class TestCeleryHealthIntegration:
             pytest.skip("Celery is disabled")
 
         mock_enabled.return_value = True
-        mock_stats.return_value = {
-            "enabled": False, "error": "Connection failed"}
+        mock_stats.return_value = {"enabled": False, "error": "Connection failed"}
 
         response = client.get("/api/v1/health")
 
