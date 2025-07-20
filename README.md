@@ -30,7 +30,7 @@ This template powers several production applications:
 - 📦 PostgreSQL Database Integration with Alembic Migrations
 - 🌐 CORS Support with Configurable Origins
 - 🐳 Docker Support with Multi-Service Composition
-- 🧪 Comprehensive Testing (383 tests with 100% success rate)
+- 🧪 Comprehensive Testing (419 tests with 100% success rate)
 - 📝 Alembic Migrations with Version Control
 - 🔍 Linting and Code Quality (ruff)
 - ✅ Type Safety (mypy + pyright)
@@ -38,7 +38,8 @@ This template powers several production applications:
 - ✅ Zero Deprecation Warnings
 - 🏥 Health Check Endpoints for Monitoring (comprehensive, simple, readiness, liveness)
 - 🚀 Automated tests, linting, and type checks on every commit (via GitHub Actions)
-- 🔒 **Pre-commit Hooks** with ruff, black, and mypy for local code quality enforcement
+- 🔒 **Automated Error Catching** with pre-commit hooks (mypy, black, ruff) for type safety and code quality
+- 📄 **Pagination System** with type-safe generic responses, HATEOAS links, and rich metadata
 - 📧 Email Service (verification, password reset with HTML templates)
 - 🔐 OAuth Support (Google & Apple with proper user management)
 - 🔑 Password Reset System with Email Integration and Security Features
@@ -60,7 +61,7 @@ This template powers several production applications:
 
 ## ✅ Test Suite
 
-- **383 core tests** with comprehensive coverage (100% success rate)
+- **419 core tests** with comprehensive coverage (100% success rate)
 - **32 complex tests deselected** (Celery and refresh token tests - isolated)
 - **14 pre-commit tests** covering configuration, installation, and functionality
 - **Full CI pipeline** (mypy, ruff, black, pytest) runs on every commit
@@ -354,7 +355,7 @@ fast-api-template/
 │   ├── bootstrap_superuser.py  # Superuser bootstrap script
 │   └── main.py                 # Application entry point
 ├── tests/                      # Test suite
-│   └── template_tests/         # Template-specific tests (349 tests)
+│   └── template_tests/         # Template-specific tests (385 tests)
 │       ├── test_api_auth.py              # Authentication API tests (11 tests)
 │       ├── test_auth_email_verification.py # Email verification tests (16 tests)
 │       ├── test_auth_oauth.py            # OAuth authentication tests (13 tests)
@@ -384,6 +385,8 @@ fast-api-template/
 │       ├── test_celery_health.py         # Background task health integration tests (9 tests)
 │       ├── test_celery_mocked.py         # Complex mock tests (separated)
 │       ├── test_audit_log.py             # Audit logging tests (5 tests)
+│       ├── test_pagination.py            # Pagination utility tests (21 tests)
+│       ├── test_users_pagination.py      # User pagination integration tests (15 tests)
 │       └── test_admin.py                 # Admin functionality tests
 ├── scripts/                    # Utility scripts
 │   ├── admin_cli.py            # Command-line admin utility for user operations
@@ -1597,6 +1600,56 @@ ruff check .
 
 # Both
 mypy . && ruff check .
+```
+
+#### Automated Error Catching (Pre-commit Hooks)
+The project includes **automated error catching** that prevents commits with type errors, formatting issues, and code style problems.
+
+**✅ What's Automated:**
+- **mypy**: Catches type errors and prevents commits with type issues
+- **black**: Auto-formats code to maintain consistent style
+- **ruff**: Catches code style issues and unused imports
+
+**🔧 Configuration:**
+- **Lenient mypy settings**: Catches important errors without being too strict
+- **Proper exclusions**: Ignores Alembic migration files and problematic modules
+- **Type stubs**: Includes essential type definitions for external libraries
+
+**🎯 How It Works:**
+1. **Before every commit**, the pre-commit hooks run automatically
+2. **If any hook fails**, the commit is blocked
+3. **Hooks can auto-fix** some issues (like black formatting)
+4. **You get immediate feedback** on what needs to be fixed
+5. **Only clean code gets committed** to the repository
+
+**📋 Benefits:**
+- **No more surprise type errors** in production
+- **Consistent code formatting** across the entire team
+- **Automatic code quality enforcement**
+- **Faster development** with immediate feedback
+- **Better IDE integration** with proper type checking
+
+**🔧 Manual Setup (if needed):**
+```bash
+# Install pre-commit hooks
+pre-commit install
+
+# Run all hooks manually
+pre-commit run --all-files
+
+# Run specific hook
+pre-commit run mypy --all-files
+pre-commit run black --all-files
+pre-commit run ruff --all-files
+```
+
+**⚠️ Troubleshooting:**
+```bash
+# Clean pre-commit cache if you encounter issues
+pre-commit clean
+
+# Reinstall hooks
+pre-commit install
 ```
 
 ### Feature Status
