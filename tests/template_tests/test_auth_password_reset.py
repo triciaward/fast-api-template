@@ -10,8 +10,7 @@ from sqlalchemy.orm import Session
 @pytest.fixture(autouse=True)
 def always_configured_email(monkeypatch: pytest.MonkeyPatch) -> None:
     """Patch email service to always be configured for all tests in this file."""
-    monkeypatch.setattr(
-        "app.services.email.email_service.is_configured", lambda: True)
+    monkeypatch.setattr("app.services.email.email_service.is_configured", lambda: True)
 
 
 class TestPasswordResetEndpoints:
@@ -224,8 +223,8 @@ class TestPasswordResetEndpoints:
 
         # Test password verification directly
         from app.core.security import verify_password
-        assert not verify_password(
-            "OldPassword123!", str(user.hashed_password))
+
+        assert not verify_password("OldPassword123!", str(user.hashed_password))
         assert verify_password("NewPassword123!", str(user.hashed_password))
 
         # Verify reset token was cleared
@@ -520,23 +519,19 @@ class TestPasswordResetCRUDOperations:
         new_password = "NewPassword123!"
 
         # Reset password
-        success = reset_user_password_sync(
-            sync_db_session, user_id, new_password)
+        success = reset_user_password_sync(sync_db_session, user_id, new_password)
         assert success is True
 
         # Verify password was changed
         sync_db_session.refresh(user)
         assert verify_password(new_password, str(user.hashed_password))
-        assert not verify_password(
-            "OldPassword123!", str(user.hashed_password))
+        assert not verify_password("OldPassword123!", str(user.hashed_password))
 
         # Verify reset token was cleared
         assert user.password_reset_token is None
         assert user.password_reset_token_expires is None
 
-    def test_reset_user_password_user_not_found(
-        self, sync_db_session: Session
-    ) -> None:
+    def test_reset_user_password_user_not_found(self, sync_db_session: Session) -> None:
         """Test resetting password for non-existent user."""
         from app.crud.user import reset_user_password_sync
 
@@ -555,7 +550,10 @@ class TestPasswordResetEmailService:
 
         with patch(
             "app.services.email.email_service.is_configured", return_value=True
-        ), patch("emails.Message.send", return_value=type("Response", (), {"status_code": 250})()):
+        ), patch(
+            "emails.Message.send",
+            return_value=type("Response", (), {"status_code": 250})(),
+        ):
             success = email_service.send_password_reset_email(
                 "test@example.com", "testuser", "reset_token_123"
             )
@@ -579,7 +577,10 @@ class TestPasswordResetEmailService:
 
         with patch(
             "app.services.email.email_service.is_configured", return_value=True
-        ), patch("emails.Message.send", return_value=type("Response", (), {"status_code": 500})()):
+        ), patch(
+            "emails.Message.send",
+            return_value=type("Response", (), {"status_code": 500})(),
+        ):
             success = email_service.send_password_reset_email(
                 "test@example.com", "testuser", "reset_token_123"
             )
@@ -605,7 +606,9 @@ class TestPasswordResetEmailService:
         sync_db_session.commit()
 
         # Create password reset token
-        token = await email_service.create_password_reset_token(sync_db_session, str(user.id))
+        token = await email_service.create_password_reset_token(
+            sync_db_session, str(user.id)
+        )
         assert token is not None
         assert len(token) == 32  # Token should be 32 characters
 
@@ -736,8 +739,8 @@ class TestPasswordResetIntegration:
 
         # Test password verification directly
         from app.core.security import verify_password
-        assert not verify_password(
-            "OldPassword123!", str(user.hashed_password))
+
+        assert not verify_password("OldPassword123!", str(user.hashed_password))
         assert verify_password("NewPassword123!", str(user.hashed_password))
 
         # Step 5: Verify reset token was cleared
@@ -763,8 +766,7 @@ class TestPasswordResetIntegration:
         # Step 7: Verify user can login with new password
         response = client.post(
             "/api/v1/auth/login",
-            data={"username": "test@example.com",
-                  "password": "NewPassword123!"},
+            data={"username": "test@example.com", "password": "NewPassword123!"},
         )
         assert response.status_code == 200
         token_data = response.json()
