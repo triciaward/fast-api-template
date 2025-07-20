@@ -81,6 +81,7 @@ def _add_extra_fields(
 
     if settings.LOG_INCLUDE_THREAD:
         import threading
+
         event_dict["thread"] = threading.current_thread().name
 
     # Add environment info
@@ -116,7 +117,7 @@ def _create_console_handler() -> logging.StreamHandler:
         # For text format, create a custom formatter
         formatter = logging.Formatter(
             fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S"
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
         handler.setFormatter(formatter)
 
@@ -140,7 +141,7 @@ def _create_file_handler() -> logging.handlers.RotatingFileHandler:
         filename=settings.LOG_FILE_PATH,
         maxBytes=max_bytes,
         backupCount=settings.LOG_FILE_BACKUP_COUNT,
-        encoding="utf-8"
+        encoding="utf-8",
     )
     handler.setLevel(getattr(logging, settings.LOG_LEVEL.upper()))
 
@@ -149,7 +150,7 @@ def _create_file_handler() -> logging.handlers.RotatingFileHandler:
     else:
         formatter = logging.Formatter(
             fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S"
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
         handler.setFormatter(formatter)
 

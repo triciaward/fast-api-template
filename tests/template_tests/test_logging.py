@@ -23,8 +23,9 @@ class TestLoggingConfiguration:
                 with patch.object(settings, "ENABLE_COLORED_LOGS", True):
                     setup_logging()
                     logger = get_app_logger()
-                    assert hasattr(logger, '_logger') or hasattr(
-                        logger, 'logger_factory_args')
+                    assert hasattr(logger, "_logger") or hasattr(
+                        logger, "logger_factory_args"
+                    )
                     logger.info("Test message", test_field="test_value")
 
     def test_setup_logging_production_json(self) -> None:
@@ -34,8 +35,9 @@ class TestLoggingConfiguration:
                 with patch.object(settings, "ENABLE_COLORED_LOGS", False):
                     setup_logging()
                     logger = get_app_logger()
-                    assert hasattr(logger, '_logger') or hasattr(
-                        logger, 'logger_factory_args')
+                    assert hasattr(logger, "_logger") or hasattr(
+                        logger, "logger_factory_args"
+                    )
                     logger.info("Test message", test_field="test_value")
 
     def test_file_logging_enabled(self) -> None:
@@ -58,20 +60,20 @@ class TestLoggingConfiguration:
         db_logger = get_db_logger()
 
         # Test that all loggers have the expected logging methods
-        assert hasattr(app_logger, 'info')
-        assert hasattr(app_logger, 'warning')
-        assert hasattr(app_logger, 'error')
-        assert hasattr(app_logger, 'debug')
+        assert hasattr(app_logger, "info")
+        assert hasattr(app_logger, "warning")
+        assert hasattr(app_logger, "error")
+        assert hasattr(app_logger, "debug")
 
-        assert hasattr(auth_logger, 'info')
-        assert hasattr(auth_logger, 'warning')
-        assert hasattr(auth_logger, 'error')
-        assert hasattr(auth_logger, 'debug')
+        assert hasattr(auth_logger, "info")
+        assert hasattr(auth_logger, "warning")
+        assert hasattr(auth_logger, "error")
+        assert hasattr(auth_logger, "debug")
 
-        assert hasattr(db_logger, 'info')
-        assert hasattr(db_logger, 'warning')
-        assert hasattr(db_logger, 'error')
-        assert hasattr(db_logger, 'debug')
+        assert hasattr(db_logger, "info")
+        assert hasattr(db_logger, "warning")
+        assert hasattr(db_logger, "error")
+        assert hasattr(db_logger, "debug")
 
         # Test that loggers can actually log messages
         app_logger.info("Test app logger")
@@ -96,7 +98,9 @@ class TestLoggingConfiguration:
                 with patch.object(settings, "LOG_FORMAT", "json"):
                     setup_logging()
                     logger = get_app_logger()
-                    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp_file:
+                    with tempfile.NamedTemporaryFile(
+                        mode="w+", delete=False
+                    ) as temp_file:
                         with patch("sys.stdout", temp_file):
                             logger.info("Test message")
                             temp_file.seek(0)
@@ -112,12 +116,14 @@ class TestLoggingConfiguration:
         """Test structured logging with contextual information."""
         setup_logging()
         logger = get_auth_logger()
-        with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp_file:
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
             with patch("sys.stdout", temp_file):
-                logger.info("User login attempt",
-                            user_id="123",
-                            email="test@example.com",
-                            ip_address="192.168.1.1")
+                logger.info(
+                    "User login attempt",
+                    user_id="123",
+                    email="test@example.com",
+                    ip_address="192.168.1.1",
+                )
                 temp_file.seek(0)
                 log_output = temp_file.read()
         if log_output.strip() and settings.LOG_FORMAT.lower() == "json":
@@ -130,7 +136,7 @@ class TestLoggingConfiguration:
         """Test error logging with exception information."""
         setup_logging()
         logger = get_app_logger()
-        with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp_file:
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
             with patch("sys.stdout", temp_file):
                 try:
                     _ = 10 / 0
@@ -142,6 +148,12 @@ class TestLoggingConfiguration:
             if settings.LOG_FORMAT.lower() == "json":
                 log_entry = json.loads(log_output.strip())
                 assert "exception" in log_entry
-                assert "division by zero" in log_entry["exception"] or "ZeroDivisionError" in log_entry["exception"]
+                assert (
+                    "division by zero" in log_entry["exception"]
+                    or "ZeroDivisionError" in log_entry["exception"]
+                )
             else:
-                assert "division by zero" in log_output or "ZeroDivisionError" in log_output
+                assert (
+                    "division by zero" in log_output
+                    or "ZeroDivisionError" in log_output
+                )
