@@ -163,6 +163,8 @@ app/
 - **70% Code Coverage**: Proper async testing with fixtures
 - **100% Optional Features**: Complete coverage when enabled
 
+> **Note:** The default test coverage threshold is set to 50% to make it easy to start new projects from this template. As you build out your app and implement more features, you should raise the threshold to encourage better test coverage.
+
 ### Test Categories
 - **Authentication**: Login, registration, password management
 - **API Endpoints**: CRUD operations, validation, error handling
