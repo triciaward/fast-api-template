@@ -66,6 +66,13 @@ async def validation_exception_handler(
             value = error.get("input")
             message = error.get("msg", "Validation error")
 
+            # Handle bytes values by converting to string
+            if isinstance(value, bytes):
+                try:
+                    value = value.decode("utf-8")
+                except UnicodeDecodeError:
+                    value = str(value)
+
             errors.append(
                 {
                     "field": field,

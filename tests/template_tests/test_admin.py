@@ -387,11 +387,13 @@ def test_admin_self_protection(client: TestClient, sync_db_session: Session) -> 
     # Try to delete own account
     response = client.delete(f"/api/v1/admin/users/{user_id}", headers=headers)
     assert response.status_code == 400
-    assert "Cannot delete your own account" in response.json()["detail"]
+    assert "Cannot delete your own account" in response.json()["error"]["message"]
 
     # Try to toggle own superuser status
     response = client.post(
         f"/api/v1/admin/users/{user_id}/toggle-superuser", headers=headers
     )
     assert response.status_code == 400
-    assert "Cannot modify your own superuser status" in response.json()["detail"]
+    assert (
+        "Cannot modify your own superuser status" in response.json()["error"]["message"]
+    )

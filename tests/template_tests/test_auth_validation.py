@@ -121,7 +121,7 @@ class TestAuthEndpointValidation:
         assert response.status_code == 400
 
         data = response.json()
-        assert "Email already registered" in data["detail"]
+        assert "Email already registered" in data["error"]["message"]
 
     def test_register_duplicate_username(
         self, client: TestClient, sync_db_session: Session
@@ -146,7 +146,7 @@ class TestAuthEndpointValidation:
         assert response.status_code == 400
 
         data = response.json()
-        assert "Username already taken" in data["detail"]
+        assert "Username already taken" in data["error"]["message"]
 
     def test_login_invalid_email_format(
         self, client: TestClient, sync_db_session: Session
@@ -158,7 +158,7 @@ class TestAuthEndpointValidation:
         assert response.status_code == 400
 
         data = response.json()
-        assert "Invalid email format" in data["detail"]
+        assert "Invalid email format" in data["error"]["message"]
 
     def test_login_nonexistent_user(
         self, client: TestClient, sync_db_session: Session
@@ -173,7 +173,7 @@ class TestAuthEndpointValidation:
         assert response.status_code == 401
 
         data = response.json()
-        assert "Invalid email or password" in data["detail"]
+        assert "Invalid email or password" in data["error"]["message"]
 
     def test_login_wrong_password(
         self, client: TestClient, sync_db_session: Session
@@ -194,7 +194,7 @@ class TestAuthEndpointValidation:
         assert response.status_code == 401
 
         data = response.json()
-        assert "Invalid email or password" in data["detail"]
+        assert "Invalid email or password" in data["error"]["message"]
 
     def test_oauth_invalid_provider(
         self, client: TestClient, sync_db_session: Session
@@ -369,7 +369,7 @@ class TestErrorMessages:
         data = response.json()
         assert (
             "Email already registered. Please use a different email or try logging in."
-            in data["detail"]
+            in data["error"]["message"]
         )
 
         # Test duplicate username error message
@@ -383,7 +383,7 @@ class TestErrorMessages:
         data = response.json()
         assert (
             "Username already taken. Please choose a different username."
-            in data["detail"]
+            in data["error"]["message"]
         )
 
     def test_login_error_messages(
@@ -400,7 +400,7 @@ class TestErrorMessages:
         data = response.json()
         assert (
             "Invalid email or password. Please check your credentials and try again."
-            in data["detail"]
+            in data["error"]["message"]
         )
 
         # Test unverified user
@@ -420,7 +420,7 @@ class TestErrorMessages:
         data = response.json()
         assert (
             "Please verify your email before logging in. Check your inbox for a verification link."
-            in data["detail"]
+            in data["error"]["message"]
         )
 
 
@@ -481,7 +481,7 @@ class TestEmailVerificationValidation:
         assert response.status_code == 404
 
         data = response.json()
-        assert "User not found" in data["detail"]
+        assert "User not found" in data["error"]["message"]
 
     def test_resend_verification_already_verified(
         self, client: TestClient, sync_db_session: Session
@@ -531,7 +531,7 @@ class TestOAuthValidation:
         assert response.status_code == 400  # OAuth service not configured
 
         data = response.json()
-        assert "Google OAuth not configured" in data["detail"]
+        assert "Google OAuth not configured" in data["error"]["message"]
 
     def test_oauth_login_malformed_token(
         self, client: TestClient, sync_db_session: Session
@@ -543,7 +543,7 @@ class TestOAuthValidation:
         assert response.status_code == 400
 
         data = response.json()
-        assert "Google OAuth not configured" in data["detail"]
+        assert "Google OAuth not configured" in data["error"]["message"]
 
     def test_oauth_login_case_sensitive_provider(
         self, client: TestClient, sync_db_session: Session
@@ -558,7 +558,7 @@ class TestOAuthValidation:
         # Should fail due to OAuth not being configured
         assert response.status_code == 400
         data = response.json()
-        assert "Google OAuth not configured" in data["detail"]
+        assert "Google OAuth not configured" in data["error"]["message"]
 
     def test_oauth_login_unsupported_provider(
         self, client: TestClient, sync_db_session: Session
