@@ -2,7 +2,14 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_serializer,
+    field_validator,
+)
 
 from app.core.validation import (
     clean_input,
@@ -435,13 +442,17 @@ class APIKeyResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: uuid.UUID
     label: str
     scopes: list[str]
-    user_id: str
+    user_id: uuid.UUID
     is_active: bool
     created_at: datetime
     expires_at: Optional[datetime] = None
+
+    @field_serializer("id", "user_id")
+    def serialize_uuid(self, uuid_value: uuid.UUID, _info):
+        return str(uuid_value)
 
 
 class APIKeyCreateResponse(BaseModel):
@@ -473,7 +484,11 @@ class APIKeyUser(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: uuid.UUID
     scopes: list[str]
-    user_id: str
-    key_id: str
+    user_id: uuid.UUID
+    key_id: uuid.UUID
+
+    @field_serializer("id", "user_id", "key_id")
+    def serialize_uuid(self, uuid_value: uuid.UUID, _info):
+        return str(uuid_value)
