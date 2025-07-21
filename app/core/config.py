@@ -43,6 +43,13 @@ class Settings(BaseSettings):
         "postgresql://postgres:dev_password_123@localhost:5432/fastapi_template"
     )
 
+    # Database Connection Pool Settings
+    DB_POOL_SIZE: int = 20
+    DB_MAX_OVERFLOW: int = 30
+    DB_POOL_RECYCLE: int = 3600  # 1 hour
+    DB_POOL_TIMEOUT: int = 30
+    DB_POOL_PRE_PING: bool = True
+
     # Redis (Optional)
     ENABLE_REDIS: bool = False
     REDIS_URL: str = "redis://localhost:6379/0"

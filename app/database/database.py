@@ -12,8 +12,24 @@ async_database_url = settings.DATABASE_URL.replace(
     "postgresql://", "postgresql+asyncpg://"
 )
 
-# Create async engine
-engine = create_async_engine(async_database_url, echo=False)
+# Create async engine with connection pooling
+engine = create_async_engine(
+    async_database_url,
+    echo=False,
+    # Connection pooling settings
+    pool_size=settings.DB_POOL_SIZE,
+    max_overflow=settings.DB_MAX_OVERFLOW,
+    pool_pre_ping=settings.DB_POOL_PRE_PING,
+    pool_recycle=settings.DB_POOL_RECYCLE,
+    pool_timeout=settings.DB_POOL_TIMEOUT,
+    # Connection settings
+    connect_args={
+        "server_settings": {
+            "application_name": "fastapi_template",
+            "jit": "off",  # Disable JIT for better performance
+        }
+    },
+)
 AsyncSessionLocal = async_sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False
 )
@@ -27,7 +43,25 @@ if os.getenv("TESTING") == "1":
 else:
     sync_database_url = settings.DATABASE_URL
 
-sync_engine = create_engine(sync_database_url, echo=False)
+sync_engine = create_engine(
+    sync_database_url,
+    echo=False,
+    # Connection pooling settings for sync engine
+    # Smaller pool for sync operations
+    pool_size=min(settings.DB_POOL_SIZE, 10),
+    max_overflow=min(settings.DB_MAX_OVERFLOW, 20),
+    pool_pre_ping=settings.DB_POOL_PRE_PING,
+    pool_recycle=settings.DB_POOL_RECYCLE,
+    pool_timeout=settings.DB_POOL_TIMEOUT,
+    # Connection settings
+    connect_args={
+        "application_name": (
+            "fastapi_template_test"
+            if os.getenv("TESTING") == "1"
+            else "fastapi_template"
+        )
+    },
+)
 SyncSessionLocal = sessionmaker(
     bind=sync_engine, expire_on_commit=False, autocommit=False, autoflush=False
 )

@@ -111,6 +111,7 @@ app/
 
 ### 🗄️ Database & Data Management
 - **PostgreSQL**: Primary database with proper indexing
+- **Connection Pooling**: Optimized connection management with configurable pools
 - **Alembic Migrations**: Version-controlled schema changes
 - **Soft Delete**: Comprehensive soft delete with restoration
 - **Search & Filter**: Advanced text search and field filtering
@@ -224,12 +225,36 @@ All API endpoints return consistent error formats:
 - **OpenAPI Schema**: Available at `/openapi.json`
 
 ### Key Endpoints
-- **Health**: `/health`, `/health/simple`, `/health/ready`, `/health/live`
+- **Health**: `/health`, `/health/simple`, `/health/ready`, `/health/live`, `/health/rate-limit`, `/health/test-sentry`
 - **Authentication**: `/api/v1/auth/login`, `/api/v1/auth/register`
 - **Users**: `/api/v1/users/` (CRUD operations)
 - **Admin**: `/api/v1/admin/` (Admin-only operations)
 
 ## 🐳 Docker & Deployment
+
+### Database Connection Pooling
+
+This template includes comprehensive database connection pooling for optimal performance:
+
+**SQLAlchemy Pool Configuration:**
+- **Pool Size**: 20 connections (configurable via `DB_POOL_SIZE`)
+- **Max Overflow**: 30 additional connections (configurable via `DB_MAX_OVERFLOW`)
+- **Connection Recycling**: 1 hour (configurable via `DB_POOL_RECYCLE`)
+- **Health Checks**: Pre-ping validation (configurable via `DB_POOL_PRE_PING`)
+- **Timeout**: 30 seconds (configurable via `DB_POOL_TIMEOUT`)
+
+**pgBouncer Integration (Optional):**
+```bash
+# Start with pgBouncer for advanced pooling
+docker-compose --profile pgbouncer up -d
+```
+
+**Pool Monitoring:**
+- Health endpoint `/health` includes real-time pool metrics
+- Monitor connection usage, overflow, and invalid connections
+- Automatic connection validation and recycling
+- Real-time pool statistics in health check responses
+- Connection pool health integration with Kubernetes probes
 
 ### Docker Services
 ```yaml
@@ -243,10 +268,11 @@ services:
 
 ### Production Deployment
 - **Environment Variables**: Comprehensive configuration
-- **Health Checks**: Application and service monitoring
+- **Health Checks**: Application and service monitoring with connection pool metrics
 - **Logging**: Structured JSON logging
 - **Security**: Proper container security practices
 - **Error Monitoring**: Production-ready Sentry/GlitchTip integration
+- **Connection Pooling**: Optimized database connection management
 - **Security Recommendations**: 
   - Secure GlitchTip behind authentication (basic/JWT)
   - Use reverse proxy (Caddy) with Cloudflare protection
@@ -290,6 +316,12 @@ pytest
 black .
 ```
 
+### Testing
+- **Health Endpoints**: Comprehensive testing of all health check endpoints
+- **Connection Pooling**: Full test coverage for SQLAlchemy and pgBouncer integration
+- **Integration Tests**: End-to-end testing of health monitoring with all optional features
+- **Test Coverage**: 100% coverage for health and connection pooling functionality
+
 ### Utility Scripts
 - **Bootstrap Admin**: `./scripts/bootstrap_admin.py`
 - **Logging Demo**: `./scripts/logging_demo.py`
@@ -305,11 +337,58 @@ black .
 - **ELK Ready**: Compatible with ELK stack
 
 ### Health Monitoring
-- **Application Health**: `/health` - Comprehensive status
-- **Simple Health**: `/health/simple` - Basic status
-- **Readiness**: `/health/ready` - Service readiness
-- **Liveness**: `/health/live` - Application liveness
-- **Error Monitoring Test**: `/health/test-sentry` - Test Sentry integration
+
+**Comprehensive Health Check (`/health`):**
+```bash
+curl http://localhost:8000/health
+```
+
+Returns detailed status including:
+- Database connectivity and connection pool metrics
+- Redis health (when enabled)
+- Rate limiting status (when enabled)
+- Celery background task status (when enabled)
+- Sentry error monitoring status
+- Real-time connection pool statistics
+
+**Response Example:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-01T12:00:00.000000",
+  "version": "1.0.0",
+  "environment": "development",
+  "checks": {
+    "database": "healthy",
+    "application": "healthy",
+    "redis": "disabled",
+    "rate_limiting": "disabled",
+    "celery": "disabled",
+    "sentry": "disabled"
+  },
+  "database_pools": {
+    "async": {
+      "size": 20,
+      "checked_in": 18,
+      "checked_out": 2,
+      "overflow": 0
+    },
+    "sync": {
+      "size": 10,
+      "checked_in": 9,
+      "checked_out": 1,
+      "overflow": 0
+    }
+  }
+}
+```
+
+**Specialized Health Endpoints:**
+- **Simple Health** (`/health/simple`) - Basic uptime monitoring
+- **Readiness Check** (`/health/ready`) - Kubernetes readiness probes
+- **Liveness Check** (`/health/live`) - Kubernetes liveness probes
+- **Rate Limit Info** (`/health/rate-limit`) - Current rate limit status
+- **Sentry Test** (`/health/test-sentry`) - Error monitoring validation
 
 ### Audit Logging
 - **User Actions**: Complete activity tracking

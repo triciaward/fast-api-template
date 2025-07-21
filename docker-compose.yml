@@ -15,6 +15,31 @@ services:
       - app-network
     restart: unless-stopped
 
+  # pgBouncer for connection pooling (optional)
+  pgbouncer:
+    image: edoburu/pgbouncer:1.18.0
+    environment:
+      DATABASES_HOST: postgres
+      DATABASES_PORT: 5432
+      DATABASES_DBNAME: ${POSTGRES_DB}
+      DATABASES_USER: ${POSTGRES_USER}
+      DATABASES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGBOUNCER_PORT: 5432
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_MAX_CLIENT_CONN: 1000
+      PGBOUNCER_DEFAULT_POOL_SIZE: 20
+      PGBOUNCER_MAX_DB_CONNECTIONS: 50
+      PGBOUNCER_MAX_USER_CONNECTIONS: 50
+    ports:
+      - "${PGBOUNCER_PORT:-5433}:5432"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    restart: unless-stopped
+    profiles:
+      - pgbouncer  # Only start when explicitly requested
+
   # Optional Redis service - only used when ENABLE_REDIS=true
   redis:
     image: redis:7-alpine

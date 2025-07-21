@@ -6,7 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.database.database import get_db
+from app.database.database import engine, get_db, sync_engine
 from app.services.sentry import capture_exception, capture_message, is_sentry_working
 
 router = APIRouter()
@@ -42,12 +42,38 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
         health_status["checks"]["sentry"] = "disabled"
         health_status["sentry"] = {"enabled": False}
 
-    # Check database connectivity
+    # Check database connectivity and pool status
     try:
         # Execute a simple query to verify database connection
         result = await db.execute(text("SELECT 1"))
         result.fetchone()
         health_status["checks"]["database"] = "healthy"
+
+        # Add connection pool information
+        async_pool = engine.pool
+        sync_pool = sync_engine.pool
+
+        health_status["database_pools"] = {
+            "async": {
+                "size": async_pool.size(),
+                "checked_in": async_pool.checkedin(),
+                "checked_out": async_pool.checkedout(),
+                "overflow": async_pool.overflow(),
+            },
+            "sync": {
+                "size": sync_pool.size(),
+                "checked_in": sync_pool.checkedin(),
+                "checked_out": sync_pool.checkedout(),
+                "overflow": sync_pool.overflow(),
+            },
+        }
+
+        # Add 'invalid' attribute if available
+        if hasattr(async_pool, "invalid"):
+            health_status["database_pools"]["async"]["invalid"] = async_pool.invalid()
+        if hasattr(sync_pool, "invalid"):
+            health_status["database_pools"]["sync"]["invalid"] = sync_pool.invalid()
+
     except Exception as e:
         health_status["checks"]["database"] = "unhealthy"
         health_status["status"] = "unhealthy"
