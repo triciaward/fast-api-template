@@ -887,6 +887,114 @@ class TestAPIKeyIntegration:
         assert "Invalid API key" in response2.json()["error"]["message"]
 
 
+def test_api_key_usage_audit_logging(
+    client: TestClient, sync_db_session: Session, test_user: User
+):
+    """Test that API key usage is logged to audit logs."""
+    from app.crud.audit_log import get_audit_logs_by_event_type_sync
+
+    # Create an API key for the user
+    raw_key = generate_api_key()
+    api_key_data = APIKeyCreate(
+        label="Audit Test Key",
+        scopes=["read_events"],
+        expires_at=datetime.utcnow() + timedelta(days=30),
+    )
+
+    api_key = crud_api_key.create_api_key_sync(
+        db=sync_db_session,
+        api_key_data=api_key_data,
+        user_id=str(test_user.id),
+        raw_key=raw_key,
+    )
+
+    # Make a request using the API key
+    response = client.get(
+        "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {raw_key}"}
+    )
+
+    assert response.status_code == 200
+
+    # Check that the API key usage was logged
+    audit_logs = get_audit_logs_by_event_type_sync(
+        sync_db_session, "api_key_usage", limit=10
+    )
+
+    # Find the log entry for this API key
+    api_key_logs = [
+        log
+        for log in audit_logs
+        if log.context and log.context.get("api_key_id") == str(api_key.id)
+    ]
+
+    assert len(api_key_logs) >= 1
+
+    # Verify the log entry contains the expected information
+    log_entry = api_key_logs[0]
+    assert log_entry.event_type == "api_key_usage"
+    assert log_entry.success is True
+    assert log_entry.context["api_key_id"] == str(api_key.id)
+    assert log_entry.context["key_label"] == "Audit Test Key"
+    assert log_entry.context["api_key_user_id"] == str(test_user.id)
+    assert log_entry.context["endpoint_path"] == "/api/v1/users/me/api-key"
+    assert log_entry.context["http_method"] == "GET"
+    assert log_entry.ip_address is not None
+    assert log_entry.user_agent is not None
+
+
+def test_api_key_usage_audit_logging_system_key(
+    client: TestClient, sync_db_session: Session
+):
+    """Test that system-level API key usage is logged correctly."""
+    from app.crud.audit_log import get_audit_logs_by_event_type_sync
+
+    # Create a system-level API key (no user_id)
+    raw_key = generate_api_key()
+    api_key_data = APIKeyCreate(
+        label="System Integration Key",
+        scopes=["read_events", "write_events"],
+        expires_at=datetime.utcnow() + timedelta(days=30),
+    )
+
+    api_key = crud_api_key.create_api_key_sync(
+        db=sync_db_session,
+        api_key_data=api_key_data,
+        user_id=None,  # System-level key
+        raw_key=raw_key,
+    )
+
+    # Make a request using the API key
+    response = client.get(
+        "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {raw_key}"}
+    )
+
+    assert response.status_code == 200
+
+    # Check that the API key usage was logged
+    audit_logs = get_audit_logs_by_event_type_sync(
+        sync_db_session, "api_key_usage", limit=10
+    )
+
+    # Find the log entry for this API key
+    api_key_logs = [
+        log
+        for log in audit_logs
+        if log.context and log.context.get("api_key_id") == str(api_key.id)
+    ]
+
+    assert len(api_key_logs) >= 1
+
+    # Verify the log entry contains the expected information
+    log_entry = api_key_logs[0]
+    assert log_entry.event_type == "api_key_usage"
+    assert log_entry.success is True
+    assert log_entry.context["api_key_id"] == str(api_key.id)
+    assert log_entry.context["key_label"] == "System Integration Key"
+    assert "api_key_user_id" not in log_entry.context  # No user_id for system keys
+    assert log_entry.context["endpoint_path"] == "/api/v1/users/me/api-key"
+    assert log_entry.context["http_method"] == "GET"
+
+
 # Fixtures for testing
 @pytest.fixture
 def test_user(sync_db_session: Session) -> User:

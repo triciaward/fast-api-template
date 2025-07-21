@@ -469,6 +469,55 @@ async def create_event(api_key_user: APIKeyUser = Depends(require_api_scope("wri
 
 - `read_events` - Read-only access to events
 - `write_events` - Create and update events
+
+### 6. API Key Audit Logging
+
+All API key usage is automatically logged to the audit system for security monitoring and compliance. Each successful API key authentication creates an audit log entry with:
+
+- **API Key ID**: Unique identifier for the key
+- **Key Label**: Human-readable name for the key
+- **User ID**: The user the key belongs to (if applicable)
+- **Endpoint Path**: The API endpoint being accessed
+- **HTTP Method**: GET, POST, PUT, DELETE, etc.
+- **Timestamp**: When the request was made
+- **IP Address**: Client IP address
+- **User Agent**: Client browser/application information
+
+**Example Audit Log Entry:**
+```json
+{
+  "event_type": "api_key_usage",
+  "api_key_id": "550e8400-e29b-41d4-a716-446655440000",
+  "key_label": "Production Integration",
+  "api_key_user_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+  "endpoint_path": "/api/v1/users/me/api-key",
+  "http_method": "GET",
+  "timestamp": "2024-01-01T12:00:00.000000Z",
+  "ip_address": "192.168.1.100",
+  "user_agent": "curl/7.68.0"
+}
+```
+
+**Querying API Key Usage:**
+```sql
+-- Get all API key usage for a specific key
+SELECT * FROM audit_logs 
+WHERE event_type = 'api_key_usage' 
+AND context->>'api_key_id' = '550e8400-e29b-41d4-a716-446655440000'
+ORDER BY timestamp DESC;
+
+-- Get API key usage for a specific user
+SELECT * FROM audit_logs 
+WHERE event_type = 'api_key_usage' 
+AND context->>'api_key_user_id' = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'
+ORDER BY timestamp DESC;
+
+-- Get recent API key usage across all keys
+SELECT * FROM audit_logs 
+WHERE event_type = 'api_key_usage' 
+AND timestamp > NOW() - INTERVAL '24 hours'
+ORDER BY timestamp DESC;
+```
 - `delete_events` - Delete events
 - `admin` - Full administrative access
 - `user_management` - Manage user accounts

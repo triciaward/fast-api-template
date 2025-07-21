@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -60,7 +60,9 @@ async def get_current_user(
 
 
 async def get_api_key_user(
-    authorization: Optional[str] = Header(None), db: Session = Depends(get_db)
+    request: Request,
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
 ) -> APIKeyUser:
     """Authenticate user via API key from Authorization header."""
     if not authorization:
@@ -104,6 +106,17 @@ async def get_api_key_user(
             detail="API key has expired",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    # Log successful API key usage
+    from app.services.audit import log_api_key_usage_sync
+
+    log_api_key_usage_sync(
+        db=db,
+        request=request,
+        api_key_id=str(db_api_key.id),
+        key_label=db_api_key.label,
+        user_id=str(db_api_key.user_id) if db_api_key.user_id else None,
+    )
 
     # Return API key user object
     return APIKeyUser(

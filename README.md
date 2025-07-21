@@ -660,6 +660,7 @@ Returns detailed status including:
 ### Audit Logging
 - **User Actions**: Complete activity tracking
 - **Security Events**: Authentication and authorization events
+- **API Key Usage**: Track which API keys are being used, when, and for what endpoints
 - **System Events**: Background tasks and health checks
 - **Database Storage**: Persistent audit trail
 

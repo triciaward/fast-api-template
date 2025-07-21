@@ -238,3 +238,63 @@ def log_password_change_sync(
         success=True,
         context={"change_type": change_type},
     )
+
+
+async def log_api_key_usage(
+    db: DBSession,
+    request: Request,
+    api_key_id: str,
+    key_label: str,
+    user_id: Optional[str] = None,
+    endpoint_path: Optional[str] = None,
+    http_method: Optional[str] = None,
+) -> None:
+    """Log API key usage for audit purposes."""
+    context = {
+        "api_key_id": api_key_id,
+        "key_label": key_label,
+        "endpoint_path": endpoint_path or request.url.path,
+        "http_method": http_method or request.method,
+    }
+
+    if user_id:
+        context["api_key_user_id"] = user_id
+
+    await log_event(
+        db=db,
+        event_type="api_key_usage",
+        request=request,
+        user=None,  # API key usage doesn't have a direct user object
+        success=True,
+        context=context,
+    )
+
+
+def log_api_key_usage_sync(
+    db: Session,
+    request: Request,
+    api_key_id: str,
+    key_label: str,
+    user_id: Optional[str] = None,
+    endpoint_path: Optional[str] = None,
+    http_method: Optional[str] = None,
+) -> None:
+    """Log API key usage for audit purposes (sync version)."""
+    context = {
+        "api_key_id": api_key_id,
+        "key_label": key_label,
+        "endpoint_path": endpoint_path or request.url.path,
+        "http_method": http_method or request.method,
+    }
+
+    if user_id:
+        context["api_key_user_id"] = user_id
+
+    log_event_sync(
+        db=db,
+        event_type="api_key_usage",
+        request=request,
+        user=None,  # API key usage doesn't have a direct user object
+        success=True,
+        context=context,
+    )

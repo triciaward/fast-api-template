@@ -238,6 +238,23 @@ def get_audit_logs_by_user_sync(
     return list(result.scalars().all())
 
 
+def get_audit_logs_by_event_type_sync(
+    db: Session,
+    event_type: str,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[AuditLog]:
+    """Get audit logs for a specific event type (sync version)."""
+    result = db.execute(
+        select(AuditLog)
+        .filter(AuditLog.event_type == event_type)
+        .order_by(desc(AuditLog.timestamp))
+        .limit(limit)
+        .offset(offset)
+    )
+    return list(result.scalars().all())
+
+
 def get_failed_login_attempts_sync(
     db: Session,
     user_id: Optional[str] = None,

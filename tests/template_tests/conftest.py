@@ -137,10 +137,17 @@ async def setup_test_db() -> AsyncGenerator[None, None]:
     # Create tables for async engine with timeout
     print("CI DEBUG: About to create async tables")
     try:
-        # Add timeout to async operations
-        async with asyncio.timeout(30):  # 30 second timeout
+        # Add timeout to async operations (Python 3.11+ compatible)
+        if hasattr(asyncio, "timeout"):
+            async with asyncio.timeout(30):  # 30 second timeout
+                async with test_engine.begin() as conn:
+                    print("CI DEBUG: Inside async engine.begin()")
+                    await conn.run_sync(Base.metadata.create_all)
+                    print("CI DEBUG: Async tables created")
+        else:
+            # Fallback for Python < 3.11
             async with test_engine.begin() as conn:
-                print("CI DEBUG: Inside async engine.begin()")
+                print("CI DEBUG: Inside async engine.begin() (no timeout)")
                 await conn.run_sync(Base.metadata.create_all)
                 print("CI DEBUG: Async tables created")
     except asyncio.TimeoutError:
@@ -162,7 +169,13 @@ async def setup_test_db() -> AsyncGenerator[None, None]:
     print("CI DEBUG: setup_test_db fixture cleanup started")
     # Drop tables for async engine
     try:
-        async with asyncio.timeout(30):  # 30 second timeout
+        if hasattr(asyncio, "timeout"):
+            async with asyncio.timeout(30):  # 30 second timeout
+                async with test_engine.begin() as conn:
+                    await conn.run_sync(Base.metadata.drop_all)
+                await test_engine.dispose()
+        else:
+            # Fallback for Python < 3.11
             async with test_engine.begin() as conn:
                 await conn.run_sync(Base.metadata.drop_all)
             await test_engine.dispose()
@@ -182,9 +195,14 @@ async def db_session(setup_test_db: None) -> AsyncGenerator[AsyncSession, None]:
     """Create a fresh database session for each test with proper isolation."""
     async with TestingAsyncSessionLocal() as session:
         # Clean the database before each test - more robust cleanup
-        await session.execute(text("DELETE FROM audit_logs"))
-        await session.execute(text("DELETE FROM users"))
-        await session.commit()
+        # Note: audit_logs table only exists in sync database, not async
+        try:
+            await session.execute(text("DELETE FROM users"))
+            await session.commit()
+        except Exception as e:
+            # If async database doesn't have tables, that's okay
+            print(f"CI DEBUG: Async cleanup failed (expected if no tables): {e}")
+            await session.rollback()
 
         try:
             yield session
@@ -192,15 +210,20 @@ async def db_session(setup_test_db: None) -> AsyncGenerator[AsyncSession, None]:
             # Clean up after the test, handling session state - more robust cleanup
             try:
                 if session.is_active:
-                    await session.execute(text("DELETE FROM audit_logs"))
                     await session.execute(text("DELETE FROM users"))
                     await session.commit()
             except Exception:
                 # If cleanup fails, rollback and try again
                 await session.rollback()
-                await session.execute(text("DELETE FROM audit_logs"))
-                await session.execute(text("DELETE FROM users"))
-                await session.commit()
+                try:
+                    await session.execute(text("DELETE FROM users"))
+                    await session.commit()
+                except Exception as e:
+                    # If async database doesn't have tables, that's okay
+                    print(
+                        f"CI DEBUG: Async cleanup failed (expected if no tables): {e}"
+                    )
+                    await session.rollback()
 
 
 @pytest.fixture(scope="session")

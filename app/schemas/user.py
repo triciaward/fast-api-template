@@ -486,9 +486,9 @@ class APIKeyUser(BaseModel):
 
     id: uuid.UUID
     scopes: list[str]
-    user_id: uuid.UUID
+    user_id: Optional[uuid.UUID] = None
     key_id: uuid.UUID
 
     @field_serializer("id", "user_id", "key_id")
-    def serialize_uuid(self, uuid_value: uuid.UUID, _info):
-        return str(uuid_value)
+    def serialize_uuid(self, uuid_value: Optional[uuid.UUID], _info):
+        return str(uuid_value) if uuid_value else None
