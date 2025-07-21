@@ -67,6 +67,20 @@ def init_sentry() -> None:
         # Don't raise the exception - we don't want Sentry to break the app
 
 
+def is_sentry_working() -> bool:
+    """Check if Sentry is properly configured and working."""
+    if not settings.ENABLE_SENTRY:
+        return False
+
+    try:
+        from sentry_sdk.transport import HttpTransport
+
+        client = sentry_sdk.Hub.current.client
+        return client is not None and isinstance(client.transport, HttpTransport)
+    except Exception:
+        return False
+
+
 def capture_exception(exception: Exception, context: Optional[dict] = None) -> None:
     """Capture an exception with optional context."""
     if not settings.ENABLE_SENTRY:
@@ -78,8 +92,9 @@ def capture_exception(exception: Exception, context: Optional[dict] = None) -> N
                 for key, value in context.items():
                     scope.set_tag(key, str(value))
             sentry_sdk.capture_exception(exception)
-    except Exception as e:
-        logger.error(f"Failed to capture exception in Sentry: {e}")
+    except Exception:
+        # Fail-silent fallback - never let error logging cause new failures
+        pass
 
 
 def capture_message(
@@ -95,8 +110,9 @@ def capture_message(
                 for key, value in context.items():
                     scope.set_tag(key, str(value))
             sentry_sdk.capture_message(message, level=level)
-    except Exception as e:
-        logger.error(f"Failed to capture message in Sentry: {e}")
+    except Exception:
+        # Fail-silent fallback - never let error logging cause new failures
+        pass
 
 
 def set_user_context(
@@ -114,8 +130,9 @@ def set_user_context(
                     "email": email,
                 }
             )
-    except Exception as e:
-        logger.error(f"Failed to set user context in Sentry: {e}")
+    except Exception:
+        # Fail-silent fallback - never let error logging cause new failures
+        pass
 
 
 def clear_user_context() -> None:
@@ -125,5 +142,28 @@ def clear_user_context() -> None:
 
     try:
         sentry_sdk.set_user(None)
-    except Exception as e:
-        logger.error(f"Failed to clear user context in Sentry: {e}")
+    except Exception:
+        # Fail-silent fallback - never let error logging cause new failures
+        pass
+
+
+def set_request_context(request) -> None:
+    """Set request context for Sentry events (for use in middleware)."""
+    if not settings.ENABLE_SENTRY:
+        return
+
+    try:
+        # Set request context for better error tracking
+        with sentry_sdk.configure_scope() as scope:
+            scope.set_context(
+                "request",
+                {
+                    "method": request.method,
+                    "url": str(request.url),
+                    "headers": dict(request.headers),
+                    "query_params": dict(request.query_params),
+                },
+            )
+    except Exception:
+        # Fail-silent fallback - never let error logging cause new failures
+        pass

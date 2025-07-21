@@ -88,6 +88,12 @@ app = FastAPI(
 # Configure CORS
 configure_cors(app)
 
+# Setup Sentry ASGI middleware for better request context
+if settings.ENABLE_SENTRY:
+    from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+
+    app.add_middleware(SentryAsgiMiddleware)
+
 # Setup rate limiting
 if settings.ENABLE_RATE_LIMITING:
     from app.services.rate_limiter import setup_rate_limiting

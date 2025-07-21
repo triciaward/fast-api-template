@@ -149,7 +149,10 @@ app/
 - **Sentry SDK**: FastAPI integration with automatic error capture
 - **Performance Monitoring**: Request tracing and profiling
 - **User Context**: Automatic user identification in error reports
+- **Request Context**: Enhanced request information for better debugging
+- **Health Validation**: Real-time Sentry connection status checking
 - **Test Endpoint**: `/health/test-sentry` for monitoring validation
+- **Fail-Safe Design**: Graceful degradation when Sentry is unavailable
 
 ## 📊 Test Suite
 
@@ -243,6 +246,11 @@ services:
 - **Health Checks**: Application and service monitoring
 - **Logging**: Structured JSON logging
 - **Security**: Proper container security practices
+- **Error Monitoring**: Production-ready Sentry/GlitchTip integration
+- **Security Recommendations**: 
+  - Secure GlitchTip behind authentication (basic/JWT)
+  - Use reverse proxy (Caddy) with Cloudflare protection
+  - Enable HTTPS for all monitoring endpoints
 
 ## 🛠️ Development
 

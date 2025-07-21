@@ -28,6 +28,8 @@ class TestSentryIntegration:
             capture_message,
             clear_user_context,
             init_sentry,
+            is_sentry_working,
+            set_request_context,
             set_user_context,
         )
 
@@ -36,6 +38,8 @@ class TestSentryIntegration:
         assert callable(capture_message)
         assert callable(set_user_context)
         assert callable(clear_user_context)
+        assert callable(is_sentry_working)
+        assert callable(set_request_context)
 
     @patch("app.services.sentry.sentry_sdk.init")
     def test_sentry_initialization_disabled(self, mock_init):
@@ -141,7 +145,10 @@ class TestSentryIntegration:
 
             # User context should be set
             mock_set_user.assert_called_once_with(
-                {"id": "123", "email": "test@example.com"}
+                {
+                    "id": "123",
+                    "email": "test@example.com",
+                }
             )
 
     @patch("app.services.sentry.sentry_sdk.set_user")
@@ -156,6 +163,27 @@ class TestSentryIntegration:
 
             # User context should be cleared
             mock_set_user.assert_called_once_with(None)
+
+    def test_is_sentry_working_disabled(self):
+        """Test is_sentry_working when Sentry is disabled."""
+        from app.services.sentry import is_sentry_working
+
+        with patch("app.services.sentry.settings") as mock_settings:
+            mock_settings.ENABLE_SENTRY = False
+
+            result = is_sentry_working()
+            assert result is False
+
+    def test_is_sentry_working_enabled(self):
+        """Test is_sentry_working when Sentry is enabled."""
+        from app.services.sentry import is_sentry_working
+
+        with patch("app.services.sentry.settings") as mock_settings:
+            mock_settings.ENABLE_SENTRY = True
+
+            # Since Sentry is not actually initialized in tests, this should return False
+            result = is_sentry_working()
+            assert result is False
 
 
 class TestSentryAPIEndpoints:

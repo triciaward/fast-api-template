@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.database.database import get_db
-from app.services.sentry import capture_exception, capture_message
+from app.services.sentry import capture_exception, capture_message, is_sentry_working
 
 router = APIRouter()
 
@@ -30,9 +30,11 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
 
     # Add Sentry status
     if settings.ENABLE_SENTRY:
-        health_status["checks"]["sentry"] = "enabled"
+        sentry_working = is_sentry_working()
+        health_status["checks"]["sentry"] = "enabled" if sentry_working else "error"
         health_status["sentry"] = {
             "enabled": True,
+            "working": sentry_working,
             "environment": settings.SENTRY_ENVIRONMENT,
             "dsn_configured": bool(settings.SENTRY_DSN),
         }
