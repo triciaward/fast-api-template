@@ -1,6 +1,6 @@
 # FastAPI Project Template
 
-![Tests](https://img.shields.io/badge/tests-311%20tests%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-316%20tests%20passing-brightgreen)
 ![CI](https://github.com/triciaward/fast-api-template/actions/workflows/ci.yml/badge.svg)
 ![Coverage](https://img.shields.io/badge/coverage-70%25-brightgreen)
 ![Linting](https://img.shields.io/badge/linting-0%20errors-brightgreen)
@@ -10,7 +10,7 @@ A production-ready FastAPI backend template with built-in authentication, CI/CD,
 
 ## Overview
 
-A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (311 tests passing, 156 skipped for complex features), secure authentication with email verification, OAuth, and password reset, comprehensive input validation, PostgreSQL integration, **complete background task processing**, and a fully working CI/CD pipeline.
+A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (316 tests passing, 156 skipped for complex features), secure authentication with email verification, OAuth, and password reset, comprehensive input validation, PostgreSQL integration, **complete background task processing**, and a fully working CI/CD pipeline.
 
 **Core Features**: JWT authentication, email verification, OAuth (Google/Apple), password reset, **password change with current password verification**, **GDPR-compliant account deletion with email confirmation and grace period**, **refresh token management with session control**, **comprehensive audit logging system**, input validation, rate limiting, structured logging, health checks, Alembic migrations, Docker support, comprehensive testing, and **automated error catching**.
 
@@ -31,7 +31,7 @@ This template powers several production applications:
 - 📦 PostgreSQL Database Integration with Alembic Migrations
 - 🌐 CORS Support with Configurable Origins
 - 🐳 Docker Support with Multi-Service Composition
-- 🧪 Comprehensive Testing (474+ tests with 100% success rate)
+- 🧪 Comprehensive Testing (472+ tests with 100% success rate)
 - 📝 Alembic Migrations with Version Control
 - 🔍 Linting and Code Quality (ruff)
 - ✅ Type Safety (mypy + pyright)
@@ -64,7 +64,7 @@ This template powers several production applications:
 
 ## ✅ Test Suite
 
-- **311 core tests** with comprehensive coverage (all passing)
+- **316 core tests** with comprehensive coverage (all passing)
 - **156 tests skipped** (complex features not yet implemented - account deletion, password reset, OAuth, Celery, etc.)
 - **14 pre-commit tests** covering configuration, installation, and functionality
 - **Full CI pipeline** (mypy, ruff, black, pytest) runs on every commit
@@ -599,7 +599,7 @@ fast-api-template/
 │   ├── bootstrap_superuser.py  # Superuser bootstrap script
 │   └── main.py                 # Application entry point
 ├── tests/                      # Test suite
-│   └── template_tests/         # Template-specific tests (385 tests)
+│   └── template_tests/         # Template-specific tests (472 tests)
 │       ├── test_api_auth.py              # Authentication API tests (11 tests)
 │       ├── test_auth_email_verification.py # Email verification tests (16 tests)
 │       ├── test_auth_oauth.py            # OAuth authentication tests (13 tests)
@@ -631,6 +631,7 @@ fast-api-template/
 │       ├── test_audit_log.py             # Audit logging tests (5 tests)
 │       ├── test_pagination.py            # Pagination utility tests (21 tests)
 │       ├── test_users_pagination.py      # User pagination integration tests (15 tests)
+│       ├── test_soft_delete.py           # Soft delete functionality tests (15 tests)
 │       └── test_admin.py                 # Admin functionality tests
 ├── scripts/                    # Utility scripts
 │   ├── admin_cli.py            # Command-line admin utility for user operations
