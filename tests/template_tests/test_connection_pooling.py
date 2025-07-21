@@ -205,24 +205,24 @@ class TestConnectionPooling:
         # Execute a simple query to test connection health
         result = await db_session.execute(text("SELECT 1 as test"))
         row = result.fetchone()  # Remove await
-        assert row[0] == 1
+        assert row is not None and row[0] == 1
 
         # Test that connection is still healthy
         result2 = await db_session.execute(text("SELECT 2 as test"))
         row2 = result2.fetchone()  # Remove await
-        assert row2[0] == 2
+        assert row2 is not None and row2[0] == 2
 
     def test_sync_connection_health_check(self, sync_db_session: Session) -> None:
         """Test that sync connection health checks work properly."""
         # Execute a simple query to test connection health
         result = sync_db_session.execute(text("SELECT 1 as test"))
         row = result.fetchone()
-        assert row[0] == 1
+        assert row is not None and row[0] == 1
 
         # Test that connection is still healthy
         result2 = sync_db_session.execute(text("SELECT 2 as test"))
         row2 = result2.fetchone()
-        assert row2[0] == 2
+        assert row2 is not None and row2[0] == 2
 
     def test_pool_statistics(self) -> None:
         """Test that pool statistics are accessible."""
