@@ -58,6 +58,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
       - name: Wait for PostgreSQL
         run: |
           echo "Waiting for PostgreSQL to be ready..."
@@ -71,6 +76,10 @@ jobs:
           echo "Running in CI environment: $CI"
           echo "Starting tests with timeout..."
           echo "CI DEBUG: Skipping async tests in CI"
+          echo "CI DEBUG: Checking database connection..."
+          echo "CI DEBUG: Testing database connection with psql..."
+          PGPASSWORD=dev_password_123 psql -h localhost -U postgres -d fastapi_template_test -c "SELECT current_user;" || echo "Database connection failed"
+          echo "CI DEBUG: Starting pytest..."
           timeout 300 pytest tests/ --ignore=tests/template_tests/test_celery_mocked.py --ignore=tests/template_tests/test_celery_api.py --ignore=tests/template_tests/test_celery_health.py -k "not test_permanently_delete_accounts_task_endpoint and not test_file_logging_enabled and not test_log_level_configuration and not test_enforce_session_limit and not test_revoke_all_sessions and not test_revoke_all_sessions_endpoint" -m "not asyncio" -v --cov=app --cov-report=term-missing --cov-fail-under=60 --tb=short
 
   lint:
