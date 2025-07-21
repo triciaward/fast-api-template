@@ -14,6 +14,13 @@ from sqlalchemy.orm import sessionmaker
 from app.database.database import Base, get_db
 from app.main import app
 
+# Debug flag for CI
+RUNNING_IN_CI = os.getenv("RUNNING_IN_CI", "false").lower() == "true"
+
+if RUNNING_IN_CI:
+    print("CI DEBUG: conftest.py module loaded")
+    print("CI DEBUG: RUNNING_IN_CI =", RUNNING_IN_CI)
+
 # Set environment variables for testing
 os.environ["ENABLE_CELERY"] = "true"
 os.environ["CELERY_TASK_ALWAYS_EAGER"] = "true"
@@ -53,6 +60,8 @@ SYNC_TEST_DATABASE_URL = os.getenv(
 )
 
 # Create async engine for direct database tests
+if RUNNING_IN_CI:
+    print("CI DEBUG: About to create async test engine")
 test_engine = create_async_engine(
     TEST_DATABASE_URL,
     echo=False,
@@ -61,8 +70,12 @@ test_engine = create_async_engine(
     max_overflow=10,
     pool_recycle=300,
 )
+if RUNNING_IN_CI:
+    print("CI DEBUG: Async test engine created")
 
 # Create sync engine for TestClient tests
+if RUNNING_IN_CI:
+    print("CI DEBUG: About to create sync test engine")
 sync_test_engine = create_engine(
     SYNC_TEST_DATABASE_URL,
     echo=False,
@@ -70,6 +83,8 @@ sync_test_engine = create_engine(
     pool_size=5,
     max_overflow=10,
 )
+if RUNNING_IN_CI:
+    print("CI DEBUG: Sync test engine created")
 
 # Create session makers
 TestingAsyncSessionLocal = async_sessionmaker(
@@ -96,15 +111,32 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 @pytest_asyncio.fixture(scope="session")
 async def setup_test_db() -> AsyncGenerator[None, None]:
     """Setup test database tables once for the session."""
+    if RUNNING_IN_CI:
+        print("CI DEBUG: setup_test_db fixture started")
+
     # Create tables for async engine
+    if RUNNING_IN_CI:
+        print("CI DEBUG: About to create async tables")
     async with test_engine.begin() as conn:
+        if RUNNING_IN_CI:
+            print("CI DEBUG: Inside async engine.begin()")
         await conn.run_sync(Base.metadata.create_all)
+        if RUNNING_IN_CI:
+            print("CI DEBUG: Async tables created")
 
     # Create tables for sync engine
+    if RUNNING_IN_CI:
+        print("CI DEBUG: About to create sync tables")
     Base.metadata.create_all(bind=sync_test_engine)
+    if RUNNING_IN_CI:
+        print("CI DEBUG: Sync tables created")
 
+    if RUNNING_IN_CI:
+        print("CI DEBUG: setup_test_db fixture yielding")
     yield
 
+    if RUNNING_IN_CI:
+        print("CI DEBUG: setup_test_db fixture cleanup started")
     # Drop tables for async engine
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
@@ -113,6 +145,8 @@ async def setup_test_db() -> AsyncGenerator[None, None]:
     # Drop tables for sync engine
     Base.metadata.drop_all(bind=sync_test_engine)
     sync_test_engine.dispose()
+    if RUNNING_IN_CI:
+        print("CI DEBUG: setup_test_db fixture cleanup completed")
 
 
 @pytest_asyncio.fixture
