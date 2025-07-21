@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.core.validation import (
     clean_input,
@@ -291,4 +291,22 @@ class AccountDeletionStatusResponse(BaseModel):
 
 
 class UserListResponse(PaginatedResponse[UserResponse]):
-    """Schema for paginated user list responses."""
+    """Paginated response for user list."""
+
+    pass
+
+
+class UserSearchResponse(BaseModel):
+    """Enhanced response for user search with metadata."""
+
+    users: list[UserResponse]
+    total_count: int
+    page: int
+    per_page: int
+    total_pages: int
+    has_next: bool
+    has_prev: bool
+    search_applied: bool = False
+    filters_applied: list[str] = Field(default_factory=list)
+    sort_field: Optional[str] = None
+    sort_order: str = "asc"

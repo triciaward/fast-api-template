@@ -684,9 +684,16 @@ async def get_users(
     limit: int = 100,
     is_verified: Optional[bool] = None,
     oauth_provider: Optional[str] = None,
+    search_query: Optional[str] = None,
+    is_superuser: Optional[bool] = None,
+    is_deleted: Optional[bool] = None,
+    date_created_after: Optional[datetime] = None,
+    date_created_before: Optional[datetime] = None,
+    sort_by: Optional[str] = None,
+    sort_order: str = "asc",
 ) -> list[User]:
     """
-    Get users with optional filtering and pagination.
+    Get users with advanced filtering, search, and pagination.
 
     Args:
         db: Database session
@@ -694,17 +701,35 @@ async def get_users(
         limit: Maximum number of users to return
         is_verified: Filter by verification status
         oauth_provider: Filter by OAuth provider
+        search_query: Text to search in username and email fields
+        is_superuser: Filter by superuser status
+        is_deleted: Filter by deletion status
+        date_created_after: Filter users created after this date
+        date_created_before: Filter users created before this date
+        sort_by: Field to sort by
+        sort_order: Sort order (asc or desc)
 
     Returns:
         List[User]: List of users matching criteria
     """
-    query = select(User)
+    from app.utils.search_filter import SearchFilterBuilder, create_user_search_filters
 
-    # Apply filters
-    if is_verified is not None:
-        query = query.filter(User.is_verified == is_verified)
-    if oauth_provider is not None:
-        query = query.filter(User.oauth_provider == oauth_provider)
+    # Create search configuration
+    search_config = create_user_search_filters(
+        search_query=search_query,
+        is_verified=is_verified,
+        oauth_provider=oauth_provider,
+        is_superuser=is_superuser,
+        is_deleted=is_deleted,
+        date_created_after=date_created_after,
+        date_created_before=date_created_before,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
+
+    # Build query with search and filters
+    builder = SearchFilterBuilder(User)
+    query = builder.build_query(search_config)
 
     # Apply pagination
     query = query.offset(skip).limit(limit)
@@ -721,30 +746,54 @@ async def count_users(
     db: DBSession,
     is_verified: Optional[bool] = None,
     oauth_provider: Optional[str] = None,
+    search_query: Optional[str] = None,
+    is_superuser: Optional[bool] = None,
+    is_deleted: Optional[bool] = None,
+    date_created_after: Optional[datetime] = None,
+    date_created_before: Optional[datetime] = None,
 ) -> int:
     """
-    Count users with optional filtering.
+    Count users with advanced filtering.
 
     Args:
         db: Database session
         is_verified: Filter by verification status
         oauth_provider: Filter by OAuth provider
+        search_query: Text to search in username and email fields
+        is_superuser: Filter by superuser status
+        is_deleted: Filter by deletion status
+        date_created_after: Filter users created after this date
+        date_created_before: Filter users created before this date
 
     Returns:
         int: Number of users matching criteria
     """
-    query = select(func.count(User.id))
+    from app.utils.search_filter import SearchFilterBuilder, create_user_search_filters
 
-    # Apply filters
-    if is_verified is not None:
-        query = query.filter(User.is_verified == is_verified)
-    if oauth_provider is not None:
-        query = query.filter(User.oauth_provider == oauth_provider)
+    # Create search configuration (without sorting for count)
+    search_config = create_user_search_filters(
+        search_query=search_query,
+        is_verified=is_verified,
+        oauth_provider=oauth_provider,
+        is_superuser=is_superuser,
+        is_deleted=is_deleted,
+        date_created_after=date_created_after,
+        date_created_before=date_created_before,
+        sort_by=None,  # No sorting needed for count
+        sort_order="asc",
+    )
+
+    # Build query with search and filters
+    builder = SearchFilterBuilder(User)
+    query = builder.build_query(search_config)
+
+    # Convert to count query
+    count_query = select(func.count()).select_from(query.subquery())
 
     if isinstance(db, AsyncSession):
-        result = await db.execute(query)
+        result = await db.execute(count_query)
     else:
-        result = db.execute(query)
+        result = db.execute(count_query)
 
     return result.scalar() or 0
 
@@ -755,9 +804,16 @@ def get_users_sync(
     limit: int = 100,
     is_verified: Optional[bool] = None,
     oauth_provider: Optional[str] = None,
+    search_query: Optional[str] = None,
+    is_superuser: Optional[bool] = None,
+    is_deleted: Optional[bool] = None,
+    date_created_after: Optional[datetime] = None,
+    date_created_before: Optional[datetime] = None,
+    sort_by: Optional[str] = None,
+    sort_order: str = "asc",
 ) -> list[User]:
     """
-    Get users with optional filtering and pagination (sync version).
+    Get users with advanced filtering, search, and pagination (sync version).
 
     Args:
         db: Database session
@@ -765,17 +821,35 @@ def get_users_sync(
         limit: Maximum number of users to return
         is_verified: Filter by verification status
         oauth_provider: Filter by OAuth provider
+        search_query: Text to search in username and email fields
+        is_superuser: Filter by superuser status
+        is_deleted: Filter by deletion status
+        date_created_after: Filter users created after this date
+        date_created_before: Filter users created before this date
+        sort_by: Field to sort by
+        sort_order: Sort order (asc or desc)
 
     Returns:
         List[User]: List of users matching criteria
     """
-    query = select(User)
+    from app.utils.search_filter import SearchFilterBuilder, create_user_search_filters
 
-    # Apply filters
-    if is_verified is not None:
-        query = query.filter(User.is_verified == is_verified)
-    if oauth_provider is not None:
-        query = query.filter(User.oauth_provider == oauth_provider)
+    # Create search configuration
+    search_config = create_user_search_filters(
+        search_query=search_query,
+        is_verified=is_verified,
+        oauth_provider=oauth_provider,
+        is_superuser=is_superuser,
+        is_deleted=is_deleted,
+        date_created_after=date_created_after,
+        date_created_before=date_created_before,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
+
+    # Build query with search and filters
+    builder = SearchFilterBuilder(User)
+    query = builder.build_query(search_config)
 
     # Apply pagination
     query = query.offset(skip).limit(limit)
@@ -788,25 +862,49 @@ def count_users_sync(
     db: Session,
     is_verified: Optional[bool] = None,
     oauth_provider: Optional[str] = None,
+    search_query: Optional[str] = None,
+    is_superuser: Optional[bool] = None,
+    is_deleted: Optional[bool] = None,
+    date_created_after: Optional[datetime] = None,
+    date_created_before: Optional[datetime] = None,
 ) -> int:
     """
-    Count users with optional filtering (sync version).
+    Count users with advanced filtering (sync version).
 
     Args:
         db: Database session
         is_verified: Filter by verification status
         oauth_provider: Filter by OAuth provider
+        search_query: Text to search in username and email fields
+        is_superuser: Filter by superuser status
+        is_deleted: Filter by deletion status
+        date_created_after: Filter users created after this date
+        date_created_before: Filter users created before this date
 
     Returns:
         int: Number of users matching criteria
     """
-    query = select(func.count(User.id))
+    from app.utils.search_filter import SearchFilterBuilder, create_user_search_filters
 
-    # Apply filters
-    if is_verified is not None:
-        query = query.filter(User.is_verified == is_verified)
-    if oauth_provider is not None:
-        query = query.filter(User.oauth_provider == oauth_provider)
+    # Create search configuration (without sorting for count)
+    search_config = create_user_search_filters(
+        search_query=search_query,
+        is_verified=is_verified,
+        oauth_provider=oauth_provider,
+        is_superuser=is_superuser,
+        is_deleted=is_deleted,
+        date_created_after=date_created_after,
+        date_created_before=date_created_before,
+        sort_by=None,  # No sorting needed for count
+        sort_order="asc",
+    )
 
-    result = db.execute(query)
+    # Build query with search and filters
+    builder = SearchFilterBuilder(User)
+    query = builder.build_query(search_config)
+
+    # Convert to count query
+    count_query = select(func.count()).select_from(query.subquery())
+
+    result = db.execute(count_query)
     return result.scalar() or 0

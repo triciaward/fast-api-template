@@ -58,6 +58,7 @@ This template powers several production applications:
 - 🔒 Input Validation System (SQL injection, XSS, boundary testing)
 - 📈 CI/CD Pipeline with PostgreSQL Integration
 - 📊 **Audit Logging System** (comprehensive user activity tracking with database persistence and real-time logging)
+- 🔍 **Search & Filter Utility** (comprehensive text search, field filtering, and sorting with SQL injection protection)
 
 ## ✅ Test Suite
 
@@ -133,6 +134,166 @@ await log_account_deletion(
 - **Debugging**: Correlate user actions with system issues
 - **Analytics**: Understand user behavior and system usage patterns
 - **Forensics**: Investigate security incidents with detailed audit trails
+
+## 🔍 Search & Filter Utility
+
+The template includes a comprehensive **search and filter utility** that provides powerful, safe, and flexible querying capabilities for API endpoints with SQL injection protection and type safety.
+
+### 🔍 Key Features
+- **Text Search**: Case-insensitive search across multiple fields with various operators
+- **Field Filtering**: Comprehensive filtering with multiple operators (equals, greater than, in, null, etc.)
+- **SQL Injection Protection**: Safe query building with field validation and parameterized queries
+- **Type Safety**: Full Pydantic validation and type checking throughout
+- **Flexible Configuration**: Support for complex search and filter combinations
+- **Reusable Components**: Generic builder pattern for any SQLAlchemy model
+- **Performance Optimized**: Efficient query construction with proper indexing support
+
+### 🏗️ Architecture
+- **Builder Pattern**: `SearchFilterBuilder` class for constructing complex queries
+- **Configuration Objects**: Pydantic models for search and filter configuration
+- **Field Validation**: Automatic validation of field names against model schema
+- **Operator Support**: Rich set of search and filter operators
+- **Query Composition**: Safe combination of multiple search and filter conditions
+
+### 📋 Core Components
+- **SearchFilterBuilder**: Main builder class for constructing SQLAlchemy queries
+- **SearchFilterConfig**: Complete configuration for search and filter operations
+- **TextSearchFilter**: Configuration for text search across multiple fields
+- **FieldFilter**: Configuration for filtering specific fields
+- **SearchOperator**: Enum for text search operators (contains, starts_with, equals, etc.)
+- **FilterOperator**: Enum for field filter operators (equals, gt, lt, in, null, etc.)
+- **UserSearchParams**: FastAPI query parameter model for user endpoints
+
+### 🔧 Implementation
+- **Location**: `app/utils/search_filter.py` - Centralized search and filter utilities
+- **CRUD Integration**: Integrated into user CRUD operations with backward compatibility
+- **API Endpoints**: Applied to user listing endpoint with comprehensive query parameters
+- **Validation**: Automatic field validation and parameter sanitization
+- **Testing**: 15 comprehensive tests covering all functionality
+
+### 📊 Usage Examples
+
+#### Basic Text Search
+```python
+from app.utils.search_filter import SearchFilterBuilder, TextSearchFilter, SearchOperator
+
+# Create text search configuration
+text_search = TextSearchFilter(
+    query="trish",
+    fields=["username", "email"],
+    operator=SearchOperator.CONTAINS,
+    case_sensitive=False
+)
+
+# Build and execute query
+builder = SearchFilterBuilder(User)
+config = SearchFilterConfig(text_search=text_search)
+query = builder.build_query(config)
+
+result = db.execute(query)
+users = result.scalars().all()
+```
+
+#### Field Filtering
+```python
+from app.utils.search_filter import FieldFilter, FilterOperator
+
+# Filter for verified users
+field_filter = FieldFilter(
+    field="is_verified",
+    operator=FilterOperator.EQUALS,
+    value=True
+)
+
+config = SearchFilterConfig(filters=[field_filter])
+query = builder.build_query(config)
+```
+
+#### Combined Search and Filters
+```python
+# Search for "trish" in verified users
+config = SearchFilterConfig(
+    text_search=TextSearchFilter(
+        query="trish",
+        fields=["username", "email"],
+        operator=SearchOperator.CONTAINS
+    ),
+    filters=[
+        FieldFilter("is_verified", FilterOperator.EQUALS, True),
+        FieldFilter("oauth_provider", FilterOperator.IS_NULL)
+    ],
+    sort_by="date_created",
+    sort_order="desc"
+)
+```
+
+#### FastAPI Endpoint Integration
+```python
+from app.utils.search_filter import UserSearchParams
+
+@router.get("/users", response_model=PaginatedResponse[UserResponse])
+async def list_users(
+    pagination: PaginationParams = Depends(),
+    search_params: UserSearchParams = Depends(),
+    db: Session = Depends(get_db),
+) -> PaginatedResponse[UserResponse]:
+    # Convert query parameters to search configuration
+    search_config = search_params.to_search_config()
+    
+    # Get users with search and filters
+    users = await crud_user.get_users(
+        db=db,
+        skip=pagination.skip,
+        limit=pagination.limit,
+        search_query=search_config.text_search.query if search_config.text_search else None,
+        is_verified=search_params.is_verified,
+        oauth_provider=search_params.oauth_provider,
+        # ... other filters
+    )
+    
+    return PaginatedResponse.create(
+        items=users,
+        page=pagination.page,
+        size=pagination.size,
+        total=total,
+    )
+```
+
+### 🎯 Available Operators
+
+#### Text Search Operators
+- **CONTAINS**: Partial text matching (default)
+- **STARTS_WITH**: Text starts with query
+- **ENDS_WITH**: Text ends with query
+- **EQUALS**: Exact text match
+- **NOT_EQUALS**: Text does not equal query
+
+#### Field Filter Operators
+- **EQUALS**: Field equals value
+- **NOT_EQUALS**: Field does not equal value
+- **GREATER_THAN**: Field greater than value
+- **GREATER_THAN_EQUAL**: Field greater than or equal to value
+- **LESS_THAN**: Field less than value
+- **LESS_THAN_EQUAL**: Field less than or equal to value
+- **IN**: Field value in list
+- **NOT_IN**: Field value not in list
+- **IS_NULL**: Field is null
+- **IS_NOT_NULL**: Field is not null
+
+### 🔒 Security Features
+- **Field Validation**: Only allows filtering on actual model fields
+- **SQL Injection Protection**: Uses SQLAlchemy parameterized queries
+- **Input Sanitization**: Automatic validation and sanitization of all inputs
+- **Type Safety**: Full type checking prevents invalid operations
+- **Query Composition**: Safe combination of multiple conditions
+
+### 🎯 Benefits
+- **Powerful Querying**: Complex search and filter combinations
+- **Developer Friendly**: Simple API with comprehensive functionality
+- **Performance**: Efficient query construction and execution
+- **Safety**: SQL injection protection and input validation
+- **Flexibility**: Support for any SQLAlchemy model
+- **Consistency**: Standardized search and filter patterns across endpoints
 
 ## 📄 Pagination System
 
@@ -1700,6 +1861,59 @@ curl http://localhost:8000/features
 
 ##### User Management
 - `GET /api/v1/users/me` - Get current user information (requires authentication)
+- `GET /api/v1/users` - List users with advanced search and filtering (requires authentication)
+
+###### Search & Filter Features
+The users endpoint supports comprehensive search and filtering capabilities:
+
+**Text Search:**
+- Search across username and email fields
+- Case-insensitive by default
+- Supports partial matching
+- **NEW**: PostgreSQL full-text search support (when available)
+- **NEW**: Enhanced search endpoint with detailed metadata
+
+**Filter Options:**
+- `is_verified` - Filter by verification status (true/false)
+- `oauth_provider` - Filter by OAuth provider (google, apple, none)
+- `is_superuser` - Filter by superuser status (true/false)
+- `is_deleted` - Filter by deletion status (true/false)
+- `date_created_after` - Filter users created after this date
+- `date_created_before` - Filter users created before this date
+
+**Sorting:**
+- `sort_by` - Field to sort by (username, email, date_created, etc.)
+- `sort_order` - Sort order (asc or desc)
+- **NEW**: Enhanced validation for sort fields and orders
+
+**Enhanced Search Endpoint:**
+- `GET /api/v1/users/search` - Enhanced search with detailed metadata
+- Returns information about applied filters and search statistics
+- Includes pagination metadata and filter tracking
+
+**Examples:**
+```bash
+# Search for users with "trish" in username or email
+GET /api/v1/users?search=trish
+
+# Use PostgreSQL full-text search (if available)
+GET /api/v1/users?search=trish&use_full_text_search=true
+
+# Enhanced search with metadata
+GET /api/v1/users/search?search=trish&is_verified=true
+
+# Find only verified users
+GET /api/v1/users?is_verified=true
+
+# Find Google OAuth users, sorted by creation date
+GET /api/v1/users?oauth_provider=google&sort_by=date_created&sort_order=desc
+
+# Find users created in the last week
+GET /api/v1/users?date_created_after=2024-01-01T00:00:00Z
+
+# Combine multiple filters
+GET /api/v1/users?search=trish&is_verified=true&oauth_provider=none
+```
 
 ##### Refresh Token Management
 - `POST /api/v1/auth/refresh` - Refresh access token using refresh token from cookies
