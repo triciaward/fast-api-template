@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.database.database import get_db
+from app.services.sentry import capture_exception, capture_message
 
 router = APIRouter()
 
@@ -27,6 +28,18 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
         "checks": {"database": "healthy", "application": "healthy"},
     }
 
+    # Add Sentry status
+    if settings.ENABLE_SENTRY:
+        health_status["checks"]["sentry"] = "enabled"
+        health_status["sentry"] = {
+            "enabled": True,
+            "environment": settings.SENTRY_ENVIRONMENT,
+            "dsn_configured": bool(settings.SENTRY_DSN),
+        }
+    else:
+        health_status["checks"]["sentry"] = "disabled"
+        health_status["sentry"] = {"enabled": False}
+
     # Check database connectivity
     try:
         # Execute a simple query to verify database connection
@@ -37,6 +50,8 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
         health_status["checks"]["database"] = "unhealthy"
         health_status["status"] = "unhealthy"
         health_status["database_error"] = str(e)
+        # Capture database error in Sentry
+        capture_exception(e, {"check": "database", "endpoint": "health"})
 
     # Check Redis connectivity if enabled
     if settings.ENABLE_REDIS:
@@ -258,3 +273,41 @@ async def rate_limit_info(request: Request) -> dict[str, Any]:
             "error": str(e),
             "message": "Failed to get rate limit information",
         }
+
+
+@router.get("/health/test-sentry")
+async def test_sentry_monitoring() -> dict[str, str]:
+    """
+    Test endpoint to demonstrate Sentry error monitoring.
+
+    This endpoint intentionally raises an exception to test error capture.
+    """
+    try:
+        # Capture a test message
+        capture_message(
+            "Testing Sentry message capture", "info", {"test": "health_endpoint"}
+        )
+
+        # Intentionally raise an exception to test error capture
+        raise ValueError("This is a test exception for Sentry monitoring")
+
+    except Exception as e:
+        # Capture the exception with context
+        capture_exception(
+            e,
+            {
+                "test": "sentry_monitoring",
+                "endpoint": "health/test-sentry",
+                "intentional": True,
+            },
+        )
+
+        # Re-raise to return proper HTTP error
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Test exception captured by Sentry",
+                "message": str(e),
+                "test": True,
+            },
+        )

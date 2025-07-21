@@ -14,6 +14,7 @@ from app.core.error_handlers import register_error_handlers
 from app.core.logging_config import get_app_logger, setup_logging
 from app.database.database import engine, sync_engine
 from app.models import models
+from app.services.sentry import init_sentry
 
 if settings.ENABLE_CELERY:
     # Import celery tasks to register them with the worker
@@ -57,6 +58,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
         logger.info("Initializing rate limiting")
         await init_rate_limiter()
+
+    # Initialize Sentry error monitoring
+    init_sentry()
 
     logger.info("Application startup complete")
     yield

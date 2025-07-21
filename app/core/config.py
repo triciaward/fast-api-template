@@ -134,6 +134,13 @@ class Settings(BaseSettings):
     LOG_INCLUDE_PID: bool = True
     LOG_INCLUDE_THREAD: bool = True
 
+    # Error Monitoring (GlitchTip/Sentry)
+    ENABLE_SENTRY: bool = False
+    SENTRY_DSN: Optional[str] = None
+    SENTRY_ENVIRONMENT: str = "development"
+    SENTRY_TRACES_SAMPLE_RATE: float = 0.1  # 10% of transactions
+    SENTRY_PROFILES_SAMPLE_RATE: float = 0.1  # 10% of profiles
+
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, list[str]]) -> list[str]:

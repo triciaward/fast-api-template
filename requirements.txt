@@ -20,6 +20,9 @@ flower==2.0.1
 # Logging
 structlog==23.2.0
 
+# Error Monitoring (GlitchTip/Sentry)
+sentry-sdk[fastapi]==1.40.4
+
 # Rate Limiting
 slowapi==0.1.9
 

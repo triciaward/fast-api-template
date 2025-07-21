@@ -40,6 +40,7 @@ A robust FastAPI project template with **hybrid async/sync architecture** optimi
 - **Redis**: Caching, sessions, rate limiting backend
 - **WebSocket**: Real-time communication with room support
 - **Celery**: Background task processing with eager mode testing
+- **Error Monitoring**: GlitchTip/Sentry integration for production error tracking
 - **Advanced Monitoring**: ELK stack ready logging
 
 ## 🚀 Quick Start
@@ -143,6 +144,13 @@ app/
 - **Eager Mode**: Synchronous execution during testing
 - **Health Integration**: Task status in health checks
 
+### 🚨 Error Monitoring
+- **GlitchTip Integration**: Self-hosted Sentry-compatible error tracking
+- **Sentry SDK**: FastAPI integration with automatic error capture
+- **Performance Monitoring**: Request tracing and profiling
+- **User Context**: Automatic user identification in error reports
+- **Test Endpoint**: `/health/test-sentry` for monitoring validation
+
 ## 📊 Test Suite
 
 - **323 Core Tests**: All passing with comprehensive coverage
@@ -227,6 +235,7 @@ services:
   postgres:     # PostgreSQL database
   redis:        # Redis cache (optional)
   celery:       # Background tasks (optional)
+  glitchtip:    # Error monitoring (optional)
 ```
 
 ### Production Deployment
@@ -277,6 +286,7 @@ black .
 - **Bootstrap Admin**: `./scripts/bootstrap_admin.py`
 - **Logging Demo**: `./scripts/logging_demo.py`
 - **Database Setup**: `./scripts/setup.sh`
+- **GlitchTip Setup**: `./scripts/setup_glitchtip.sh`
 
 ## 📈 Monitoring & Logging
 
@@ -291,6 +301,7 @@ black .
 - **Simple Health**: `/health/simple` - Basic status
 - **Readiness**: `/health/ready` - Service readiness
 - **Liveness**: `/health/live` - Application liveness
+- **Error Monitoring Test**: `/health/test-sentry` - Test Sentry integration
 
 ### Audit Logging
 - **User Actions**: Complete activity tracking
