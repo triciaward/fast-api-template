@@ -1,3 +1,4 @@
+# mypy: disable-error-code=assignment
 from datetime import datetime, timedelta
 from uuid import uuid4
 
@@ -702,6 +703,7 @@ class TestSearchFilterUtility:
         )
 
         # Update user1's creation date to be older
+        # type: ignore[assignment]
         user1.date_created = datetime.now() - timedelta(days=10)
         sync_db_session.commit()
 
@@ -719,9 +721,12 @@ class TestSearchFilterUtility:
             field="date_created",
             operator=FilterOperator.GREATER_THAN,
             value=datetime.now() - timedelta(days=5),
+            values=None,
         )
 
-        config = SearchFilterConfig(filters=[filter_config], sort_by=None)
+        config = SearchFilterConfig(
+            text_search=None, filters=[filter_config], sort_by=None
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -744,6 +749,7 @@ class TestSearchFilterUtility:
         )
 
         # Update user1's creation date to be older
+        # type: ignore[assignment]
         user1.date_created = datetime.now() - timedelta(days=10)
         sync_db_session.commit()
 
@@ -761,9 +767,12 @@ class TestSearchFilterUtility:
             field="date_created",
             operator=FilterOperator.LESS_THAN,
             value=datetime.now() - timedelta(days=5),
+            values=None,
         )
 
-        config = SearchFilterConfig(filters=[filter_config], sort_by=None)
+        config = SearchFilterConfig(
+            text_search=None, filters=[filter_config], sort_by=None
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -797,10 +806,13 @@ class TestSearchFilterUtility:
         filter_config = FieldFilter(
             field="username",
             operator=FilterOperator.IN,
+            value=None,
             values=["user1", "user3"],  # user3 doesn't exist
         )
 
-        config = SearchFilterConfig(filters=[filter_config], sort_by=None)
+        config = SearchFilterConfig(
+            text_search=None, filters=[filter_config], sort_by=None
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -834,10 +846,13 @@ class TestSearchFilterUtility:
         filter_config = FieldFilter(
             field="username",
             operator=FilterOperator.NOT_IN,
+            value=None,
             values=["user1"],
         )
 
-        config = SearchFilterConfig(filters=[filter_config], sort_by=None)
+        config = SearchFilterConfig(
+            text_search=None, filters=[filter_config], sort_by=None
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -871,9 +886,13 @@ class TestSearchFilterUtility:
         filter_config = FieldFilter(
             field="oauth_provider",
             operator=FilterOperator.IS_NULL,
+            value=None,
+            values=None,
         )
 
-        config = SearchFilterConfig(filters=[filter_config], sort_by=None)
+        config = SearchFilterConfig(
+            text_search=None, filters=[filter_config], sort_by=None
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -907,9 +926,13 @@ class TestSearchFilterUtility:
         filter_config = FieldFilter(
             field="email",
             operator=FilterOperator.IS_NOT_NULL,
+            value=None,
+            values=None,
         )
 
-        config = SearchFilterConfig(filters=[filter_config], sort_by=None)
+        config = SearchFilterConfig(
+            text_search=None, filters=[filter_config], sort_by=None
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
