@@ -1,3 +1,4 @@
+import base64
 import secrets
 from datetime import datetime, timedelta
 from typing import Any, Optional, Union
@@ -47,3 +48,24 @@ def hash_refresh_token(token: str) -> str:
 def verify_refresh_token(plain_token: str, hashed_token: str) -> bool:
     """Verify a refresh token against its hash."""
     return pwd_context.verify(plain_token, hashed_token)
+
+
+# API Key functions
+def generate_api_key() -> str:
+    """Generate a cryptographically secure API key."""
+    # Generate 32 random bytes and encode as base64
+    key_bytes = secrets.token_bytes(32)
+    # Convert to base64 and remove padding
+    key_b64 = base64.urlsafe_b64encode(key_bytes).decode("ascii").rstrip("=")
+    # Add prefix for easy identification
+    return f"sk_{key_b64}"
+
+
+def hash_api_key(key: str) -> str:
+    """Hash an API key for secure storage."""
+    return pwd_context.hash(key)
+
+
+def verify_api_key(plain_key: str, hashed_key: str) -> bool:
+    """Verify an API key against its hash."""
+    return pwd_context.verify(plain_key, hashed_key)

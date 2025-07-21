@@ -379,3 +379,101 @@ class DeletedUserSearchResponse(BaseModel):
     filters_applied: list[str] = Field(default_factory=list)
     sort_field: Optional[str] = None
     sort_order: str = "desc"
+
+
+# API Key schemas
+class APIKeyBase(BaseModel):
+    label: str = Field(
+        ...,
+        min_length=1,
+        max_length=255,
+        description="Human-readable label for the API key",
+    )
+    scopes: list[str] = Field(
+        default_factory=list, description="List of scopes the key has access to"
+    )
+    expires_at: Optional[datetime] = Field(
+        None, description="Optional expiration date for the key"
+    )
+
+    @field_validator("label")
+    @classmethod
+    def validate_label(cls, v: str) -> str:
+        """Sanitize and validate label."""
+        return sanitize_input(v, max_length=255)
+
+    @field_validator("scopes")
+    @classmethod
+    def validate_scopes(cls, v: list[str]) -> list[str]:
+        """Validate scopes are non-empty strings."""
+        if not isinstance(v, list):
+            raise ValueError("Scopes must be a list")
+
+        validated_scopes = []
+        for scope in v:
+            if not isinstance(scope, str) or not scope.strip():
+                raise ValueError("Each scope must be a non-empty string")
+            validated_scopes.append(scope.strip())
+
+        return validated_scopes
+
+
+class APIKeyCreate(BaseModel):
+    """Schema for creating an API key."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    label: str = Field(..., description="Human-readable label for the API key")
+    scopes: list[str] = Field(
+        default_factory=list, description="List of scopes for the API key"
+    )
+    expires_at: Optional[datetime] = Field(None, description="Optional expiration date")
+
+
+class APIKeyResponse(BaseModel):
+    """Schema for API key responses."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    label: str
+    scopes: list[str]
+    user_id: str
+    is_active: bool
+    created_at: datetime
+    expires_at: Optional[datetime] = None
+
+
+class APIKeyCreateResponse(BaseModel):
+    """Response model for newly created API key (includes the raw key once)."""
+
+    api_key: APIKeyResponse
+    raw_key: str = Field(
+        ..., description="The raw API key (only returned once upon creation)"
+    )
+
+
+class APIKeyRotateResponse(BaseModel):
+    """Response model for API key rotation."""
+
+    api_key: APIKeyResponse
+    new_raw_key: str = Field(
+        ..., description="The new raw API key (only returned once upon rotation)"
+    )
+
+
+class APIKeyListResponse(PaginatedResponse[APIKeyResponse]):
+    """Paginated response for API key list."""
+
+    pass
+
+
+class APIKeyUser(BaseModel):
+    """Schema for API key user information."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    scopes: list[str]
+    user_id: str
+    key_id: str

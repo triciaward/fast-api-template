@@ -65,6 +65,7 @@ curl http://localhost:8000/health
 
 > **What's Included by Default:**
 > - ✅ User authentication (JWT, email verification, password reset)
+> - ✅ API Key authentication (server-to-server, dev tooling)
 > - ✅ PostgreSQL database with migrations
 > - ✅ Complete test suite (360 tests)
 > - ✅ Security features (rate limiting, CORS, audit logging)
@@ -202,6 +203,7 @@ fast-api-template/
 
 ### 🔐 Authentication System
 - **JWT Tokens**: Secure token-based authentication
+- **API Keys**: Server-to-server authentication with scopes
 - **Email Verification**: Complete email verification workflow
 - **OAuth Integration**: Google and Apple OAuth support
 - **Password Management**: Reset, change, and strength validation
@@ -229,6 +231,109 @@ fast-api-template/
 - **Auto-registration**: Automatically wire new endpoints into the API router
 - **Consistent Patterns**: Follow established conventions for models, schemas, and endpoints
 - **Test Generation**: Basic test files included for immediate testing
+
+---
+
+## 🔑 API Key Authentication
+
+**Secure server-to-server authentication with fine-grained scopes!**
+
+This template includes a complete API Key system following industry best practices (like Stripe and OpenAI). Perfect for internal tools, external integrations, and development tooling.
+
+### Quick Start
+
+```bash
+# 1. Create an API key (requires user authentication)
+curl -X POST "http://localhost:8000/api/v1/auth/api-keys" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "label": "Production Integration",
+    "scopes": ["read_events", "write_events"],
+    "expires_at": "2024-12-31T23:59:59Z"
+  }'
+
+# Response includes the raw key (only shown once!)
+{
+  "api_key": {
+    "id": "uuid",
+    "label": "Production Integration",
+    "scopes": ["read_events", "write_events"],
+    "user_id": "user_uuid",
+    "is_active": true,
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  "raw_key": "sk_abc123..."  # Store this securely!
+}
+
+# 2. Use the API key for authentication
+curl -X GET "http://localhost:8000/api/v1/users/me" \
+  -H "Authorization: Bearer sk_abc123..."
+```
+
+### Key Features
+
+✅ **Secure Generation**: Cryptographically secure keys with `sk_` prefix  
+✅ **Scope-Based Access**: Fine-grained permissions (e.g., `read_events`, `write_events`)  
+✅ **Expiration Support**: Optional key expiration dates  
+✅ **Key Rotation**: Generate new keys while keeping the same ID  
+✅ **User Isolation**: Users can only manage their own keys  
+✅ **Soft Delete**: Keys can be deactivated and restored  
+✅ **Audit Logging**: All key operations are logged  
+
+### API Key Management
+
+```bash
+# List your API keys
+GET /api/v1/auth/api-keys
+
+# Create a new API key
+POST /api/v1/auth/api-keys
+{
+  "label": "My Integration",
+  "scopes": ["read_events"],
+  "expires_at": "2024-12-31T23:59:59Z"  # Optional
+}
+
+# Deactivate an API key
+DELETE /api/v1/auth/api-keys/{key_id}
+
+# Rotate an API key (get a new key with same ID)
+POST /api/v1/auth/api-keys/{key_id}/rotate
+```
+
+### Using API Keys in Your Code
+
+```python
+from fastapi import Depends
+from app.api.api_v1.endpoints.users import get_api_key_user, require_api_scope
+
+# Basic API key authentication
+@app.get("/api/v1/events")
+async def get_events(api_key_user: APIKeyUser = Depends(get_api_key_user)):
+    return {"message": "Authenticated with API key", "user_id": api_key_user.user_id}
+
+# Scope-based access control
+@app.post("/api/v1/events")
+async def create_event(api_key_user: APIKeyUser = Depends(require_api_scope("write_events"))):
+    return {"message": "Event created", "scopes": api_key_user.scopes}
+```
+
+### Security Best Practices
+
+1. **Store Keys Securely**: Never commit API keys to version control
+2. **Use Environment Variables**: Store keys in `.env` files or secure vaults
+3. **Rotate Regularly**: Use the rotation endpoint to update keys periodically
+4. **Minimal Scopes**: Only grant the scopes your integration needs
+5. **Monitor Usage**: Check audit logs for unusual activity
+
+### Common Scopes
+
+- `read_events` - Read-only access to events
+- `write_events` - Create and update events
+- `delete_events` - Delete events
+- `admin` - Full administrative access
+- `user_management` - Manage user accounts
 
 ---
 

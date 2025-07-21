@@ -10,6 +10,8 @@ from app.api.api_v1.endpoints.users import get_current_user
 from app.core.config import settings
 from app.core.logging_config import get_auth_logger
 from app.core.security import verify_password
+from app.crud import api_key as crud_api_key
+from app.crud import refresh_token as crud_refresh_token
 from app.crud import user as crud_user
 from app.database.database import get_db
 from app.schemas.user import (
@@ -20,6 +22,11 @@ from app.schemas.user import (
     AccountDeletionRequest,
     AccountDeletionResponse,
     AccountDeletionStatusResponse,
+    APIKeyCreate,
+    APIKeyCreateResponse,
+    APIKeyListResponse,
+    APIKeyResponse,
+    APIKeyRotateResponse,
     EmailVerificationRequest,
     EmailVerificationResponse,
     OAuthLogin,
@@ -58,6 +65,7 @@ from app.services.audit import (
     log_oauth_login,
     log_password_change,
 )
+from app.utils.pagination import PaginationParams
 
 router = APIRouter()
 logger = get_auth_logger()
@@ -1385,44 +1393,210 @@ async def revoke_all_sessions(
     current_user: UserResponse = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
-    """Revoke all sessions for the current user except the current one."""
-    logger.info("Revoke all sessions request", user_id=str(current_user.id))
+    """Revoke all refresh tokens for the current user."""
+    logger.info(
+        "User revoking all sessions",
+        user_id=str(current_user.id),
+        email=current_user.email,
+    )
+
+    # Get user's IP address
+    client_ip = request.client.host if request.client else None
+
+    # Revoke all sessions for the user
+    revoked_count = await crud_refresh_token.revoke_all_user_sessions(
+        db, str(current_user.id)
+    )
+
+    # Log the action
+    await log_logout(
+        user_id=str(current_user.id),
+        ip_address=client_ip,
+        user_agent=request.headers.get("user-agent"),
+        session_id=None,  # Revoking all sessions
+        success=True,
+    )
+
+    logger.info(
+        "All sessions revoked successfully",
+        user_id=str(current_user.id),
+        revoked_count=revoked_count,
+    )
+
+    return {
+        "message": f"All sessions revoked successfully. {revoked_count} sessions were active."
+    }
+
+
+# API Key management endpoints
+@router.post("/api-keys", response_model=APIKeyCreateResponse, status_code=201)
+async def create_api_key(
+    api_key_data: APIKeyCreate,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> APIKeyCreateResponse:
+    """Create a new API key for the current user."""
+    logger.info(
+        "User creating API key",
+        user_id=str(current_user.id),
+        email=current_user.email,
+        label=api_key_data.label,
+    )
 
     try:
-        from app.services.refresh_token import (
-            get_refresh_token_from_cookie,
-        )
-        from app.services.refresh_token import (
-            revoke_all_sessions as service_revoke_all_sessions,
-        )
+        # Generate the API key
+        from app.core.security import generate_api_key
 
-        # Get current refresh token
-        current_refresh_token = get_refresh_token_from_cookie(request)
+        raw_key = generate_api_key()
 
-        # Revoke all sessions except current
-        revoked_count = service_revoke_all_sessions(
-            db, current_user.id, current_refresh_token
+        # Create the API key in the database
+        db_api_key = crud_api_key.create_api_key_sync(
+            db=db,
+            api_key_data=api_key_data,
+            user_id=str(current_user.id),
+            raw_key=raw_key,
         )
 
         logger.info(
-            "All sessions revoked successfully",
+            "API key created successfully",
             user_id=str(current_user.id),
-            revoked_count=revoked_count,
+            key_id=str(db_api_key.id),
+            label=api_key_data.label,
         )
 
-        return {
-            "message": f"Successfully revoked {revoked_count} sessions",
-            "revoked_count": revoked_count,
-        }
+        return APIKeyCreateResponse(
+            api_key=db_api_key,
+            raw_key=raw_key,
+        )
 
     except Exception as e:
         logger.error(
-            "Failed to revoke all sessions",
+            "Failed to create API key",
             user_id=str(current_user.id),
             error=str(e),
-            exc_info=True,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to revoke sessions. Please try again later.",
+            detail="Failed to create API key",
         )
+
+
+@router.get("/api-keys", response_model=APIKeyListResponse)
+async def list_api_keys(
+    pagination: PaginationParams = Depends(),
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> APIKeyListResponse:
+    """List all API keys for the current user."""
+    logger.info(
+        "User listing API keys",
+        user_id=str(current_user.id),
+        email=current_user.email,
+    )
+
+    # Get API keys with pagination
+    api_keys = crud_api_key.get_user_api_keys_sync(
+        db=db,
+        user_id=str(current_user.id),
+        skip=pagination.skip,
+        limit=pagination.limit,
+    )
+
+    # Count total API keys
+    total_count = crud_api_key.count_user_api_keys_sync(
+        db=db,
+        user_id=str(current_user.id),
+    )
+
+    # Convert SQLAlchemy objects to Pydantic models
+    api_key_responses = [APIKeyResponse.model_validate(api_key) for api_key in api_keys]
+
+    return APIKeyListResponse.create(
+        items=api_key_responses,
+        page=pagination.page,
+        size=pagination.limit,
+        total=total_count,
+    )
+
+
+@router.delete("/api-keys/{key_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def deactivate_api_key(
+    key_id: str,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    """Deactivate an API key."""
+    logger.info(
+        "User deactivating API key",
+        user_id=str(current_user.id),
+        email=current_user.email,
+        key_id=key_id,
+    )
+
+    success = crud_api_key.deactivate_api_key_sync(
+        db=db,
+        key_id=key_id,
+        user_id=str(current_user.id),
+    )
+
+    if not success:
+        logger.warning(
+            "Failed to deactivate API key - not found or not owned by user",
+            user_id=str(current_user.id),
+            key_id=key_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="API key not found",
+        )
+
+    logger.info(
+        "API key deactivated successfully",
+        user_id=str(current_user.id),
+        key_id=key_id,
+    )
+
+
+@router.post("/api-keys/{key_id}/rotate", response_model=APIKeyRotateResponse)
+async def rotate_api_key(
+    key_id: str,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> APIKeyRotateResponse:
+    """Rotate an API key by generating a new one."""
+    logger.info(
+        "User rotating API key",
+        user_id=str(current_user.id),
+        email=current_user.email,
+        key_id=key_id,
+    )
+
+    result = crud_api_key.rotate_api_key_sync(
+        db=db,
+        key_id=key_id,
+        user_id=str(current_user.id),
+    )
+
+    if not result[0]:
+        logger.warning(
+            "Failed to rotate API key - not found or not owned by user",
+            user_id=str(current_user.id),
+            key_id=key_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="API key not found",
+        )
+
+    api_key, new_raw_key = result
+
+    logger.info(
+        "API key rotated successfully",
+        user_id=str(current_user.id),
+        key_id=key_id,
+    )
+
+    return APIKeyRotateResponse(
+        api_key=api_key,
+        new_raw_key=new_raw_key,
+    )

@@ -244,19 +244,20 @@ def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
     # Clean the database before each test - more robust cleanup
     with sync_test_engine.begin() as conn:
         conn.execute(text("DELETE FROM audit_logs"))
+        conn.execute(text("DELETE FROM api_keys"))
         conn.execute(text("DELETE FROM users"))
         conn.commit()
 
-    with TestClient(app) as test_client:
-        yield test_client
-
-    # Clean the database after each test - more robust cleanup
-    with sync_test_engine.begin() as conn:
-        conn.execute(text("DELETE FROM audit_logs"))
-        conn.execute(text("DELETE FROM users"))
-        conn.commit()
-
-    app.dependency_overrides.clear()
+    try:
+        yield TestClient(app)
+    finally:
+        # Clean up after the test
+        with sync_test_engine.begin() as conn:
+            conn.execute(text("DELETE FROM audit_logs"))
+            conn.execute(text("DELETE FROM api_keys"))
+            conn.execute(text("DELETE FROM users"))
+            conn.commit()
+        app.dependency_overrides.clear()
 
 
 @pytest.fixture
@@ -265,6 +266,7 @@ def sync_db_session(setup_sync_test_db: None) -> Generator:
     with TestingSyncSessionLocal() as session:
         # Clean the database before each test
         session.execute(text("DELETE FROM audit_logs"))
+        session.execute(text("DELETE FROM api_keys"))
         session.execute(text("DELETE FROM users"))
         session.commit()
 
@@ -274,11 +276,13 @@ def sync_db_session(setup_sync_test_db: None) -> Generator:
             # Clean up after the test
             try:
                 session.execute(text("DELETE FROM audit_logs"))
+                session.execute(text("DELETE FROM api_keys"))
                 session.execute(text("DELETE FROM users"))
                 session.commit()
             except Exception:
                 session.rollback()
                 session.execute(text("DELETE FROM audit_logs"))
+                session.execute(text("DELETE FROM api_keys"))
                 session.execute(text("DELETE FROM users"))
                 session.commit()
 

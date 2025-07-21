@@ -1,14 +1,17 @@
 from datetime import datetime
+from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.crud import api_key as crud_api_key
 from app.crud import user as crud_user
 from app.database.database import get_db
 from app.schemas.user import (
+    APIKeyUser,
     DeletedUserListResponse,
     DeletedUserResponse,
     DeletedUserSearchResponse,
@@ -56,11 +59,90 @@ async def get_current_user(
     return user
 
 
+async def get_api_key_user(
+    authorization: Optional[str] = Header(None), db: Session = Depends(get_db)
+) -> APIKeyUser:
+    """Authenticate user via API key from Authorization header."""
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="API key required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Check if it's a Bearer token
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authorization header format. Use 'Bearer <api_key>'",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Extract the API key
+    api_key = authorization[7:]  # Remove "Bearer " prefix
+
+    # Verify the API key
+    db_api_key = crud_api_key.verify_api_key_in_db_sync(db, api_key)
+    if not db_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Check if key is active and not expired
+    if not db_api_key.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="API key is inactive",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if db_api_key.expires_at and db_api_key.expires_at < datetime.utcnow():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="API key has expired",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Return API key user object
+    return APIKeyUser(
+        id=db_api_key.id,
+        scopes=db_api_key.scopes,
+        user_id=db_api_key.user_id,
+        key_id=db_api_key.id,
+    )
+
+
+def require_api_scope(required_scope: str):
+    """Dependency to check if API key has required scope."""
+
+    def scope_checker(
+        api_key_user: APIKeyUser = Depends(get_api_key_user),
+    ) -> APIKeyUser:
+        if required_scope not in api_key_user.scopes:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"API key missing required scope: {required_scope}",
+            )
+        return api_key_user
+
+    return scope_checker
+
+
 @router.get("/me", response_model=UserResponse)
 async def read_current_user(
     current_user: UserResponse = Depends(get_current_user),
 ) -> UserResponse:
     return current_user
+
+
+@router.get("/me/api-key", response_model=APIKeyUser)
+async def read_current_user_api_key(
+    api_key_user: APIKeyUser = Depends(get_api_key_user),
+) -> APIKeyUser:
+    """Get current user information via API key authentication."""
+    return api_key_user
 
 
 @router.get("", response_model=UserListResponse)

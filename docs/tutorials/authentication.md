@@ -330,6 +330,216 @@ This prevents abuse and keeps your app secure.
 
 ---
 
+## 🔑 API Key Authentication
+
+API keys provide a secure way for applications and services to authenticate with your API without user interaction. They're perfect for:
+- **Server-to-server communication**
+- **Mobile app backends**
+- **Third-party integrations**
+- **Development tooling**
+- **Automated scripts**
+
+### How API Key Authentication Works
+
+```mermaid
+flowchart TD
+    A[Create API Key] --> B[Store Key Securely]
+    B --> C[Use in Requests]
+    C --> D[API Validates Key]
+    D --> E[Check Scopes]
+    E --> F[Access Granted/Denied]
+```
+
+### 1. Creating API Keys
+
+**Prerequisite**: You must be logged in with a JWT token to create API keys.
+
+```bash
+# 1. First, get a JWT token by logging in
+curl -X POST "http://localhost:8000/api/v1/auth/login" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=user@example.com&password=password123"
+
+# 2. Create an API key using the JWT token
+curl -X POST "http://localhost:8000/api/v1/auth/api-keys" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "label": "Production Integration",
+    "scopes": ["read_events", "write_events"],
+    "expires_at": "2024-12-31T23:59:59Z"
+  }'
+```
+
+**Response:**
+```json
+{
+  "api_key": {
+    "id": "uuid",
+    "label": "Production Integration",
+    "scopes": ["read_events", "write_events"],
+    "user_id": "user_uuid",
+    "is_active": true,
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  "raw_key": "sk_abc123..."  // Store this securely!
+}
+```
+
+> **⚠️ Important**: The `raw_key` is only shown once! Store it securely and never commit it to version control.
+
+### 2. Using API Keys for Authentication
+
+API keys use the same `Authorization: Bearer` header format as JWT tokens:
+
+```bash
+# Use API key to access protected endpoints
+curl -X GET "http://localhost:8000/api/v1/users/me/api-key" \
+  -H "Authorization: Bearer sk_abc123..."
+```
+
+**Response:**
+```json
+{
+  "id": "key_uuid",
+  "scopes": ["read_events", "write_events"],
+  "user_id": "user_uuid",
+  "key_id": "key_uuid"
+}
+```
+
+### 3. API Key Management
+
+#### List Your API Keys
+
+```bash
+curl -X GET "http://localhost:8000/api/v1/auth/api-keys" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+#### Deactivate an API Key
+
+```bash
+curl -X DELETE "http://localhost:8000/api/v1/auth/api-keys/{key_id}" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+#### Rotate an API Key
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/auth/api-keys/{key_id}/rotate" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Response:**
+```json
+{
+  "api_key": {
+    "id": "uuid",
+    "label": "Production Integration",
+    "scopes": ["read_events", "write_events"],
+    "user_id": "user_uuid",
+    "is_active": true,
+    "created_at": "2024-01-01T00:00:00Z"
+  },
+  "new_raw_key": "sk_xyz789..."  // New key to use
+}
+```
+
+### 4. Scope-Based Access Control
+
+API keys support fine-grained permissions through scopes:
+
+```python
+from fastapi import Depends
+from app.api.api_v1.endpoints.users import get_api_key_user, require_api_scope
+
+# Basic API key authentication
+@app.get("/api/v1/events")
+async def get_events(api_key_user: APIKeyUser = Depends(get_api_key_user)):
+    return {"message": "Authenticated with API key", "user_id": api_key_user.user_id}
+
+# Scope-based access control
+@app.post("/api/v1/events")
+async def create_event(api_key_user: APIKeyUser = Depends(require_api_scope("write_events"))):
+    return {"message": "Event created", "scopes": api_key_user.scopes}
+```
+
+### 5. Common API Key Scopes
+
+- `read_events` - Read-only access to events
+- `write_events` - Create and update events
+- `delete_events` - Delete events
+- `admin` - Full administrative access
+- `user_management` - Manage user accounts
+
+### 6. API Key Security Features
+
+✅ **Secure Generation**: Cryptographically secure keys with `sk_` prefix  
+✅ **Scope-Based Access**: Fine-grained permissions  
+✅ **Expiration Support**: Optional key expiration dates  
+✅ **Key Rotation**: Generate new keys while keeping the same ID  
+✅ **User Isolation**: Users can only manage their own keys  
+✅ **Soft Delete**: Keys can be deactivated and restored  
+✅ **Audit Logging**: All key operations are logged  
+
+### 7. API Key Best Practices
+
+#### 🔒 Security
+1. **Store Keys Securely**: Never commit API keys to version control
+2. **Use Environment Variables**: Store keys in `.env` files or secure vaults
+3. **Rotate Regularly**: Use the rotation endpoint to update keys periodically
+4. **Minimal Scopes**: Only grant the scopes your integration needs
+5. **Monitor Usage**: Check audit logs for unusual activity
+
+#### 🛠️ Development
+```bash
+# Store API key in environment variable
+export API_KEY="sk_abc123..."
+
+# Use in requests
+curl -X GET "http://localhost:8000/api/v1/users/me/api-key" \
+  -H "Authorization: Bearer $API_KEY"
+```
+
+#### 📝 Environment Configuration
+```bash
+# .env file
+API_KEY=sk_abc123...
+API_BASE_URL=http://localhost:8000/api/v1
+```
+
+### 8. API Key vs JWT Tokens
+
+| Feature | API Keys | JWT Tokens |
+|---------|----------|------------|
+| **Use Case** | Server-to-server, integrations | User sessions, web apps |
+| **Lifespan** | Long-lived (months/years) | Short-lived (minutes) |
+| **Scopes** | Fine-grained permissions | User roles |
+| **Management** | Manual creation/rotation | Automatic refresh |
+| **Security** | Single-use, can be rotated | Can be compromised |
+
+### 9. Troubleshooting API Keys
+
+**"Invalid API key" error**
+- Check that the key starts with `sk_`
+- Verify the key is correct and not truncated
+- Ensure the key hasn't been deactivated
+
+**"API key has expired" error**
+- The key has passed its expiration date
+- Create a new key or contact the key owner
+
+**"API key is inactive" error**
+- The key has been deactivated
+- Contact the key owner to reactivate it
+
+**"API key missing required scope" error**
+- The key doesn't have the required permission
+- Request a key with the necessary scopes
+
+---
+
 ## Testing the Authentication
 
 ### Using the API Documentation
