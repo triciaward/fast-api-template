@@ -1067,7 +1067,6 @@ class TestSearchFilterUtility:
             ),
         )
 
-        # Test with invalid operator (should return None)
         builder = SearchFilterBuilder(User)
 
         # Test that the method handles unknown operators gracefully
@@ -1078,9 +1077,9 @@ class TestSearchFilterUtility:
         empty_values_filter = FieldFilter(
             field="username",
             operator=FilterOperator.IN,
+            value=None,
             values=[],
         )
-
         condition = builder._build_field_filter_condition(empty_values_filter)
         assert condition is None
 
@@ -1088,8 +1087,8 @@ class TestSearchFilterUtility:
         none_values_filter = FieldFilter(
             field="username",
             operator=FilterOperator.IN,
+            value=None,
             values=None,
         )
-
         condition = builder._build_field_filter_condition(none_values_filter)
         assert condition is None
