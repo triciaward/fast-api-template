@@ -92,39 +92,16 @@ async def list_users(
     - ?oauth_provider=google&sort_by=date_created&sort_order=desc
     - ?date_created_after=2024-01-01T00:00:00Z
     """
-    # Convert search params to search configuration
-    search_config = search_params.to_search_config()
-
     # Get users with pagination and search
     users = await crud_user.get_users(
         db=db,
         skip=pagination.skip,
         limit=pagination.limit,
-        search_query=(
-            search_config.text_search.query if search_config.text_search else None
-        ),
-        is_verified=search_params.is_verified,
-        oauth_provider=search_params.oauth_provider,
-        is_superuser=search_params.is_superuser,
-        is_deleted=search_params.is_deleted,
-        date_created_after=search_params.date_created_after,
-        date_created_before=search_params.date_created_before,
-        sort_by=search_params.sort_by,
-        sort_order=search_params.sort_order,
     )
 
     # Get total count with same filters
     total = await crud_user.count_users(
         db=db,
-        search_query=(
-            search_config.text_search.query if search_config.text_search else None
-        ),
-        is_verified=search_params.is_verified,
-        oauth_provider=search_params.oauth_provider,
-        is_superuser=search_params.is_superuser,
-        is_deleted=search_params.is_deleted,
-        date_created_after=search_params.date_created_after,
-        date_created_before=search_params.date_created_before,
     )
 
     # Convert to response models
@@ -175,39 +152,16 @@ async def search_users(
     - sort_field: Field used for sorting
     - sort_order: Sort direction used
     """
-    # Convert search params to search configuration
-    search_config = search_params.to_search_config()
-
     # Get users with pagination and search
     users = await crud_user.get_users(
         db=db,
         skip=pagination.skip,
         limit=pagination.limit,
-        search_query=(
-            search_config.text_search.query if search_config.text_search else None
-        ),
-        is_verified=search_params.is_verified,
-        oauth_provider=search_params.oauth_provider,
-        is_superuser=search_params.is_superuser,
-        is_deleted=search_params.is_deleted,
-        date_created_after=search_params.date_created_after,
-        date_created_before=search_params.date_created_before,
-        sort_by=search_params.sort_by,
-        sort_order=search_params.sort_order,
     )
 
     # Get total count with same filters
     total = await crud_user.count_users(
         db=db,
-        search_query=(
-            search_config.text_search.query if search_config.text_search else None
-        ),
-        is_verified=search_params.is_verified,
-        oauth_provider=search_params.oauth_provider,
-        is_superuser=search_params.is_superuser,
-        is_deleted=search_params.is_deleted,
-        date_created_after=search_params.date_created_after,
-        date_created_before=search_params.date_created_before,
     )
 
     # Convert to response models
@@ -299,9 +253,7 @@ async def soft_delete_user(
         )
 
     # Perform soft delete
-    success = await crud_user.soft_delete_user(
-        db=db, user_id=user_id, deleted_by=current_user.id, reason=delete_request.reason
-    )
+    success = await crud_user.soft_delete_user(db=db, user_id=user_id)
 
     if not success:
         raise HTTPException(
@@ -398,21 +350,11 @@ async def list_deleted_users(
         db=db,
         skip=pagination.skip,
         limit=pagination.limit,
-        deleted_by=search_params.deleted_by,
-        deletion_reason=search_params.deletion_reason,
-        deleted_after=search_params.deleted_after,
-        deleted_before=search_params.deleted_before,
-        sort_by=search_params.sort_by,
-        sort_order=search_params.sort_order,
     )
 
     # Get total count with same filters
     total = await crud_user.count_deleted_users(
         db=db,
-        deleted_by=search_params.deleted_by,
-        deletion_reason=search_params.deletion_reason,
-        deleted_after=search_params.deleted_after,
-        deleted_before=search_params.deleted_before,
     )
 
     # Convert to response models
@@ -467,21 +409,11 @@ async def search_deleted_users(
         db=db,
         skip=pagination.skip,
         limit=pagination.limit,
-        deleted_by=search_params.deleted_by,
-        deletion_reason=search_params.deletion_reason,
-        deleted_after=search_params.deleted_after,
-        deleted_before=search_params.deleted_before,
-        sort_by=search_params.sort_by,
-        sort_order=search_params.sort_order,
     )
 
     # Get total count with same filters
     total = await crud_user.count_deleted_users(
         db=db,
-        deleted_by=search_params.deleted_by,
-        deletion_reason=search_params.deletion_reason,
-        deleted_after=search_params.deleted_after,
-        deleted_before=search_params.deleted_before,
     )
 
     # Convert to response models

@@ -264,8 +264,6 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         success = await crud_user.soft_delete_user(
             db=db,
             user_id=str(user_id),
-            deleted_by=None,  # Admin deletion
-            reason="Admin force deletion",
         )
         return success
 
