@@ -1,7 +1,7 @@
 """Sentry/GlitchTip error monitoring service."""
 
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
@@ -22,7 +22,14 @@ def init_sentry() -> None:
 
     try:
         # Configure integrations based on enabled features
-        integrations = [FastApiIntegration()]
+        integrations: list[
+            Union[
+                FastApiIntegration,
+                SqlalchemyIntegration,
+                RedisIntegration,
+                CeleryIntegration,
+            ]
+        ] = [FastApiIntegration()]
 
         # Add SQLAlchemy integration for database monitoring
         integrations.append(SqlalchemyIntegration())
@@ -41,16 +48,15 @@ def init_sentry() -> None:
             traces_sample_rate=settings.SENTRY_TRACES_SAMPLE_RATE,
             profiles_sample_rate=settings.SENTRY_PROFILES_SAMPLE_RATE,
             integrations=integrations,
-            # Add custom tags for better organization
-            default_tags={
-                "service": "fastapi-template",
-                "version": settings.VERSION,
-            },
             # Capture request body for better debugging (be careful with sensitive data)
             send_default_pii=False,
             # Enable debug mode in development
             debug=settings.ENVIRONMENT == "development",
         )
+
+        # Set custom tags after initialization
+        sentry_sdk.set_tag("service", "fastapi-template")
+        sentry_sdk.set_tag("version", settings.VERSION)
 
         logger.info(
             f"Sentry initialized for environment: {settings.SENTRY_ENVIRONMENT}"
