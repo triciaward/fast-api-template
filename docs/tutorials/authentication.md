@@ -646,6 +646,185 @@ curl -X POST "http://localhost:8000/api/v1/auth/change-password" \
 
 ---
 
+## 🔑 API Key Management CLI
+
+The FastAPI template includes a powerful command-line interface for managing API keys. This CLI provides the same functionality as the web API but in a scriptable format perfect for automation and server management.
+
+### Installation
+
+The CLI script is located at `scripts/manage_api_keys.py` and includes a shell wrapper at `scripts/manage_api_keys.sh` for easy execution.
+
+### Basic Commands
+
+```bash
+# Show help
+./scripts/manage_api_keys.sh --help
+
+# Show help for a specific command
+./scripts/manage_api_keys.sh create --help
+./scripts/manage_api_keys.sh list --help
+./scripts/manage_api_keys.sh deactivate --help
+./scripts/manage_api_keys.sh rotate --help
+```
+
+### Creating API Keys
+
+```bash
+# Create a new API key
+./scripts/manage_api_keys.sh create \
+  --user-id 123e4567-e89b-12d3-a456-426614174000 \
+  --label "Production Integration" \
+  --scopes "read_events,write_events"
+
+# Create a key with expiration
+./scripts/manage_api_keys.sh create \
+  --user-id 123e4567-e89b-12d3-a456-426614174000 \
+  --label "Temporary Key" \
+  --expires-at "2024-12-31T23:59:59"
+
+# Create a key with no scopes (full access)
+./scripts/manage_api_keys.sh create \
+  --user-id 123e4567-e89b-12d3-a456-426614174000 \
+  --label "Admin Key"
+```
+
+**Important**: The raw API key is only shown once when created. Store it securely!
+
+### Listing API Keys
+
+```bash
+# List all keys for a user
+./scripts/manage_api_keys.sh list \
+  --user-id 123e4567-e89b-12d3-a456-426614174000
+```
+
+**Example Output:**
+```
+📋 API keys for user 123e4567-e89b-12d3-a456-426614174000:
+--------------------------------------------------------------------------------
+
+1. Production Integration
+   ID: 16ceeaae-023e-4300-914d-c6323d26b021
+   Status: 🟢 Active
+   Scopes: read_events, write_events
+   Created: 2024-01-01 12:00:00
+
+2. Temporary Key
+   ID: 28dffbbf-1341-5411-b025-2fe33c3e7c132
+   Status: 🟢 Active
+   Scopes: None
+   Created: 2024-01-01 13:00:00
+   Expires: 2024-12-31 23:59:59
+```
+
+### Deactivating API Keys
+
+```bash
+# Deactivate a key (requires key ID)
+./scripts/manage_api_keys.sh deactivate \
+  --key-id 123e4567-e89b-12d3-a456-426614174000
+
+# Deactivate a key with user verification
+./scripts/manage_api_keys.sh deactivate \
+  --key-id 123e4567-e89b-12d3-a456-426614174000 \
+  --user-id 123e4567-e89b-12d3-a456-426614174000
+```
+
+### Rotating API Keys
+
+```bash
+# Rotate a key (get a new key with same ID)
+./scripts/manage_api_keys.sh rotate \
+  --key-id 123e4567-e89b-12d3-a456-426614174000
+
+# Rotate a key with user verification
+./scripts/manage_api_keys.sh rotate \
+  --key-id 123e4567-e89b-12d3-a456-426614174000 \
+  --user-id 123e4567-e89b-12d3-a456-426614174000
+```
+
+**Important**: The new raw API key is only shown once when rotated. Store it securely!
+
+### Integration Examples
+
+#### Shell Scripts
+
+```bash
+#!/bin/bash
+# Create an API key for a user
+USER_ID="123e4567-e89b-12d3-a456-426614174000"
+API_KEY_OUTPUT=$(./scripts/manage_api_keys.sh create \
+  --user-id "$USER_ID" \
+  --label "CI/CD Integration" \
+  --scopes "read_events")
+
+# Extract the raw key (be careful with this in production!)
+RAW_KEY=$(echo "$API_KEY_OUTPUT" | grep "sk_" | head -1 | awk '{print $3}')
+
+echo "API Key created: $RAW_KEY"
+```
+
+#### Python Scripts
+
+```python
+import subprocess
+import json
+
+def create_api_key(user_id: str, label: str, scopes: str = "") -> str:
+    """Create an API key and return the raw key."""
+    cmd = [
+        "./scripts/manage_api_keys.sh",
+        "create",
+        "--user-id", user_id,
+        "--label", label,
+        "--scopes", scopes
+    ]
+    
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    
+    if result.returncode != 0:
+        raise Exception(f"Failed to create API key: {result.stderr}")
+    
+    # Extract the raw key from output
+    for line in result.stdout.split('\n'):
+        if line.strip().startswith('sk_'):
+            return line.strip()
+    
+    raise Exception("Raw key not found in output")
+```
+
+### Security Considerations
+
+1. **Raw Key Storage**: Raw API keys are only shown once. Store them securely in environment variables or secure vaults.
+
+2. **User Verification**: Use the `--user-id` flag with deactivate and rotate commands to ensure you're operating on the correct user's keys.
+
+3. **Scope Management**: Only grant the minimum scopes needed for each integration.
+
+4. **Key Rotation**: Regularly rotate API keys using the rotate command.
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **Module not found**: Make sure you're using the shell wrapper (`manage_api_keys.sh`) or have set `PYTHONPATH` correctly.
+
+2. **Database connection**: Ensure the database is running and accessible.
+
+3. **User not found**: Verify the user ID exists in the database.
+
+4. **Permission denied**: Make sure the script files are executable (`chmod +x scripts/manage_api_keys.sh`).
+
+#### Getting User IDs
+
+To get a user ID for testing, you can:
+
+1. Use the web API to create a user and get their ID
+2. Query the database directly: `SELECT id, email FROM users;`
+3. Use the admin CLI: `./scripts/admin_cli.sh list-users`
+
+---
+
 ## Next Steps
 
 Now that you understand authentication, you can:
@@ -654,5 +833,6 @@ Now that you understand authentication, you can:
 3. **Implement social login**: Add more OAuth providers (Facebook, GitHub, etc.)
 4. **Add two-factor authentication**: Extra security layer
 5. **Create user management**: Admin panel for managing users
+6. **Automate API key management**: Use the CLI for CI/CD and automation
 
 The authentication system is designed to be secure, flexible, and easy to use. It handles all the complex security details so you can focus on building your app's features! 
