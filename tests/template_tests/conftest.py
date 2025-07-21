@@ -14,12 +14,13 @@ from sqlalchemy.orm import sessionmaker
 from app.database.database import Base, get_db
 from app.main import app
 
-# Debug flag for CI
+# Check if running in CI environment
 RUNNING_IN_CI = os.getenv("RUNNING_IN_CI", "false").lower() == "true"
 
 if RUNNING_IN_CI:
     print("CI DEBUG: conftest.py module loaded")
     print("CI DEBUG: RUNNING_IN_CI =", RUNNING_IN_CI)
+
 
 # Set environment variables for testing
 os.environ["ENABLE_CELERY"] = "true"
