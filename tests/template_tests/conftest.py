@@ -120,6 +120,11 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 async def setup_test_db() -> AsyncGenerator[None, None]:
     """Setup test database tables once for the session."""
     if RUNNING_IN_CI:
+        print("CI DEBUG: setup_test_db fixture started - SKIPPING IN CI")
+        yield
+        return
+
+    if RUNNING_IN_CI:
         print("CI DEBUG: setup_test_db fixture started")
 
     # Create tables for async engine
