@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api.api_v1.endpoints.users import get_current_user
@@ -119,6 +120,45 @@ async def register_user(
 
         return db_user
 
+    except IntegrityError as e:
+        # Handle database integrity errors (duplicate email/username)
+        error_message = str(e)
+        if (
+            "ix_users_email" in error_message.lower()
+            or "email" in error_message.lower()
+        ):
+            logger.warning(
+                "Registration failed - email already exists (integrity error)",
+                email=user.email,
+            )
+            raise HTTPException(
+                status_code=400,
+                detail="Email already registered. Please use a different email or try logging in.",
+            )
+        elif (
+            "ix_users_username" in error_message.lower()
+            or "username" in error_message.lower()
+        ):
+            logger.warning(
+                "Registration failed - username already taken (integrity error)",
+                username=user.username,
+            )
+            raise HTTPException(
+                status_code=400,
+                detail="Username already taken. Please choose a different username.",
+            )
+        else:
+            logger.error(
+                "Registration failed with integrity error",
+                email=user.email,
+                username=user.username,
+                error=error_message,
+                exc_info=True,
+            )
+            raise HTTPException(
+                status_code=400,
+                detail="Registration failed due to a database constraint violation.",
+            )
     except HTTPException:
         raise
     except Exception as e:

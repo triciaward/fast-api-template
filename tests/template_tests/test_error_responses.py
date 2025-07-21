@@ -372,6 +372,7 @@ class TestErrorSchemaValidation:
             type=ErrorType.VALIDATION_ERROR,
             message="Email is invalid",
             code=ErrorCode.INVALID_EMAIL,
+            details={},
         )
 
         error_response = ErrorResponse(error=error_detail)
@@ -388,6 +389,7 @@ class TestErrorSchemaValidation:
             code=ErrorCode.INVALID_EMAIL,
             field="email",
             value="invalid-email",
+            details={},
         )
 
         assert error_detail.type.value == "ValidationError"
@@ -403,6 +405,7 @@ class TestErrorSchemaValidation:
         error_detail = AuthenticationErrorDetail(
             message="Invalid credentials",
             code=ErrorCode.INVALID_CREDENTIALS,
+            details={},
         )
 
         assert error_detail.type.value == "AuthenticationError"
