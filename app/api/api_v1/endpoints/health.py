@@ -9,6 +9,17 @@ from app.core.config import settings
 from app.database.database import engine, get_db, sync_engine
 from app.services.sentry import capture_exception, capture_message, is_sentry_working
 
+
+def safe_pool_stat(pool, name: str, default: int = 0) -> int:
+    """Safely get pool statistics, handling missing attributes gracefully."""
+    if hasattr(pool, name):
+        attr = getattr(pool, name)
+        if callable(attr):
+            return attr()
+        return attr
+    return default
+
+
 router = APIRouter()
 
 
@@ -55,24 +66,28 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
 
         health_status["database_pools"] = {
             "async": {
-                "size": async_pool.size(),
-                "checked_in": async_pool.checkedin(),
-                "checked_out": async_pool.checkedout(),
-                "overflow": async_pool.overflow(),
+                "size": safe_pool_stat(async_pool, "size"),
+                "checked_in": safe_pool_stat(async_pool, "checkedin"),
+                "checked_out": safe_pool_stat(async_pool, "checkedout"),
+                "overflow": safe_pool_stat(async_pool, "overflow"),
             },
             "sync": {
-                "size": sync_pool.size(),
-                "checked_in": sync_pool.checkedin(),
-                "checked_out": sync_pool.checkedout(),
-                "overflow": sync_pool.overflow(),
+                "size": safe_pool_stat(sync_pool, "size"),
+                "checked_in": safe_pool_stat(sync_pool, "checkedin"),
+                "checked_out": safe_pool_stat(sync_pool, "checkedout"),
+                "overflow": safe_pool_stat(sync_pool, "overflow"),
             },
         }
 
         # Add 'invalid' attribute if available
         if hasattr(async_pool, "invalid"):
-            health_status["database_pools"]["async"]["invalid"] = async_pool.invalid()
+            health_status["database_pools"]["async"]["invalid"] = safe_pool_stat(
+                async_pool, "invalid"
+            )
         if hasattr(sync_pool, "invalid"):
-            health_status["database_pools"]["sync"]["invalid"] = sync_pool.invalid()
+            health_status["database_pools"]["sync"]["invalid"] = safe_pool_stat(
+                sync_pool, "invalid"
+            )
 
     except Exception as e:
         health_status["checks"]["database"] = "unhealthy"
