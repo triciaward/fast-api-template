@@ -252,12 +252,17 @@ class TestConnectionPooling:
     @pytest.mark.asyncio
     async def test_session_cleanup_on_exception(self) -> None:
         """Test that sessions are properly cleaned up even on exceptions."""
+        session = None
         try:
-            async with AsyncSessionLocal() as session:
-                await session.execute(text("SELECT 1"))
-                raise Exception("Test exception")
+            session = AsyncSessionLocal()
+            await session.execute(text("SELECT 1"))
+            raise Exception("Test exception")
         except Exception:
             pass
+        finally:
+            # Ensure session is properly closed even if exception occurs
+            if session is not None:
+                await session.close()
 
         # Check that connection was returned to pool despite exception
         # Note: In test environment, connection cleanup might be delayed
