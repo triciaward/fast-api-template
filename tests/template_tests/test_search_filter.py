@@ -67,7 +67,7 @@ class TestSearchFilterUtility:
             case_sensitive=False,
         )
 
-        config = SearchFilterConfig(text_search=text_search)
+        config = SearchFilterConfig(text_search=text_search, sort_by=None)
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -103,7 +103,7 @@ class TestSearchFilterUtility:
             case_sensitive=False,
         )
 
-        config = SearchFilterConfig(text_search=text_search)
+        config = SearchFilterConfig(text_search=text_search, sort_by=None)
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -136,10 +136,12 @@ class TestSearchFilterUtility:
 
         # Test filter configuration
         field_filter = FieldFilter(
-            field="is_verified", operator=FilterOperator.EQUALS, value=True
+            field="is_verified", operator=FilterOperator.EQUALS, value=True, values=None
         )
 
-        config = SearchFilterConfig(filters=[field_filter])
+        config = SearchFilterConfig(
+            text_search=None, filters=[field_filter], sort_by=None
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -152,7 +154,7 @@ class TestSearchFilterUtility:
     def test_date_range_filter(self, sync_db_session: Session):
         """Test date range filtering."""
         # Create test users with different creation dates
-        user1 = crud_user.create_user_sync(
+        _user1 = crud_user.create_user_sync(
             sync_db_session,
             UserCreate(
                 email="old@example.com", username="old_user", password="Password123!"
@@ -160,7 +162,8 @@ class TestSearchFilterUtility:
         )
 
         # Manually set creation date for user1 to be old
-        user1.date_created = datetime.utcnow() - timedelta(days=30)
+        old_date = datetime.utcnow() - timedelta(days=30)
+        _user1.date_created = old_date  # type: ignore
         sync_db_session.commit()
 
         _user2 = crud_user.create_user_sync(
@@ -177,9 +180,12 @@ class TestSearchFilterUtility:
             field="date_created",
             operator=FilterOperator.GREATER_THAN_EQUAL,
             value=recent_date,
+            values=None,
         )
 
-        config = SearchFilterConfig(filters=[field_filter])
+        config = SearchFilterConfig(
+            text_search=None, filters=[field_filter], sort_by=None
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -219,10 +225,12 @@ class TestSearchFilterUtility:
         )
 
         field_filter = FieldFilter(
-            field="is_verified", operator=FilterOperator.EQUALS, value=True
+            field="is_verified", operator=FilterOperator.EQUALS, value=True, values=None
         )
 
-        config = SearchFilterConfig(text_search=text_search, filters=[field_filter])
+        config = SearchFilterConfig(
+            text_search=text_search, filters=[field_filter], sort_by=None
+        )
 
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
@@ -251,7 +259,9 @@ class TestSearchFilterUtility:
         )
 
         # Test ascending sort
-        config = SearchFilterConfig(sort_by="username", sort_order="asc")
+        config = SearchFilterConfig(
+            text_search=None, sort_by="username", sort_order="asc"
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -262,7 +272,9 @@ class TestSearchFilterUtility:
         assert users[1].username == "bob"
 
         # Test descending sort
-        config = SearchFilterConfig(sort_by="username", sort_order="desc")
+        config = SearchFilterConfig(
+            text_search=None, sort_by="username", sort_order="desc"
+        )
         query = builder.build_query(config)
 
         result = sync_db_session.execute(query)
@@ -330,10 +342,15 @@ class TestSearchFilterUtility:
 
         # Test filtering for non-OAuth users
         field_filter = FieldFilter(
-            field="oauth_provider", operator=FilterOperator.IS_NULL
+            field="oauth_provider",
+            operator=FilterOperator.IS_NULL,
+            value=None,
+            values=None,
         )
 
-        config = SearchFilterConfig(filters=[field_filter])
+        config = SearchFilterConfig(
+            text_search=None, filters=[field_filter], sort_by=None
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -363,7 +380,7 @@ class TestSearchFilterUtility:
             case_sensitive=False,
         )
 
-        config = SearchFilterConfig(text_search=text_search)
+        config = SearchFilterConfig(text_search=text_search, sort_by=None)
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -393,7 +410,7 @@ class TestSearchFilterUtility:
             case_sensitive=True,
         )
 
-        config = SearchFilterConfig(text_search=text_search)
+        config = SearchFilterConfig(text_search=text_search, sort_by=None)
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -415,10 +432,15 @@ class TestSearchFilterUtility:
 
         # Test with invalid field name
         field_filter = FieldFilter(
-            field="invalid_field", operator=FilterOperator.EQUALS, value="test"
+            field="invalid_field",
+            operator=FilterOperator.EQUALS,
+            value="test",
+            values=None,
         )
 
-        config = SearchFilterConfig(filters=[field_filter])
+        config = SearchFilterConfig(
+            text_search=None, filters=[field_filter], sort_by=None
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -445,7 +467,7 @@ class TestSearchFilterUtility:
             operator=SearchOperator.CONTAINS,
         )
 
-        config = SearchFilterConfig(text_search=text_search)
+        config = SearchFilterConfig(text_search=text_search, sort_by=None)
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -482,7 +504,7 @@ class TestSearchFilterUtility:
             use_full_text_search=True,
         )
 
-        config = SearchFilterConfig(text_search=text_search)
+        config = SearchFilterConfig(text_search=text_search, sort_by=None)
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -503,7 +525,9 @@ class TestSearchFilterUtility:
         )
 
         # Test with invalid sort field
-        config = SearchFilterConfig(sort_by="invalid_field", sort_order="asc")
+        config = SearchFilterConfig(
+            text_search=None, sort_by="invalid_field", sort_order="asc"
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 
@@ -524,7 +548,9 @@ class TestSearchFilterUtility:
         )
 
         # Test with invalid sort order
-        config = SearchFilterConfig(sort_by="username", sort_order="invalid_order")
+        config = SearchFilterConfig(
+            text_search=None, sort_by="username", sort_order="invalid_order"
+        )
         builder = SearchFilterBuilder(User)
         query = builder.build_query(config)
 

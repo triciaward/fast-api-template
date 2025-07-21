@@ -4,7 +4,6 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 from sqlalchemy import and_, func, or_, select
-from sqlalchemy.orm import Query
 
 
 class SearchOperator(str, Enum):
@@ -113,14 +112,13 @@ class SearchFilterBuilder:
         if filter_config.use_full_text_search:
             try:
                 # Create a full-text search condition using PostgreSQL's to_tsvector
+                field_expressions = [
+                    func.coalesce(getattr(self.model_class, field), "")
+                    for field in filter_config.fields
+                ]
+                # Use string concatenation with spaces for full-text search
                 search_vector = func.to_tsvector(
-                    "english",
-                    " ".join(
-                        [
-                            func.coalesce(getattr(self.model_class, field), "")
-                            for field in filter_config.fields
-                        ]
-                    ),
+                    "english", func.concat_ws(" ", *field_expressions)
                 )
                 search_query = func.plainto_tsquery("english", query)
                 return search_vector.op("@@")(search_query)
@@ -202,7 +200,7 @@ class SearchFilterBuilder:
 
         return None
 
-    def build_query(self, config: SearchFilterConfig) -> Query:
+    def build_query(self, config: SearchFilterConfig) -> Any:
         """Build a complete SQLAlchemy query with search and filters."""
         query = select(self.model_class)
         conditions = []
