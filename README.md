@@ -16,7 +16,6 @@ A production-ready FastAPI backend template with comprehensive authentication, t
 - [🔧 Core Features](#-core-features)
 - [⚡ Optional Features](#-optional-features)
 - [📊 Test Suite](#-test-suite)
-- [🚀 Live Examples](#-live-examples)
 - [📁 Project Structure](#-project-structure)
 - [🔐 Authentication & Security](#-authentication--security)
 - [📄 API Documentation](#-api-documentation)
@@ -159,12 +158,7 @@ app/
 - **Security**: Input validation, rate limiting, CORS
 - **Services**: Email, Redis, WebSocket, background tasks
 
-## 🚀 Live Examples
 
-This template powers several production applications:
-
-- **[Thirdly](https://github.com/triciaward/thirdly)** - News aggregation and analysis platform
-- **[Truth Showdown](https://github.com/triciaward/truth-showdown)** - AI-powered debate game with real-time multiplayer
 
 ## 📁 Project Structure
 
