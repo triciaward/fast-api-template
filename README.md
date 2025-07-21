@@ -243,7 +243,7 @@ services:
 - **ruff**: Fast Python linter with zero warnings
 - **black**: Code formatting
 
-### Pre-commit Hooks
+### Code Quality (Pre-commit Hooks)
 This project uses pre-commit hooks to ensure code quality before every commit.
 
 **Installation:**
