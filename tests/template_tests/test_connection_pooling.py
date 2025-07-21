@@ -23,12 +23,24 @@ from app.database.database import (
 # Debug flag for CI
 RUNNING_IN_CI = os.getenv("RUNNING_IN_CI", "false").lower() == "true"
 
+if RUNNING_IN_CI:
+    print("CI DEBUG: test_connection_pooling.py module loaded")
+    print("CI DEBUG: RUNNING_IN_CI =", RUNNING_IN_CI)
+
 
 class TestConnectionPooling:
     """Test database connection pooling functionality."""
 
+    def setup_method(self):
+        """Setup method that runs before each test."""
+        if RUNNING_IN_CI:
+            print(f"CI DEBUG: setup_method called for {self.__class__.__name__}")
+
     def test_pool_configuration(self) -> None:
         """Test that pool configuration is properly set."""
+        if RUNNING_IN_CI:
+            print("CI DEBUG: Starting test_pool_configuration")
+
         # Test async engine pool configuration
         if hasattr(engine.pool, "size"):
             assert engine.pool.size() == settings.DB_POOL_SIZE
@@ -69,7 +81,12 @@ class TestConnectionPooling:
     @pytest.mark.asyncio
     async def test_async_session_pool_usage(self, db_session: AsyncSession) -> None:
         """Test that async sessions properly use the connection pool."""
+        if RUNNING_IN_CI:
+            print("CI DEBUG: Starting test_async_session_pool_usage")
+
         # Execute a query
+        if RUNNING_IN_CI:
+            print("CI DEBUG: About to execute query in test_async_session_pool_usage")
         result = await db_session.execute(text("SELECT 1"))
         result.fetchone()  # Remove await - fetchone() is not async
 
@@ -92,9 +109,17 @@ class TestConnectionPooling:
         if hasattr(engine.pool, "checkedin"):
             assert engine.pool.checkedin() >= 0
 
+        if RUNNING_IN_CI:
+            print("CI DEBUG: test_async_session_pool_usage completed")
+
     def test_sync_session_pool_usage(self, sync_db_session: Session) -> None:
         """Test that sync sessions properly use the connection pool."""
+        if RUNNING_IN_CI:
+            print("CI DEBUG: Starting test_sync_session_pool_usage")
+
         # Execute a query
+        if RUNNING_IN_CI:
+            print("CI DEBUG: About to execute sync query")
         result = sync_db_session.execute(text("SELECT 1"))
         result.fetchone()
 
@@ -111,13 +136,19 @@ class TestConnectionPooling:
         if hasattr(sync_engine.pool, "checkedin"):
             assert sync_engine.pool.checkedin() >= 0
 
+        if RUNNING_IN_CI:
+            print("CI DEBUG: test_sync_session_pool_usage completed")
+
     @pytest.mark.asyncio
     async def test_concurrent_async_connections(self) -> None:
         """Test handling of concurrent async connections."""
         if RUNNING_IN_CI:
             print("CI DEBUG: Starting test_concurrent_async_connections")
+            print("CI DEBUG: About to define execute_query function")
 
         async def execute_query() -> None:
+            if RUNNING_IN_CI:
+                print("CI DEBUG: execute_query function called")
             session = None
             try:
                 if RUNNING_IN_CI:
