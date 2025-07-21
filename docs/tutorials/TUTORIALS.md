@@ -28,11 +28,10 @@ Welcome to the tutorials section! Here you'll find comprehensive guides for ever
 **New to FastAPI?** Follow this path:
 1. **📖 [Getting Started Guide](../getting-started.md)** - Set up your development environment
 2. **🔐 [Authentication System](authentication.md)** - Learn user login and registration
-3. **🗄️ [Database Management](database-management.md)** - Work with data and migrations
-4. **🛠️ [CRUD Scaffolding](crud-scaffolding.md)** - Generate CRUD boilerplate automatically
-5. **🧪 [Testing and Development](testing-and-development.md)** - Write tests and debug
-6. **🌐 [Deployment and Production](deployment-and-production.md)** - Deploy to production
-7. **🔧 [Optional Features](optional-features.md)** - Add advanced features as needed
+3. **🗄️ [Database Management](database-management.md)** - Work with data, migrations, and CRUD scaffolding
+4. **🧪 [Testing and Development](testing-and-development.md)** - Write tests and debug
+5. **🌐 [Deployment and Production](deployment-and-production.md)** - Deploy to production
+6. **🔧 [Optional Features](optional-features.md)** - Add advanced features as needed
 
 **Experienced developer?** Jump to any tutorial or use the [Quick Reference](#️-quick-reference) section below.
 
@@ -155,14 +154,7 @@ Master database operations and management:
 - Search and filtering
 - Pagination and audit logging
 - Soft delete functionality
-
-#### 🛠️ [CRUD Scaffolding](crud-scaffolding.md)
-Generate CRUD boilerplate automatically:
-- Create models, schemas, CRUD, and endpoints with one command
-- Auto-registration in API router
-- Consistent patterns and conventions
-- Basic test coverage included
-- Support for soft delete, search, and admin features
+- **CRUD Scaffolding**: Generate complete CRUD boilerplate automatically with one command
 
 ### ⚡ Optional Features
 
@@ -302,7 +294,7 @@ curl http://localhost:8000/health
 ### 🔧 **Full Feature Path** (4-6 hours)
 1. [Getting Started Guide](../getting-started.md)
 2. [Authentication System](authentication.md) - Complete
-3. [Database Management](database-management.md) - Core features
+3. [Database Management](database-management.md) - Core features and CRUD scaffolding
 4. [Optional Features](optional-features.md) - Choose what you need
 5. [Testing and Development](testing-and-development.md) - Best practices
 
