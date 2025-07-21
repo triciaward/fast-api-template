@@ -47,7 +47,7 @@ class TestUserEndpoints:
         response = client.get("/api/v1/users/me")
 
         assert response.status_code == 401
-        assert "Not authenticated" in response.json()["detail"]
+        assert "Not authenticated" in response.json()["error"]["message"]
 
     async def test_get_current_user_invalid_token(self, client: TestClient) -> None:
         """Test getting current user with invalid token."""
@@ -56,7 +56,7 @@ class TestUserEndpoints:
         response = client.get("/api/v1/users/me", headers=headers)
 
         assert response.status_code == 401
-        assert "Could not validate credentials" in response.json()["detail"]
+        assert "Could not validate credentials" in response.json()["error"]["message"]
 
     async def test_get_current_user_expired_token(
         self, client: TestClient, test_user_data: dict[str, str]
@@ -80,7 +80,7 @@ class TestUserEndpoints:
         response = client.get("/api/v1/users/me", headers=headers)
 
         assert response.status_code == 401
-        assert "Could not validate credentials" in response.json()["detail"]
+        assert "Could not validate credentials" in response.json()["error"]["message"]
 
     async def test_get_current_user_wrong_secret_key(
         self, client: TestClient, test_user_data: dict[str, str]
@@ -107,7 +107,7 @@ class TestUserEndpoints:
         response = client.get("/api/v1/users/me", headers=headers)
 
         assert response.status_code == 401
-        assert "Could not validate credentials" in response.json()["detail"]
+        assert "Could not validate credentials" in response.json()["error"]["message"]
 
     async def test_get_current_user_nonexistent_user(self, client: TestClient) -> None:
         """Test getting current user with token for non-existent user."""
@@ -118,7 +118,7 @@ class TestUserEndpoints:
         response = client.get("/api/v1/users/me", headers=headers)
 
         assert response.status_code == 401
-        assert "Could not validate credentials" in response.json()["detail"]
+        assert "Could not validate credentials" in response.json()["error"]["message"]
 
     async def test_get_current_user_malformed_token(self, client: TestClient) -> None:
         """Test getting current user with malformed token."""
@@ -127,7 +127,7 @@ class TestUserEndpoints:
         response = client.get("/api/v1/users/me", headers=headers)
 
         assert response.status_code == 401
-        assert "Could not validate credentials" in response.json()["detail"]
+        assert "Could not validate credentials" in response.json()["error"]["message"]
 
     async def test_get_current_user_wrong_auth_scheme(
         self, client: TestClient, test_user_data: dict[str, str]
@@ -148,4 +148,4 @@ class TestUserEndpoints:
         response = client.get("/api/v1/users/me", headers=headers)
 
         assert response.status_code == 401
-        assert "Not authenticated" in response.json()["detail"]
+        assert "Not authenticated" in response.json()["error"]["message"]

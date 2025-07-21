@@ -106,21 +106,22 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
         details = getattr(exc, "error_details", {})
 
         # Create appropriate error detail based on type
+        custom_error_detail: ErrorDetail
         if error_type == ErrorType.AUTHENTICATION_ERROR:
-            error_detail = AuthenticationErrorDetail(
+            custom_error_detail = AuthenticationErrorDetail(
                 message=exc.detail,
                 code=error_code,
                 details=details,
             )
         elif error_type == ErrorType.AUTHORIZATION_ERROR:
-            error_detail = AuthorizationErrorDetail(
+            custom_error_detail = AuthorizationErrorDetail(
                 message=exc.detail,
                 code=error_code,
                 required_permissions=details.get("required_permissions"),
                 details=details,
             )
         elif error_type == ErrorType.NOT_FOUND:
-            error_detail = ResourceErrorDetail(
+            custom_error_detail = ResourceErrorDetail(
                 message=exc.detail,
                 code=error_code,
                 resource_type=details.get("resource_type"),
@@ -128,7 +129,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
                 details=details,
             )
         elif error_type == ErrorType.CONFLICT:
-            error_detail = ConflictErrorDetail(
+            custom_error_detail = ConflictErrorDetail(
                 message=exc.detail,
                 code=error_code,
                 conflicting_field=details.get("conflicting_field"),
@@ -136,7 +137,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
                 details=details,
             )
         elif error_type == ErrorType.VALIDATION_ERROR:
-            error_detail = ValidationErrorDetail(
+            custom_error_detail = ValidationErrorDetail(
                 message=exc.detail,
                 code=error_code,
                 field=details.get("field"),
@@ -144,21 +145,22 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
                 details=details,
             )
         elif error_type == ErrorType.RATE_LIMIT_EXCEEDED:
-            error_detail = RateLimitErrorDetail(
+            custom_error_detail = RateLimitErrorDetail(
                 message=exc.detail,
                 code=error_code,
                 retry_after=details.get("retry_after"),
                 limit=details.get("limit"),
+                details=details,
             )
         elif error_type == ErrorType.INTERNAL_SERVER_ERROR:
-            error_detail = ServerErrorDetail(
+            custom_error_detail = ServerErrorDetail(
                 message=exc.detail,
                 code=error_code,
                 request_id=details.get("request_id"),
                 details=details,
             )
         else:
-            error_detail = ErrorDetail(
+            custom_error_detail = ErrorDetail(
                 type=error_type,
                 message=exc.detail,
                 code=error_code,
@@ -200,34 +202,56 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
         error_type = status_to_error_type.get(
             exc.status_code, ErrorType.INTERNAL_SERVER_ERROR
         )
-        error_code = detail_to_code.get(exc.detail, ErrorCode.INVALID_REQUEST)
+
+        # Handle case where exc.detail is a dict (not hashable)
+        if isinstance(exc.detail, dict):
+            error_code = ErrorCode.INVALID_REQUEST
+            # Convert dict to string for message field
+            message = str(exc.detail)
+            # If dict has a 'message' key, use that as the primary message
+            if "message" in exc.detail:
+                message = str(exc.detail["message"])
+        else:
+            error_code = detail_to_code.get(exc.detail, ErrorCode.INVALID_REQUEST)
+            message = exc.detail
 
         # Create appropriate error detail based on type
+        error_detail: ErrorDetail
         if error_type == ErrorType.AUTHENTICATION_ERROR:
             error_detail = AuthenticationErrorDetail(
-                message=exc.detail,
+                message=message,
                 code=error_code,
+                details={},
             )
         elif error_type == ErrorType.AUTHORIZATION_ERROR:
             error_detail = AuthorizationErrorDetail(
-                message=exc.detail,
+                message=message,
                 code=error_code,
+                required_permissions=None,
+                details={},
             )
         elif error_type == ErrorType.NOT_FOUND:
             error_detail = ResourceErrorDetail(
-                message=exc.detail,
+                message=message,
                 code=error_code,
+                resource_type=None,
+                resource_id=None,
+                details={},
             )
         elif error_type == ErrorType.CONFLICT:
             error_detail = ConflictErrorDetail(
-                message=exc.detail,
+                message=message,
                 code=error_code,
+                conflicting_field=None,
+                conflicting_value=None,
+                details={},
             )
         else:
             error_detail = ErrorDetail(
                 type=error_type,
-                message=exc.detail,
+                message=message,
                 code=error_code,
+                details={},
             )
 
     logger.warning(
@@ -238,7 +262,11 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
         detail=exc.detail,
     )
 
-    return create_error_response(error_detail, status_code=exc.status_code)
+    # Use the appropriate error detail variable
+    final_error_detail = (
+        custom_error_detail if "custom_error_detail" in locals() else error_detail
+    )
+    return create_error_response(final_error_detail, status_code=exc.status_code)
 
 
 async def rate_limit_exception_handler(
@@ -252,6 +280,7 @@ async def rate_limit_exception_handler(
         code=ErrorCode.RATE_LIMIT_EXCEEDED,
         retry_after=getattr(exc, "retry_after", 60),
         limit=getattr(exc, "limit", None),
+        details={},
     )
 
     logger.warning(
@@ -289,6 +318,8 @@ async def integrity_error_handler(
     error_detail = ConflictErrorDetail(
         message=message,
         code=error_code,
+        conflicting_field=None,
+        conflicting_value=None,
         details={"database_error": error_message},
     )
 

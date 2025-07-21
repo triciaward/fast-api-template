@@ -38,7 +38,7 @@ class TestAuthEndpoints:
         response = client.post("/api/v1/auth/register", json=test_user_data)
 
         assert response.status_code == 400
-        assert "Email already registered" in response.json()["detail"]
+        assert "Email already registered" in response.json()["error"]["message"]
 
     def test_register_user_duplicate_username(
         self,
@@ -58,7 +58,7 @@ class TestAuthEndpoints:
         response = client.post("/api/v1/auth/register", json=duplicate_username_data)
 
         assert response.status_code == 400
-        assert "Username already taken" in response.json()["detail"]
+        assert "Username already taken" in response.json()["error"]["message"]
 
     def test_register_user_invalid_email(
         self, client: TestClient, test_user_data: dict[str, str]
@@ -132,7 +132,7 @@ class TestAuthEndpoints:
         response = client.post("/api/v1/auth/login", data=login_data)
 
         assert response.status_code == 401
-        assert "Invalid email or password" in response.json()["detail"]
+        assert "Invalid email or password" in response.json()["error"]["message"]
 
     def test_login_wrong_email(
         self, client: TestClient, test_user_data: dict[str, str]
@@ -151,7 +151,7 @@ class TestAuthEndpoints:
         response = client.post("/api/v1/auth/login", data=login_data)
 
         assert response.status_code == 401
-        assert "Invalid email or password" in response.json()["detail"]
+        assert "Invalid email or password" in response.json()["error"]["message"]
 
     def test_login_nonexistent_user(self, client: TestClient) -> None:
         """Test login for non-existent user."""
@@ -160,7 +160,7 @@ class TestAuthEndpoints:
         response = client.post("/api/v1/auth/login", data=login_data)
 
         assert response.status_code == 401
-        assert "Invalid email or password" in response.json()["detail"]
+        assert "Invalid email or password" in response.json()["error"]["message"]
 
     def test_login_missing_credentials(self, client: TestClient) -> None:
         """Test login with missing credentials."""
@@ -186,4 +186,7 @@ class TestAuthEndpoints:
         response = client.post("/api/v1/auth/login", data=login_data)
 
         assert response.status_code == 401
-        assert "Please verify your email before logging in" in response.json()["detail"]
+        assert (
+            "Please verify your email before logging in"
+            in response.json()["error"]["message"]
+        )

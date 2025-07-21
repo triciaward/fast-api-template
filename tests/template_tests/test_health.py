@@ -64,11 +64,12 @@ class TestHealthEndpoints:
             assert components["application"]["ready"] is True
         else:
             # Check error response structure
-            assert "detail" in data
-            detail = data["detail"]
-            assert detail["ready"] is False
-            assert "Service not ready" in detail["message"]
-            assert "components" in detail
+            assert "error" in data
+            error = data["error"]
+            assert "message" in error
+            assert "Service not ready" in error["message"]
+            assert "type" in error
+            assert "code" in error
 
     def test_liveness_check(self, client: TestClient) -> None:
         """Test the liveness check endpoint."""
