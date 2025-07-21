@@ -78,9 +78,6 @@ class TestConnectionPooling:
         assert sync_engine is not None
         assert sync_engine.pool is not None
 
-    @pytest.mark.skipif(
-        RUNNING_IN_CI, reason="Temporarily skipping async tests in CI to debug hang"
-    )
     @pytest.mark.asyncio
     async def test_async_session_pool_usage(self, db_session: AsyncSession) -> None:
         """Test that async sessions properly use the connection pool."""
@@ -142,9 +139,6 @@ class TestConnectionPooling:
         if RUNNING_IN_CI:
             print("CI DEBUG: test_sync_session_pool_usage completed")
 
-    @pytest.mark.skipif(
-        RUNNING_IN_CI, reason="Temporarily skipping async tests in CI to debug hang"
-    )
     @pytest.mark.asyncio
     async def test_concurrent_async_connections(self) -> None:
         """Test handling of concurrent async connections."""
@@ -212,9 +206,6 @@ class TestConnectionPooling:
             assert sync_engine.pool.checkedout() >= 0
             assert sync_engine.pool.checkedin() >= 0
 
-    @pytest.mark.skipif(
-        RUNNING_IN_CI, reason="Temporarily skipping async tests in CI to debug hang"
-    )
     @pytest.mark.asyncio
     async def test_get_db_dependency(self) -> None:
         """Test the get_db dependency function."""
@@ -279,9 +270,6 @@ class TestConnectionPooling:
         if hasattr(sync_engine.pool, "_pre_ping"):
             assert sync_engine.pool._pre_ping == settings.DB_POOL_PRE_PING
 
-    @pytest.mark.skipif(
-        RUNNING_IN_CI, reason="Temporarily skipping async tests in CI to debug hang"
-    )
     @pytest.mark.asyncio
     async def test_connection_health_check(self, db_session: AsyncSession) -> None:
         """Test that connection health checks work properly."""
@@ -332,9 +320,6 @@ class TestConnectionPooling:
                 else:
                     assert isinstance(attr_value, int)
 
-    @pytest.mark.skipif(
-        RUNNING_IN_CI, reason="Temporarily skipping async tests in CI to debug hang"
-    )
     @pytest.mark.asyncio
     async def test_session_cleanup_on_exception(self) -> None:
         """Test that sessions are properly cleaned up even on exceptions."""
