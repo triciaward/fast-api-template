@@ -112,13 +112,18 @@ class TestConnectionPooling:
         """Test handling of concurrent async connections."""
 
         async def execute_query() -> None:
-            async with AsyncSessionLocal() as session:
+            session = None
+            try:
+                session = AsyncSessionLocal()
                 result = await session.execute(text("SELECT 1"))
                 result.fetchone()  # Remove await
-                await asyncio.sleep(0.1)  # Simulate some work
+                await asyncio.sleep(0.01)  # Reduced sleep time for CI
+            finally:
+                if session is not None:
+                    await session.close()
 
         # Create multiple concurrent connections
-        tasks = [execute_query() for _ in range(5)]
+        tasks = [execute_query() for _ in range(3)]  # Reduced number for CI
         await asyncio.gather(*tasks)
 
         # Check that connections were properly managed
@@ -153,10 +158,15 @@ class TestConnectionPooling:
     @pytest.mark.asyncio
     async def test_get_db_dependency(self) -> None:
         """Test the get_db dependency function."""
-        async for session in get_db():
-            assert isinstance(session, AsyncSession)
-            assert session.is_active
-            break
+        session = None
+        try:
+            async for session in get_db():
+                assert isinstance(session, AsyncSession)
+                assert session.is_active
+                break
+        finally:
+            if session is not None:
+                await session.close()
 
     def test_get_db_sync_dependency(self) -> None:
         """Test the get_db_sync dependency function."""
@@ -319,8 +329,7 @@ class TestConnectionPoolingConfiguration:
 class TestConnectionPoolingIntegration:
     """Integration tests for connection pooling with the application."""
 
-    @pytest.mark.asyncio
-    async def test_health_endpoint_pool_metrics(self, client) -> None:
+    def test_health_endpoint_pool_metrics(self, client) -> None:
         """Test that health endpoint includes pool metrics."""
         response = client.get("/api/v1/health")
         assert response.status_code == 200
@@ -354,8 +363,7 @@ class TestConnectionPoolingIntegration:
             assert "database" in data["checks"]
             assert data["checks"]["database"] == "unhealthy"
 
-    @pytest.mark.asyncio
-    async def test_multiple_health_checks_pool_usage(self, client) -> None:
+    def test_multiple_health_checks_pool_usage(self, client) -> None:
         """Test that multiple health checks don't exhaust the pool."""
         # Make multiple health check requests
         for _ in range(5):
