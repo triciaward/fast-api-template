@@ -3,6 +3,7 @@ Unit tests for database connection pooling functionality.
 """
 
 import asyncio
+import os
 
 import pytest
 from sqlalchemy import text
@@ -18,6 +19,9 @@ from app.database.database import (
     get_db_sync,
     sync_engine,
 )
+
+# Debug flag for CI
+RUNNING_IN_CI = os.getenv("RUNNING_IN_CI", "false").lower() == "true"
 
 
 class TestConnectionPooling:
@@ -110,26 +114,42 @@ class TestConnectionPooling:
     @pytest.mark.asyncio
     async def test_concurrent_async_connections(self) -> None:
         """Test handling of concurrent async connections."""
+        if RUNNING_IN_CI:
+            print("CI DEBUG: Starting test_concurrent_async_connections")
 
         async def execute_query() -> None:
             session = None
             try:
+                if RUNNING_IN_CI:
+                    print("CI DEBUG: Creating session in execute_query")
                 session = AsyncSessionLocal()
                 result = await session.execute(text("SELECT 1"))
                 result.fetchone()  # Remove await
                 await asyncio.sleep(0.01)  # Reduced sleep time for CI
             finally:
                 if session is not None:
+                    if RUNNING_IN_CI:
+                        print("CI DEBUG: Closing session in execute_query")
                     await session.close()
 
         # Create multiple concurrent connections
+        if RUNNING_IN_CI:
+            print("CI DEBUG: Creating 3 concurrent tasks")
         tasks = [execute_query() for _ in range(3)]  # Reduced number for CI
+
+        if RUNNING_IN_CI:
+            print("CI DEBUG: Starting asyncio.gather")
         await asyncio.gather(*tasks)
+        if RUNNING_IN_CI:
+            print("CI DEBUG: asyncio.gather completed")
 
         # Check that connections were properly managed
         if hasattr(engine.pool, "checkedout") and hasattr(engine.pool, "checkedin"):
             assert engine.pool.checkedout() >= 0
             assert engine.pool.checkedin() >= 0
+
+        if RUNNING_IN_CI:
+            print("CI DEBUG: test_concurrent_async_connections completed")
 
     def test_concurrent_sync_connections(self) -> None:
         """Test handling of concurrent sync connections."""
@@ -158,15 +178,25 @@ class TestConnectionPooling:
     @pytest.mark.asyncio
     async def test_get_db_dependency(self) -> None:
         """Test the get_db dependency function."""
+        if RUNNING_IN_CI:
+            print("CI DEBUG: Starting test_get_db_dependency")
+
         session = None
         try:
+            if RUNNING_IN_CI:
+                print("CI DEBUG: Getting session from get_db")
             async for session in get_db():
                 assert isinstance(session, AsyncSession)
                 assert session.is_active
                 break
         finally:
             if session is not None:
+                if RUNNING_IN_CI:
+                    print("CI DEBUG: Closing session in test_get_db_dependency")
                 await session.close()
+
+        if RUNNING_IN_CI:
+            print("CI DEBUG: test_get_db_dependency completed")
 
     def test_get_db_sync_dependency(self) -> None:
         """Test the get_db_sync dependency function."""
@@ -262,17 +292,34 @@ class TestConnectionPooling:
     @pytest.mark.asyncio
     async def test_session_cleanup_on_exception(self) -> None:
         """Test that sessions are properly cleaned up even on exceptions."""
+        if RUNNING_IN_CI:
+            print("CI DEBUG: Starting test_session_cleanup_on_exception")
+
         session = None
         try:
+            if RUNNING_IN_CI:
+                print("CI DEBUG: Creating AsyncSessionLocal")
             session = AsyncSessionLocal()
+
+            if RUNNING_IN_CI:
+                print("CI DEBUG: Executing query")
             await session.execute(text("SELECT 1"))
+
+            if RUNNING_IN_CI:
+                print("CI DEBUG: Raising test exception")
             raise Exception("Test exception")
         except Exception:
+            if RUNNING_IN_CI:
+                print("CI DEBUG: Exception caught")
             pass
         finally:
             # Ensure session is properly closed even if exception occurs
             if session is not None:
+                if RUNNING_IN_CI:
+                    print("CI DEBUG: Closing session")
                 await session.close()
+                if RUNNING_IN_CI:
+                    print("CI DEBUG: Session closed")
 
         # Check that connection was returned to pool despite exception
         # Note: In test environment, connection cleanup might be delayed
@@ -282,13 +329,27 @@ class TestConnectionPooling:
         if hasattr(engine.pool, "checkedin"):
             assert engine.pool.checkedin() >= 0
 
+        if RUNNING_IN_CI:
+            print("CI DEBUG: test_session_cleanup_on_exception completed")
+
     def test_sync_session_cleanup_on_exception(self) -> None:
         """Test that sync sessions are properly cleaned up even on exceptions."""
+        if RUNNING_IN_CI:
+            print("CI DEBUG: Starting test_sync_session_cleanup_on_exception")
+
         try:
+            if RUNNING_IN_CI:
+                print("CI DEBUG: Creating sync session")
             with SyncSessionLocal() as session:
+                if RUNNING_IN_CI:
+                    print("CI DEBUG: Executing sync query")
                 session.execute(text("SELECT 1"))
+                if RUNNING_IN_CI:
+                    print("CI DEBUG: Raising sync test exception")
                 raise Exception("Test exception")
         except Exception:
+            if RUNNING_IN_CI:
+                print("CI DEBUG: Sync exception caught")
             pass
 
         # Check that connection was returned to pool despite exception
@@ -297,6 +358,9 @@ class TestConnectionPooling:
             assert sync_engine.pool.checkedout() >= 0
         if hasattr(sync_engine.pool, "checkedin"):
             assert sync_engine.pool.checkedin() >= 0
+
+        if RUNNING_IN_CI:
+            print("CI DEBUG: test_sync_session_cleanup_on_exception completed")
 
 
 class TestConnectionPoolingConfiguration:
