@@ -1,4 +1,18 @@
 # Export all user schemas
+# Export error schemas
+from .errors import (
+    AuthenticationErrorDetail,
+    AuthorizationErrorDetail,
+    ConflictErrorDetail,
+    ErrorCode,
+    ErrorDetail,
+    ErrorResponse,
+    ErrorType,
+    RateLimitErrorDetail,
+    ResourceErrorDetail,
+    ServerErrorDetail,
+    ValidationErrorDetail,
+)
 from .user import (
     EmailVerificationRequest,
     EmailVerificationResponse,
@@ -27,4 +41,16 @@ __all__ = [
     "UserResponse",
     "VerifyEmailRequest",
     "VerifyEmailResponse",
+    # Error schemas
+    "AuthenticationErrorDetail",
+    "AuthorizationErrorDetail",
+    "ConflictErrorDetail",
+    "ErrorCode",
+    "ErrorDetail",
+    "ErrorResponse",
+    "ErrorType",
+    "RateLimitErrorDetail",
+    "ResourceErrorDetail",
+    "ServerErrorDetail",
+    "ValidationErrorDetail",
 ]

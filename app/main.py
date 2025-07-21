@@ -10,6 +10,7 @@ from app.api.api_v1.api import create_api_router
 from app.bootstrap_superuser import bootstrap_superuser
 from app.core.config import settings
 from app.core.cors import configure_cors
+from app.core.error_handlers import register_error_handlers
 from app.core.logging_config import get_app_logger, setup_logging
 from app.database.database import engine, sync_engine
 from app.models import models
@@ -88,6 +89,10 @@ if settings.ENABLE_RATE_LIMITING:
     from app.services.rate_limiter import setup_rate_limiting
 
     setup_rate_limiting(app)
+
+# Register error handlers for standardized error responses
+
+register_error_handlers(app)
 
 # Include API router dynamically based on settings
 app.include_router(create_api_router(), prefix=settings.API_V1_STR)
