@@ -103,9 +103,17 @@ TestingSyncSessionLocal = sessionmaker(
 @pytest.fixture(scope="session")
 def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     """Create an instance of the default event loop for the test session."""
+    if RUNNING_IN_CI:
+        print("CI DEBUG: event_loop fixture started")
     loop = asyncio.get_event_loop_policy().new_event_loop()
+    if RUNNING_IN_CI:
+        print("CI DEBUG: event_loop created")
     yield loop
+    if RUNNING_IN_CI:
+        print("CI DEBUG: event_loop fixture cleanup")
     loop.close()
+    if RUNNING_IN_CI:
+        print("CI DEBUG: event_loop closed")
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -178,17 +186,27 @@ async def db_session(setup_test_db: None) -> AsyncGenerator[AsyncSession, None]:
 @pytest.fixture(scope="session")
 def setup_sync_test_db() -> Generator[None, None, None]:
     """Setup test database tables for sync operations."""
+    if RUNNING_IN_CI:
+        print("CI DEBUG: setup_sync_test_db fixture started")
     # Create tables for sync engine
     Base.metadata.create_all(bind=sync_test_engine)
+    if RUNNING_IN_CI:
+        print("CI DEBUG: setup_sync_test_db tables created")
     yield
+    if RUNNING_IN_CI:
+        print("CI DEBUG: setup_sync_test_db cleanup started")
     # Drop tables for sync engine
     Base.metadata.drop_all(bind=sync_test_engine)
     sync_test_engine.dispose()
+    if RUNNING_IN_CI:
+        print("CI DEBUG: setup_sync_test_db cleanup completed")
 
 
 @pytest.fixture
 def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
     """Create a test client with synchronous database session override."""
+    if RUNNING_IN_CI:
+        print("CI DEBUG: client fixture started")
 
     def override_get_db_sync() -> Generator:
         """Override to use our test-specific sync session."""
@@ -200,6 +218,8 @@ def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
 
     # Override the database dependency with our test-specific sync version
     app.dependency_overrides[get_db] = override_get_db_sync
+    if RUNNING_IN_CI:
+        print("CI DEBUG: client fixture dependency overrides set")
 
     # Clean the database before each test - more robust cleanup
     with sync_test_engine.begin() as conn:
