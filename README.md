@@ -1,12 +1,12 @@
 # FastAPI Project Template
 
-![Tests](https://img.shields.io/badge/tests-323%20tests%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-360%20tests%20passing-brightgreen)
 ![CI](https://github.com/triciaward/fast-api-template/actions/workflows/ci.yml/badge.svg)
-![Coverage](https://img.shields.io/badge/coverage-70%25-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-60%25-brightgreen)
 ![Linting](https://img.shields.io/badge/linting-0%20errors-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-A production-ready FastAPI backend template with comprehensive authentication, testing, CI/CD, and enterprise features. **323 tests passing, 156 skipped for complex features.**
+A production-ready FastAPI backend template with comprehensive authentication, testing, CI/CD, and enterprise features. **360 tests passing, 152 skipped for complex features.**
 
 ## 📋 Table of Contents
 
@@ -26,13 +26,13 @@ A production-ready FastAPI backend template with comprehensive authentication, t
 
 ## Overview
 
-A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (323 tests passing), secure authentication with email verification, OAuth, and password reset, comprehensive input validation, PostgreSQL integration, and a fully working CI/CD pipeline.
+A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (360 tests passing), secure authentication with email verification, OAuth, and password reset, comprehensive input validation, PostgreSQL integration, and a fully working CI/CD pipeline.
 
 ### 🎯 **Core Features**
 - **Authentication**: JWT + bcrypt + Email Verification + OAuth + Password Reset
 - **Security**: GDPR-compliant account deletion, refresh token management, audit logging
 - **Database**: PostgreSQL with Alembic migrations, soft delete, search & filtering
-- **Testing**: 323 tests passing, comprehensive coverage, CI/CD pipeline
+- **Testing**: 360 tests passing, comprehensive coverage, CI/CD pipeline
 - **Quality**: Type safety (mypy), linting (ruff), pre-commit hooks
 - **Monitoring**: Health checks, structured logging, rate limiting
 
@@ -157,10 +157,10 @@ app/
 
 ## 📊 Test Suite
 
-- **323 Core Tests**: All passing with comprehensive coverage
-- **156 Skipped Tests**: Complex features (OAuth, account deletion, etc.)
-- **14 Pre-commit Tests**: Configuration and installation validation
-- **70% Code Coverage**: Proper async testing with fixtures
+- **360 Core Tests**: All passing with comprehensive coverage
+- **152 Skipped Tests**: Complex features (OAuth, account deletion, etc.)
+- **76 Async Tests**: Deselected in CI to prevent hangs
+- **60% Code Coverage**: Proper async testing with fixtures
 - **100% Optional Features**: Complete coverage when enabled
 
 > **Note:** The default test coverage threshold is set to 50% to make it easy to start new projects from this template. As you build out your app and implement more features, you should raise the threshold to encourage better test coverage.

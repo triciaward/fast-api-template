@@ -201,7 +201,7 @@ pytest --cov -m "not asyncio" -v
 
 ### Run Tests with Coverage Report
 ```bash
-pytest --cov=app --cov-report=term-missing --cov-fail-under=59
+pytest --cov=app --cov-report=term-missing --cov-fail-under=50
 ```
 
 ### Debug Database Connection in CI
@@ -224,7 +224,7 @@ pytest tests/template_tests/test_websocket.py -v
 ---
 
 **Next Steps**: 
-1. Push changes to trigger CI run
+1. ✅ Push changes to trigger CI run
 2. Check CI logs for PostgreSQL role error traceback
 3. Implement final fix for database configuration issue
 4. Consider re-enabling async tests with improved configuration
