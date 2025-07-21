@@ -76,6 +76,11 @@ class UserResponse(UserBase):
     is_verified: bool
     date_created: datetime
     oauth_provider: Optional[str] = None
+    # Soft delete fields
+    is_deleted: bool = False
+    deleted_at: Optional[datetime] = None
+    deleted_by: Optional[uuid.UUID] = None
+    deletion_reason: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -310,3 +315,67 @@ class UserSearchResponse(BaseModel):
     filters_applied: list[str] = Field(default_factory=list)
     sort_field: Optional[str] = None
     sort_order: str = "asc"
+
+
+class DeletedUserResponse(UserBase):
+    """Response model for soft-deleted users."""
+
+    id: uuid.UUID
+    is_superuser: bool
+    is_verified: bool
+    date_created: datetime
+    oauth_provider: Optional[str] = None
+    # Soft delete fields
+    is_deleted: bool = True
+    deleted_at: datetime
+    deleted_by: Optional[uuid.UUID] = None
+    deletion_reason: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SoftDeleteRequest(BaseModel):
+    """Request model for soft deleting a user."""
+
+    reason: Optional[str] = Field(
+        None, max_length=500, description="Optional reason for deletion"
+    )
+
+
+class SoftDeleteResponse(BaseModel):
+    """Response model for soft delete operations."""
+
+    message: str
+    user_id: uuid.UUID
+    deleted_at: datetime
+    deleted_by: Optional[uuid.UUID] = None
+    reason: Optional[str] = None
+
+
+class RestoreUserResponse(BaseModel):
+    """Response model for user restoration."""
+
+    message: str
+    user_id: uuid.UUID
+    restored_at: datetime
+
+
+class DeletedUserListResponse(PaginatedResponse[DeletedUserResponse]):
+    """Paginated response for deleted user list."""
+
+    pass
+
+
+class DeletedUserSearchResponse(BaseModel):
+    """Enhanced response for deleted user search with metadata."""
+
+    users: list[DeletedUserResponse]
+    total_count: int
+    page: int
+    per_page: int
+    total_pages: int
+    has_next: bool
+    has_prev: bool
+    filters_applied: list[str] = Field(default_factory=list)
+    sort_field: Optional[str] = None
+    sort_order: str = "desc"

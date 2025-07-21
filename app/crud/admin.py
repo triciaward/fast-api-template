@@ -5,7 +5,6 @@ This module provides admin-only CRUD operations for managing users and other res
 All operations require superuser privileges.
 """
 
-from datetime import datetime
 from typing import Any, Optional, Union
 from uuid import UUID
 
@@ -14,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.admin import BaseAdminCRUD, DBSession
 from app.core.security import get_password_hash
+from app.crud import user as crud_user
 from app.models.models import User
 from app.schemas.admin import AdminUserUpdate
 from app.schemas.user import UserCreate, UserResponse
@@ -260,23 +260,14 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         Returns:
             bool: True if deleted, False if not found
         """
-        user = await self.get(db, user_id)
-        if not user:
-            return False
-
-        # Mark for immediate deletion
-        user.is_deleted = True  # type: ignore
-        user.deletion_confirmed_at = datetime.utcnow()  # type: ignore
-        user.deletion_scheduled_for = datetime.utcnow()  # type: ignore
-
-        db.add(user)
-
-        if isinstance(db, AsyncSession):
-            await db.commit()
-        else:
-            db.commit()
-
-        return True
+        # Use the soft delete function with admin context
+        success = await crud_user.soft_delete_user(
+            db=db,
+            user_id=str(user_id),
+            deleted_by=None,  # Admin deletion
+            reason="Admin force deletion",
+        )
+        return success
 
     async def get_user_statistics(self, db: DBSession) -> dict:
         """

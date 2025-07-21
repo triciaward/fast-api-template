@@ -30,7 +30,7 @@ This template powers several production applications:
 - 📦 PostgreSQL Database Integration with Alembic Migrations
 - 🌐 CORS Support with Configurable Origins
 - 🐳 Docker Support with Multi-Service Composition
-- 🧪 Comprehensive Testing (477 tests with 100% success rate)
+- 🧪 Comprehensive Testing (474+ tests with 100% success rate)
 - 📝 Alembic Migrations with Version Control
 - 🔍 Linting and Code Quality (ruff)
 - ✅ Type Safety (mypy + pyright)
@@ -59,6 +59,7 @@ This template powers several production applications:
 - 📈 CI/CD Pipeline with PostgreSQL Integration
 - 📊 **Audit Logging System** (comprehensive user activity tracking with database persistence and real-time logging)
 - 🔍 **Search & Filter Utility** (comprehensive text search, field filtering, and sorting with SQL injection protection)
+- 🗑️ **Soft Delete System** (comprehensive soft delete functionality with audit trails, restoration, and filtering)
 
 ## ✅ Test Suite
 
@@ -98,42 +99,104 @@ The template includes a comprehensive **audit logging system** that tracks user 
 - **CRUD Operations**: Async and sync functions for log creation and querying
 - **Service Layer**: Reusable `log_event()` function with convenience methods
 - **Auth Integration**: Seamlessly integrated into all authentication endpoints
-- **Testing**: 5 comprehensive tests covering all functionality
+
+## 🗑️ Soft Delete System
+
+The template includes a comprehensive **soft delete system** that allows for safe deletion of records while maintaining data integrity and audit trails.
+
+### 🔍 What Gets Soft Deleted
+- **User Records**: Complete user accounts with all associated data
+- **Audit Trails**: Full deletion history with who deleted what and when
+- **Restoration Support**: Ability to restore soft-deleted records
+- **Filtered Queries**: Automatic exclusion of deleted records from normal operations
+
+### 🏗️ Architecture
+- **Database Mixin**: `SoftDeleteMixin` provides reusable soft delete functionality
+- **Audit Fields**: `is_deleted`, `deleted_at`, `deleted_by`, `deletion_reason`
+- **Query Methods**: `get_active_query()`, `get_deleted_query()`, `get_all_query()`
+- **CRUD Integration**: Seamless integration with existing CRUD operations
+
+### 📋 Key Features
+- **Safe Deletion**: Records are marked as deleted but not physically removed
+- **Audit Trail**: Tracks who deleted the record, when, and why
+- **Restoration**: Ability to restore soft-deleted records
+- **Filtered Access**: Normal queries automatically exclude deleted records
+- **Admin Access**: Special functions to access deleted records for admin purposes
+- **Search & Filter**: Advanced search and filtering for deleted records
+
+### 🔧 Implementation
+- **Model Mixin**: `SoftDeleteMixin` with `soft_delete()` and `restore()` methods
+- **CRUD Functions**: `soft_delete_user()`, `restore_user()`, `get_deleted_users()`
+- **API Endpoints**: `/users/{user_id}/soft`, `/users/{user_id}/restore`, `/users/deleted`
+- **Search Integration**: Full integration with search and filter system
+- **Admin Support**: Admin CRUD functions updated to use soft delete
+
+### 🚀 API Endpoints
+- `DELETE /api/v1/users/{user_id}/soft` - Soft delete a user
+- `POST /api/v1/users/{user_id}/restore` - Restore a soft-deleted user
+- `GET /api/v1/users/deleted` - List soft-deleted users with filtering
+- `GET /api/v1/users/deleted/search` - Enhanced search for deleted users
+
+### 📝 Migration Notes
+The soft delete functionality was implemented with proper database migrations. The current migration state includes:
+
+**Migration Files:**
+- `d5efb0f5bf2f_add_soft_delete_fields.py` - Latest migration with proper revision ID
+- `c1da97bbb9a3_add_audit_logs_table.py` - Audit logs table
+- `add_refresh_tokens_table.py` - Refresh tokens (descriptive revision ID)
+- `add_account_deletion_fields.py` - Account deletion fields (descriptive revision ID)
+- `add_password_reset_fields.py` - Password reset fields (descriptive revision ID)
+- `8fc34fade26c_merge_account_deletion_and_password_.py` - Merge migration
+- `2b2d3cd4001a_add_oauth_and_email_verification_fields.py` - OAuth fields
+- `baa1c45958ec_add_is_superuser_field_to_user_model.py` - Superuser field
+- `157866a0839e_create_users_table.py` - Base users table
+
+**Migration Best Practices:**
+- ✅ **Always use**: `alembic revision --autogenerate -m "description"` for new migrations
+- ✅ **Proper revision IDs**: Use 12-character hexadecimal IDs (like `2ff681e2a828`)
+- ⚠️ **Avoid**: Descriptive revision IDs (like `add_soft_delete_fields`) - these can cause issues
+- ✅ **Database sync**: Current database is fully in sync with all migrations applied
+- ✅ **Testing**: All migrations tested and verified to work correctly
+
+**Current Status:**
+- Database is fully in sync with migration `d5efb0f5bf2f` (head)
+- All soft delete functionality working correctly
+- Migration chain is functional despite some descriptive revision IDs
+- **Testing**: 18 comprehensive tests covering all functionality
 
 ### 📊 Usage Examples
 ```python
-# Log a login attempt
-await log_login_attempt(
-    db=db,
-    request=request,
-    user=user,
-    success=True,
-    oauth_provider="google"
+# Soft delete a user
+success = await crud_user.soft_delete_user(
+    db=db, 
+    user_id=user_id, 
+    deleted_by=current_user.id, 
+    reason="User requested deletion"
 )
 
-# Log a password change
-await log_password_change(
+# Restore a user
+success = await crud_user.restore_user(db=db, user_id=user_id)
+
+# Get deleted users with filtering
+deleted_users = await crud_user.get_deleted_users(
     db=db,
-    request=request,
-    user=user,
-    change_type="password_change"
+    deleted_by=admin_id,
+    deletion_reason="spam",
+    deleted_after=datetime(2024, 1, 1)
 )
 
-# Log account deletion
-await log_account_deletion(
-    db=db,
-    request=request,
-    user=user,
-    deletion_stage="deletion_requested"
-)
+# Use the mixin directly
+user.soft_delete(deleted_by=admin_id, reason="Policy violation")
+user.restore()
 ```
 
 ### 🎯 Benefits
-- **Security Monitoring**: Track suspicious login patterns and failed attempts
-- **Compliance**: Meet regulatory requirements for user activity logging
-- **Debugging**: Correlate user actions with system issues
-- **Analytics**: Understand user behavior and system usage patterns
-- **Forensics**: Investigate security incidents with detailed audit trails
+- **Data Safety**: Records are preserved while being hidden from normal operations
+- **Audit Compliance**: Complete audit trail of who deleted what and when
+- **Recovery**: Ability to restore accidentally deleted records
+- **Data Integrity**: Maintains referential integrity while allowing "deletion"
+- **Admin Control**: Full administrative control over deleted records
+- **Search & Filter**: Advanced capabilities for managing deleted data
 
 ## 🔍 Search & Filter Utility
 
@@ -170,6 +233,12 @@ The template includes a comprehensive **search and filter utility** that provide
 - **API Endpoints**: Applied to user listing endpoint with comprehensive query parameters
 - **Validation**: Automatic field validation and parameter sanitization
 - **Testing**: 15 comprehensive tests covering all functionality
+
+### 🛠️ Convenience Functions
+- **`create_text_search(query: str, fields: list[str], operator: SearchOperator = SearchOperator.CONTAINS, case_sensitive: bool = False, use_full_text_search: bool = False) -> TextSearchFilter`**: Create text search configuration
+- **`create_field_filter(field: str, operator: FilterOperator, value: Any, values: Optional[list[Any]] = None) -> FieldFilter`**: Create field filter configuration
+- **`create_user_search_filters(search_query: Optional[str] = None, is_verified: Optional[bool] = None, oauth_provider: Optional[str] = None, sort_by: Optional[str] = None, sort_order: str = "asc") -> SearchFilterConfig`**: Create complete user search configuration
+- **`UserSearchParams.to_search_config() -> SearchFilterConfig`**: Convert FastAPI query parameters to search configuration
 
 ### 📊 Usage Examples
 
@@ -294,6 +363,19 @@ async def list_users(
 - **Safety**: SQL injection protection and input validation
 - **Flexibility**: Support for any SQLAlchemy model
 - **Consistency**: Standardized search and filter patterns across endpoints
+
+### 📈 Performance Optimization
+**Full-Text Search Indexing**: To optimize full-text search performance, create GIN indexes on relevant fields:
+```sql
+-- Example: Create full-text search index for username and email
+CREATE INDEX idx_users_fulltext ON users USING GIN (to_tsvector('english', username || ' ' || email));
+
+-- For individual fields
+CREATE INDEX idx_users_username_fulltext ON users USING GIN (to_tsvector('english', username));
+CREATE INDEX idx_users_email_fulltext ON users USING GIN (to_tsvector('english', email));
+```
+
+**System Name**: This search and filter utility is informally referred to as **SearchCore** or **FilterKit** for easy referencing in discussions and documentation.
 
 ## 📄 Pagination System
 
@@ -1220,7 +1302,7 @@ The project includes a comprehensive GitHub Actions CI/CD pipeline that runs on 
 - **Fast Execution**: Complete pipeline completes in under 2 minutes
 - **Environment Isolation**: Proper test database setup and cleanup
 - **Coverage Reporting**: Test coverage tracking and reporting
-- **Perfect Success Rate**: All 477 tests pass consistently
+- **Perfect Success Rate**: All 474+ tests pass consistently
 - **🔄 Pre-commit Alignment**: CI uses the same tools as local pre-commit hooks
 
 ### Local Development

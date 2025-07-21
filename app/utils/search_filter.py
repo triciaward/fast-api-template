@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 from sqlalchemy import and_, func, or_, select
@@ -353,6 +354,68 @@ def create_user_search_filters(
     )
 
 
+def create_deleted_user_search_filters(
+    deleted_by: Optional[UUID] = None,
+    deletion_reason: Optional[str] = None,
+    deleted_after: Optional[datetime] = None,
+    deleted_before: Optional[datetime] = None,
+    sort_by: Optional[str] = None,
+    sort_order: str = "desc",
+) -> SearchFilterConfig:
+    """
+    Create a search filter configuration for soft-deleted users.
+
+    Args:
+        deleted_by: Filter by user who performed the deletion
+        deletion_reason: Filter by deletion reason
+        deleted_after: Filter users deleted after this date
+        deleted_before: Filter users deleted before this date
+        sort_by: Field to sort by
+        sort_order: Sort order (asc or desc)
+
+    Returns:
+        SearchFilterConfig: Complete search and filter configuration
+    """
+    filters = []
+
+    # Always filter for deleted users
+    filters.append(create_field_filter("is_deleted", FilterOperator.EQUALS, True))
+
+    # Add text search for deletion reason if provided
+    text_search = None
+    if deletion_reason:
+        text_search = create_text_search(
+            query=deletion_reason,
+            fields=["deletion_reason"],
+            operator=SearchOperator.CONTAINS,
+        )
+
+    # Add deleted_by filter
+    if deleted_by is not None:
+        filters.append(
+            create_field_filter("deleted_by", FilterOperator.EQUALS, deleted_by)
+        )
+
+    # Add deletion date range filters
+    if deleted_after:
+        filters.append(
+            create_field_filter(
+                "deleted_at", FilterOperator.GREATER_THAN_EQUAL, deleted_after
+            )
+        )
+
+    if deleted_before:
+        filters.append(
+            create_field_filter(
+                "deleted_at", FilterOperator.LESS_THAN_EQUAL, deleted_before
+            )
+        )
+
+    return SearchFilterConfig(
+        text_search=text_search, filters=filters, sort_by=sort_by, sort_order=sort_order
+    )
+
+
 # Query parameter models for FastAPI endpoints
 class UserSearchParams(BaseModel):
     """Query parameters for user search endpoint."""
@@ -391,6 +454,36 @@ class UserSearchParams(BaseModel):
             is_deleted=self.is_deleted,
             date_created_after=self.date_created_after,
             date_created_before=self.date_created_before,
+            sort_by=self.sort_by,
+            sort_order=self.sort_order,
+        )
+
+
+class DeletedUserSearchParams(BaseModel):
+    """Query parameters for deleted user search endpoint."""
+
+    deleted_by: Optional[UUID] = Field(
+        None, description="Filter by user who performed the deletion"
+    )
+    deletion_reason: Optional[str] = Field(
+        None, description="Search in deletion reason field"
+    )
+    deleted_after: Optional[datetime] = Field(
+        None, description="Filter users deleted after this date"
+    )
+    deleted_before: Optional[datetime] = Field(
+        None, description="Filter users deleted before this date"
+    )
+    sort_by: Optional[str] = Field(None, description="Field to sort by")
+    sort_order: str = Field(default="desc", description="Sort order (asc or desc)")
+
+    def to_search_config(self) -> SearchFilterConfig:
+        """Convert search parameters to search configuration."""
+        return create_deleted_user_search_filters(
+            deleted_by=self.deleted_by,
+            deletion_reason=self.deletion_reason,
+            deleted_after=self.deleted_after,
+            deleted_before=self.deleted_before,
             sort_by=self.sort_by,
             sort_order=self.sort_order,
         )
