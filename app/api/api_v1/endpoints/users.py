@@ -114,7 +114,7 @@ async def get_api_key_user(
         db=db,
         request=request,
         api_key_id=str(db_api_key.id),
-        key_label=db_api_key.label,
+        key_label=getattr(db_api_key, "label", ""),
         user_id=str(db_api_key.user_id) if db_api_key.user_id else None,
     )
 
