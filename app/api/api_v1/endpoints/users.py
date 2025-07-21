@@ -107,10 +107,10 @@ async def get_api_key_user(
 
     # Return API key user object
     return APIKeyUser(
-        id=db_api_key.id,
-        scopes=db_api_key.scopes,
-        user_id=db_api_key.user_id,
-        key_id=db_api_key.id,
+        id=db_api_key.id,  # type: ignore
+        scopes=db_api_key.scopes,  # type: ignore
+        user_id=db_api_key.user_id,  # type: ignore
+        key_id=db_api_key.id,  # type: ignore
     )
 
 

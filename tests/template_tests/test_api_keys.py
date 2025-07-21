@@ -104,7 +104,7 @@ class TestAPIKeyCRUD:
 
         # Get by hash - use the hash that was actually stored
         found_key = crud_api_key.get_api_key_by_hash_sync(
-            sync_db_session, api_key.key_hash
+            sync_db_session, api_key.key_hash  # type: ignore
         )
 
         assert found_key is not None
@@ -269,7 +269,7 @@ class TestAPIKeyCRUD:
         )
 
         # Deactivate the key
-        api_key.is_active = False
+        api_key.is_active = False  # type: ignore
         sync_db_session.commit()
 
         # Should find inactive key (for status checking)
@@ -388,7 +388,7 @@ class TestAPIKeyAuthentication:
         )
 
         # Deactivate the key
-        api_key.is_active = False
+        api_key.is_active = False  # type: ignore
         sync_db_session.commit()
 
         response = client.get(
@@ -843,7 +843,7 @@ class TestAPIKeyIntegration:
         )
 
         # Deactivate the key
-        api_key.is_active = False
+        api_key.is_active = False  # type: ignore
         sync_db_session.commit()
 
         # Test that inactive key is rejected

@@ -94,7 +94,8 @@ async def verify_api_key_in_db(db: DBSession, raw_key: str) -> Optional[APIKey]:
 
     # Check each key to see if the raw key matches
     for api_key in api_keys:
-        if verify_api_key(raw_key, api_key.key_hash):
+        assert api_key.key_hash is not None  # type: ignore
+        if verify_api_key(raw_key, api_key.key_hash):  # type: ignore
             # Found the key, now check if it's active and not expired
             if not api_key.is_active:
                 # Return the key so the caller can check is_active and raise appropriate error
@@ -126,7 +127,7 @@ async def get_user_api_keys(
             .offset(skip)
             .limit(limit)
         )
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def count_user_api_keys(db: DBSession, user_id: str) -> int:
@@ -161,7 +162,6 @@ async def get_api_key_by_id(
         result = await db.execute(query)
     else:
         result = db.execute(query)
-
     return result.scalar_one_or_none()
 
 
@@ -173,8 +173,7 @@ async def deactivate_api_key(
     if not api_key:
         return False
 
-    api_key.is_active = False
-
+    api_key.is_active = False  # type: ignore
     if isinstance(db, AsyncSession):
         await db.commit()
     else:
@@ -196,8 +195,8 @@ async def rotate_api_key(
     new_key_hash = hash_api_key(new_raw_key)
 
     # Update the existing key
-    api_key.key_hash = new_key_hash
-    api_key.is_active = True
+    api_key.key_hash = new_key_hash  # type: ignore
+    api_key.is_active = True  # type: ignore
 
     if isinstance(db, AsyncSession):
         await db.commit()
@@ -269,7 +268,8 @@ def verify_api_key_in_db_sync(db: Session, raw_key: str) -> Optional[APIKey]:
 
     # Check each key to see if the raw key matches
     for api_key in api_keys:
-        if verify_api_key(raw_key, api_key.key_hash):
+        assert api_key.key_hash is not None  # type: ignore
+        if verify_api_key(raw_key, api_key.key_hash):  # type: ignore
             # Found the key, now check if it's active and not expired
             if not api_key.is_active:
                 # Return the key so the caller can check is_active and raise appropriate error
@@ -293,7 +293,7 @@ def get_user_api_keys_sync(
         .offset(skip)
         .limit(limit)
     )
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 def count_user_api_keys_sync(db: Session, user_id: str) -> int:
@@ -329,7 +329,7 @@ def deactivate_api_key_sync(
     if not api_key:
         return False
 
-    api_key.is_active = False
+    api_key.is_active = False  # type: ignore
     db.commit()
 
     return True
@@ -348,8 +348,8 @@ def rotate_api_key_sync(
     new_key_hash = hash_api_key(new_raw_key)
 
     # Update the existing key
-    api_key.key_hash = new_key_hash
-    api_key.is_active = True
+    api_key.key_hash = new_key_hash  # type: ignore
+    api_key.is_active = True  # type: ignore
 
     db.commit()
     try:
