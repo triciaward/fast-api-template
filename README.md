@@ -243,6 +243,21 @@ services:
 - **ruff**: Fast Python linter with zero warnings
 - **black**: Code formatting
 
+### Pre-commit Hooks
+This project uses pre-commit hooks to ensure code quality before every commit.
+
+**Installation:**
+```bash
+pre-commit install
+```
+
+**Available Hooks:**
+- **ruff**: Fast Python linter with zero warnings
+- **black**: Code formatting
+- **mypy**: Static type checking with zero errors
+
+**Configuration:** See `.pre-commit-config.yaml` for the complete list of hooks and their settings.
+
 ### Development Workflow
 ```bash
 # Install pre-commit hooks
