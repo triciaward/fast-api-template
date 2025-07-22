@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.crud import user as crud_user
-from app.database.database import get_db
+from app.database.database import get_db_sync
 from app.schemas.user import TokenData, UserResponse
 
 logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db_sync)
 ) -> UserResponse:
     """
     Get the current authenticated user.
@@ -184,9 +184,11 @@ class BaseAdminCRUD(
         if isinstance(db, AsyncSession):
             # type: ignore
             # type: ignore
-            result = await db.execute(select(self.model).filter(self.model.id == id))  # type: ignore
+            result = await db.execute(select(self.model).filter(self.model.id == id))
         else:
-            result = db.execute(select(self.model).filter(self.model.id == id))  # type: ignore
+            result = db.execute(
+                select(self.model).filter(self.model.id == id)  # type: ignore
+            )  # type: ignore
         return result.scalar_one_or_none()
 
     async def create(self, db: DBSession, obj_in: CreateSchemaType) -> ModelType:
