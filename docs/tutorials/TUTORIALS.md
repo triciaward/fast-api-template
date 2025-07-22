@@ -165,6 +165,16 @@ Explore advanced features that can enhance your application:
 - **Celery**: Background task processing
 - **Email**: Automated notifications
 - **Admin CLI**: Terminal administration
+- **Admin HTML Dashboard**: Visual API key management interface
+
+#### 🖥️ [Admin HTML Dashboard](optional-features.md#️-admin-html-dashboard---visual-api-key-management)
+Manage API keys through a beautiful web interface:
+- **Visual Management**: No command line needed - manage keys through your browser
+- **Dark Mode Interface**: Modern Bootstrap 5 styling with dark theme
+- **Real-time Operations**: Create, rotate, and revoke keys with one click
+- **Status Tracking**: See active, inactive, and expired keys at a glance
+- **Security Features**: Superuser-only access with full audit logging
+- **Responsive Design**: Works on desktop and mobile devices
 
 ### 🛠️ Development & Testing
 

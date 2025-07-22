@@ -358,3 +358,21 @@ def rotate_api_key_sync(
         pass
 
     return api_key, new_raw_key
+
+
+def get_all_api_keys_sync(db: Session, skip: int = 0, limit: int = 100) -> list[APIKey]:
+    """Get all API keys in the system (admin only, sync version)."""
+    result = db.execute(
+        select(APIKey)
+        .filter(APIKey.is_deleted.is_(False))
+        .order_by(APIKey.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+    )
+    return list(result.scalars().all())
+
+
+def count_all_api_keys_sync(db: Session) -> int:
+    """Count all API keys in the system (admin only, sync version)."""
+    result = db.execute(select(APIKey).filter(APIKey.is_deleted.is_(False)))
+    return len(result.scalars().all())

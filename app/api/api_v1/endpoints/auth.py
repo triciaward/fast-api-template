@@ -13,7 +13,7 @@ from app.core.security import verify_password
 from app.crud import api_key as crud_api_key
 from app.crud import refresh_token as crud_refresh_token
 from app.crud import user as crud_user
-from app.database.database import get_db
+from app.database.database import get_db, get_db_sync
 from app.schemas.user import (
     AccountDeletionCancelRequest,
     AccountDeletionCancelResponse,
@@ -74,7 +74,7 @@ logger = get_auth_logger()
 @router.post("/register", response_model=UserResponse, status_code=201)
 @rate_limit_register
 async def register_user(
-    user: UserCreate, db: Session = Depends(get_db)
+    user: UserCreate, db: Session = Depends(get_db_sync)
 ) -> UserResponse:
     logger.info("User registration attempt", email=user.email, username=user.username)
 
@@ -188,7 +188,7 @@ async def login_user(
     request: Request,
     response: Response,
     form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_sync),
 ) -> Token:
     logger.info("Login attempt", email=form_data.username)
 

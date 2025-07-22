@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.api.admin_router import router as admin_html_router
 from app.api.api_v1.api import create_api_router
 
 # Import API router dynamically based on settings
@@ -12,7 +13,7 @@ from app.core.config import settings
 from app.core.cors import configure_cors
 from app.core.error_handlers import register_error_handlers
 from app.core.logging_config import get_app_logger, setup_logging
-from app.database.database import engine, sync_engine
+from app.database.database import engine
 from app.models import models
 from app.services.sentry import init_sentry
 
@@ -27,9 +28,7 @@ if settings.ENABLE_CELERY:
 setup_logging()
 logger = get_app_logger()
 
-# Create database tables only if not in testing mode
-if os.getenv("TESTING") != "1":
-    models.Base.metadata.create_all(bind=sync_engine)
+# Database tables will be created in the lifespan context manager
 
 
 @asynccontextmanager
@@ -106,6 +105,9 @@ register_error_handlers(app)
 
 # Include API router dynamically based on settings
 app.include_router(create_api_router(), prefix=settings.API_V1_STR)
+
+# Include admin HTML router
+app.include_router(admin_html_router, prefix="/admin", tags=["admin-html"])
 
 
 @app.get("/")

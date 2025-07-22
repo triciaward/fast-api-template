@@ -397,3 +397,138 @@ def test_admin_self_protection(client: TestClient, sync_db_session: Session) -> 
     assert (
         "Cannot modify your own superuser status" in response.json()["error"]["message"]
     )
+
+
+def test_admin_html_api_keys_dashboard(
+    client: TestClient, sync_db_session: Session
+) -> None:
+    """Test admin HTML API keys dashboard."""
+    # Create a superuser directly in database
+    from app.crud import user as crud_user
+    from app.schemas.user import UserCreate
+
+    user_data = UserCreate(
+        email="admin@test.com",
+        username="adminuser",
+        password="TestPassword123!",
+        is_superuser=True,
+    )
+    user = crud_user.create_user_sync(sync_db_session, user_data)
+    user.is_verified = True  # type: ignore[assignment]
+    sync_db_session.commit()
+
+    # Login as superuser
+    login_data = {
+        "username": "admin@test.com",
+        "password": "TestPassword123!",
+    }
+    response = client.post("/api/v1/auth/login", data=login_data)
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+
+    # Test accessing the admin API keys dashboard without authentication
+    response = client.get("/admin/api-keys")
+    assert response.status_code == 401  # Should require authentication
+
+    # Test accessing with regular user (should fail)
+    # Create a regular user
+    regular_user_data = UserCreate(
+        email="regular@test.com",
+        username="regularuser",
+        password="TestPassword123!",
+        is_superuser=False,
+    )
+    regular_user = crud_user.create_user_sync(sync_db_session, regular_user_data)
+    regular_user.is_verified = True  # type: ignore[assignment]
+    sync_db_session.commit()
+
+    # Login as regular user
+    regular_login_data = {
+        "username": "regular@test.com",
+        "password": "TestPassword123!",
+    }
+    response = client.post("/api/v1/auth/login", data=regular_login_data)
+    assert response.status_code == 200
+    regular_token = response.json()["access_token"]
+
+    # Try to access admin dashboard with regular user token
+    headers = {"Authorization": f"Bearer {regular_token}"}
+    response = client.get("/admin/api-keys", headers=headers)
+    assert response.status_code == 403  # Should require superuser privileges
+
+    # Test accessing with superuser (should work)
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.get("/admin/api-keys", headers=headers)
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert "API Key Management" in response.text
+    assert "Create New API Key" in response.text
+
+
+def test_admin_html_api_key_operations(
+    client: TestClient, sync_db_session: Session
+) -> None:
+    """Test admin HTML API key operations."""
+    # Create a superuser directly in database
+    from app.crud import user as crud_user
+    from app.schemas.user import UserCreate
+
+    user_data = UserCreate(
+        email="admin@test.com",
+        username="adminuser",
+        password="TestPassword123!",
+        is_superuser=True,
+    )
+    user = crud_user.create_user_sync(sync_db_session, user_data)
+    user.is_verified = True  # type: ignore[assignment]
+    sync_db_session.commit()
+
+    # Login as superuser
+    login_data = {
+        "username": "admin@test.com",
+        "password": "TestPassword123!",
+    }
+    response = client.post("/api/v1/auth/login", data=login_data)
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Test creating an API key via HTML form
+    form_data = {
+        "label": "Test API Key",
+        "scopes": "read_events,write_events",
+        "expires_at": "",  # No expiration
+    }
+    response = client.post(
+        "/admin/api-keys", data=form_data, headers=headers, follow_redirects=False
+    )
+    assert response.status_code == 303  # Redirect after creation
+    assert "API%20key%20created%20successfully" in response.headers["location"]
+
+    # Test creating an API key with expiration
+    from datetime import datetime, timedelta
+
+    expires_at = (datetime.utcnow() + timedelta(days=30)).strftime("%Y-%m-%dT%H:%M")
+    form_data = {
+        "label": "Test API Key with Expiration",
+        "scopes": "read_events",
+        "expires_at": expires_at,
+    }
+    response = client.post(
+        "/admin/api-keys", data=form_data, headers=headers, follow_redirects=False
+    )
+    assert response.status_code == 303  # Redirect after creation
+    assert "API%20key%20created%20successfully" in response.headers["location"]
+
+    # Test creating an API key with invalid expiration
+    form_data = {
+        "label": "Test API Key Invalid Expiration",
+        "scopes": "read_events",
+        "expires_at": "invalid-date",
+    }
+    response = client.post(
+        "/admin/api-keys", data=form_data, headers=headers, follow_redirects=False
+    )
+    assert response.status_code == 303  # Redirect with error
+    assert "Failed%20to%20create%20API%20key" in response.headers["location"]
