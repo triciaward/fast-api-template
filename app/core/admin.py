@@ -5,7 +5,7 @@ This module provides admin-only utilities, base classes, and dependencies for ad
 """
 
 import logging
-from typing import Any, Callable, Generic, Optional, TypeVar, Union
+from typing import Any, Callable, Generic, Optional, Protocol, TypeVar, Union
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
@@ -23,8 +23,15 @@ from app.schemas.user import TokenData, UserResponse
 
 logger = logging.getLogger(__name__)
 
+# Protocol to ensure models have an id attribute
+
+
+class HasId(Protocol):
+    id: Any
+
+
 # Type variables for generic CRUD operations
-ModelType = TypeVar("ModelType")
+ModelType = TypeVar("ModelType", bound=HasId)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 ResponseSchemaType = TypeVar("ResponseSchemaType", bound=BaseModel)
@@ -183,12 +190,11 @@ class BaseAdminCRUD(
         """
         if isinstance(db, AsyncSession):
             # type: ignore
-            # type: ignore
             result = await db.execute(select(self.model).filter(self.model.id == id))
         else:
             result = db.execute(
                 select(self.model).filter(self.model.id == id)  # type: ignore
-            )  # type: ignore
+            )
         return result.scalar_one_or_none()
 
     async def create(self, db: DBSession, obj_in: CreateSchemaType) -> ModelType:

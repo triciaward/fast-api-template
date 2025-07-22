@@ -8,15 +8,22 @@ All endpoints require superuser privileges.
 import logging
 from datetime import datetime
 from typing import Optional
-from uuid import UUID
 
 from fastapi import Depends, Form, HTTPException, Query, Request, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from starlette.templating import _TemplateResponse
 
 from app.core.admin import require_superuser
-from app.crud import api_key as crud_api_key
+from app.crud.api_key import (  # type: ignore
+    count_all_api_keys_sync,
+    create_api_key_sync,
+    deactivate_api_key_sync,
+    get_all_api_keys_sync,
+    get_api_key_by_id_sync,
+    rotate_api_key_sync,
+)
 from app.database.database import get_db_sync
 from app.schemas.user import APIKeyCreate, UserResponse
 
@@ -31,7 +38,7 @@ async def admin_api_keys_view(
     page: int = Query(1, ge=1, description="Page number"),
     current_admin: UserResponse = Depends(require_superuser),
     db: Session = Depends(get_db_sync),
-) -> HTMLResponse:
+) -> _TemplateResponse:
     """
     Admin view for managing API keys.
 
@@ -48,20 +55,20 @@ async def admin_api_keys_view(
     skip = (page - 1) * page_size
 
     # Get API keys with pagination
-    api_keys = crud_api_key.get_all_api_keys_sync(
+    api_keys = get_all_api_keys_sync(
         db=db,
         skip=skip,
         limit=page_size,
     )
 
     # Get total count
-    total_count = crud_api_key.count_all_api_keys_sync(db=db)
+    total_count = count_all_api_keys_sync(db=db)
     total_pages = (total_count + page_size - 1) // page_size
 
     # Convert to response models for template
     from app.schemas.user import APIKeyResponse
-    api_key_responses = [
-        APIKeyResponse.model_validate(key) for key in api_keys]
+
+    api_key_responses = [APIKeyResponse.model_validate(key) for key in api_keys]
 
     return templates.TemplateResponse(
         "admin/api_keys.html",
@@ -99,15 +106,17 @@ async def admin_create_api_key(
 
     try:
         # Parse scopes
-        scope_list = [s.strip() for s in scopes.split(",")
-                      if s.strip()] if scopes else []
+        scope_list = (
+            [s.strip() for s in scopes.split(",") if s.strip()] if scopes else []
+        )
 
         # Parse expiration date
         expires_datetime = None
         if expires_at:
             try:
                 expires_datetime = datetime.fromisoformat(
-                    expires_at.replace("Z", "+00:00"))
+                    expires_at.replace("Z", "+00:00")
+                )
             except ValueError:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -127,7 +136,7 @@ async def admin_create_api_key(
         raw_key = generate_api_key()
 
         # Create the API key in the database
-        db_api_key = crud_api_key.create_api_key_sync(
+        db_api_key = create_api_key_sync(
             db=db,
             api_key_data=api_key_data,
             user_id=str(current_admin.id),
@@ -186,7 +195,7 @@ async def admin_rotate_api_key(
 
     try:
         # Rotate the key
-        result = crud_api_key.rotate_api_key_sync(
+        result = rotate_api_key_sync(
             db=db,
             key_id=key_id,
         )
@@ -204,13 +213,13 @@ async def admin_rotate_api_key(
             extra={
                 "admin_id": str(current_admin.id),
                 "key_id": key_id,
-                "label": api_key.label,
+                "label": api_key.label if api_key else "Unknown",
             },
         )
 
         # Redirect with success message
         response = RedirectResponse(
-            url=f"/admin/api-keys?message=API key '{api_key.label}' rotated successfully. New key: {new_raw_key}&message_type=success",
+            url=f"/admin/api-keys?message=API key '{api_key.label if api_key else 'Unknown'}' rotated successfully. New key: {new_raw_key}&message_type=success",
             status_code=status.HTTP_303_SEE_OTHER,
         )
         return response
@@ -252,7 +261,7 @@ async def admin_revoke_api_key(
 
     try:
         # Get the key first to get the label for the message
-        api_key = crud_api_key.get_api_key_by_id_sync(db=db, key_id=key_id)
+        api_key = get_api_key_by_id_sync(db=db, key_id=key_id)
         if not api_key:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -260,7 +269,7 @@ async def admin_revoke_api_key(
             )
 
         # Deactivate the key
-        success = crud_api_key.deactivate_api_key_sync(
+        success = deactivate_api_key_sync(
             db=db,
             key_id=key_id,
         )
@@ -276,13 +285,13 @@ async def admin_revoke_api_key(
             extra={
                 "admin_id": str(current_admin.id),
                 "key_id": key_id,
-                "label": api_key.label,
+                "label": api_key.label if api_key else "Unknown",
             },
         )
 
         # Redirect with success message
         response = RedirectResponse(
-            url=f"/admin/api-keys?message=API key '{api_key.label}' revoked successfully&message_type=success",
+            url=f"/admin/api-keys?message=API key '{api_key.label if api_key else 'Unknown'}' revoked successfully&message_type=success",
             status_code=status.HTTP_303_SEE_OTHER,
         )
         return response
