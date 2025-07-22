@@ -60,11 +60,10 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN_HERE"
 ```
 
-### 4. Alternative: Use FastAPI Swagger UI
-1. **Open Swagger UI**: `http://localhost:8000/docs`
-2. **Click "Authorize"** button
-3. **Login with superuser credentials**: `admin@example.com` / `Admin123!`
-4. **Then access**: `http://localhost:8000/admin/api-keys`
+### 4. Alternative: Use Browser Extension
+1. **Install "ModHeader"** (Chrome) or "Header Editor" (Firefox)
+2. **Add Authorization header** with your JWT token
+3. **Visit**: `http://localhost:8000/admin/api-keys`
 
 ## Key Learnings
 
@@ -103,7 +102,7 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
 ```
 
 ### 3. Development Workflow
-- **Use Swagger UI** for interactive testing: `http://localhost:8000/docs`
+- **Use browser extensions** like ModHeader for interactive testing
 - **Use curl/Postman** for programmatic testing
 - **Always include Authorization headers** for protected endpoints
 
@@ -117,20 +116,35 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
 
 ## Recommended Access Methods
 
-### Method 1: FastAPI Swagger UI (Recommended for Development)
-1. **Open**: `http://localhost:8000/docs`
-2. **Click "Authorize"** and login with superuser credentials
-3. **Then access**: `http://localhost:8000/admin/api-keys`
+### Method 1: Browser with Authorization Header (Recommended)
+1. **Get JWT token:**
+   ```bash
+   curl -X POST "http://localhost:8000/api/v1/auth/login" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "username=admin@example.com&password=Admin123!"
+   ```
 
-### Method 2: Programmatic Access
+2. **Install browser extension** like "ModHeader" (Chrome) or "Header Editor" (Firefox)
+
+3. **Add Authorization header:**
+   - Header Name: `Authorization`
+   - Header Value: `Bearer YOUR_ACCESS_TOKEN_HERE`
+
+4. **Visit dashboard**: `http://localhost:8000/admin/api-keys`
+
+### Method 2: Browser Developer Tools
+1. **Open browser developer tools** (F12)
+2. **Go to Network tab**
+3. **Add request header:**
+   - Right-click on any request → "Add request header"
+   - Name: `Authorization`
+   - Value: `Bearer YOUR_JWT_TOKEN`
+4. **Visit**: `http://localhost:8000/admin/api-keys`
+
+### Method 3: Programmatic Access (curl)
 1. **Get JWT token** via `/api/v1/auth/login`
 2. **Use Bearer token** in Authorization header
 3. **Access dashboard** with proper authentication
-
-### Method 3: Browser with Developer Tools
-1. **Open browser developer tools**
-2. **Add Authorization header** via browser extension or developer tools
-3. **Access**: `http://localhost:8000/admin/api-keys`
 
 ---
 

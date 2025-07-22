@@ -12,6 +12,7 @@ Think of optional features like add-ons for your car. The basic car works great,
 - **Celery**: Background task processing for heavy operations
 - **Email**: Automated email sending for user management
 - **Admin CLI**: Terminal-based administration tools
+- **Admin HTML Dashboard**: Visual web-based administration interface
 
 ---
 
@@ -24,6 +25,7 @@ Think of optional features like add-ons for your car. The basic car works great,
 | **Celery** | `ENABLE_CELERY=true` | Background tasks | Medium |
 | **Email** | SMTP settings | User notifications | Easy |
 | **Admin CLI** | CLI scripts | Terminal admin | Easy |
+| **Admin HTML Dashboard** | Built-in | Visual admin interface | Easy |
 
 ---
 
@@ -344,6 +346,7 @@ python scripts/admin_cli.py stats
 | **Celery** | `ENABLE_CELERY=true` | Redis | `celery -A app.services.celery_app worker` |
 | **Email** | SMTP settings | None | Restart server |
 | **Admin CLI** | None | None | `python scripts/admin_cli.py` |
+| **Admin HTML Dashboard** | Built-in | None | `GET /admin/api-keys` |
 
 ---
 
@@ -384,6 +387,10 @@ curl -X POST "http://localhost:8000/api/v1/auth/register" \
 
 # Test Admin CLI
 python scripts/admin_cli.py stats
+
+# Test Admin HTML Dashboard
+curl -X GET "http://localhost:8000/admin/api-keys" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ---
@@ -417,6 +424,143 @@ python scripts/admin_cli.py stats
 - **CLI**: Command Line Interface, a text-based interface for interacting with software.
 - **Broker**: A message broker (like Redis) that stores and forwards messages between applications.
 - **Worker**: A Celery process that executes background tasks.
+- **HTML Dashboard**: A web-based interface for visual administration tasks.
+
+---
+
+## 🖥️ Admin HTML Dashboard - Visual API Key Management
+
+**One-liner**: A beautiful dark-mode web interface for managing API keys without using the command line.
+
+**Why use it**: Provides a visual, user-friendly way for administrators to manage API keys through their browser, perfect for non-technical users or quick key management tasks.
+
+**Relevant code**: 
+- [`app/templates/admin/api_keys.html`](../../app/templates/admin/api_keys.html)
+- [`app/api/admin_views.py`](../../app/api/admin_views.py)
+
+### How to Access the Admin Dashboard
+
+⚠️ **IMPORTANT**: The admin dashboard requires JWT Bearer token authentication. It is NOT accessible through traditional web browser login forms.
+
+#### Method 1: Browser with Authorization Header (Recommended)
+
+1. **Get a JWT token first:**
+   ```bash
+   curl -X POST "http://localhost:8000/api/v1/auth/login" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "username=admin@example.com&password=Admin123!"
+   ```
+
+2. **Install a browser extension** like "ModHeader" (Chrome) or "Header Editor" (Firefox)
+
+3. **Add the Authorization header:**
+   - Header Name: `Authorization`
+   - Header Value: `Bearer YOUR_ACCESS_TOKEN_HERE`
+
+4. **Visit the dashboard:**
+   ```
+   http://localhost:8000/admin/api-keys
+   ```
+
+#### Method 2: Browser Developer Tools
+
+1. **Open browser developer tools** (F12)
+2. **Go to Network tab**
+3. **Add a request header:**
+   - Right-click on any request → "Add request header"
+   - Name: `Authorization`
+   - Value: `Bearer YOUR_JWT_TOKEN`
+4. **Visit:** `http://localhost:8000/admin/api-keys`
+
+#### Method 3: Programmatic Access (curl)
+
+```bash
+# Get JWT token
+TOKEN=$(curl -s -X POST "http://localhost:8000/api/v1/auth/login" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=admin@example.com&password=Admin123!" | jq -r '.access_token')
+
+# Access dashboard (returns HTML)
+curl -X GET "http://localhost:8000/admin/api-keys" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### Method 4: For Production Applications
+
+When building a real application with this template:
+
+1. **Create a proper admin interface** that handles JWT authentication
+2. **Store the JWT token** in your admin session/cookies
+3. **Make authenticated requests** to `/admin/api-keys` from your admin dashboard
+4. **Use the API endpoints** programmatically for key management
+
+#### Default Superuser Credentials
+
+- **Email:** `admin@example.com`
+- **Password:** `Admin123!`
+
+⚠️ **Note**: These credentials are for development only. Change them in production!
+
+### Admin Dashboard Features
+
+- **Visual Key Management**: Create, rotate, and revoke keys with one click
+- **Dark Mode Interface**: Modern Bootstrap 5 styling with dark theme
+- **Status Tracking**: See active, inactive, and expired keys at a glance
+- **Pagination**: Handle large numbers of keys efficiently
+- **Real-time Operations**: Immediate feedback on all operations
+- **Security**: Superuser-only access with full audit logging
+
+### Admin Dashboard Lifecycle
+
+```mermaid
+flowchart TD
+  A[Admin Login] --> B[Access Dashboard]
+  B --> C[View All API Keys]
+  C --> D{Choose Action}
+  D --> E[Create New Key]
+  D --> F[Rotate Existing Key]
+  D --> G[Revoke Key]
+  E --> H[Key Created Successfully]
+  F --> I[New Key Generated]
+  G --> J[Key Deactivated]
+  H --> C
+  I --> C
+  J --> C
+```
+
+### What the Admin Dashboard Does
+
+- **Key Creation**: Fill out a form to create new API keys with labels, scopes, and expiration dates
+- **Key Rotation**: Generate new keys while keeping the same ID and metadata
+- **Key Revocation**: Deactivate keys permanently with confirmation
+- **Key Monitoring**: View all keys in the system with their current status
+- **Audit Trail**: All operations are logged for security and compliance
+
+> **Admin Dashboard Benefits:**
+> - **No Command Line**: Perfect for non-technical administrators
+> - **Visual Feedback**: See key status and operations immediately
+> - **Bulk Operations**: Manage multiple keys efficiently
+> - **Security**: All operations require superuser privileges and are audited
+>
+> **Use Cases:** API key management for development teams, client key provisioning, security audits, and compliance reporting.
+
+### Test Admin Dashboard
+
+```bash
+# Create a superuser first (if you don't have one)
+python scripts/bootstrap_superuser.py
+
+# Login and get a token
+curl -X POST "http://localhost:8000/api/v1/auth/login" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=admin@example.com&password=your_password"
+
+# Access the dashboard
+curl -X GET "http://localhost:8000/admin/api-keys" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+For complete documentation, see the **[Admin HTML Dashboard section](#️-admin-html-dashboard---visual-api-key-management)** above.
 
 ---
 
@@ -429,5 +573,6 @@ Now that you understand optional features, you can:
 4. **Handle background tasks** with Celery
 5. **Automate user management** with email notifications
 6. **Manage your app** efficiently with the Admin CLI
+7. **Provide visual administration** with the Admin HTML Dashboard
 
 Remember: Start simple and add features as you need them. The template works great without any optional features, but they can make your app much more powerful when used appropriately! 

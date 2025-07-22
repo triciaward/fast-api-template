@@ -302,6 +302,55 @@ DELETE /api/v1/auth/api-keys/{key_id}
 POST /api/v1/auth/api-keys/{key_id}/rotate
 ```
 
+### 🖥️ Admin HTML Dashboard
+
+**Visual API key management for superusers!**
+
+The template includes a beautiful dark-mode HTML dashboard for managing API keys:
+
+```bash
+# Access the admin dashboard (requires superuser login)
+GET /admin/api-keys
+```
+
+⚠️ **IMPORTANT**: The admin dashboard requires JWT Bearer token authentication. It is NOT accessible through traditional web browser login forms.
+
+#### Quick Access Guide
+
+1. **Get JWT token:**
+   ```bash
+   curl -X POST "http://localhost:8000/api/v1/auth/login" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "username=admin@example.com&password=Admin123!"
+   ```
+
+2. **Access dashboard with browser extension:**
+   - Install "ModHeader" (Chrome) or "Header Editor" (Firefox)
+   - Add header: `Authorization: Bearer YOUR_TOKEN`
+   - Visit: `http://localhost:8000/admin/api-keys`
+
+3. **Or use curl:**
+   ```bash
+   curl -X GET "http://localhost:8000/admin/api-keys" \
+     -H "Authorization: Bearer YOUR_TOKEN"
+   ```
+
+**Features:**
+- **Visual Interface**: No command line needed - manage keys through your browser
+- **Dark Mode**: Easy on the eyes with modern Bootstrap 5 styling
+- **Real-time Operations**: Create, rotate, and revoke keys with one click
+- **Status Tracking**: See active, inactive, and expired keys at a glance
+- **Pagination**: Handle large numbers of keys efficiently
+- **Audit Logging**: All operations are logged for security
+
+**Perfect for:**
+- Non-technical administrators
+- Quick key management without API calls
+- Visual overview of all system API keys
+- Secure key rotation workflows
+
+See **[Optional Features Tutorial](docs/tutorials/optional-features.md#️-admin-html-dashboard---visual-api-key-management)** for complete usage guide.
+
 ### Using API Keys in Your Code
 
 ```python
