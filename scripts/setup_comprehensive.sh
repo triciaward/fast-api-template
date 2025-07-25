@@ -459,26 +459,32 @@ fi
 # =============================================================================
 # 5. Start Database Services
 # =============================================================================
-print_header "5. Starting Database Services"
+print_header "5. Starting Services with Docker"
 
 if command_exists docker && command_exists docker-compose; then
-    print_status "Starting PostgreSQL with Docker Compose..."
-    docker-compose up postgres -d
+    print_status "Starting all services with Docker Compose..."
+    docker-compose up -d
     
-    # Wait for PostgreSQL to be ready
-    print_status "Waiting for PostgreSQL to be ready..."
-    sleep 5
+    # Wait for services to be ready
+    print_status "Waiting for services to be ready..."
+    sleep 10
     
-    # Check if PostgreSQL is running
-    if docker-compose ps postgres | grep -q "Up"; then
-        print_success "PostgreSQL is running"
+    # Check if services are running
+    if docker-compose ps | grep -q "Up"; then
+        print_success "All services are running"
+        
+        # Show service status
+        print_status "Service status:"
+        docker-compose ps
     else
-        print_error "PostgreSQL failed to start"
+        print_error "Services failed to start"
+        print_status "Checking logs..."
+        docker-compose logs
         exit 1
     fi
 else
-    print_warning "Docker/Docker Compose not available. Please start PostgreSQL manually."
-    print_status "You can start it with: docker-compose up postgres -d"
+    print_warning "Docker/Docker Compose not available. Please start services manually."
+    print_status "You can start them with: docker-compose up -d"
 fi
 
 # =============================================================================
@@ -623,35 +629,43 @@ print_header "9. Setup Complete! 🎉"
 
 print_success "Your FastAPI Template development environment is ready!"
 echo ""
-echo "📋 Next Steps:"
-echo "1. Start the development server:"
-echo "   uvicorn app.main:app --reload"
-echo ""
-echo "2. Access your API:"
+echo "📋 Your application is now running in Docker:"
 echo "   - API: http://localhost:8000"
 echo "   - Docs: http://localhost:8000/docs"
 echo "   - ReDoc: http://localhost:8000/redoc"
 echo ""
-echo "3. Optional services (if needed):"
-echo "   - Redis: docker-compose --profile redis up redis -d"
-echo "   - Celery: docker-compose --profile celery up -d"
-echo "   - Monitoring: docker-compose --profile monitoring up -d"
+echo "🐳 Docker Services:"
+echo "   - FastAPI App: Running on port 8000"
+echo "   - PostgreSQL: Running on port 5432"
+echo "   - Redis: Available when needed (optional)"
 echo ""
-echo "4. Useful commands:"
+echo "🔧 Development Commands:"
+echo "   - View logs: docker-compose logs -f"
+echo "   - Stop services: docker-compose down"
+echo "   - Restart services: docker-compose restart"
+echo "   - Rebuild and restart: docker-compose up -d --build"
+echo ""
+echo "🧪 Testing:"
 echo "   - Run tests: pytest"
 echo "   - Format code: black ."
 echo "   - Lint code: ruff check ."
 echo "   - Type check: mypy ."
 echo ""
+echo "📚 Optional Services (if needed):"
+echo "   - Redis: docker-compose --profile redis up redis -d"
+echo "   - Celery: docker-compose --profile celery up -d"
+echo "   - Monitoring: docker-compose --profile monitoring up -d"
+echo ""
 echo "🔧 Troubleshooting:"
-echo "   - If you encounter issues, check the logs: docker-compose logs"
-echo "   - Reset database: docker-compose down && docker-compose up postgres -d && alembic upgrade head"
-echo "   - View setup script: cat scripts/setup_comprehensive.sh"
+echo "   - View all logs: docker-compose logs"
+echo "   - View specific service logs: docker-compose logs api"
+echo "   - Reset everything: docker-compose down -v && docker-compose up -d && alembic upgrade head"
+echo "   - Check service status: docker-compose ps"
 echo ""
 echo "📚 Documentation:"
 echo "   - Getting Started: docs/tutorials/getting-started.md"
 echo "   - Tutorials: docs/tutorials/"
-echo "   - API Reference: http://localhost:8000/docs (after starting server)"
+echo "   - API Reference: http://localhost:8000/docs"
 echo ""
 
 print_success "Happy coding! 🚀" 

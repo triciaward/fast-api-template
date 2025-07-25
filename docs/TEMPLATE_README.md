@@ -312,10 +312,16 @@ alembic upgrade head
 
 ### Running the Application
 ```bash
-# Development mode
-uvicorn app.main:app --reload
+# Start all services with Docker (recommended)
+docker-compose up -d
 
-# Production mode
+# View logs
+docker-compose logs -f
+
+# Development workflow (tools run locally, app runs in Docker)
+ruff format .
+ruff check .
+pytest
 docker-compose up -d
 ```
 

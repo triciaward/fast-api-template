@@ -146,7 +146,7 @@ flowchart TD
 2. **Log in to your Coolify dashboard**
 3. **Click "Add New App"**
 4. **Select your GitHub repo**
-5. **Set build and run commands** (e.g., `uvicorn app.main:app --host 0.0.0.0 --port 8000`)
+5. **Set build and run commands** (e.g., `docker-compose up -d` or `uvicorn app.main:app --host 0.0.0.0 --port 8000`)
 6. **Add environment variables** (copy from `.env.production`)
 7. **Deploy!**
 

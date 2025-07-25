@@ -595,7 +595,7 @@ API_BASE_URL=http://localhost:8000/api/v1
 
 The easiest way to test is through the interactive API docs:
 
-1. Start your server: `uvicorn app.main:app --reload`
+1. Start your server: `docker-compose up -d`
 2. Open http://localhost:8000/docs in your browser
 3. Try the authentication endpoints interactively
 

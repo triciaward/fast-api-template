@@ -313,8 +313,8 @@ Each tutorial includes:
 
 ### Essential Commands
 ```bash
-# Start development server
-uvicorn app.main:app --reload
+# Start all services with Docker (recommended)
+docker-compose up -d
 
 # Run tests
 pytest
@@ -325,8 +325,8 @@ pytest -m "template_only"
 # Run database migrations
 alembic upgrade head
 
-# Start with Docker
-docker-compose up -d
+# View Docker logs
+docker-compose logs -f
 
 # Check application health
 curl http://localhost:8000/health

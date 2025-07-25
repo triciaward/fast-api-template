@@ -377,15 +377,23 @@ Original template: https://github.com/your-username/fast-api-template
         self.create_customization_log()
         print("   📝 Created: docs/TEMPLATE_CUSTOMIZATION.md")
 
+        # Rename project directory
+        print("\n📁 Renaming project directory...")
+        self.rename_project_directory()
+
         # Update git remote info
         self.update_git_remote()
 
         print("\n🎉 Template customization completed successfully!")
         print("\n📋 Next Steps:")
         print("   1. Review the changes in docs/TEMPLATE_CUSTOMIZATION.md")
-        print("   2. Update your git remote: git remote set-url origin <your-repo-url>")
-        print("   3. Run setup: ./scripts/setup_comprehensive.sh")
-        print("   4. Start developing your application!")
+        print("   2. If the directory was renamed, navigate to the new folder:")
+        print(
+            f"      cd {self.replacements.get('fast-api-template', 'your_project_name')}"
+        )
+        print("   3. Update your git remote: git remote set-url origin <your-repo-url>")
+        print("   4. Run setup: ./scripts/setup_comprehensive.sh")
+        print("   5. Start developing your application!")
         print("\n✨ Happy coding!")
 
 

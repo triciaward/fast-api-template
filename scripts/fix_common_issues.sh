@@ -341,26 +341,28 @@ fi
 print_header "Issue 7: Starting Docker services"
 
 if command -v docker >/dev/null 2>&1 && command -v docker-compose >/dev/null 2>&1; then
-    print_status "Starting PostgreSQL with Docker Compose..."
-    if docker-compose up postgres -d; then
-        print_success "PostgreSQL started successfully"
+    print_status "Starting all services with Docker Compose..."
+    if docker-compose up -d; then
+        print_success "All services started successfully"
         
-        # Wait for PostgreSQL to be ready
-        print_status "Waiting for PostgreSQL to be ready..."
-        sleep 5
+        # Wait for services to be ready
+        print_status "Waiting for services to be ready..."
+        sleep 10
         
-        # Check if PostgreSQL is running
-        if docker-compose ps postgres | grep -q "Up"; then
-            print_success "PostgreSQL is running and ready"
+        # Check if services are running
+        if docker-compose ps | grep -q "Up"; then
+            print_success "All services are running and ready"
+            print_status "Service status:"
+            docker-compose ps
         else
-            print_warning "PostgreSQL may not be fully ready yet"
+            print_warning "Services may not be fully ready yet"
         fi
     else
-        print_error "Failed to start PostgreSQL"
+        print_error "Failed to start services"
     fi
 else
-    print_warning "Docker/Docker Compose not available. Please start PostgreSQL manually:"
-    echo "  docker-compose up postgres -d"
+    print_warning "Docker/Docker Compose not available. Please start services manually:"
+    echo "  docker-compose up -d"
 fi
 
 # =============================================================================
@@ -380,22 +382,24 @@ print_header "Fix Script Complete! 🎉"
 
 print_success "All common issues have been addressed!"
 echo ""
-echo "📋 Next Steps:"
-echo "1. Start the development server:"
-echo "   uvicorn app.main:app --reload"
-echo ""
-echo "2. Access your API:"
+echo "📋 Your application is now running in Docker:"
 echo "   - API: http://localhost:8000"
 echo "   - Docs: http://localhost:8000/docs"
 echo ""
-echo "3. If you still encounter issues:"
-echo "   - Run: python scripts/verify_setup.py"
-echo "   - Check: ./scripts/setup_comprehensive.sh"
+echo "🐳 Docker Services:"
+echo "   - FastAPI App: Running on port 8000"
+echo "   - PostgreSQL: Running on port 5432"
+echo ""
+echo "🔧 Development Commands:"
+echo "   - View logs: docker-compose logs -f"
+echo "   - Stop services: docker-compose down"
+echo "   - Restart services: docker-compose restart"
 echo ""
 echo "🔧 Troubleshooting:"
-echo "   - Database issues: docker-compose logs postgres"
-echo "   - Migration issues: alembic stamp head"
-echo "   - Environment issues: cat .env"
+echo "   - View all logs: docker-compose logs"
+echo "   - View specific service logs: docker-compose logs api"
+echo "   - Reset everything: docker-compose down -v && docker-compose up -d"
+echo "   - Check service status: docker-compose ps"
 echo ""
 
 print_success "Happy coding! 🚀" 

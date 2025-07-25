@@ -98,7 +98,7 @@ cd my-new-app
 2. Click the green "Code" button
 3. Select "Download ZIP"
 4. Extract the ZIP file to your desired location
-5. Rename the folder to your project name
+5. The customization script will automatically rename the folder to your project name
 
 > **💡 Note**: The template includes a user-friendly README.md that you can customize for your project. The comprehensive template documentation is available in [docs/TEMPLATE_README.md](TEMPLATE_README.md).
 
@@ -305,15 +305,29 @@ Follow the prompts to create your admin account.
 
 ## 🚀 Step 5: Start Your Application
 
-### Start the Development Server
+### Start All Services with Docker
 ```bash
-uvicorn app.main:app --reload
+docker-compose up -d
 ```
 
 Your application is now running! Open your web browser and go to:
 - **Main app**: http://localhost:8000
 - **API documentation**: http://localhost:8000/docs
 - **Admin panel**: http://localhost:8000/admin
+
+### Development Workflow
+For development, you'll use the local Python environment for tools while the app runs in Docker:
+
+```bash
+# Development tools (run locally)
+ruff format .
+ruff check .
+pytest
+
+# Application (runs in Docker)
+docker-compose up -d
+docker-compose logs -f api
+```
 
 ---
 
@@ -341,11 +355,11 @@ If any issues are found, the script will provide specific instructions to fix th
 
 **If verification fails, try these steps:**
 
-1. **Database connection issues:**
+1. **Service issues:**
    ```bash
    docker-compose down
-   docker-compose up postgres -d
-   alembic upgrade head
+   docker-compose up -d
+   docker-compose logs -f
    ```
 
 2. **Environment variable issues:**
@@ -532,7 +546,12 @@ The template now includes automatic fixes for common setup issues:
 ### "Port already in use" error
 If you get an error about port 8000 being in use, try:
 ```bash
-uvicorn app.main:app --reload --port 8001
+# Stop other containers first
+docker-compose down
+
+# Start with a different port
+docker-compose up -d
+# Or if running locally: uvicorn app.main:app --reload --port 8001
 ```
 
 ### Database connection errors

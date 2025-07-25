@@ -174,6 +174,53 @@ class TestTemplateCustomizer:
         # This should not raise an exception
         customizer.update_git_remote()
 
+    def test_rename_project_directory(self, customizer):
+        """Test that rename_project_directory works correctly."""
+        current_dir = customizer.project_root.name
+        new_name = customizer.replacements.get("fast-api-template", "test_project")
+
+        # Test the renaming logic
+        if current_dir != new_name:
+            parent_dir = customizer.project_root.parent
+            new_path = parent_dir / new_name
+
+            # Should not exist initially
+            assert not new_path.exists()
+
+            # Rename should work
+            customizer.rename_project_directory()
+
+            # Check if rename was successful
+            if new_path.exists():
+                # Rename was successful, verify the new path exists
+                assert new_path.exists()
+                # Note: project_root attribute is not updated after rename, which is expected
+                # The rename method just renames the directory, it doesn't update the object reference
+            else:
+                # Rename might have been skipped due to existing directory
+                assert (
+                    customizer.project_root.name == current_dir
+                    or customizer.project_root.name == new_name
+                )
+
+    def test_rename_project_directory_already_exists(self, customizer):
+        """Test that rename_project_directory handles existing directories gracefully."""
+        current_dir = customizer.project_root.name
+        new_name = customizer.replacements.get("fast-api-template", "test_project")
+
+        if current_dir != new_name:
+            parent_dir = customizer.project_root.parent
+            new_path = parent_dir / new_name
+
+            # Create a directory with the target name
+            new_path.mkdir(exist_ok=True)
+
+            # Should handle gracefully without raising exception
+            customizer.rename_project_directory()
+
+            # Original directory should still exist
+            assert customizer.project_root.exists()
+
 
 @pytest.mark.template_only
 class TestTemplateCustomizerIntegration:

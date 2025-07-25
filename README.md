@@ -14,8 +14,8 @@ First, you need to get this template. You can either:
 - Download it as a ZIP file
 - Or use it as a GitHub template
 
-### Step 2: Copy and Rename
-Copy the entire template folder and rename it to your project name (e.g., `myawesomeproject_backend`).
+### Step 2: Copy the Template
+Copy the entire template folder to your desired location.
 
 ### Step 3: Run the Customization Script
 This is where the magic happens! Run:
@@ -30,6 +30,7 @@ The script will ask you questions like:
 
 ### Step 4: The Magic Happens
 The script automatically:
+- **Renames the project folder** to your project slug (e.g., `myawesomeproject_backend`)
 - Renames all template references to your project name
 - Updates database names and connection strings
 - Changes import statements throughout the code
@@ -38,8 +39,9 @@ The script automatically:
 - Updates the Docker setup
 
 ### Step 5: Set Up Your New Project
-After customization, run:
+After customization, the script will tell you the new folder name. Navigate to it and run:
 ```bash
+cd your_project_name_backend
 ./scripts/setup_comprehensive.sh
 ```
 
@@ -68,9 +70,8 @@ Now you have a fully working project with:
 If you're new to this project, here's how to get it running:
 
 ### Prerequisites
-- Python 3.11 or higher
-- PostgreSQL database
-- Redis (optional, for caching)
+- Python 3.11 or higher (for development tools)
+- Docker and Docker Compose (for running the application)
 
 ### Quick Setup
 
@@ -80,39 +81,53 @@ If you're new to this project, here's how to get it running:
 ./scripts/setup_comprehensive.sh
 ```
 This script will automatically:
-- Create a virtual environment
+- Create a virtual environment for development tools
 - Install dependencies
 - Set up your `.env` file
-- Start the database
-- Run migrations
+- Start all services in Docker (FastAPI, PostgreSQL, Redis)
+- Run database migrations
 - Verify everything is working
 
-**Option 2: Manual Setup**
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+**Option 2: Manual Docker Setup**
+```bash
+# Start everything with Docker Compose
+docker-compose up -d
 
-2. **Set up your environment:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your database and other settings
-   ```
+# Run database migrations
+alembic upgrade head
 
-3. **Set up the database:**
-   ```bash
-   # Run database migrations
-   alembic upgrade head
-   ```
-
-4. **Start your application:**
-   ```bash
-   uvicorn app.main:app --reload
-   ```
+# Create a superuser (optional)
+python app/bootstrap_superuser.py
+```
 
 Your API will be available at `http://localhost:8000`
 
 Visit http://localhost:8000/docs to view the interactive API documentation.
+
+## 🐳 Running with Docker
+
+**This is the primary way to run the application!** The template is designed to run everything in Docker containers:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+
+# Restart services
+docker-compose restart
+```
+
+**Available Services:**
+- **FastAPI App**: http://localhost:8000
+- **PostgreSQL**: Port 5432
+- **Redis**: Port 6379 (optional)
+- **Celery Worker**: Background tasks (optional)
+- **Flower**: Celery monitoring (optional)
 
 ## 📚 API Documentation
 
@@ -120,18 +135,6 @@ Once your app is running, you can explore your API:
 
 - **Interactive API Docs**: http://localhost:8000/docs
 - **Alternative API Docs**: http://localhost:8000/redoc
-
-## 🐳 Running with Docker
-
-If you prefer using Docker:
-
-```bash
-# Start everything with Docker Compose
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-```
 
 ## 🧪 Testing Your Application
 
@@ -145,15 +148,17 @@ pytest --cov=app
 
 ## 🔧 Development Workflow
 
+For development, you'll use the local Python environment for tools while the app runs in Docker:
+
 ```bash
-# Start development server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# Format your code
+# Development tools (run locally)
 ruff format .
-
-# Check for code issues
 ruff check .
+pytest
+
+# Application (runs in Docker)
+docker-compose up -d
+docker-compose logs -f api
 ```
 
 ## 🧹 Code Quality (Pre-commit Hooks)
@@ -184,13 +189,14 @@ The pre-commit hooks will automatically:
 
 This project comes with several features out of the box:
 
+- **Docker-First Architecture** - Everything runs in containers by default
 - **User Authentication** - Registration, login, and JWT tokens
 - **Database Management** - PostgreSQL with automatic migrations
 - **Admin Panel** - Built-in admin interface at `/admin`
 - **API Key Management** - Secure API key system
 - **Audit Logging** - Track important actions
 - **Testing Framework** - Comprehensive test suite
-- **Docker Support** - Easy containerized deployment
+- **Development Tools** - Local Python environment for linting, testing, and formatting
 
 ## 🎯 Next Steps
 

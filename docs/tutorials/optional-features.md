@@ -52,7 +52,7 @@ Think of optional features like add-ons for your car. The basic car works great,
 
 3. **Restart your FastAPI server:**
    ```bash
-   uvicorn app.main:app --reload
+   docker-compose restart api
    ```
 
 ### Redis Lifecycle Flow
@@ -114,7 +114,7 @@ curl http://localhost:8000/health
 
 2. **Restart your FastAPI server:**
    ```bash
-   uvicorn app.main:app --reload
+   docker-compose restart api
    ```
 
 3. **Connect to WebSocket endpoint:**
@@ -175,7 +175,7 @@ websocat ws://localhost:8000/api/v1/ws/chat/test-room?token=your_access_token
 
 4. **Restart your FastAPI server:**
    ```bash
-   uvicorn app.main:app --reload
+   docker-compose restart api
    ```
 
 ### Celery Task Lifecycle
@@ -255,7 +255,7 @@ curl -X GET "http://localhost:8000/api/v1/celery/task-status/{task_id}"
 
 2. **Restart your FastAPI server:**
    ```bash
-   uvicorn app.main:app --reload
+   docker-compose restart api
    ```
 
 ### Email Features
