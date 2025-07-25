@@ -57,7 +57,7 @@ class TestUserCRUD:
             password="TestPassword123!",
         )
         created_user = await crud_user.create_user(db_session, user_data)
-        user = await crud_user.get_user_by_id(db_session, user_id=created_user.id)
+        user = await crud_user.get_user_by_id(db_session, user_id=str(created_user.id))
         assert user is not None
         assert user.email == user_data.email
 

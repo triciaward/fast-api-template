@@ -95,6 +95,30 @@ ruff format .
 ruff check .
 ```
 
+## 🧹 Code Quality (Pre-commit Hooks)
+
+This project uses [pre-commit](https://pre-commit.com/) hooks for code quality. To set them up:
+
+```bash
+./scripts/install_precommit.sh
+```
+
+This script will:
+- Install pre-commit
+- Install git hooks for code formatting and linting
+- Run all hooks on your codebase
+
+You can also manually install the hooks:
+```bash
+pre-commit install
+```
+
+The pre-commit hooks will automatically:
+- Format your code with `black`
+- Check for linting issues with `ruff`
+- Verify type annotations with `mypy`
+- Run on every commit to ensure code quality
+
 ## 📖 What's Included
 
 This project comes with several features out of the box:

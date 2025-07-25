@@ -88,7 +88,13 @@ async def test_admin_user_crud_operations(db_session: AsyncSession) -> None:
     assert user is not None
     from app.schemas.admin import AdminUserUpdate
 
-    update_data = AdminUserUpdate(username="updatedadmin")
+    update_data = AdminUserUpdate(
+        email=None,
+        username="updatedadmin",
+        password=None,
+        is_superuser=None,
+        is_verified=None,
+    )
     updated_user = await admin_user_crud.update_user(
         db_session, str(user.id), update_data
     )

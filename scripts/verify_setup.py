@@ -107,7 +107,7 @@ def check_environment_variables() -> dict[str, Any]:
     return results
 
 
-def check_database_connection() -> bool:
+async def check_database_connection() -> bool:
     """Test database connection."""
     print_header("Database Connection Test")
 
@@ -116,8 +116,8 @@ def check_database_connection() -> bool:
 
         from app.database.database import engine
 
-        with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
             print_success("Database connection successful")
             return True
     except Exception as e:
@@ -345,12 +345,12 @@ def generate_summary_report(
         print("   ./scripts/setup_comprehensive.sh")
 
 
-def run_verification() -> bool:
+async def run_verification() -> bool:
     """Run the complete verification process."""
     try:
         # Run all checks
         env_vars = check_environment_variables()
-        db_connection = check_database_connection()
+        db_connection = await check_database_connection()
         config_loading = check_configuration_loading()
         migrations = check_alembic_migrations()
         docker_services = check_docker_services()
@@ -379,14 +379,16 @@ def run_verification() -> bool:
         return False
 
 
-def main():
+async def main():
     """Main verification function."""
     print("FastAPI Template Setup Verification")
     print("===================================")
 
-    success = run_verification()
+    success = await run_verification()
     return 0 if success else 1
 
 
 if __name__ == "__main__":
-    exit(main())
+    import asyncio
+
+    exit(asyncio.run(main()))
