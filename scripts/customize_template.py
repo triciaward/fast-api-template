@@ -29,6 +29,26 @@ class TemplateCustomizer:
         self.project_root = Path(__file__).parent.parent
         self.replacements: dict[str, str] = {}
 
+        # Check if already customized
+        self.check_already_customized()
+
+    def check_already_customized(self) -> None:
+        """Check if the template has already been customized."""
+        # Check if the directory name is not the default template name
+        if self.project_root.name != "fast-api-template":
+            print("⚠️  Warning: This appears to be an already customized project!")
+            print(f"   Current directory name: {self.project_root.name}")
+            print("   Expected template name: fast-api-template")
+            print("\n   This script is designed to run on the original template.")
+            print("   If you want to customize a new project, please:")
+            print("   1. Clone the template again")
+            print("   2. Run this script on the fresh template")
+
+            confirm = input("\nContinue anyway? (y/N): ").strip().lower()
+            if confirm not in ["y", "yes"]:
+                print("❌ Customization cancelled.")
+                sys.exit(0)
+
     def get_user_input(self) -> None:
         """Get project details from user input."""
         print("🚀 FastAPI Template Customization")
@@ -218,25 +238,100 @@ class TemplateCustomizer:
         return content
 
     def rename_project_directory(self) -> None:
-        """Provide instructions for renaming the project directory."""
+        """Rename the project directory and handle VS Code workspace transition."""
         current_dir = self.project_root.name
         new_name = self.replacements.get("fast-api-template", current_dir)
 
         if current_dir != new_name:
-            print("   📁 Directory Renaming Instructions:")
+            print("   📁 Renaming project directory...")
             print(f"   Current directory: {current_dir}")
-            print(f"   Recommended name: {new_name}")
-            print("   To rename the directory, run these commands:")
-            print("   cd ..")
-            print(f"   mv {current_dir} {new_name}")
-            print(f"   cd {new_name}")
-            print("   ")
-            print(
-                "   ⚠️  Note: Directory renaming is not automatic to prevent data loss."
-            )
-            print("   ⚠️  Please rename manually after reviewing the customization.")
+            print(f"   New name: {new_name}")
+
+            try:
+                # Get the parent directory
+                parent_dir = self.project_root.parent
+                new_path = parent_dir / new_name
+
+                # Check if target directory already exists
+                if new_path.exists():
+                    print(f"   ⚠️  Warning: Directory '{new_name}' already exists!")
+                    print("   Please manually rename or remove the existing directory.")
+                    print("   Commands to run:")
+                    print(f"   cd {parent_dir}")
+                    print(f"   mv {current_dir} {new_name}")
+                    print(f"   cd {new_name}")
+                    return
+
+                # Perform the rename
+                import shutil
+
+                shutil.move(str(self.project_root), str(new_path))
+
+                print(f"   ✅ Successfully renamed directory to: {new_name}")
+                print(f"   📍 New project location: {new_path}")
+
+                # Create VS Code workspace file to help with transition
+                self.create_vscode_workspace(new_path, new_name)
+
+                # Update the project root reference
+                self.project_root = new_path
+
+                print("\n   🔧 VS Code Workspace Instructions:")
+                print("   Since the directory was renamed, you'll need to:")
+                print("   1. Close the current VS Code workspace")
+                print("   2. Open the new directory: File → Open Folder")
+                print(f"   3. Navigate to: {new_path}")
+                print("   4. Or use the workspace file: .vscode/project.code-workspace")
+
+            except Exception as e:
+                print(f"   ❌ Error renaming directory: {e}")
+                print("   Please rename manually:")
+                print("   cd ..")
+                print(f"   mv {current_dir} {new_name}")
+                print(f"   cd {new_name}")
         else:
             print(f"   ✅ Directory name is already correct: {current_dir}")
+
+    def create_vscode_workspace(self, project_path: Path, project_name: str) -> None:
+        """Create a VS Code workspace file to help with the transition."""
+        vscode_dir = project_path / ".vscode"
+        vscode_dir.mkdir(exist_ok=True)
+
+        workspace_content = f"""{{
+    "folders": [
+        {{
+            "name": "{project_name}",
+            "path": "."
+        }}
+    ],
+    "settings": {{
+        "python.defaultInterpreterPath": "./venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "files.exclude": {{
+            "**/__pycache__": true,
+            "**/*.pyc": true,
+            "**/.pytest_cache": true,
+            "**/.mypy_cache": true,
+            "**/.ruff_cache": true,
+            "**/venv": true
+        }}
+    }},
+    "extensions": {{
+        "recommendations": [
+            "ms-python.python",
+            "ms-python.black-formatter",
+            "ms-python.flake8",
+            "ms-python.mypy-type-checker",
+            "charliermarsh.ruff"
+        ]
+    }}
+}}"""
+
+        workspace_file = vscode_dir / "project.code-workspace"
+        with open(workspace_file, "w", encoding="utf-8") as f:
+            f.write(workspace_content)
+
+        print("   📝 Created VS Code workspace: .vscode/project.code-workspace")
 
     def update_git_remote(self) -> None:
         """Update git remote if it points to the template repository."""
@@ -384,7 +479,9 @@ Original template: https://github.com/your-username/fast-api-template
         print("\n🎉 Template customization completed successfully!")
         print("\n📋 Next Steps:")
         print("   1. Review the changes in docs/TEMPLATE_CUSTOMIZATION.md")
-        print("   2. Rename the directory if needed (see instructions above)")
+        print(
+            "   2. If the directory was renamed, close VS Code and reopen the new directory"
+        )
         print("   3. Update your git remote: git remote set-url origin <your-repo-url>")
         print("   4. Run setup: ./scripts/setup_comprehensive.sh")
         print("   5. Start developing your application!")

@@ -52,6 +52,24 @@ fi
 print_info "Starting FastAPI Template Customization..."
 echo
 
+# Check if we're in the template directory
+if [ "$(basename "$PWD")" != "fast-api-template" ]; then
+    print_warning "You're not in the 'fast-api-template' directory!"
+    print_info "Current directory: $(basename "$PWD")"
+    print_info "This script should be run from the original template directory."
+    print_info "If you want to customize a new project, please:"
+    print_info "1. Clone the template again"
+    print_info "2. Navigate to the template directory"
+    print_info "3. Run this script"
+    echo
+    confirm=$(read -p "Continue anyway? (y/N): " -n 1 -r)
+    echo
+    if [[ ! $confirm =~ ^[Yy]$ ]]; then
+        print_error "Customization cancelled."
+        exit 1
+    fi
+fi
+
 # Run the Python customization script
 python3 scripts/customize_template.py
 

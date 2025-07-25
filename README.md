@@ -30,16 +30,23 @@ The script will ask you questions like:
 
 ### Step 4: The Magic Happens
 The script automatically:
-- **Provides instructions** for renaming the project folder to your project slug (e.g., `myawesomeproject_backend`)
+- **Renames the project folder** to your project slug (e.g., `myawesomeproject_backend`)
 - Renames all template references to your project name
 - Updates database names and connection strings
 - Changes import statements throughout the code
 - Updates documentation and README files
 - Modifies configuration files
 - Updates the Docker setup
+- **Creates a VS Code workspace file** to help with the transition
 
 ### Step 5: Set Up Your New Project
-After customization, follow the instructions to rename the folder if needed, then run:
+After customization, the directory will be automatically renamed. If you're using VS Code, you'll need to reopen the project:
+1. Close VS Code
+2. Open the renamed directory: `File → Open Folder`
+3. Navigate to your renamed project folder
+4. Or use the workspace file: `.vscode/project.code-workspace`
+
+Then run:
 ```bash
 cd your_project_name_backend
 ./scripts/setup_comprehensive.sh
