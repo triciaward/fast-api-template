@@ -120,22 +120,29 @@ class TestVerifySetupScript:
         # Check that optional variables are handled
         assert "ENABLE_REDIS" in result["optional"]
 
-    def test_verify_script_checks_database_connection(self):
+    @pytest.mark.asyncio
+    async def test_verify_script_checks_database_connection(self):
         """Test that the verification script checks database connectivity."""
         # Mock successful database connection
         mock_conn = MagicMock()
         mock_engine = MagicMock()
-        mock_engine.connect.return_value.__enter__.return_value = mock_conn
-        mock_conn.execute.return_value = MagicMock()
+        mock_engine.connect.return_value.__aenter__.return_value = mock_conn
+
+        # Create an async mock for the execute method
+        async def mock_execute(*args, **kwargs):
+            return MagicMock()
+
+        mock_conn.execute = mock_execute
 
         # Mock the import inside the function
         with patch("app.database.database.engine", mock_engine):
             from scripts.verify_setup import check_database_connection
 
-            result = check_database_connection()
+            result = await check_database_connection()
             assert result is True
 
-    def test_verify_script_handles_database_connection_failure(self):
+    @pytest.mark.asyncio
+    async def test_verify_script_handles_database_connection_failure(self):
         """Test that the verification script handles database connection failures."""
         # Mock database connection failure
         mock_engine = MagicMock()
@@ -145,7 +152,7 @@ class TestVerifySetupScript:
         with patch("app.database.database.engine", mock_engine):
             from scripts.verify_setup import check_database_connection
 
-            result = check_database_connection()
+            result = await check_database_connection()
             assert result is False
 
     @patch("subprocess.run")
@@ -324,7 +331,8 @@ class TestScriptIntegration:
 
     @patch("subprocess.run")
     @patch("os.getenv")
-    def test_full_setup_workflow(self, mock_getenv, mock_run):
+    @pytest.mark.asyncio
+    async def test_full_setup_workflow(self, mock_getenv, mock_run):
         """Test the complete setup workflow."""
         # Mock environment variables
         mock_getenv.side_effect = lambda var: {
@@ -348,8 +356,13 @@ class TestScriptIntegration:
             # Mock database connection for verification
             mock_conn = MagicMock()
             mock_engine = MagicMock()
-            mock_engine.connect.return_value.__enter__.return_value = mock_conn
-            mock_conn.execute.return_value = MagicMock()
+            mock_engine.connect.return_value.__aenter__.return_value = mock_conn
+
+            # Create an async mock for the execute method
+            async def mock_execute(*args, **kwargs):
+                return MagicMock()
+
+            mock_conn.execute = mock_execute
 
             with patch("app.database.database.engine", mock_engine):
                 from scripts.verify_setup import run_verification
@@ -359,7 +372,7 @@ class TestScriptIntegration:
                 assert setup_result is True
 
                 # Run verification
-                verify_result = run_verification()
+                verify_result = await run_verification()
                 assert verify_result is True
 
     def test_script_error_handling(self):
