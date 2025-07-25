@@ -4,6 +4,7 @@ Python module version of the comprehensive setup script.
 This module provides functions that can be imported and tested.
 """
 
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -89,6 +90,36 @@ FROM_NAME=FastAPI Template
     env_path.write_text(env_content)
 
 
+def get_python_command() -> str:
+    """Get the appropriate Python command (python3.11 or python3)."""
+    # Try python3.11 first
+    if shutil.which("python3.11"):
+        return "python3.11"
+    # Fall back to python3
+    elif shutil.which("python3"):
+        return "python3"
+    else:
+        raise RuntimeError("Python 3.11+ is required but not found")
+
+
+def check_python_version() -> bool:
+    """Check if Python 3.11+ is available."""
+    try:
+        python_cmd = get_python_command()
+        result = subprocess.run(
+            [python_cmd, "--version"], capture_output=True, text=True, check=True
+        )
+        version = result.stdout.strip()
+
+        # Parse version (e.g., "Python 3.11.5")
+        version_parts = version.split()[1].split(".")
+        major, minor = int(version_parts[0]), int(version_parts[1])
+
+        return major >= 3 and minor >= 11
+    except (subprocess.CalledProcessError, FileNotFoundError, IndexError):
+        return False
+
+
 def check_docker_services() -> bool:
     """Check if Docker services are available."""
     try:
@@ -98,6 +129,167 @@ def check_docker_services() -> bool:
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
+
+
+def create_alembic_ini(project_root: Path, db_name: str = "fastapi_template") -> None:
+    """Create alembic.ini file with proper configuration."""
+    alembic_content = f"""# A generic, single database configuration.
+
+[alembic]
+# path to migration scripts
+script_location = alembic
+
+# template used to generate migration file names; The default value is %%(rev)s_%%(slug)s
+# Uncomment the line below if you want the files to be prepended with date and time
+# file_template = %%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s
+
+# sys.path path, will be prepended to sys.path if present.
+# defaults to the current working directory.
+prepend_sys_path = .
+
+# timezone to use when rendering the date within the migration file
+# as well as the filename.
+# If specified, requires the python-dateutil library that can be
+# installed by adding `alembic[tz]` to the pip requirements
+# string value is passed to dateutil.tz.gettz()
+# leave blank for localtime
+# timezone =
+
+# max length of characters to apply to the
+# "slug" field
+# truncate_slug_length = 40
+
+# set to 'true' to run the environment during
+# the 'revision' command, regardless of autogenerate
+# revision_environment = false
+
+# set to 'true' to allow .pyc and .pyo files without
+# a source .py file to be detected as revisions in the
+# versions/ directory
+# sourceless = false
+
+# version number format
+version_num_format = %04d
+
+# version path separator; As mentioned above, this is the character used to split
+# version_locations. The default within new alembic.ini files is "os", which uses
+# os.pathsep. If this key is omitted entirely, it falls back to the legacy
+# behavior of splitting on spaces and/or commas.
+# Valid values for version_path_separator are:
+#
+# version_path_separator = :
+# version_path_separator = ;
+# version_path_separator = space
+version_path_separator = os
+
+# the output encoding used when revision files
+# are written from script.py.mako
+# output_encoding = utf-8
+
+sqlalchemy.url = postgresql://postgres:dev_password_123@localhost:5432/{db_name}
+
+
+[post_write_hooks]
+# post_write_hooks defines scripts or Python functions that are run
+# on newly generated revision scripts.  See the documentation for further
+# detail and examples
+
+# format using "black" - use the console_scripts runner, against the "black" entrypoint
+# hooks = black
+# black.type = console_scripts
+# black.entrypoint = black
+# black.options = -l 79 REVISION_SCRIPT_FILENAME
+
+# lint with attempts to fix using "ruff" - use the exec runner, execute a binary
+# hooks = ruff
+# ruff.type = exec
+# ruff.executable = %(here)s/.venv/bin/ruff
+# ruff.options = --fix REVISION_SCRIPT_FILENAME
+
+# Logging configuration
+[loggers]
+keys = root,sqlalchemy,alembic
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARN
+handlers = console
+qualname =
+
+[logger_sqlalchemy]
+level = WARN
+handlers =
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+"""
+
+    alembic_path = project_root / "alembic.ini"
+    alembic_path.write_text(alembic_content)
+
+
+def create_database(db_name: str, test_db_name: str = None) -> bool:
+    """Create database and test database if they don't exist."""
+    try:
+        # Create main database
+        subprocess.run(
+            [
+                "docker-compose",
+                "exec",
+                "-T",
+                "postgres",
+                "psql",
+                "-U",
+                "postgres",
+                "-c",
+                f'CREATE DATABASE "{db_name}";',
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        # Create test database if specified
+        if test_db_name:
+            subprocess.run(
+                [
+                    "docker-compose",
+                    "exec",
+                    "-T",
+                    "postgres",
+                    "psql",
+                    "-U",
+                    "postgres",
+                    "-c",
+                    f'CREATE DATABASE "{test_db_name}";',
+                ],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
+        return True
+    except subprocess.CalledProcessError:
+        # Database might already exist, which is fine
+        return True
 
 
 def run_migrations() -> bool:
@@ -122,13 +314,36 @@ def run_migrations() -> bool:
 def run_setup_workflow(project_root: Path) -> bool:
     """Run the complete setup workflow."""
     try:
+        # Check Python version
+        if not check_python_version():
+            return False
+
         # Create .env file if it doesn't exist
         env_path = project_root / ".env"
         if not env_path.exists():
             create_env_file(env_path)
 
+        # Create alembic.ini if it doesn't exist
+        alembic_path = project_root / "alembic.ini"
+        if not alembic_path.exists():
+            # Get database name from .env or use default
+            db_name = "fastapi_template"
+            if env_path.exists():
+                env_content = env_path.read_text()
+                for line in env_content.split("\n"):
+                    if line.startswith("POSTGRES_DB="):
+                        db_name = line.split("=", 1)[1]
+                        break
+            create_alembic_ini(project_root, db_name)
+
         # Check Docker services
         docker_available = check_docker_services()
+
+        # Create database if Docker is available
+        if docker_available:
+            db_name = "fastapi_template"
+            test_db_name = f"{db_name}_test"
+            create_database(db_name, test_db_name)
 
         # Run migrations
         migrations_success = run_migrations()

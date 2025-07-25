@@ -31,6 +31,8 @@ pre-commit install
 docker-compose up -d
 ```
 
+> **🎯 What's New**: The setup script now automatically handles common issues like Python version detection, missing alembic.ini files, database creation, and Docker container naming conflicts!
+
 ### Option 2: Use as Reference
 
 ```bash
@@ -52,18 +54,30 @@ docker-compose up -d
 
 The template includes a powerful customization script that transforms all template references into your project-specific names:
 
+### 🆕 **Recent Improvements**
+
+The template has been enhanced with automatic fixes for common setup issues:
+
+- **🔍 Smart Python Detection**: Automatically finds and uses `python3.11` if available
+- **📄 Auto alembic.ini**: Creates missing `alembic.ini` files with proper configuration
+- **🗄️ Database Auto-Creation**: Creates main and test databases before running migrations
+- **🐳 Container Isolation**: Uses `COMPOSE_PROJECT_NAME` to prevent Docker container conflicts
+- **🔄 Migration Handling**: Automatically resolves migration conflicts with existing tables
+- **📁 Organized Documentation**: Customization logs saved in `docs/` folder
+
 ### What Gets Customized:
 - **Project Name**: "FastAPI Template" → "Your Project Name"
 - **Project Slug**: "fast-api-template" → "your_project_name"
 - **Database Name**: "fastapi_template" → "your_project_name"
-- **Docker Containers**: "fast-api-template-postgres-1" → "your_project_name-postgres-1"
+- **Docker Containers**: All containers get unique names using `COMPOSE_PROJECT_NAME`
 - **Documentation**: All references updated to reflect your project
 - **Configuration Files**: Database URLs, container names, etc.
+- **Environment Variables**: `COMPOSE_PROJECT_NAME` added to `.env` to prevent container conflicts
 
 ### Customization Process:
 1. Run `./scripts/customize_template.sh`
 2. Enter your project details when prompted
-3. Review the changes in `TEMPLATE_CUSTOMIZATION.md`
+3. Review the changes in `docs/TEMPLATE_CUSTOMIZATION.md`
 4. Update your git remote to point to your new repository
 5. **Important**: Update the license and README.md branding to reflect your project
 6. Start developing!

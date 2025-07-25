@@ -68,7 +68,7 @@ Now you have a fully working project with:
 If you're new to this project, here's how to get it running:
 
 ### Prerequisites
-- Python 3.8 or higher
+- Python 3.11 or higher
 - PostgreSQL database
 - Redis (optional, for caching)
 

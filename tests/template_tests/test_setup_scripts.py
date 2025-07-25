@@ -87,6 +87,44 @@ class TestSetupComprehensiveScript:
         assert result is True
         assert mock_run.call_count == 2
 
+    @patch("subprocess.run")
+    def test_python_version_detection(self, mock_run):
+        """Test Python version detection functionality."""
+        # Mock Python 3.11 version check
+        mock_run.return_value.returncode = 0
+        mock_run.return_value.stdout = "Python 3.11.5"
+
+        from scripts.setup_comprehensive import check_python_version, get_python_command
+
+        # Test Python command detection
+        python_cmd = get_python_command()
+        assert python_cmd in ["python3.11", "python3"]
+
+        # Test version check
+        result = check_python_version()
+        assert result is True
+
+    @patch("subprocess.run")
+    def test_alembic_ini_creation(self, mock_run):
+        """Test alembic.ini creation functionality."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            from scripts.setup_comprehensive import create_alembic_ini
+
+            # Test alembic.ini creation
+            create_alembic_ini(project_root, "test_db")
+
+            alembic_path = project_root / "alembic.ini"
+            assert alembic_path.exists()
+
+            content = alembic_path.read_text()
+            assert "script_location = alembic" in content
+            assert (
+                "sqlalchemy.url = postgresql://postgres:dev_password_123@localhost:5432/test_db"
+                in content
+            )
+
 
 @pytest.mark.template_only
 class TestVerifySetupScript:
@@ -331,9 +369,13 @@ class TestScriptIntegration:
 
     @patch("subprocess.run")
     @patch("os.getenv")
+    @patch("scripts.setup_comprehensive.check_python_version")
     @pytest.mark.asyncio
-    async def test_full_setup_workflow(self, mock_getenv, mock_run):
+    async def test_full_setup_workflow(self, mock_python_check, mock_getenv, mock_run):
         """Test the complete setup workflow."""
+        # Mock Python version check to return True
+        mock_python_check.return_value = True
+
         # Mock environment variables
         mock_getenv.side_effect = lambda var: {
             "DATABASE_URL": "postgresql://test",

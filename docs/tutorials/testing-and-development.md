@@ -44,7 +44,7 @@ The template uses Docker containers for testing:
 docker-compose up -d postgres redis
 
 # Create test database
-docker exec -it fast-api-template-postgres-1 psql -U postgres -c "CREATE DATABASE fastapi_template_test;"
+docker exec -it ${COMPOSE_PROJECT_NAME:-fast-api-template}-postgres-1 psql -U postgres -c "CREATE DATABASE fastapi_template_test;"
 
 # Run tests
 pytest

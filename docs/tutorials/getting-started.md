@@ -114,9 +114,10 @@ The template includes a powerful customization script that transforms all templa
 - **Project Name**: "FastAPI Template" → "Your Project Name"
 - **Project Slug**: "fast-api-template" → "your_project_name"
 - **Database Name**: "fastapi_template" → "your_project_name"
-- **Docker Containers**: "fast-api-template-postgres-1" → "your_project_name-postgres-1"
+- **Docker Containers**: All containers get unique names using `COMPOSE_PROJECT_NAME`
 - **Documentation**: All references updated to reflect your project
 - **Configuration Files**: Database URLs, container names, etc.
+- **Environment Variables**: `COMPOSE_PROJECT_NAME` added to `.env` to prevent container conflicts
 
 ### Run the Customization Script:
 ```bash
@@ -148,8 +149,9 @@ Database name: myawesomeproject_backend
 ```
 
 ### After Customization:
-1. Review the changes in `TEMPLATE_CUSTOMIZATION.md`
-2. Update your git remote to point to your new repository:
+1. Review the changes in `docs/TEMPLATE_CUSTOMIZATION.md`
+2. **Docker Container Naming**: The customization script adds `COMPOSE_PROJECT_NAME` to your `.env` file, ensuring each project gets unique container names and preventing conflicts when running multiple projects
+3. Update your git remote to point to your new repository:
    ```bash
    git remote set-url origin <your-new-repo-url>
    git remote add upstream <template-repo-url>  # Optional: keep template as upstream
@@ -507,6 +509,25 @@ fast-api-template/
 ---
 
 ## 🚨 Common Issues and Solutions
+
+### ✅ **Automatic Fixes Included**
+
+The template now includes automatic fixes for common setup issues:
+
+- **Python Version Detection**: Automatically detects and uses `python3.11` if available
+- **Missing alembic.ini**: Automatically creates `alembic.ini` with proper configuration
+- **Database Creation**: Automatically creates main and test databases before migrations
+- **Docker Container Conflicts**: Uses `COMPOSE_PROJECT_NAME` to prevent naming conflicts
+- **Migration Conflicts**: Automatically handles existing tables with `alembic stamp head`
+
+### Docker Container Naming Conflicts
+**Problem**: When creating multiple projects from the template, Docker containers might have the same names, causing conflicts.
+
+**Solution**: The template customization script automatically adds `COMPOSE_PROJECT_NAME` to your `.env` file, ensuring each project gets unique container names. If you encounter container conflicts:
+
+1. **Check your `.env` file** - ensure `COMPOSE_PROJECT_NAME` is set to your project name
+2. **Stop existing containers** - `docker-compose down` in other project directories  
+3. **Use different project names** - each project should have a unique name during customization
 
 ### "Port already in use" error
 If you get an error about port 8000 being in use, try:

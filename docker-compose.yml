@@ -3,6 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-postgres-1
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -18,6 +19,7 @@ services:
   # pgBouncer for connection pooling (optional)
   pgbouncer:
     image: edoburu/pgbouncer:1.18.0
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-pgbouncer-1
     environment:
       DATABASES_HOST: postgres
       DATABASES_PORT: 5432
@@ -43,6 +45,7 @@ services:
   # Optional Redis service - only used when ENABLE_REDIS=true
   redis:
     image: redis:7-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-redis-1
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
@@ -57,6 +60,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-api-1
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379/0
@@ -86,6 +90,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-celery-worker-1
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379/0
@@ -113,6 +118,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-flower-1
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379/0
@@ -140,6 +146,7 @@ services:
   # Optional GlitchTip error monitoring service
   glitchtip:
     image: glitchtip/glitchtip:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-glitchtip-1
     environment:
       - DJANGO_SETTINGS_MODULE=glitchtip.settings.production
       - GLITCHTIP_SECRET_KEY=${GLITCHTIP_SECRET_KEY:-your-secret-key-here}
@@ -164,8 +171,11 @@ services:
 
 volumes:
   postgres_data:
+    name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-postgres_data
   redis_data:
+    name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-redis_data
 
 networks:
   app-network:
+    name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-app-network
     driver: bridge 

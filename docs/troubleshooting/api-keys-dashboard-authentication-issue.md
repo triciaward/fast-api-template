@@ -34,7 +34,7 @@ The fundamental problem is that users are trying to access an API endpoint desig
 curl -X GET "http://localhost:8000/api/v1/health"
 
 # Check if superuser exists
-docker exec fast-api-template-postgres-1 psql -U postgres -d fastapi_template -c "SELECT email, is_superuser, is_verified FROM users WHERE is_superuser = true;"
+docker exec ${COMPOSE_PROJECT_NAME:-fast-api-template}-postgres-1 psql -U postgres -d fastapi_template -c "SELECT email, is_superuser, is_verified FROM users WHERE is_superuser = true;"
 ```
 
 ### 2. Get JWT Token via API Login

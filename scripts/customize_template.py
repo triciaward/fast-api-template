@@ -113,6 +113,9 @@ class TemplateCustomizer:
             "fast-api-template-postgres": f"{docker_prefix}-postgres",
         }
 
+        # Store Docker project name for environment file
+        self.docker_project_name = docker_prefix
+
     def get_files_to_process(self) -> list[Path]:
         """Get list of files that need template customization."""
         files_to_process = []
@@ -267,6 +270,38 @@ class TemplateCustomizer:
             # Git not available or not a git repo
             pass
 
+    def update_env_file(self) -> None:
+        """Update or create .env file with project-specific Docker settings."""
+        env_file = self.project_root / ".env"
+
+        # Read existing .env file if it exists
+        env_content = ""
+        if env_file.exists():
+            with open(env_file, encoding="utf-8") as f:
+                env_content = f.read()
+
+        # Add or update COMPOSE_PROJECT_NAME
+        if "COMPOSE_PROJECT_NAME=" in env_content:
+            # Update existing line
+            import re
+
+            env_content = re.sub(
+                r"COMPOSE_PROJECT_NAME=.*",
+                f"COMPOSE_PROJECT_NAME={self.docker_project_name}",
+                env_content,
+            )
+        else:
+            # Add new line
+            env_content += f"\n# Docker Compose project name (prevents container naming conflicts)\nCOMPOSE_PROJECT_NAME={self.docker_project_name}\n"
+
+        # Write back to file
+        with open(env_file, "w", encoding="utf-8") as f:
+            f.write(env_content)
+
+        print(
+            f"   ✅ Updated: .env (added COMPOSE_PROJECT_NAME={self.docker_project_name})"
+        )
+
     def create_customization_log(self) -> None:
         """Create a log file documenting the customization."""
         log_content = f"""# Template Customization Log
@@ -284,10 +319,11 @@ This file documents the customization performed on the FastAPI template.
 ## What Was Changed
 - All template references replaced with project-specific names
 - Database configuration updated
-- Docker container names updated
+- Docker container names updated (using COMPOSE_PROJECT_NAME to prevent conflicts)
 - Documentation updated to reflect new project name
 - Configuration files updated
 - README.md customized for your project (template docs preserved in docs/TEMPLATE_README.md)
+- .env file updated with COMPOSE_PROJECT_NAME to ensure unique container names
 
 ## Next Steps
 1. Review the changes made to ensure they meet your requirements
@@ -300,7 +336,11 @@ This project was created using the FastAPI Template.
 Original template: https://github.com/your-username/fast-api-template
 """
 
-        log_file = self.project_root / "TEMPLATE_CUSTOMIZATION.md"
+        # Create docs directory if it doesn't exist
+        docs_dir = self.project_root / "docs"
+        docs_dir.mkdir(exist_ok=True)
+
+        log_file = docs_dir / "TEMPLATE_CUSTOMIZATION.md"
         with open(log_file, "w", encoding="utf-8") as f:
             f.write(log_content)
 
@@ -330,16 +370,19 @@ Original template: https://github.com/your-username/fast-api-template
         print(f"   Files processed: {len(files_to_process)}")
         print(f"   Files updated: {processed_count}")
 
+        # Update .env file with Docker project name
+        self.update_env_file()
+
         # Create customization log
         self.create_customization_log()
-        print("   📝 Created: TEMPLATE_CUSTOMIZATION.md")
+        print("   📝 Created: docs/TEMPLATE_CUSTOMIZATION.md")
 
         # Update git remote info
         self.update_git_remote()
 
         print("\n🎉 Template customization completed successfully!")
         print("\n📋 Next Steps:")
-        print("   1. Review the changes in TEMPLATE_CUSTOMIZATION.md")
+        print("   1. Review the changes in docs/TEMPLATE_CUSTOMIZATION.md")
         print("   2. Update your git remote: git remote set-url origin <your-repo-url>")
         print("   3. Run setup: ./scripts/setup_comprehensive.sh")
         print("   4. Start developing your application!")

@@ -126,7 +126,7 @@ class TestTemplateCustomizer:
         """Test that create_customization_log creates the expected log file."""
         customizer.create_customization_log()
 
-        log_file = customizer.project_root / "TEMPLATE_CUSTOMIZATION.md"
+        log_file = customizer.project_root / "docs" / "TEMPLATE_CUSTOMIZATION.md"
         assert log_file.exists()
 
         content = log_file.read_text()
@@ -315,7 +315,7 @@ def read_root():
         customizer.create_customization_log()
 
         # Check the log file exists and has correct content
-        log_file = temp_project_dir / "TEMPLATE_CUSTOMIZATION.md"
+        log_file = temp_project_dir / "docs" / "TEMPLATE_CUSTOMIZATION.md"
         assert log_file.exists()
 
         content = log_file.read_text()

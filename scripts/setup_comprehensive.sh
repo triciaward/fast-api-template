@@ -54,8 +54,13 @@ echo ""
 # =============================================================================
 print_header "1. Checking Prerequisites"
 
-# Check Python version
-if command_exists python3; then
+# Check Python version - try python3.11 first, then python3
+PYTHON_CMD=""
+if command_exists python3.11; then
+    PYTHON_CMD="python3.11"
+    python_version=$(python3.11 --version 2>&1 | cut -d' ' -f2)
+    print_success "Found Python 3.11: $python_version"
+elif command_exists python3; then
     python_version=$(python3 --version 2>&1 | cut -d' ' -f2)
     print_success "Python version: $python_version"
     
@@ -65,12 +70,16 @@ if command_exists python3; then
     
     if [ "$python_major" -lt 3 ] || ([ "$python_major" -eq 3 ] && [ "$python_minor" -lt 11 ]); then
         print_error "Python 3.11+ is required. Current version: $python_version"
+        print_status "Please install Python 3.11+ or ensure python3.11 command is available"
         exit 1
     fi
+    PYTHON_CMD="python3"
 else
     print_error "Python 3 is not installed. Please install Python 3.11+ first."
     exit 1
 fi
+
+print_success "Using Python command: $PYTHON_CMD"
 
 # Check Docker
 if command_exists docker; then
@@ -96,7 +105,7 @@ print_header "2. Setting up Virtual Environment"
 
 if [ ! -d "venv" ]; then
     print_status "Creating virtual environment..."
-    python3 -m venv venv
+    $PYTHON_CMD -m venv venv
     print_success "Virtual environment created"
 else
     print_success "Virtual environment already exists"
@@ -326,7 +335,125 @@ if [ -f "alembic.ini" ]; then
     fi
 else
     print_error "alembic.ini not found! This is required for database migrations."
-    exit 1
+    print_status "Creating alembic.ini with proper configuration..."
+    
+    # Get database name from .env file or use default
+    DB_NAME="fastapi_template"
+    if [ -f ".env" ]; then
+        DB_NAME=$(grep "^POSTGRES_DB=" .env | cut -d'=' -f2 || echo "fastapi_template")
+    fi
+    
+    cat > alembic.ini << EOF
+# A generic, single database configuration.
+
+[alembic]
+# path to migration scripts
+script_location = alembic
+
+# template used to generate migration file names; The default value is %%(rev)s_%%(slug)s
+# Uncomment the line below if you want the files to be prepended with date and time
+# file_template = %%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s
+
+# sys.path path, will be prepended to sys.path if present.
+# defaults to the current working directory.
+prepend_sys_path = .
+
+# timezone to use when rendering the date within the migration file
+# as well as the filename.
+# If specified, requires the python-dateutil library that can be
+# installed by adding `alembic[tz]` to the pip requirements
+# string value is passed to dateutil.tz.gettz()
+# leave blank for localtime
+# timezone =
+
+# max length of characters to apply to the
+# "slug" field
+# truncate_slug_length = 40
+
+# set to 'true' to run the environment during
+# the 'revision' command, regardless of autogenerate
+# revision_environment = false
+
+# set to 'true' to allow .pyc and .pyo files without
+# a source .py file to be detected as revisions in the
+# versions/ directory
+# sourceless = false
+
+# version number format
+version_num_format = %04d
+
+# version path separator; As mentioned above, this is the character used to split
+# version_locations. The default within new alembic.ini files is "os", which uses
+# os.pathsep. If this key is omitted entirely, it falls back to the legacy
+# behavior of splitting on spaces and/or commas.
+# Valid values for version_path_separator are:
+#
+# version_path_separator = :
+# version_path_separator = ;
+# version_path_separator = space
+version_path_separator = os
+
+# the output encoding used when revision files
+# are written from script.py.mako
+# output_encoding = utf-8
+
+sqlalchemy.url = postgresql://postgres:dev_password_123@localhost:5432/${DB_NAME}
+
+
+[post_write_hooks]
+# post_write_hooks defines scripts or Python functions that are run
+# on newly generated revision scripts.  See the documentation for further
+# detail and examples
+
+# format using "black" - use the console_scripts runner, against the "black" entrypoint
+# hooks = black
+# black.type = console_scripts
+# black.entrypoint = black
+# black.options = -l 79 REVISION_SCRIPT_FILENAME
+
+# lint with attempts to fix using "ruff" - use the exec runner, execute a binary
+# hooks = ruff
+# ruff.type = exec
+# ruff.executable = %(here)s/.venv/bin/ruff
+# ruff.options = --fix REVISION_SCRIPT_FILENAME
+
+# Logging configuration
+[loggers]
+keys = root,sqlalchemy,alembic
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARN
+handlers = console
+qualname =
+
+[logger_sqlalchemy]
+level = WARN
+handlers =
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+EOF
+    
+    print_success "Created alembic.ini with proper configuration"
 fi
 
 # =============================================================================
@@ -355,9 +482,53 @@ else
 fi
 
 # =============================================================================
-# 6. Run Database Migrations
+# 6. Create Database (if needed)
 # =============================================================================
-print_header "6. Running Database Migrations"
+print_header "6. Creating Database"
+
+# Get database name from .env file
+DB_NAME="fastapi_template"
+if [ -f ".env" ]; then
+    DB_NAME=$(grep "^POSTGRES_DB=" .env | cut -d'=' -f2 || echo "fastapi_template")
+fi
+
+print_status "Checking if database '$DB_NAME' exists..."
+
+# Try to create the database if it doesn't exist
+if command_exists docker && docker-compose ps postgres | grep -q "Up"; then
+    # Check if database exists by trying to connect to it
+    if docker-compose exec -T postgres psql -U postgres -d "$DB_NAME" -c "SELECT 1;" >/dev/null 2>&1; then
+        print_success "Database '$DB_NAME' already exists"
+    else
+        print_status "Creating database '$DB_NAME'..."
+        if docker-compose exec -T postgres psql -U postgres -c "CREATE DATABASE \"$DB_NAME\";"; then
+            print_success "Database '$DB_NAME' created successfully"
+        else
+            print_warning "Failed to create database. It might already exist or there's a permission issue."
+        fi
+    fi
+    
+    # Also create test database
+    TEST_DB_NAME="${DB_NAME}_test"
+    print_status "Checking if test database '$TEST_DB_NAME' exists..."
+    if docker-compose exec -T postgres psql -U postgres -d "$TEST_DB_NAME" -c "SELECT 1;" >/dev/null 2>&1; then
+        print_success "Test database '$TEST_DB_NAME' already exists"
+    else
+        print_status "Creating test database '$TEST_DB_NAME'..."
+        if docker-compose exec -T postgres psql -U postgres -c "CREATE DATABASE \"$TEST_DB_NAME\";"; then
+            print_success "Test database '$TEST_DB_NAME' created successfully"
+        else
+            print_warning "Failed to create test database. It might already exist or there's a permission issue."
+        fi
+    fi
+else
+    print_warning "PostgreSQL not running via Docker. Please ensure database '$DB_NAME' exists manually."
+fi
+
+# =============================================================================
+# 7. Run Database Migrations
+# =============================================================================
+print_header "7. Running Database Migrations"
 
 # Set PYTHONPATH for alembic
 export PYTHONPATH=.
@@ -377,9 +548,9 @@ else
 fi
 
 # =============================================================================
-# 7. Create Initial Superuser (Optional)
+# 8. Create Initial Superuser (Optional)
 # =============================================================================
-print_header "7. Setting up Initial Superuser"
+print_header "8. Setting up Initial Superuser"
 
 if [ -f "app/bootstrap_superuser.py" ]; then
     print_success "Bootstrap script found at app/bootstrap_superuser.py"
@@ -387,7 +558,7 @@ if [ -f "app/bootstrap_superuser.py" ]; then
     # Check if superuser credentials are set
     if grep -q "FIRST_SUPERUSER=" .env && ! grep -q "# FIRST_SUPERUSER=" .env; then
         print_status "Superuser credentials found in .env, creating superuser..."
-        if python app/bootstrap_superuser.py; then
+        if $PYTHON_CMD app/bootstrap_superuser.py; then
             print_success "Superuser created successfully"
         else
             print_warning "Failed to create superuser. You can create one manually later."
@@ -403,9 +574,9 @@ else
 fi
 
 # =============================================================================
-# 8. Setup Verification
+# 9. Setup Verification
 # =============================================================================
-print_header "8. Verifying Setup"
+print_header "9. Verifying Setup"
 
 # Test database connection
 print_status "Testing database connection..."
