@@ -151,11 +151,11 @@ Database name: myawesomeproject_backend
 ### After Customization:
 1. Review the changes in `docs/TEMPLATE_CUSTOMIZATION.md`
 2. **Docker Container Naming**: The customization script adds `COMPOSE_PROJECT_NAME` to your `.env` file, ensuring each project gets unique container names and preventing conflicts when running multiple projects
-3. **VS Code Workspace**: If you're using VS Code and the directory was renamed, you'll need to reopen the project:
-   - Close the current VS Code workspace
-   - Open the new directory: `File → Open Folder`
-   - Navigate to the renamed project directory
-   - Or use the created workspace file: `.vscode/project.code-workspace`
+3. **VS Code Workspace**: Follow the directory renaming instructions provided by the script:
+   - Close VS Code completely
+   - Rename the directory using the provided commands
+   - Reopen the renamed directory in VS Code
+   - Or use the workspace file: `.vscode/project.code-workspace`
 4. Update your git remote to point to your new repository:
    ```bash
    git remote set-url origin <your-new-repo-url>
@@ -812,11 +812,11 @@ pip install -r requirements.txt
 **Problem:** Project disappeared from VS Code after customization
 **Solution:**
 ```bash
-# The customization script renames the directory, causing VS Code to lose track
-# Close VS Code completely, then:
-# 1. Open VS Code
-# 2. File → Open Folder
-# 3. Navigate to the renamed project directory
+# The customization script provides instructions to rename the directory
+# Follow the instructions provided by the script:
+# 1. Close VS Code completely
+# 2. Rename the directory using the provided commands
+# 3. Reopen the renamed directory in VS Code
 # 4. Or use the workspace file: .vscode/project.code-workspace
 ```
 

@@ -175,29 +175,24 @@ class TestTemplateCustomizer:
         customizer.update_git_remote()
 
     def test_rename_project_directory(self, customizer):
-        """Test that rename_project_directory actually renames the directory."""
+        """Test that rename_project_directory provides instructions and creates workspace."""
         current_dir = customizer.project_root.name
         new_name = customizer.replacements.get("fast-api-template", "test_project")
 
-        # Test that the method actually renames the directory
+        # Test that the method provides instructions without actually renaming
         if current_dir != new_name:
-            # Store the parent directory for verification
-            parent_dir = customizer.project_root.parent
-
             # Should not raise any exceptions
             customizer.rename_project_directory()
 
-            # Directory should be renamed
+            # Directory should still exist with original name
             assert customizer.project_root.exists()
-            assert customizer.project_root.name == new_name
+            assert customizer.project_root.name == current_dir
 
-            # Verify the old directory name no longer exists
-            old_path = parent_dir / current_dir
-            assert not old_path.exists()
-
-            # Verify the new directory name exists
-            new_path = parent_dir / new_name
-            assert new_path.exists()
+            # Verify VS Code workspace file was created
+            workspace_file = (
+                customizer.project_root / ".vscode" / "project.code-workspace"
+            )
+            assert workspace_file.exists()
 
     def test_rename_project_directory_same_name(self, customizer):
         """Test that rename_project_directory handles same directory name."""
