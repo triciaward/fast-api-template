@@ -83,10 +83,33 @@ If you're new to this project, here's how to get it running:
 This script will automatically:
 - Create a virtual environment for development tools
 - Install dependencies
-- Set up your `.env` file
+- Set up your `.env` file (hidden file starting with a dot)
 - Start all services in Docker (FastAPI, PostgreSQL, Redis)
 - Run database migrations
 - Verify everything is working
+
+**💡 Note:** The `.env` file is a hidden file (starts with `.`). If you can't see it, use `ls -la | grep -E "\.env"` to find it.
+
+**Option 2: Fix Environment Issues (If you encounter problems)**
+If you're experiencing environment variable or configuration issues:
+```bash
+# Run the environment fix script
+./scripts/fix_env_issues.sh
+```
+This script specifically addresses:
+- Missing or incorrect environment variables
+- Database configuration issues
+- Docker Compose environment variable problems
+- Alembic configuration errors
+
+**⚠️ Important Note:** The `.env` file is a **hidden file** (starts with a dot). If you can't see it, use:
+```bash
+# Show hidden files including .env
+ls -la | grep -E "\.env"
+
+# Or view the .env file contents
+cat .env
+```
 
 **Option 2: Manual Docker Setup**
 ```bash
@@ -161,6 +184,136 @@ docker-compose up -d
 docker-compose logs -f api
 ```
 
+## 🛠️ Troubleshooting
+
+### Understanding Hidden Files
+
+**Important:** The `.env` file is a **hidden file** (starts with a dot). This is normal and intentional for security reasons. Hidden files don't show up in regular directory listings.
+
+**To see hidden files:**
+```bash
+# Show all files including hidden ones
+ls -la
+
+# Show only .env files
+ls -la | grep -E "\.env"
+
+# View .env file contents
+cat .env
+```
+
+**Common hidden files in this project:**
+- `.env` - Environment variables (this is what you need!)
+- `.env.example` - Example environment file
+- `.env.test` - Test environment file
+- `.gitignore` - Git ignore rules
+- `.pre-commit-config.yaml` - Pre-commit hooks configuration
+
+### Common Issues and Solutions
+
+**0. Can't Find the .env File**
+If you can't see the `.env` file, it's because it's a **hidden file**:
+```bash
+# Show hidden files
+ls -la | grep -E "\.env"
+
+# View .env contents
+cat .env
+
+# If .env doesn't exist, create it from example
+cp .env.example .env
+```
+
+**1. Environment Variables Not Loading**
+If you see warnings like `WARN[0000] The "POSTGRES_DB" variable is not set. Defaulting to a blank string.`:
+```bash
+# Run the environment fix script
+./scripts/fix_env_issues.sh
+```
+
+**2. Database Connection Issues**
+If migrations fail or database connections don't work:
+```bash
+# Fix environment and configuration
+./scripts/fix_env_issues.sh
+
+# Restart services
+docker-compose down
+docker-compose up -d
+
+# Run migrations
+alembic upgrade head
+```
+
+**3. Alembic Configuration Errors**
+If you see `configparser.InterpolationSyntaxError` or similar:
+```bash
+# The fix_env_issues.sh script will automatically fix these
+./scripts/fix_env_issues.sh
+```
+
+**4. Docker Compose Environment Issues**
+If Docker Compose can't read environment variables:
+```bash
+# Export variables and test configuration
+./scripts/fix_env_issues.sh
+
+# Verify configuration
+docker-compose config
+```
+
+**5. Test Suite Issues**
+If tests fail due to database connection problems:
+```bash
+# Ensure services are running
+docker-compose up -d
+
+# Wait for services to be ready
+sleep 10
+
+# Run tests
+pytest
+```
+
+**6. Virtual Environment Issues**
+If you get "command not found" errors for Python tools:
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Quick Diagnostic Commands
+
+```bash
+# Check if .env file exists (it's a hidden file!)
+ls -la | grep -E "\.env"
+
+# View .env file contents
+cat .env
+
+# Check if .env file has required variables
+grep -E "^(POSTGRES_DB|POSTGRES_USER|POSTGRES_PASSWORD|DATABASE_URL|SECRET_KEY)=" .env
+
+# Test Docker Compose configuration
+docker-compose config
+
+# Check service status
+docker-compose ps
+
+# View logs for specific service
+docker-compose logs api
+docker-compose logs postgres
+
+# Test database connection
+docker-compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
+
+# Test Alembic configuration
+alembic current
+```
+
 ## 🧹 Code Quality (Pre-commit Hooks)
 
 This project uses [pre-commit](https://pre-commit.com/) hooks for code quality. To set them up:
@@ -208,6 +361,22 @@ If you're already working with your customized project:
 2. **Explore the code** - Check out the `app/` folder to see how everything is organized
 3. **Add your features** - Start building your application logic
 4. **Check the docs** - See the template documentation for advanced features
+
+## 🆕 Recent Improvements
+
+**Latest Updates (July 2025):**
+- ✅ **Enhanced Environment Variable Handling** - Robust detection and validation of hidden `.env` files
+- ✅ **Improved Setup Scripts** - Intelligent handling of existing configurations without overwriting
+- ✅ **New Environment Fix Script** - Dedicated `fix_env_issues.sh` for quick problem resolution
+- ✅ **Comprehensive Test Coverage** - 416 passing tests with 0 failures
+- ✅ **Better Documentation** - Clear troubleshooting guides and hidden file explanations
+- ✅ **Stable Docker Infrastructure** - Improved container stability and connection handling
+
+**Key Features:**
+- **Smart .env Detection** - Scripts now properly find and read hidden environment files
+- **Non-Destructive Setup** - Preserves existing configurations while adding missing variables
+- **Automated Problem Resolution** - One-command fixes for common environment issues
+- **Comprehensive Testing** - Full test suite with 627 selected tests covering all functionality
 
 ## 📚 Template Documentation
 

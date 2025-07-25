@@ -222,12 +222,35 @@ This uses the prebuilt `docker-compose.yml` file in the project, which spins up:
 - **Redis**: A fast cache database (optional, but included for future use)
 
 ### Set Up Your Environment Variables
+
+**💡 Important:** The `.env` file is a **hidden file** (starts with a dot). This is normal and intentional for security reasons.
+
 Create a file called `.env` in your project root:
 
 ```bash
 # If you have .env.example (the automated setup creates .env automatically)
 cp .env.example .env
+
+# To view hidden files including .env:
+ls -la | grep -E "\.env"
+
+# To view .env contents:
+cat .env
 ```
+
+**🆕 Environment Fix Script (Recommended):**
+If you encounter any environment variable issues, use our dedicated fix script:
+```bash
+./scripts/fix_env_issues.sh
+```
+
+This script will:
+- ✅ Detect and read existing `.env` files (including hidden ones)
+- ✅ Add missing required environment variables
+- ✅ Fix database configuration issues
+- ✅ Validate Docker Compose configuration
+- ✅ Test database connectivity
+- ✅ Verify Alembic configuration
 
 Then edit the `.env` file with your settings. Here are the most important ones:
 
@@ -704,3 +727,110 @@ This generates:
 # Or use Beekeeper Studio
 # Connection string: postgresql://postgres:password@localhost:5432/fastapi_template
 ```
+
+---
+
+## 🛠️ Troubleshooting Common Issues
+
+### Environment Variable Problems
+
+**Problem:** "The 'POSTGRES_DB' variable is not set. Defaulting to a blank string."
+**Solution:**
+```bash
+# Run the environment fix script
+./scripts/fix_env_issues.sh
+```
+
+**Problem:** Can't find the `.env` file
+**Solution:**
+```bash
+# Show hidden files
+ls -la | grep -E "\.env"
+
+# If it doesn't exist, create it
+cp .env.example .env
+```
+
+### Database Connection Issues
+
+**Problem:** "connection to server at localhost failed"
+**Solution:**
+```bash
+# Ensure Docker services are running
+docker-compose up -d
+
+# Wait for services to be ready
+sleep 10
+
+# Test connection
+docker-compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
+```
+
+### Alembic Configuration Errors
+
+**Problem:** `configparser.InterpolationSyntaxError`
+**Solution:**
+```bash
+# The fix script handles this automatically
+./scripts/fix_env_issues.sh
+```
+
+### Test Suite Issues
+
+**Problem:** Tests fail with database connection errors
+**Solution:**
+```bash
+# Ensure services are running
+docker-compose up -d
+
+# Activate virtual environment
+source venv/bin/activate
+
+# Run tests
+pytest
+```
+
+### Virtual Environment Issues
+
+**Problem:** "command not found" for Python tools
+**Solution:**
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Quick Diagnostic Commands
+
+```bash
+# Check environment
+./scripts/fix_env_issues.sh
+
+# Check service status
+docker-compose ps
+
+# Check logs
+docker-compose logs api
+
+# Test API health
+curl http://localhost:8000/api/v1/health
+
+# Run verification
+python scripts/verify_setup.py
+```
+
+---
+
+## 🎉 You're Ready!
+
+Congratulations! You now have a fully functional FastAPI application running locally. Here's what you can do next:
+
+1. **Explore the API**: Visit http://localhost:8000/docs
+2. **Check the Admin Panel**: Visit http://localhost:8000/admin
+3. **Run Tests**: `pytest` to verify everything works
+4. **Read More Tutorials**: Check out the other guides in the `docs/tutorials/` folder
+5. **Start Building**: Add your own features and endpoints
+
+Happy coding! 🚀
