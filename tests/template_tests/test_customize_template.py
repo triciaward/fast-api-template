@@ -175,18 +175,29 @@ class TestTemplateCustomizer:
         customizer.update_git_remote()
 
     def test_rename_project_directory(self, customizer):
-        """Test that rename_project_directory provides correct instructions."""
+        """Test that rename_project_directory actually renames the directory."""
         current_dir = customizer.project_root.name
         new_name = customizer.replacements.get("fast-api-template", "test_project")
 
-        # Test that the method provides instructions without actually renaming
+        # Test that the method actually renames the directory
         if current_dir != new_name:
+            # Store the parent directory for verification
+            parent_dir = customizer.project_root.parent
+
             # Should not raise any exceptions
             customizer.rename_project_directory()
 
-            # Original directory should still exist
+            # Directory should be renamed
             assert customizer.project_root.exists()
-            assert customizer.project_root.name == current_dir
+            assert customizer.project_root.name == new_name
+
+            # Verify the old directory name no longer exists
+            old_path = parent_dir / current_dir
+            assert not old_path.exists()
+
+            # Verify the new directory name exists
+            new_path = parent_dir / new_name
+            assert new_path.exists()
 
     def test_rename_project_directory_same_name(self, customizer):
         """Test that rename_project_directory handles same directory name."""
@@ -197,8 +208,9 @@ class TestTemplateCustomizer:
         # Should not raise any exceptions
         customizer.rename_project_directory()
 
-        # Directory should still exist
+        # Directory should still exist with same name (no rename needed)
         assert customizer.project_root.exists()
+        assert customizer.project_root.name == current_dir
 
 
 @pytest.mark.template_only
