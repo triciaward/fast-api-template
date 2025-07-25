@@ -188,11 +188,8 @@ class TestTemplateCustomizer:
             assert customizer.project_root.exists()
             assert customizer.project_root.name == current_dir
 
-            # Verify VS Code workspace file was created
-            workspace_file = (
-                customizer.project_root / ".vscode" / "project.code-workspace"
-            )
-            assert workspace_file.exists()
+            # VS Code workspace file creation is now disabled, so just check directory exists
+            assert customizer.project_root.exists()
 
     def test_rename_project_directory_same_name(self, customizer):
         """Test that rename_project_directory handles same directory name."""
