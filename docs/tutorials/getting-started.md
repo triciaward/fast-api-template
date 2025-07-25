@@ -98,7 +98,7 @@ cd my-new-app
 2. Click the green "Code" button
 3. Select "Download ZIP"
 4. Extract the ZIP file to your desired location
-5. The customization script will automatically rename the folder to your project name
+5. The customization script will provide instructions for renaming the folder to your project name
 
 > **💡 Note**: The template includes a user-friendly README.md that you can customize for your project. The comprehensive template documentation is available in [docs/TEMPLATE_README.md](TEMPLATE_README.md).
 

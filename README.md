@@ -30,7 +30,7 @@ The script will ask you questions like:
 
 ### Step 4: The Magic Happens
 The script automatically:
-- **Renames the project folder** to your project slug (e.g., `myawesomeproject_backend`)
+- **Provides instructions** for renaming the project folder to your project slug (e.g., `myawesomeproject_backend`)
 - Renames all template references to your project name
 - Updates database names and connection strings
 - Changes import statements throughout the code
@@ -39,7 +39,7 @@ The script automatically:
 - Updates the Docker setup
 
 ### Step 5: Set Up Your New Project
-After customization, the script will tell you the new folder name. Navigate to it and run:
+After customization, follow the instructions to rename the folder if needed, then run:
 ```bash
 cd your_project_name_backend
 ./scripts/setup_comprehensive.sh

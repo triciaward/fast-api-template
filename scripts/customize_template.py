@@ -218,28 +218,25 @@ class TemplateCustomizer:
         return content
 
     def rename_project_directory(self) -> None:
-        """Rename the project directory if needed."""
+        """Provide instructions for renaming the project directory."""
         current_dir = self.project_root.name
         new_name = self.replacements.get("fast-api-template", current_dir)
 
         if current_dir != new_name:
-            parent_dir = self.project_root.parent
-            new_path = parent_dir / new_name
-
-            if new_path.exists():
-                print(
-                    f"   ⚠️  Warning: {new_path} already exists. Skipping directory rename."
-                )
-                return
-
-            try:
-                self.project_root.rename(new_path)
-                print(f"   ✅ Renamed project directory to: {new_name}")
-                print(
-                    f"   📝 Note: You may need to navigate to the new directory: cd {new_name}"
-                )
-            except Exception as e:
-                print(f"   ⚠️  Warning: Could not rename directory: {e}")
+            print("   📁 Directory Renaming Instructions:")
+            print(f"   Current directory: {current_dir}")
+            print(f"   Recommended name: {new_name}")
+            print("   To rename the directory, run these commands:")
+            print("   cd ..")
+            print(f"   mv {current_dir} {new_name}")
+            print(f"   cd {new_name}")
+            print("   ")
+            print(
+                "   ⚠️  Note: Directory renaming is not automatic to prevent data loss."
+            )
+            print("   ⚠️  Please rename manually after reviewing the customization.")
+        else:
+            print(f"   ✅ Directory name is already correct: {current_dir}")
 
     def update_git_remote(self) -> None:
         """Update git remote if it points to the template repository."""
@@ -387,10 +384,7 @@ Original template: https://github.com/your-username/fast-api-template
         print("\n🎉 Template customization completed successfully!")
         print("\n📋 Next Steps:")
         print("   1. Review the changes in docs/TEMPLATE_CUSTOMIZATION.md")
-        print("   2. If the directory was renamed, navigate to the new folder:")
-        print(
-            f"      cd {self.replacements.get('fast-api-template', 'your_project_name')}"
-        )
+        print("   2. Rename the directory if needed (see instructions above)")
         print("   3. Update your git remote: git remote set-url origin <your-repo-url>")
         print("   4. Run setup: ./scripts/setup_comprehensive.sh")
         print("   5. Start developing your application!")
