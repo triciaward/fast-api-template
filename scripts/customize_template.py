@@ -247,8 +247,7 @@ class TemplateCustomizer:
             print(f"   Current directory: {current_dir}")
             print(f"   Recommended name: {new_name}")
 
-            # Create VS Code workspace file in current directory before renaming
-            self.create_vscode_workspace(self.project_root, new_name)
+            # Note: VS Code workspace file creation removed to prevent workspace conflicts
 
             print("\n   🔧 To rename the directory and update VS Code:")
             print("   1. Close VS Code completely")
@@ -260,14 +259,10 @@ class TemplateCustomizer:
             print("   5. Open the renamed directory in VS Code:")
             print(f"      code {new_name}")
             print("      # OR: File → Open Folder → select the renamed directory")
-            print("   6. Or use the workspace file:")
-            print(f"      code {new_name}/.vscode/project.code-workspace")
+            print("   6. After renaming, open the new directory in VS Code")
 
             print(
-                "\n   📝 VS Code workspace file created: .vscode/project.code-workspace"
-            )
-            print(
-                "   This file will help VS Code recognize your project after renaming."
+                "\n   📝 Note: VS Code workspace file creation disabled to prevent conflicts"
             )
 
         else:
@@ -450,8 +445,8 @@ Original template: https://github.com/your-username/fast-api-template
         self.create_customization_log()
         print("   📝 Created: docs/TEMPLATE_CUSTOMIZATION.md")
 
-        # Create VS Code workspace and provide renaming instructions
-        print("\n📁 VS Code Workspace Setup...")
+        # Provide renaming instructions
+        print("\n📁 Directory Renaming Instructions...")
         self.rename_project_directory()
 
         # Update git remote info
