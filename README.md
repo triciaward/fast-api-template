@@ -53,6 +53,8 @@ This script will automatically:
 
 Your API will be available at `http://localhost:8000`
 
+Visit http://localhost:8000/docs to view the interactive API documentation.
+
 ## 📚 API Documentation
 
 Once your app is running, you can explore your API:
@@ -168,7 +170,9 @@ This is your project! Feel free to:
 
 ## 📄 License
 
-[Add your license information here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**Note**: This is a default MIT license. You may want to update it to reflect your specific licensing needs for your project.
 
 ---
 

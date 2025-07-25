@@ -2,6 +2,13 @@
 
 A comprehensive, production-ready FastAPI template with authentication, admin panel, API keys, audit logging, and more.
 
+![Tests](https://img.shields.io/badge/tests-414%20passing-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-74%25-yellowgreen)
+![CI](https://github.com/triciaward/fast-api-template/actions/workflows/ci.yml/badge.svg)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-green)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
 ## 🚀 Quick Start
 
 ### Option 1: Use as Template (Recommended)
@@ -17,6 +24,9 @@ cd fast-api-template
 # Run the comprehensive setup script (handles everything automatically!)
 ./scripts/setup_comprehensive.sh
 
+# Install pre-commit hooks (recommended for code quality)
+pre-commit install
+
 # Start the application
 docker-compose up -d
 ```
@@ -30,6 +40,9 @@ cd fast-api-template
 
 # Run the comprehensive setup script (handles everything automatically!)
 ./scripts/setup_comprehensive.sh
+
+# Install pre-commit hooks (recommended for code quality)
+pre-commit install
 
 # Start the application
 docker-compose up -d
@@ -52,7 +65,8 @@ The template includes a powerful customization script that transforms all templa
 2. Enter your project details when prompted
 3. Review the changes in `TEMPLATE_CUSTOMIZATION.md`
 4. Update your git remote to point to your new repository
-5. Start developing!
+5. **Important**: Update the license and README.md branding to reflect your project
+6. Start developing!
 
 ### Example:
 ```bash
@@ -406,6 +420,8 @@ docker run -p 8000:8000 fastapi-template
 - Use production database
 - Configure backup strategies
 - Set up CI/CD pipelines
+
+📖 **For detailed deployment instructions**, see the [Deployment and Production Guide](docs/tutorials/deployment-and-production.md) which covers Docker, cloud deployment, monitoring, and production best practices.
 
 ## 🤝 Contributing
 
