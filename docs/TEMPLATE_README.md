@@ -71,15 +71,15 @@ The template includes a powerful customization script that transforms all templa
 ### Example:
 ```bash
 # Input:
-Project name: OneStory Backend
-Project slug: onestory_backend
-Database name: onestory_backend
+Project name: My Awesome Project
+Project slug: myawesomeproject_backend
+Database name: myawesomeproject_backend
 
 # Result:
-- All "FastAPI Template" → "OneStory Backend"
-- All "fast-api-template" → "onestory_backend"
-- All "fastapi_template" → "onestory_backend"
-- Docker containers: "onestory_backend-postgres-1"
+- All "FastAPI Template" → "My Awesome Project"
+- All "fast-api-template" → "myawesomeproject_backend"
+- All "fastapi_template" → "myawesomeproject_backend"
+- Docker containers: "myawesomeproject_backend-postgres-1"
 ```
 
 ### 🎯 See It in Action:

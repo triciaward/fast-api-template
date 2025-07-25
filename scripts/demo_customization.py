@@ -250,14 +250,14 @@ def show_before_after_demo() -> None:
         customizer = TemplateCustomizer()
         customizer.project_root = project_dir
         customizer.replacements = {
-            "fast-api-template": "onestory_backend",
-            "fastapi_template": "onestory_backend",
-            "FastAPI Template": "OneStory Backend",
-            "FastAPI Template with Authentication": "Backend API for OneStory",
+            "fast-api-template": "myawesomeproject_backend",
+            "fastapi_template": "myawesomeproject_backend",
+            "FastAPI Template": "My Awesome Project",
+            "FastAPI Template with Authentication": "Backend API for My Awesome Project",
             "Your Name": "John Doe",
             "your.email@example.com": "john@example.com",
-            "fast-api-template-postgres-1": "onestory_backend-postgres-1",
-            "fast-api-template-postgres": "onestory_backend-postgres",
+            "fast-api-template-postgres-1": "myawesomeproject_backend-postgres-1",
+            "fast-api-template-postgres": "myawesomeproject_backend-postgres",
         }
 
         # Process files
@@ -287,7 +287,7 @@ def show_before_after_demo() -> None:
         config_after = (project_dir / "app/core/config.py").read_text()
         print("app/core/config.py (key lines):")
         for line in config_after.split("\n"):
-            if "OneStory Backend" in line or "onestory_backend" in line:
+            if "My Awesome Project" in line or "myawesomeproject_backend" in line:
                 print(f"  {line}")
         print()
 

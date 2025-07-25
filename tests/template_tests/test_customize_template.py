@@ -54,14 +54,14 @@ class TestTemplateCustomizer:
         customizer = TemplateCustomizer()
         customizer.project_root = temp_project_dir
         customizer.replacements = {
-            "fast-api-template": "onestory_backend",
-            "fastapi_template": "onestory_backend",
-            "FastAPI Template": "OneStory Backend",
-            "FastAPI Template with Authentication": "OneStory Backend API",
+            "fast-api-template": "myawesomeproject_backend",
+            "fastapi_template": "myawesomeproject_backend",
+            "FastAPI Template": "My Awesome Project",
+            "FastAPI Template with Authentication": "My Awesome Project API",
             "Your Name": "John Doe",
             "your.email@example.com": "john@example.com",
-            "fast-api-template-postgres-1": "onestory_backend-postgres-1",
-            "fast-api-template-postgres": "onestory_backend-postgres",
+            "fast-api-template-postgres-1": "myawesomeproject_backend-postgres-1",
+            "fast-api-template-postgres": "myawesomeproject_backend-postgres",
         }
         return customizer
 
@@ -92,7 +92,7 @@ class TestTemplateCustomizer:
 
         # Check the content was updated
         content = test_file.read_text()
-        assert "OneStory Backend" in content
+        assert "My Awesome Project" in content
         # The template link should still be preserved
         assert "[FastAPI Template](docs/TEMPLATE_README.md)" in content
 
@@ -131,8 +131,8 @@ class TestTemplateCustomizer:
 
         content = log_file.read_text()
         assert "Template Customization Log" in content
-        assert "OneStory Backend" in content
-        assert "onestory_backend" in content
+        assert "My Awesome Project" in content
+        assert "myawesomeproject_backend" in content
         assert "John Doe" in content
         assert "john@example.com" in content
 
@@ -154,7 +154,9 @@ class TestTemplateCustomizer:
         """Test git remote update when pointing to custom repository."""
         # Mock git remote pointing to custom repo
         mock_run.return_value.returncode = 0
-        mock_run.return_value.stdout = "https://github.com/user/onestory_backend.git"
+        mock_run.return_value.stdout = (
+            "https://github.com/user/myawesomeproject_backend.git"
+        )
 
         # This should not raise an exception
         customizer.update_git_remote()
@@ -257,11 +259,11 @@ def read_root():
         """Test the complete customization process with user input."""
         # Mock user input
         mock_input.side_effect = [
-            "OneStory Backend",  # Project name
-            "onestory_backend",  # Project slug
-            "onestory_backend",  # Database name
-            "onestory_backend",  # Docker prefix
-            "Backend API for OneStory",  # Description
+            "My Awesome Project",  # Project name
+            "myawesomeproject_backend",  # Project slug
+            "myawesomeproject_backend",  # Database name
+            "myawesomeproject_backend",  # Docker prefix
+            "Backend API for My Awesome Project",  # Description
             "John Doe",  # Author
             "john@example.com",  # Email
             "y",  # Confirm
@@ -286,9 +288,11 @@ def read_root():
             customizer.run()
 
         # Verify the replacements were set correctly
-        assert customizer.replacements["FastAPI Template"] == "OneStory Backend"
-        assert customizer.replacements["fast-api-template"] == "onestory_backend"
-        assert customizer.replacements["fastapi_template"] == "onestory_backend"
+        assert customizer.replacements["FastAPI Template"] == "My Awesome Project"
+        assert (
+            customizer.replacements["fast-api-template"] == "myawesomeproject_backend"
+        )
+        assert customizer.replacements["fastapi_template"] == "myawesomeproject_backend"
         assert customizer.replacements["Your Name"] == "John Doe"
         assert customizer.replacements["your.email@example.com"] == "john@example.com"
 
@@ -297,14 +301,14 @@ def read_root():
         customizer = TemplateCustomizer()
         customizer.project_root = temp_project_dir
         customizer.replacements = {
-            "fast-api-template": "onestory_backend",
-            "fastapi_template": "onestory_backend",
-            "FastAPI Template": "OneStory Backend",
-            "FastAPI Template with Authentication": "Backend API for OneStory",
+            "fast-api-template": "myawesomeproject_backend",
+            "fastapi_template": "myawesomeproject_backend",
+            "FastAPI Template": "My Awesome Project",
+            "FastAPI Template with Authentication": "Backend API for My Awesome Project",
             "Your Name": "John Doe",
             "your.email@example.com": "john@example.com",
-            "fast-api-template-postgres-1": "onestory_backend-postgres-1",
-            "fast-api-template-postgres": "onestory_backend-postgres",
+            "fast-api-template-postgres-1": "myawesomeproject_backend-postgres-1",
+            "fast-api-template-postgres": "myawesomeproject_backend-postgres",
         }
 
         # Create the log file
@@ -316,8 +320,8 @@ def read_root():
 
         content = log_file.read_text()
         assert "Template Customization Log" in content
-        assert "OneStory Backend" in content
-        assert "onestory_backend" in content
+        assert "My Awesome Project" in content
+        assert "myawesomeproject_backend" in content
         assert "John Doe" in content
         assert "john@example.com" in content
-        assert "Backend API for OneStory" in content
+        assert "Backend API for My Awesome Project" in content

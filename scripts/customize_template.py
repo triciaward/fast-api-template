@@ -11,10 +11,10 @@ Usage:
     ./scripts/customize_template.py
 
 The script will prompt for:
-- Project name (e.g., "OneStory Backend")
-- Project slug (e.g., "onestory_backend")
-- Database name (e.g., "onestory_backend")
-- Docker container names (e.g., "onestory_backend")
+- Project name (e.g., "My Awesome Project")
+- Project slug (e.g., "myawesomeproject_backend")
+- Database name (e.g., "myawesomeproject_backend")
+- Docker container names (e.g., "myawesomeproject_backend")
 - Description
 - Author information
 """
@@ -39,13 +39,15 @@ class TemplateCustomizer:
         print("Please provide the following information:\n")
 
         # Project name (human readable)
-        project_name = input("Project name (e.g., 'OneStory Backend'): ").strip()
+        project_name = input("Project name (e.g., 'My Awesome Project'): ").strip()
         if not project_name:
             print("❌ Project name is required!")
             sys.exit(1)
 
         # Project slug (for directories, databases, etc.)
-        project_slug = input("Project slug (e.g., 'onestory_backend'): ").strip()
+        project_slug = input(
+            "Project slug (e.g., 'myawesomeproject_backend'): "
+        ).strip()
         if not project_slug:
             # Auto-generate from project name
             project_slug = re.sub(r"[^a-zA-Z0-9]", "_", project_name.lower())
@@ -53,13 +55,15 @@ class TemplateCustomizer:
             print(f"   Auto-generated slug: {project_slug}")
 
         # Database name
-        db_name = input(f"Database name (default: {project_slug}): ").strip()
+        db_name = input(
+            f"Database name (e.g., '{project_slug}', default: {project_slug}): "
+        ).strip()
         if not db_name:
             db_name = project_slug
 
         # Docker container prefix
         docker_prefix = input(
-            f"Docker container prefix (default: {project_slug}): "
+            f"Docker container prefix (e.g., '{project_slug}', default: {project_slug}): "
         ).strip()
         if not docker_prefix:
             docker_prefix = project_slug

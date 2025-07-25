@@ -125,25 +125,25 @@ The template includes a powerful customization script that transforms all templa
 ```
 
 The script will prompt you for:
-- **Project name** (e.g., "OneStory Backend")
-- **Project slug** (e.g., "onestory_backend") - auto-generated if not provided
-- **Database name** (e.g., "onestory_backend") - defaults to project slug
-- **Docker container prefix** (e.g., "onestory_backend") - defaults to project slug
-- **Description** (e.g., "Backend API for OneStory application")
+- **Project name** (e.g., "My Awesome Project")
+- **Project slug** (e.g., "myawesomeproject_backend") - auto-generated if not provided
+- **Database name** (e.g., "myawesomeproject_backend") - defaults to project slug
+- **Docker container prefix** (e.g., "myawesomeproject_backend") - defaults to project slug
+- **Description** (e.g., "Backend API for My Awesome Project application")
 - **Author information** (name and email)
 
 ### Example Customization:
 ```bash
 # Input:
-Project name: OneStory Backend
-Project slug: onestory_backend
-Database name: onestory_backend
+Project name: My Awesome Project
+Project slug: myawesomeproject_backend
+Database name: myawesomeproject_backend
 
 # Result:
-- All "FastAPI Template" → "OneStory Backend"
-- All "fast-api-template" → "onestory_backend"
-- All "fastapi_template" → "onestory_backend"
-- Docker containers: "onestory_backend-postgres-1"
+- All "FastAPI Template" → "My Awesome Project"
+- All "fast-api-template" → "myawesomeproject_backend"
+- All "fastapi_template" → "myawesomeproject_backend"
+- Docker containers: "myawesomeproject_backend-postgres-1"
 - Documentation updated throughout
 ```
 

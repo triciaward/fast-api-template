@@ -6,7 +6,7 @@ This is your project's main README file - feel free to customize it to describe 
 
 ## 🎯 Creating Your Own Project from This Template
 
-**This is a FastAPI template!** If you want to create your own project (let's say "MyAwesomeApp"), here's exactly how to do it:
+**This is a FastAPI template!** If you want to create your own project (let's say "My Awesome Project"), here's exactly how to do it:
 
 ### Step 1: Get the Template
 First, you need to get this template. You can either:
@@ -15,7 +15,7 @@ First, you need to get this template. You can either:
 - Or use it as a GitHub template
 
 ### Step 2: Copy and Rename
-Copy the entire template folder and rename it to your project name (e.g., `MyAwesomeApp`).
+Copy the entire template folder and rename it to your project name (e.g., `myawesomeproject_backend`).
 
 ### Step 3: Run the Customization Script
 This is where the magic happens! Run:
@@ -24,9 +24,9 @@ This is where the magic happens! Run:
 ```
 
 The script will ask you questions like:
-- "What's your project name?" → "MyAwesomeApp"
-- "What should the database be called?" → "myawesomeapp_db"
-- "What's your app name?" → "myawesomeapp"
+- "What's your project name?" → "My Awesome Project"
+- "What should the project slug be?" → "myawesomeproject_backend"
+- "What should the database be called?" → "myawesomeproject_backend"
 
 ### Step 4: The Magic Happens
 The script automatically:
@@ -61,7 +61,7 @@ Now you have a fully working project with:
 - Docker support
 - All template features, but branded for your project
 
-**That's it!** You've gone from "I want to build MyAwesomeApp" to "I have a working MyAwesomeApp API" in just a few commands.
+**That's it!** You've gone from "I want to build My Awesome Project" to "I have a working My Awesome Project API" in just a few commands.
 
 ## 🚀 Getting Started
 
