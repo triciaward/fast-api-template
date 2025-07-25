@@ -26,7 +26,7 @@ from app.core.config import settings
 #     confirm_account_deletion_sync,
 #     cancel_account_deletion_sync,
 # )
-from app.models.models import User
+from app.models import User
 from app.schemas.user import UserCreate
 
 

@@ -157,7 +157,7 @@ class TestEmailService:
     ) -> None:
         """Test creating verification token successfully."""
         # Create a test user first
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -190,7 +190,7 @@ class TestEmailService:
     async def test_verify_token_success(self, sync_db_session: Session) -> None:
         """Test token verification successfully."""
         # Create a test user with verification token
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -215,7 +215,7 @@ class TestEmailService:
     async def test_verify_token_expired(self, sync_db_session: Session) -> None:
         """Test token verification with expired token."""
         # Create a test user with expired verification token
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -236,7 +236,7 @@ class TestEmailService:
     ) -> None:
         """Test token verification when verification fails."""
         # Create a test user with verification token
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",

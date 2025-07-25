@@ -14,7 +14,7 @@ from app.core.cors import configure_cors
 from app.core.error_handlers import register_error_handlers
 from app.core.logging_config import get_app_logger, setup_logging
 from app.database.database import engine
-from app.models import models
+from app.models import Base
 from app.services.sentry import init_sentry
 
 if settings.ENABLE_CELERY:
@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.info("Starting application", environment=settings.ENVIRONMENT)
 
         async with engine.begin() as conn:
-            await conn.run_sync(models.Base.metadata.create_all)
+            await conn.run_sync(Base.metadata.create_all)
 
         # Bootstrap superuser if environment variables are set
         await bootstrap_superuser()

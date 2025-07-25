@@ -8,7 +8,7 @@ All errors follow the same structure for better frontend integration.
 from enum import Enum
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ErrorType(str, Enum):
@@ -126,8 +126,8 @@ class ErrorResponse(BaseModel):
 
     error: "ErrorDetail" = Field(..., description="Error details")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "error": {
                     "type": "ValidationError",
@@ -136,6 +136,7 @@ class ErrorResponse(BaseModel):
                 }
             }
         }
+    )
 
 
 class ErrorDetail(BaseModel):
@@ -148,8 +149,8 @@ class ErrorDetail(BaseModel):
         None, description="Additional error details"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "type": "ValidationError",
                 "message": "Email is invalid",
@@ -157,6 +158,7 @@ class ErrorDetail(BaseModel):
                 "details": {"field": "email", "value": "invalid-email"},
             }
         }
+    )
 
 
 class ValidationErrorDetail(ErrorDetail):
@@ -166,8 +168,8 @@ class ValidationErrorDetail(ErrorDetail):
     field: Optional[str] = Field(None, description="Field that failed validation")
     value: Optional[Any] = Field(None, description="Invalid value provided")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "type": "ValidationError",
                 "message": "Email format is invalid",
@@ -176,6 +178,7 @@ class ValidationErrorDetail(ErrorDetail):
                 "value": "invalid-email",
             }
         }
+    )
 
 
 class AuthenticationErrorDetail(ErrorDetail):
@@ -183,14 +186,15 @@ class AuthenticationErrorDetail(ErrorDetail):
 
     type: ErrorType = Field(default=ErrorType.AUTHENTICATION_ERROR)
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "type": "AuthenticationError",
                 "message": "Invalid email or password",
                 "code": "invalid_credentials",
             }
         }
+    )
 
 
 class AuthorizationErrorDetail(ErrorDetail):
@@ -201,8 +205,8 @@ class AuthorizationErrorDetail(ErrorDetail):
         None, description="Required permissions for this operation"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "type": "AuthorizationError",
                 "message": "Superuser privileges required",
@@ -210,6 +214,7 @@ class AuthorizationErrorDetail(ErrorDetail):
                 "required_permissions": ["superuser"],
             }
         }
+    )
 
 
 class ResourceErrorDetail(ErrorDetail):
@@ -219,8 +224,8 @@ class ResourceErrorDetail(ErrorDetail):
     resource_type: Optional[str] = Field(None, description="Type of resource not found")
     resource_id: Optional[str] = Field(None, description="ID of resource not found")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "type": "NotFound",
                 "message": "User not found",
@@ -229,6 +234,7 @@ class ResourceErrorDetail(ErrorDetail):
                 "resource_id": "123e4567-e89b-12d3-a456-426614174000",
             }
         }
+    )
 
 
 class ConflictErrorDetail(ErrorDetail):
@@ -242,8 +248,8 @@ class ConflictErrorDetail(ErrorDetail):
         None, description="Value that caused the conflict"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "type": "Conflict",
                 "message": "Email already registered",
@@ -252,6 +258,7 @@ class ConflictErrorDetail(ErrorDetail):
                 "conflicting_value": "user@example.com",
             }
         }
+    )
 
 
 class RateLimitErrorDetail(ErrorDetail):
@@ -263,8 +270,8 @@ class RateLimitErrorDetail(ErrorDetail):
     )
     limit: Optional[int] = Field(None, description="Rate limit threshold")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "type": "RateLimitExceeded",
                 "message": "Too many requests",
@@ -273,6 +280,7 @@ class RateLimitErrorDetail(ErrorDetail):
                 "limit": 100,
             }
         }
+    )
 
 
 class ServerErrorDetail(ErrorDetail):
@@ -281,8 +289,8 @@ class ServerErrorDetail(ErrorDetail):
     type: ErrorType = Field(default=ErrorType.INTERNAL_SERVER_ERROR)
     request_id: Optional[str] = Field(None, description="Request ID for tracking")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "type": "InternalServerError",
                 "message": "An unexpected error occurred",
@@ -290,3 +298,4 @@ class ServerErrorDetail(ErrorDetail):
                 "request_id": "req_123456",
             }
         }
+    )

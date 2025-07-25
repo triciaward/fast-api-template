@@ -26,7 +26,7 @@ Welcome to the tutorials section! Here you'll find comprehensive guides for ever
 ## 🚀 Start Here - Quick Navigation
 
 **New to FastAPI?** Follow this path:
-1. **📖 [Getting Started Guide](../getting-started.md)** - Set up your development environment
+1. **📖 [Getting Started Guide](getting-started.md)** - Set up your development environment
 2. **🔐 [Authentication System](authentication.md)** - Learn user login and registration
 3. **🗄️ [Database Management](database-management.md)** - Work with data, migrations, and CRUD scaffolding
 4. **🧪 [Testing and Development](testing-and-development.md)** - Write tests and debug
@@ -81,29 +81,41 @@ flowchart TD
         E --> M[Search & Filter]
     end
     
-    subgraph "Optional Services"
-        N[Redis Cache]
-        O[Celery Workers]
-        P[WebSocket Server]
-        Q[Email Service]
-    end
-    
     subgraph "Development Tools"
-        R[Pytest Tests]
-        S[Pre-commit Hooks]
-        T[Docker Compose]
-        U[CI/CD Pipeline]
+        N[Setup Scripts]
+        O[CRUD Scaffolding]
+        P[Pre-commit Hooks]
+        Q[Verification Tools]
     end
     
-    B -.-> N
-    B -.-> O
-    B -.-> P
-    B -.-> Q
+    subgraph "Optional Services"
+        R[Redis Cache]
+        S[Celery Workers]
+        T[WebSocket Server]
+        U[Email Service]
+    end
     
-    R --> B
-    S --> B
-    T --> A
-    U --> R
+    subgraph "Testing & Quality"
+        V[Pytest Tests]
+        W[Template Tests]
+        X[Code Quality]
+        Y[CI/CD Pipeline]
+    end
+    
+    B -.-> R
+    B -.-> S
+    B -.-> T
+    B -.-> U
+    
+    N --> A
+    O --> E
+    P --> X
+    Q --> A
+    
+    V --> B
+    W --> N
+    X --> B
+    Y --> V
 ```
 
 ---
@@ -116,13 +128,19 @@ fast-api-template/
 │   ├── 📁 api/               # API endpoints and routes
 │   ├── 📁 core/              # Configuration and core utilities
 │   ├── 📁 crud/              # Database operations
-│   ├── 📁 models/            # Database models
+│   ├── 📁 models/            # Database models (separated by entity)
+│   │   ├── base.py           # Base model and mixins
+│   │   ├── user.py           # User model
+│   │   ├── api_key.py        # API key model
+│   │   ├── audit_log.py      # Audit log model
+│   │   └── refresh_token.py  # Refresh token model
 │   ├── 📁 schemas/           # Pydantic schemas
 │   ├── 📁 services/          # Business logic and external services
 │   └── 📁 utils/             # Utility functions
 ├── 📁 docs/                  # Documentation
 │   └── 📁 tutorials/         # This tutorial section
 ├── 📁 tests/                 # Test files
+│   └── 📁 template_tests/    # Template-specific tests
 ├── 📁 scripts/               # Utility scripts
 ├── 📄 docker-compose.yml     # Docker services
 ├── 📄 requirements.txt       # Python dependencies
@@ -134,7 +152,42 @@ fast-api-template/
 ## 📚 Tutorial Index
 
 ### 🚀 Getting Started
-- **[Getting Started Guide](../getting-started.md)** - Complete setup guide for creating a new app from this template
+- **[Getting Started Guide](getting-started.md)** - Complete setup guide for creating a new app from this template
+
+### 🎯 Template Customization
+Transform the FastAPI template into your own project with the powerful customization system:
+- **Interactive Customization**: Guided prompts to personalize your project
+- **Comprehensive Replacement**: All template references updated automatically
+- **Smart Defaults**: Auto-generated project names and configurations
+- **Documentation Updates**: All docs updated to reflect your project
+- **Git Integration**: Automatic remote repository detection and guidance
+- **Safety Features**: Confirmation prompts and detailed logging
+
+**Quick Start:**
+```bash
+# Clone the template
+git clone <your-repo-url>
+cd fast-api-template
+
+# Customize for your project
+./scripts/customize_template.sh
+
+# Follow the prompts and start developing!
+```
+
+**What Gets Customized:**
+- Project name and description
+- Database names and configurations
+- Docker container names
+- Documentation and README files
+- Configuration files and scripts
+- Git remote setup guidance
+
+**Demo:**
+```bash
+# See the customization process in action
+python scripts/demo_customization.py
+```
 
 ### 🔧 Core Features
 
@@ -185,6 +238,7 @@ Learn best practices for development:
 - Code quality tools (linting, formatting)
 - Pre-commit hooks and CI/CD setup
 - Development workflow best practices
+- Template-specific tests and isolation
 
 ### 🚀 Production & Deployment
 
@@ -202,12 +256,13 @@ Take your app from development to production:
 ## 🎯 How to Use These Tutorials
 
 ### For Beginners
-1. Start with the **[Getting Started Guide](../getting-started.md)**
-2. Read the **[Authentication System](authentication.md)** tutorial
-3. Learn about **[Database Management](database-management.md)**
-4. Explore **[Optional Features](optional-features.md)** as needed
-5. Study **[Testing and Development](testing-and-development.md)** for best practices
-6. Read **[Deployment and Production](deployment-and-production.md)** when ready to deploy
+1. Start with the **[Getting Started Guide](getting-started.md)**
+2. **Customize the template** for your project (see Template Customization section above)
+3. Read the **[Authentication System](authentication.md)** tutorial
+4. Learn about **[Database Management](database-management.md)**
+5. Explore **[Optional Features](optional-features.md)** as needed
+6. Study **[Testing and Development](testing-and-development.md)** for best practices
+7. Read **[Deployment and Production](deployment-and-production.md)** when ready to deploy
 
 ### For Experienced Developers
 - Jump directly to the tutorials you need
@@ -264,6 +319,9 @@ uvicorn app.main:app --reload
 # Run tests
 pytest
 
+# Run only template tests
+pytest -m "template_only"
+
 # Run database migrations
 alembic upgrade head
 
@@ -274,11 +332,43 @@ docker-compose up -d
 curl http://localhost:8000/health
 ```
 
+### 🚀 **CRUD Scaffolding**
+```bash
+# Generate a Post model with title, content, and is_published fields
+python scripts/generate_crud.py Post title:str content:str is_published:bool
+
+# Generate a Product model with soft delete and search capabilities
+python scripts/generate_crud.py Product name:str price:float description:str --soft-delete --searchable
+
+# Generate an admin-managed Category model
+python scripts/generate_crud.py Category name:str slug:str --admin
+```
+
+### 🛠️ **Development Tools**
+```bash
+# Comprehensive setup
+./scripts/setup_comprehensive.sh
+
+# Fix common issues
+./scripts/fix_common_issues.sh
+
+# Verify setup
+python scripts/verify_setup.py
+
+# Install pre-commit hooks
+./scripts/install_precommit.sh
+
+# Run code quality checks
+./scripts/lint.sh
+```
+
 ### Key Configuration Files
 - `.env` - Environment variables
 - `docker-compose.yml` - Docker services
 - `alembic.ini` - Database migrations
 - `requirements.txt` - Python dependencies
+- `pyproject.toml` - Tool configurations
+- `mypy.ini` - MyPy configuration
 
 ### Important URLs
 - **API Documentation**: http://localhost:8000/docs
@@ -297,12 +387,12 @@ curl http://localhost:8000/health
 ## 🎯 Learning Paths
 
 ### 🚀 **Quick Start Path** (1-2 hours)
-1. [Getting Started Guide](../getting-started.md)
+1. [Getting Started Guide](getting-started.md)
 2. [Authentication System](authentication.md) - Basic setup
 3. Test the API at http://localhost:8000/docs
 
 ### 🔧 **Full Feature Path** (4-6 hours)
-1. [Getting Started Guide](../getting-started.md)
+1. [Getting Started Guide](getting-started.md)
 2. [Authentication System](authentication.md) - Complete
 3. [Database Management](database-management.md) - Core features and CRUD scaffolding
 4. [Optional Features](optional-features.md) - Choose what you need
@@ -329,6 +419,7 @@ curl http://localhost:8000/health
 - Check the troubleshooting sections in each tutorial
 - Review the [troubleshooting folder](../troubleshooting/) for specific issues
 - Look at the test files for working examples
+- Run the verification script: `python scripts/verify_setup.py`
 
 ### 💬 **Community Support**
 - **FastAPI Discord**: https://discord.gg/VQjSZaeJmf
@@ -347,6 +438,8 @@ After completing these tutorials, you'll be able to:
 ✅ **Scale your application** as it grows  
 ✅ **Maintain code quality** with testing and best practices  
 ✅ **Monitor and debug** production issues effectively  
+✅ **Generate CRUD boilerplate** automatically  
+✅ **Set up development environments** with one command  
 
 ---
 

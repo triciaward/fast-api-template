@@ -5,7 +5,7 @@ from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
-from app.models.models import AuditLog
+from app.models import AuditLog
 
 # Type alias for both sync and async sessions
 DBSession = Union[AsyncSession, Session]

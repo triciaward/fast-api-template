@@ -83,7 +83,7 @@ async def bootstrap_superuser() -> None:
             # Check if any superuser exists
             from sqlalchemy import select
 
-            from app.models.models import User
+            from app.models import User
 
             result = await db.execute(select(User).where(User.is_superuser))
             existing_superusers = result.scalars().all()

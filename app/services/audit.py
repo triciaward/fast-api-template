@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.logging_config import get_auth_logger
 from app.crud.audit_log import create_audit_log, create_audit_log_sync
-from app.models.models import User
+from app.models import User
 
 # Type alias for both sync and async sessions
 DBSession = Union[AsyncSession, Session]

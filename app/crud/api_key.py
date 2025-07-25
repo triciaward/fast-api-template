@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from app.core.security import generate_api_key, hash_api_key, verify_api_key
-from app.models.models import APIKey
+from app.models import APIKey
 from app.schemas.user import APIKeyCreate
 
 # Type alias for both sync and async sessions

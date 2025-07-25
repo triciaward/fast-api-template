@@ -4,20 +4,20 @@ Welcome! This guide will walk you through creating a new application based on th
 
 ---
 
-> **🧪 Do I Need to Do Local Setup if I’m Using Coolify?**
+> **🧪 Do I Need to Do Local Setup if I'm Using Coolify?**
 >
 > Yes — you should absolutely do the local setup first.
 >
-> Even if you plan to host the app on your server using Coolify, it’s best to:
+> Even if you plan to host the app on your server using Coolify, it's best to:
 > - Build the app on your computer first
 > - Test everything locally
-> - Only push it to Coolify once it’s working
+> - Only push it to Coolify once it's working
 >
-> ⚠️ Don’t skip local development — it’s where you’ll catch most bugs early and build faster.
+> ⚠️ Don't skip local development — it's where you'll catch most bugs early and build faster.
 >
-> _Think of Coolify like a delivery system. It takes your app and sets it up on a live server. But if something’s broken, it’s much harder to debug on the server._
+> _Think of Coolify like a delivery system. It takes your app and sets it up on a live server. But if something's broken, it's much harder to debug on the server._
 >
-> _It’s like baking a cake at home (local dev), tasting it, and then letting Coolify deliver it. You wouldn’t want to deliver uncooked batter and hope it turns into cake on the way!_
+> _It's like baking a cake at home (local dev), tasting it, and then letting Coolify deliver it. You wouldn't want to deliver uncooked batter and hope it turns into cake on the way!_
 
 ---
 
@@ -25,12 +25,11 @@ Welcome! This guide will walk you through creating a new application based on th
 
 ```mermaid
 flowchart TD
-    A[Download Template] --> B[Set Up Environment]
-    B --> C[Configure Database]
-    C --> D[Create Superuser]
-    D --> E[Start Application]
-    E --> F[Test Everything]
-    F --> G[Explore Tutorials]
+    A[Download Template] --> B[Run Setup Script]
+    B --> C[Verify Setup]
+    C --> D[Start Application]
+    D --> E[Test Everything]
+    E --> F[Explore Tutorials]
 ```
 
 ---
@@ -48,6 +47,8 @@ This FastAPI template is like a pre-built foundation for web applications. Think
 - **🧪 Testing framework** ready to go
 - **🐳 Docker support** for easy deployment
 - **⚡ Optional features** (Redis, WebSockets, Celery)
+- **🚀 CRUD scaffolding** - Generate complete CRUD boilerplate with one command
+- **🛠️ Development tools** - Setup scripts, pre-commit hooks, verification tools
 
 ---
 
@@ -56,7 +57,7 @@ This FastAPI template is like a pre-built foundation for web applications. Think
 Before you start, make sure you have these tools installed on your computer:
 
 ### 🔧 Required Tools:
-1. **Python 3.8+** - The programming language we'll use
+1. **Python 3.11+** - The programming language we'll use
 2. **Git** - For version control (downloading and managing code)
 3. **Docker** - For running databases and services
 4. **A code editor** - Like VS Code, PyCharm, or even Notepad++
@@ -99,11 +100,88 @@ cd my-new-app
 4. Extract the ZIP file to your desired location
 5. Rename the folder to your project name
 
+> **💡 Note**: The template includes a user-friendly README.md that you can customize for your project. The comprehensive template documentation is available in [docs/TEMPLATE_README.md](TEMPLATE_README.md).
+
+---
+
+## 🎯 Step 1.5: Customize the Template (Recommended)
+
+> **💡 Pro Tip:** Before setting up your environment, consider customizing the template to match your project's name and branding. This step is optional but highly recommended for a professional setup.
+
+The template includes a powerful customization script that transforms all template references into your project-specific names:
+
+### What Gets Customized:
+- **Project Name**: "FastAPI Template" → "Your Project Name"
+- **Project Slug**: "fast-api-template" → "your_project_name"
+- **Database Name**: "fastapi_template" → "your_project_name"
+- **Docker Containers**: "fast-api-template-postgres-1" → "your_project_name-postgres-1"
+- **Documentation**: All references updated to reflect your project
+- **Configuration Files**: Database URLs, container names, etc.
+
+### Run the Customization Script:
+```bash
+# Run the customization script
+./scripts/customize_template.sh
+```
+
+The script will prompt you for:
+- **Project name** (e.g., "OneStory Backend")
+- **Project slug** (e.g., "onestory_backend") - auto-generated if not provided
+- **Database name** (e.g., "onestory_backend") - defaults to project slug
+- **Docker container prefix** (e.g., "onestory_backend") - defaults to project slug
+- **Description** (e.g., "Backend API for OneStory application")
+- **Author information** (name and email)
+
+### Example Customization:
+```bash
+# Input:
+Project name: OneStory Backend
+Project slug: onestory_backend
+Database name: onestory_backend
+
+# Result:
+- All "FastAPI Template" → "OneStory Backend"
+- All "fast-api-template" → "onestory_backend"
+- All "fastapi_template" → "onestory_backend"
+- Docker containers: "onestory_backend-postgres-1"
+- Documentation updated throughout
+```
+
+### After Customization:
+1. Review the changes in `TEMPLATE_CUSTOMIZATION.md`
+2. Update your git remote to point to your new repository:
+   ```bash
+   git remote set-url origin <your-new-repo-url>
+   git remote add upstream <template-repo-url>  # Optional: keep template as upstream
+   ```
+3. Continue with the setup process below
+
 ---
 
 ## 🔧 Step 2: Set Up Your Environment
 
-### Create a Virtual Environment
+### 🚀 Automated Setup (Recommended)
+The template includes a comprehensive setup script that handles everything automatically:
+
+```bash
+# Run the automated setup script
+./scripts/setup_comprehensive.sh
+```
+
+This script will:
+- ✅ Check Python version and prerequisites
+- ✅ Create and activate a virtual environment
+- ✅ Install all dependencies
+- ✅ Create a complete `.env` file with all required variables
+- ✅ Start the database services
+- ✅ Run database migrations
+- ✅ Verify the setup is working correctly
+- ✅ Provide next steps and troubleshooting tips
+
+### Option B: Manual Setup
+If you prefer to set up everything manually:
+
+#### Create a Virtual Environment
 Think of a virtual environment as a clean workspace for your project. It keeps your project's dependencies separate from other projects on your computer.
 
 ```bash
@@ -119,7 +197,7 @@ source venv/bin/activate
 
 You'll know it's activated when you see `(venv)` at the beginning of your command line.
 
-### Install Dependencies
+#### Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
@@ -129,6 +207,8 @@ This installs all the packages your project needs. It might take a few minutes t
 ---
 
 ## 🗄️ Step 3: Configure Your Database
+
+> **Note:** If you used the automated setup script, this step is already complete! You can skip to Step 4.
 
 ### Start PostgreSQL with Docker
 ```bash
@@ -143,6 +223,7 @@ This uses the prebuilt `docker-compose.yml` file in the project, which spins up:
 Create a file called `.env` in your project root:
 
 ```bash
+# If you have .env.example (the automated setup creates .env automatically)
 cp .env.example .env
 ```
 
@@ -234,7 +315,49 @@ Your application is now running! Open your web browser and go to:
 
 ---
 
-## ✅ Step 6: Test Everything Works
+## ✅ Step 6: Verify Your Setup
+
+Before testing, let's make sure everything is configured correctly:
+
+### Run the Verification Script
+```bash
+# This will check all components and provide detailed feedback
+python scripts/verify_setup.py
+```
+
+The verification script will test:
+- ✅ Environment variables configuration
+- ✅ Database connectivity
+- ✅ Configuration loading
+- ✅ Database migrations
+- ✅ Docker services status
+- ✅ File structure integrity
+
+If any issues are found, the script will provide specific instructions to fix them.
+
+### Common Issues and Solutions
+
+**If verification fails, try these steps:**
+
+1. **Database connection issues:**
+   ```bash
+   docker-compose down
+   docker-compose up postgres -d
+   alembic upgrade head
+   ```
+
+2. **Environment variable issues:**
+   ```bash
+   # Re-run the setup script
+   ./scripts/setup_comprehensive.sh
+   ```
+
+3. **Migration conflicts:**
+   ```bash
+   alembic stamp head
+   ```
+
+## ✅ Step 7: Test Everything Works
 
 1. **Check the health endpoint**: Visit http://localhost:8000/health
 2. **Try the API docs**: Visit http://localhost:8000/docs
@@ -270,6 +393,9 @@ curl http://localhost:8000/health
 
 # Run all tests
 pytest --cov -v
+
+# Run only template tests
+pytest -m "template_only"
 
 # Test specific features
 pytest tests/template_tests/test_auth.py -v
@@ -336,6 +462,7 @@ Now that your basic application is running, you can:
 4. **🧪 Set up testing** - Follow the [Testing Tutorial](tutorials/testing-and-development.md)
 5. **🌐 Deploy to production** - Read the [Deployment Tutorial](tutorials/deployment-and-production.md)
 6. **⚡ Add optional features** - Explore the [Optional Features Tutorial](tutorials/optional-features.md)
+7. **🚀 Generate CRUD boilerplate** - Use the CRUD scaffolding tool
 
 ### 📁 Understanding Your Project Structure
 
@@ -347,13 +474,19 @@ fast-api-template/
 │   │       └── 📁 endpoints/ # Route handlers (auth, users, admin, health)
 │   ├── 📁 core/              # Configuration and core utilities
 │   ├── 📁 crud/              # Database operations
-│   ├── 📁 models/            # SQLAlchemy database models
+│   ├── 📁 models/            # SQLAlchemy database models (separated by entity)
+│   │   ├── base.py           # Base model and mixins
+│   │   ├── user.py           # User model
+│   │   ├── api_key.py        # API key model
+│   │   ├── audit_log.py      # Audit log model
+│   │   └── refresh_token.py  # Refresh token model
 │   ├── 📁 schemas/           # Pydantic schemas for validation
 │   ├── 📁 services/          # Business logic and external services
 │   └── 📁 utils/             # Utility functions
 ├── 📁 alembic/               # Database migrations
 ├── 📁 docs/                  # Documentation (you're here!)
 ├── 📁 tests/                 # Test files (360+ tests)
+│   └── 📁 template_tests/    # Template-specific tests
 ├── 📁 scripts/               # Utility scripts
 ├── 📄 docker-compose.yml     # Docker services
 ├── 📄 requirements.txt       # Python dependencies
@@ -363,7 +496,7 @@ fast-api-template/
 **Key files to know:**
 - `app/main.py` - Application entry point
 - `app/core/config.py` - All configuration settings
-- `app/models/models.py` - Database models
+- `app/models/` - Database models (separated by entity)
 - `app/api/api_v1/endpoints/` - API route handlers
 - `alembic/versions/` - Database migration files
 
@@ -410,6 +543,9 @@ If you want to run tests to make sure everything is working correctly:
 # Run all tests with coverage report
 pytest --cov -v
 
+# Run only template tests
+pytest -m "template_only"
+
 # Run specific test files
 pytest tests/template_tests/test_auth.py -v
 
@@ -450,6 +586,9 @@ python scripts/demo_error_responses.py
 
 # Logging demo
 python scripts/logging_demo.py
+
+# Fix common issues
+./scripts/fix_common_issues.sh
 ```
 
 ### Code Quality Tools
@@ -493,6 +632,29 @@ pre-commit run mypy --all-files
 ```
 
 > **💡 Pro Tip**: While pre-commit hooks catch most issues, they may not catch everything. If you see errors in GitHub CI that weren't caught locally, you can run `pre-commit run --all-files` to check all files, not just the ones you're committing.
+
+### 🚀 **CRUD Scaffolding**
+
+Generate complete CRUD boilerplate with one command:
+
+```bash
+# Generate a Post model with title, content, and is_published fields
+python scripts/generate_crud.py Post title:str content:str is_published:bool
+
+# Generate a Product model with soft delete and search capabilities
+python scripts/generate_crud.py Product name:str price:float description:str --soft-delete --searchable
+
+# Generate an admin-managed Category model
+python scripts/generate_crud.py Category name:str slug:str --admin
+```
+
+This generates:
+- SQLAlchemy model with proper relationships
+- Pydantic schemas for validation
+- CRUD operations with search and filtering
+- API endpoints with pagination
+- Basic tests
+- Auto-registration in the API router
 
 ### Database Management
 ```bash

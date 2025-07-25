@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.admin import BaseAdminCRUD, DBSession
 from app.core.security import get_password_hash
 from app.crud import user as crud_user
-from app.models.models import User
+from app.models import User
 from app.schemas.admin import AdminUserUpdate
 from app.schemas.user import UserCreate, UserResponse
 

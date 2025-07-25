@@ -14,7 +14,7 @@ from app.crud import (
     enforce_session_limit,
     verify_refresh_token_in_db,
 )
-from app.models.models import User
+from app.models import User
 
 
 def get_device_info(request: Request) -> str:

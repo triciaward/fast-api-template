@@ -61,7 +61,7 @@ class TestEmailVerificationEndpoints:
         """Test login attempt by unverified user."""
         # Create unverified user
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="unverified@example.com",
@@ -85,7 +85,7 @@ class TestEmailVerificationEndpoints:
         """Test successful login by verified user."""
         # Create verified user
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="verified@example.com",
@@ -110,7 +110,7 @@ class TestEmailVerificationEndpoints:
     ) -> None:
         """Test successful resend verification email."""
         # Create unverified user
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -149,7 +149,7 @@ class TestEmailVerificationEndpoints:
     ) -> None:
         """Test resend verification email for already verified user."""
         # Create verified user
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="verified@example.com",
@@ -173,7 +173,7 @@ class TestEmailVerificationEndpoints:
     ) -> None:
         """Test resend verification email when email is not configured."""
         # Create unverified user
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -200,7 +200,7 @@ class TestEmailVerificationEndpoints:
     ) -> None:
         """Test successful email verification."""
         # Create user with verification token
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -238,7 +238,7 @@ class TestEmailVerificationCRUDOperations:
     ) -> None:
         """Test getting user by verification token using sync CRUD."""
         from app.crud import user as crud_user
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -258,7 +258,7 @@ class TestEmailVerificationCRUDOperations:
     def test_update_verification_token_sync(self, sync_db_session: Session) -> None:
         """Test updating verification token using sync CRUD."""
         from app.crud import user as crud_user
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -296,7 +296,7 @@ class TestEmailVerificationCRUDOperations:
     def test_verify_user_sync(self, sync_db_session: Session) -> None:
         """Test verifying user using sync CRUD."""
         from app.crud import user as crud_user
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -366,7 +366,7 @@ class TestEmailVerificationIntegration:
             )
 
             # Step 3: Get the user and manually set verification token
-            from app.models.models import User
+            from app.models import User
 
             user = (
                 sync_db_session.query(User)

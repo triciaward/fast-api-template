@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import generate_api_key, hash_api_key, verify_api_key
 from app.crud import api_key as crud_api_key
-from app.models.models import User
+from app.models import User
 from app.schemas.user import APIKeyCreate
 
 

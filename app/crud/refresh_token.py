@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.security import hash_refresh_token, verify_refresh_token
-from app.models.models import RefreshToken
+from app.models import RefreshToken
 
 
 def create_refresh_token(

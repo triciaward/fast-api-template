@@ -492,3 +492,13 @@ class APIKeyUser(BaseModel):
     @field_serializer("id", "user_id", "key_id")
     def serialize_uuid(self, uuid_value: Optional[uuid.UUID], _info):
         return str(uuid_value) if uuid_value else None
+
+
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    username: Optional[str] = Field(None, min_length=3, max_length=30)
+    password: Optional[str] = Field(None, min_length=8, max_length=128)
+    full_name: Optional[str] = None
+    is_active: Optional[bool] = None
+    is_superuser: Optional[bool] = None
+    # Add any other fields relevant to your user model

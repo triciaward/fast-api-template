@@ -1,744 +1,153 @@
-# FastAPI Project Template
+# Your Project Name
 
-![Tests](https://img.shields.io/badge/tests-360%20tests%20passing-brightgreen)
-![CI](https://github.com/triciaward/fast-api-template/actions/workflows/ci.yml/badge.svg)
-![Coverage](https://img.shields.io/badge/coverage-60%25-brightgreen)
-![Linting](https://img.shields.io/badge/linting-0%20errors-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-blue)
+Welcome to your new FastAPI project! 🎉
 
----
+This is your project's main README file - feel free to customize it to describe what your application does, how to use it, and any specific features you've built.
 
-## 🚀 Start Here
+## 🚀 Getting Started
 
-**New to this template?** Follow this step-by-step guide:
-
-1. **📖 [Getting Started Guide](docs/getting-started.md)** - Complete setup from zero to running app
-2. **📚 [Tutorials Overview](docs/tutorials/TUTORIALS.md)** - All feature guides in one place
-3. **🔐 [Authentication Tutorial](docs/tutorials/authentication.md)** - Build your user system
-4. **🗄️ [Database Management](docs/tutorials/database-management.md)** - Add your own models
-5. **🌐 [Deployment Guide](docs/tutorials/deployment-and-production.md)** - Go live with your app
-
-**Quick clone and run:**
-```bash
-git clone https://github.com/triciaward/fast-api-template.git
-cd fast-api-template
-# Then follow the [Getting Started Guide](docs/getting-started.md)
-```
-
----
-
-## ⚡ Quick Start
+If you're new to this project, here's how to get it running:
 
 ### Prerequisites
-- Python 3.11+
-- PostgreSQL 13+
-- Docker (optional)
+- Python 3.8 or higher
+- PostgreSQL database
+- Redis (optional, for caching)
 
-### Installation
+### Quick Setup
+
+**Option 1: Automated Setup (Recommended)**
 ```bash
-# Clone the repository
-git clone https://github.com/triciaward/fast-api-template.git
-cd fast-api-template
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set up environment
-cp .env.example .env
-# Edit .env with your database credentials
-
-# Run migrations
-alembic upgrade head
-
-# Start the server
-uvicorn app.main:app --reload
+# Run the comprehensive setup script
+./scripts/setup_comprehensive.sh
 ```
+This script will automatically:
+- Create a virtual environment
+- Install dependencies
+- Set up your `.env` file
+- Start the database
+- Run migrations
+- Verify everything is working
 
-### Docker Quick Start
+**Option 2: Manual Setup**
+1. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Set up your environment:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your database and other settings
+   ```
+
+3. **Set up the database:**
+   ```bash
+   # Run database migrations
+   alembic upgrade head
+   ```
+
+4. **Start your application:**
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+
+Your API will be available at `http://localhost:8000`
+
+## 📚 API Documentation
+
+Once your app is running, you can explore your API:
+
+- **Interactive API Docs**: http://localhost:8000/docs
+- **Alternative API Docs**: http://localhost:8000/redoc
+
+## 🐳 Running with Docker
+
+If you prefer using Docker:
+
 ```bash
-# Start all services
+# Start everything with Docker Compose
 docker-compose up -d
 
-# Access the API
-curl http://localhost:8000/health
+# View logs
+docker-compose logs -f
 ```
 
-> **What's Included by Default:**
-> - ✅ User authentication (JWT, email verification, password reset)
-> - ✅ API Key authentication (server-to-server, dev tooling)
-> - ✅ PostgreSQL database with migrations
-> - ✅ Complete test suite (360 tests)
-> - ✅ Security features (rate limiting, CORS, audit logging)
-> - ✅ Health checks and monitoring
->
-> **What's Optional (disabled by default):**
-> - 🔧 Redis (caching, sessions) - Enable with `ENABLE_REDIS=true`
-> - 🌐 WebSockets (real-time features) - Enable with `ENABLE_WEBSOCKETS=true`
-> - 🔄 Celery (background tasks) - Enable with `ENABLE_CELERY=true`
-> - 🔐 OAuth (Google/Apple login) - Configure OAuth credentials
-> - 📧 Email notifications - Configure SMTP settings
-
----
-
-## 📖 Documentation
-
-### 🎯 **Getting Started**
-- **[Complete Setup Guide](docs/getting-started.md)** - From zero to running application
-- **[Tutorials Overview](docs/tutorials/TUTORIALS.md)** - All feature guides organized by skill level
-
-### 🔧 **Feature Tutorials**
-- **[Authentication System](docs/tutorials/authentication.md)** - User login, registration, OAuth, password reset
-- **[Database Management](docs/tutorials/database-management.md)** - Models, migrations, CRUD operations
-- **[Testing & Development](docs/tutorials/testing-and-development.md)** - Writing tests, debugging, CI/CD
-- **[Deployment & Production](docs/tutorials/deployment-and-production.md)** - Going live, monitoring, scaling
-- **[Optional Features](docs/tutorials/optional-features.md)** - Redis, WebSockets, Celery, error monitoring
-
-### 📚 **Skill-Based Learning Paths**
-- **👶 Beginners**: Getting Started → Authentication → Database Management
-- **👨‍💻 Intermediate**: Authentication → Database → Testing → Deployment  
-- **🚀 Advanced**: Quick Reference → Deployment → Optional Features
-
----
-
-## 🏗️ Architecture & File Tree
-
-```mermaid
-graph TD
-  A[app/]
-  A1[api/ ← route handlers] --> A
-  A2[core/ ← shared config + utilities] --> A
-  A3[crud/ ← DB access logic] --> A
-  A4[models/ ← SQLAlchemy models] --> A
-  A5[schemas/ ← Pydantic schemas] --> A
-  A6[services/ ← business logic, external services] --> A
-  A7[utils/ ← utility functions] --> A
-  B[alembic/ ← DB migrations]
-  C[tests/ ← full test suite]
-  D[scripts/ ← utility scripts]
-  E[docker-compose.yml]
-  F[Dockerfile]
-  G[requirements.txt]
-```
-
----
-
-## Who is this for?
-
-> **This template is for beginners to intermediate devs who want a production-ready FastAPI backend with batteries included.**
->
-> - Learn by example with clear, step-by-step tutorials
-> - Get started quickly with authentication, database, and testing
-> - Grow into advanced features (Celery, Redis, WebSockets, CI/CD)
-
----
-
-## 📚 Table of Contents
-
-- [🚀 Start Here](#-start-here)
-- [📖 Documentation](#-documentation)
-- [🏗️ Architecture & File Tree](#️-architecture--file-tree)
-- [Who is this for?](#who-is-this-for)
-- [Overview](#overview)
-- [Quick Start](#quick-start)
-- [Core Features](#core-features)
-- [Optional Features](#optional-features)
-- [Test Suite](#test-suite)
-- [Project Structure](#project-structure)
-- [Authentication & Security](#authentication--security)
-- [API Documentation](#api-documentation)
-- [Docker & Deployment](#docker--deployment)
-- [Development](#development)
-- [Monitoring & Logging](#monitoring--logging)
-- [Contributing](#contributing)
-
----
-
-## Overview
-
-A robust FastAPI project template with **hybrid async/sync architecture** optimized for both development and production. Features comprehensive testing (360 tests passing), secure authentication with email verification, OAuth, and password reset, comprehensive input validation, PostgreSQL integration, and a fully working CI/CD pipeline.
-
-### 🎯 **Core Features**
-- **Authentication**: JWT + bcrypt + Email Verification + OAuth + Password Reset
-- **Security**: GDPR-compliant account deletion, refresh token management, audit logging
-- **Database**: PostgreSQL with Alembic migrations, soft delete, search & filtering
-- **Testing**: 360 tests passing, comprehensive coverage, CI/CD pipeline
-- **Quality**: Type safety (mypy), linting (ruff), pre-commit hooks
-- **Monitoring**: Health checks, structured logging, rate limiting
-- **Development Tools**: CRUD scaffolding CLI for rapid development
-
-### 🚀 **Optional Features**
-- **Redis**: Caching, sessions, rate limiting backend
-- **WebSocket**: Real-time communication with room support
-- **Celery**: Background task processing with eager mode testing
-- **Error Monitoring**: GlitchTip/Sentry integration for production error tracking
-- **Advanced Monitoring**: ELK stack ready logging
-
-
-
-## 🏗️ Project Structure
-
-```text
-fast-api-template/
-├── app/                          # Main application code
-│   ├── api/                      # API endpoints
-│   │   └── api_v1/
-│   │       └── endpoints/        # Route handlers
-│   ├── core/                     # Core configuration
-│   ├── crud/                     # Database operations
-│   ├── models/                   # SQLAlchemy models
-│   ├── schemas/                  # Pydantic schemas
-│   ├── services/                 # Business logic
-│   └── utils/                    # Utility functions
-├── alembic/                      # Database migrations
-├── tests/                        # Test suite
-├── scripts/                      # Utility scripts
-├── docker-compose.yml            # Docker services
-├── Dockerfile                    # Application container
-└── requirements.txt              # Python dependencies
-```
-
----
-
-## Core Features
-
-### 🔐 Authentication System
-- **JWT Tokens**: Secure token-based authentication
-- **API Keys**: Server-to-server authentication with scopes
-- **Email Verification**: Complete email verification workflow
-- **OAuth Integration**: Google and Apple OAuth support
-- **Password Management**: Reset, change, and strength validation
-- **GDPR Compliance**: Account deletion with grace period
-- **Session Management**: Refresh tokens with multi-device support
-
-### 🗄️ Database & Data Management
-- **PostgreSQL**: Primary database with proper indexing
-- **Connection Pooling**: Optimized connection management with configurable pools
-- **Alembic Migrations**: Version-controlled schema changes
-- **Soft Delete**: Comprehensive soft delete with restoration
-- **Search & Filter**: Advanced text search and field filtering
-- **Pagination**: Type-safe pagination with HATEOAS links
-- **Audit Logging**: Complete user activity tracking
-
-### 🛡️ Security & Validation
-- **Input Validation**: SQL injection protection, XSS prevention
-- **Rate Limiting**: Configurable per-endpoint rate limiting
-- **CORS**: Configurable cross-origin resource sharing
-- **Error Handling**: Standardized error responses with codes
-- **Type Safety**: Complete mypy type checking
-
-### 🚀 Development Tools
-- **CRUD Scaffolding**: Generate complete CRUD boilerplate with one command
-- **Auto-registration**: Automatically wire new endpoints into the API router
-- **Consistent Patterns**: Follow established conventions for models, schemas, and endpoints
-- **Test Generation**: Basic test files included for immediate testing
-
----
-
-## 🔑 API Key Authentication
-
-**Secure server-to-server authentication with fine-grained scopes!**
-
-This template includes a complete API Key system following industry best practices (like Stripe and OpenAI). Perfect for internal tools, external integrations, and development tooling.
-
-### Quick Start
+## 🧪 Testing Your Application
 
 ```bash
-# 1. Create an API key (requires user authentication)
-curl -X POST "http://localhost:8000/api/v1/auth/api-keys" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "label": "Production Integration",
-    "scopes": ["read_events", "write_events"],
-    "expires_at": "2024-12-31T23:59:59Z"
-  }'
-
-# Response includes the raw key (only shown once!)
-{
-  "api_key": {
-    "id": "uuid",
-    "label": "Production Integration",
-    "scopes": ["read_events", "write_events"],
-    "user_id": "user_uuid",
-    "is_active": true,
-    "created_at": "2024-01-01T00:00:00Z"
-  },
-  "raw_key": "sk_abc123..."  # Store this securely!
-}
-
-# 2. Use the API key for authentication
-curl -X GET "http://localhost:8000/api/v1/users/me" \
-  -H "Authorization: Bearer sk_abc123..."
-```
-
-### Key Features
-
-✅ **Secure Generation**: Cryptographically secure keys with `sk_` prefix  
-✅ **Scope-Based Access**: Fine-grained permissions (e.g., `read_events`, `write_events`)  
-✅ **Expiration Support**: Optional key expiration dates  
-✅ **Key Rotation**: Generate new keys while keeping the same ID  
-✅ **User Isolation**: Users can only manage their own keys  
-✅ **Soft Delete**: Keys can be deactivated and restored  
-✅ **Audit Logging**: All key operations are logged  
-
-### API Key Management
-
-```bash
-# List your API keys
-GET /api/v1/auth/api-keys
-
-# Create a new API key
-POST /api/v1/auth/api-keys
-{
-  "label": "My Integration",
-  "scopes": ["read_events"],
-  "expires_at": "2024-12-31T23:59:59Z"  # Optional
-}
-
-# Deactivate an API key
-DELETE /api/v1/auth/api-keys/{key_id}
-
-# Rotate an API key (get a new key with same ID)
-POST /api/v1/auth/api-keys/{key_id}/rotate
-```
-
-### 🖥️ Admin HTML Dashboard
-
-**Visual API key management for superusers!**
-
-The template includes a beautiful dark-mode HTML dashboard for managing API keys:
-
-```bash
-# Access the admin dashboard (requires superuser login)
-GET /admin/api-keys
-```
-
-⚠️ **IMPORTANT**: The admin dashboard requires JWT Bearer token authentication. It is NOT accessible through traditional web browser login forms.
-
-#### Quick Access Guide
-
-1. **Get JWT token:**
-   ```bash
-   curl -X POST "http://localhost:8000/api/v1/auth/login" \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     -d "username=admin@example.com&password=Admin123!"
-   ```
-
-2. **Access dashboard with browser extension:**
-   - Install "ModHeader" (Chrome) or "Header Editor" (Firefox)
-   - Add header: `Authorization: Bearer YOUR_TOKEN`
-   - Visit: `http://localhost:8000/admin/api-keys`
-
-3. **Or use curl:**
-   ```bash
-   curl -X GET "http://localhost:8000/admin/api-keys" \
-     -H "Authorization: Bearer YOUR_TOKEN"
-   ```
-
-**Features:**
-- **Visual Interface**: No command line needed - manage keys through your browser
-- **Dark Mode**: Easy on the eyes with modern Bootstrap 5 styling
-- **Real-time Operations**: Create, rotate, and revoke keys with one click
-- **Status Tracking**: See active, inactive, and expired keys at a glance
-- **Pagination**: Handle large numbers of keys efficiently
-- **Audit Logging**: All operations are logged for security
-
-**Perfect for:**
-- Non-technical administrators
-- Quick key management without API calls
-- Visual overview of all system API keys
-- Secure key rotation workflows
-
-See **[Optional Features Tutorial](docs/tutorials/optional-features.md#️-admin-html-dashboard---visual-api-key-management)** for complete usage guide.
-
-### Using API Keys in Your Code
-
-```python
-from fastapi import Depends
-from app.api.api_v1.endpoints.users import get_api_key_user, require_api_scope
-
-# Basic API key authentication
-@app.get("/api/v1/events")
-async def get_events(api_key_user: APIKeyUser = Depends(get_api_key_user)):
-    return {"message": "Authenticated with API key", "user_id": api_key_user.user_id}
-
-# Scope-based access control
-@app.post("/api/v1/events")
-async def create_event(api_key_user: APIKeyUser = Depends(require_api_scope("write_events"))):
-    return {"message": "Event created", "scopes": api_key_user.scopes}
-```
-
-### Security Best Practices
-
-1. **Store Keys Securely**: Never commit API keys to version control
-2. **Use Environment Variables**: Store keys in `.env` files or secure vaults
-3. **Rotate Regularly**: Use the rotation endpoint to update keys periodically
-4. **Minimal Scopes**: Only grant the scopes your integration needs
-5. **Monitor Usage**: Check audit logs for unusual activity
-
-### Common Scopes
-
-- `read_events` - Read-only access to events
-- `write_events` - Create and update events
-- `delete_events` - Delete events
-- `admin` - Full administrative access
-- `user_management` - Manage user accounts
-
----
-
-## 🛠️ CRUD Scaffolding CLI
-
-**Boost your development speed with automated CRUD generation!**
-
-Instead of manually creating models, schemas, CRUD operations, endpoints, and tests, use the built-in scaffolding tool to generate everything with one command.
-
-### Quick Example
-
-```bash
-# Generate a Post model with soft delete
-python scripts/generate_crud.py Post title:str content:str is_published:bool --soft-delete
-
-# Generate a Product model with search functionality
-python scripts/generate_crud.py Product name:str price:float description:str --searchable
-
-# Generate a Category model with admin features
-python scripts/generate_crud.py Category name:str slug:str --admin --slug
-```
-
-### What Gets Generated
-
-✅ **Model** (`app/models/post.py`) - SQLAlchemy model with proper fields and relationships  
-✅ **Schemas** (`app/schemas/post.py`) - Pydantic schemas for create, update, and response  
-✅ **CRUD** (`app/crud/post.py`) - Database operations (create, read, update, delete)  
-✅ **Endpoints** (`app/api/api_v1/endpoints/post.py`) - FastAPI route handlers  
-✅ **Tests** (`tests/template_tests/test_post.py`) - Basic test coverage  
-✅ **Auto-registration** - Automatically added to API router  
-
-### Available Options
-
-- `--soft-delete` - Include soft delete functionality with restoration
-- `--searchable` - Add search and filtering capabilities
-- `--admin` - Include admin panel integration
-- `--slug` - Auto-generate slug field from title
-
-### Generated API Endpoints
-
-```bash
-GET    /api/v1/posts          # List all posts
-POST   /api/v1/posts          # Create new post
-GET    /api/v1/posts/{id}     # Get specific post
-PUT    /api/v1/posts/{id}     # Update post
-DELETE /api/v1/posts/{id}     # Delete post (soft delete if enabled)
-```
-
-### Next Steps After Generation
-
-1. **Review generated files** - Customize business logic as needed
-2. **Run migrations** - `alembic revision --autogenerate -m 'Add Post model'`
-3. **Apply migrations** - `alembic upgrade head`
-4. **Test endpoints** - `pytest tests/template_tests/test_post.py`
-
-### Supported Field Types
-
-- `str` - String fields
-- `int` - Integer fields  
-- `float` - Float/decimal fields
-- `bool` - Boolean fields
-- `datetime` - Date/time fields
-- `date` - Date fields
-- `uuid` - UUID fields
-- `text` - Long text fields
-- `json` - JSON fields
-
----
-
-## Optional Features
-
-### 🎯 Redis Integration
-- **Caching**: Response caching for improved performance
-- **Sessions**: User session management
-- **Rate Limiting**: Redis-backed rate limiting
-- **Health Checks**: Redis connection monitoring
-
-### 🌐 WebSocket Support
-- **Real-time Communication**: WebSocket endpoints
-- **Room Management**: Multi-room chat functionality
-- **Connection Handling**: Proper connection lifecycle management
-- **Testing**: Comprehensive WebSocket testing
-
-### 🔄 Background Tasks
-- **Celery Integration**: Asynchronous task processing
-- **Task Management**: Submit, monitor, and cancel tasks
-- **Eager Mode**: Synchronous execution during testing
-- **Health Integration**: Task status in health checks
-
-### 🚨 Error Monitoring
-- **GlitchTip Integration**: Self-hosted Sentry-compatible error tracking
-- **Sentry SDK**: FastAPI integration with automatic error capture
-- **Performance Monitoring**: Request tracing and profiling
-- **User Context**: Automatic user identification in error reports
-- **Request Context**: Enhanced request information for better debugging
-- **Health Validation**: Real-time Sentry connection status checking
-- **Test Endpoint**: `/health/test-sentry` for monitoring validation
-- **Fail-Safe Design**: Graceful degradation when Sentry is unavailable
-
----
-
-## Test Suite
-
-- **360 Core Tests**: All passing with comprehensive coverage
-- **152 Skipped Tests**: Complex features (OAuth, account deletion, etc.)
-- **76 Async Tests**: Deselected in CI to prevent hangs
-- **60% Code Coverage**: Proper async testing with fixtures
-- **100% Optional Features**: Complete coverage when enabled
-
-> **Note:** The default test coverage threshold is set to 50% to make it easy to start new projects from this template. As you build out your app and implement more features, you should raise the threshold to encourage better test coverage.
-
----
-
-## Authentication & Security
-
-### Standardized Error Responses
-All API endpoints return consistent error formats:
-
-```json
-{
-  "error": {
-    "type": "ValidationError",
-    "message": "Invalid email format",
-    "code": "INVALID_EMAIL",
-    "details": {}
-  }
-}
-```
-
-### Security Features
-- **JWT Token Management**: Secure token generation and validation
-- **Password Security**: bcrypt hashing with strength validation
-- **Rate Limiting**: Configurable per-endpoint limits
-- **Input Sanitization**: SQL injection and XSS protection
-- **Audit Logging**: Complete security event tracking
-
----
-
-## API Documentation
-
-### Interactive Documentation
-- **Swagger UI**: Available at `/docs`
-- **ReDoc**: Available at `/redoc`
-- **OpenAPI Schema**: Available at `/openapi.json`
-
-### Key Endpoints
-- **Health**: `/health`, `/health/simple`, `/health/ready`, `/health/live`, `/health/rate-limit`, `/health/test-sentry`
-- **Authentication**: `/api/v1/auth/login`, `/api/v1/auth/register`
-- **Users**: `/api/v1/users/` (CRUD operations)
-- **Admin**: `/api/v1/admin/` (Admin-only operations)
-- **Root**: `/` (application info), `/features` (enabled features)
-- **Optional**: `/api/v1/ws/` (WebSockets), `/api/v1/celery/` (background tasks)
-
----
-
-## Docker & Deployment
-
-### Database Connection Pooling
-
-This template includes comprehensive database connection pooling for optimal performance:
-
-**SQLAlchemy Pool Configuration:**
-- **Pool Size**: 20 connections (configurable via `DB_POOL_SIZE`)
-- **Max Overflow**: 30 additional connections (configurable via `DB_MAX_OVERFLOW`)
-- **Connection Recycling**: 1 hour (configurable via `DB_POOL_RECYCLE`)
-- **Health Checks**: Pre-ping validation (configurable via `DB_POOL_PRE_PING`)
-- **Timeout**: 30 seconds (configurable via `DB_POOL_TIMEOUT`)
-
-**pgBouncer Integration (Optional):**
-```bash
-# Start with pgBouncer for advanced pooling
-docker-compose --profile pgbouncer up -d
-```
-
-**Pool Monitoring:**
-- Health endpoint `/health` includes real-time pool metrics
-- Monitor connection usage, overflow, and invalid connections
-- Automatic connection validation and recycling
-- Real-time pool statistics in health check responses
-- Connection pool health integration with Kubernetes probes
-
-### Docker Services
-```yaml
-services:
-  app:          # FastAPI application
-  postgres:     # PostgreSQL database
-  redis:        # Redis cache (optional)
-  celery:       # Background tasks (optional)
-  glitchtip:    # Error monitoring (optional)
-```
-
-### Production Deployment
-- **Environment Variables**: Comprehensive configuration
-- **Health Checks**: Application and service monitoring with connection pool metrics
-- **Logging**: Structured JSON logging
-- **Security**: Proper container security practices
-- **Error Monitoring**: Production-ready Sentry/GlitchTip integration
-- **Connection Pooling**: Optimized database connection management
-- **Security Recommendations**: 
-  - Secure GlitchTip behind authentication (basic/JWT)
-  - Use reverse proxy (Caddy) with Cloudflare protection
-  - Enable HTTPS for all monitoring endpoints
-
----
-
-## Development
-
-### Code Quality
-- **Pre-commit Hooks**: Automated linting and type checking
-- **mypy**: Static type checking with zero errors
-- **ruff**: Fast Python linter with zero warnings
-- **black**: Code formatting
-
-### Code Quality (Pre-commit Hooks)
-This project uses pre-commit hooks to ensure code quality before every commit.
-
-**Installation:**
-```bash
-pre-commit install
-```
-
-**Available Hooks:**
-- **ruff**: Fast Python linter with zero warnings
-- **black**: Code formatting
-- **mypy**: Static type checking with zero errors
-
-**Configuration:** See `.pre-commit-config.yaml` for the complete list of hooks and their settings.
-
-### Development Workflow
-```bash
-# Install pre-commit hooks
-./scripts/install_precommit.sh
-
-# Run tests
+# Run all tests
 pytest
 
-# Run linting
-./scripts/lint.sh
-
-# Format code
-black .
+# Run tests with coverage report
+pytest --cov=app
 ```
 
-### Testing
-- **Health Endpoints**: Comprehensive testing of all health check endpoints
-- **Connection Pooling**: Full test coverage for SQLAlchemy and pgBouncer integration
-- **Integration Tests**: End-to-end testing of health monitoring with all optional features
-- **Test Coverage**: 100% coverage for health and connection pooling functionality
+## 🔧 Development Workflow
 
-### Utility Scripts
-- **Bootstrap Admin**: `./scripts/bootstrap_admin.py`
-- **Bootstrap Superuser**: `./scripts/bootstrap_superuser.sh`
-- **Logging Demo**: `./scripts/logging_demo.py`
-- **Database Setup**: `./scripts/setup.sh`
-- **GlitchTip Setup**: `./scripts/setup_glitchtip.sh`
-- **Pre-commit Setup**: `./scripts/install_precommit.sh`
-- **Error Response Demo**: `./scripts/demo_error_responses.py`
-- **Admin CLI**: `./scripts/admin_cli.py`
-
----
-
-## Monitoring & Logging
-
-### Structured Logging
-- **JSON Format**: Machine-readable logs
-- **Console Output**: Colored human-readable logs
-- **File Rotation**: Automatic log file management
-- **ELK Ready**: Compatible with ELK stack
-
-### Health Monitoring
-
-**Comprehensive Health Check (`/health`):**
 ```bash
-curl http://localhost:8000/health
+# Start development server
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Format your code
+ruff format .
+
+# Check for code issues
+ruff check .
 ```
 
-Returns detailed status including:
-- Database connectivity and connection pool metrics
-- Redis health (when enabled)
-- Rate limiting status (when enabled)
-- Celery background task status (when enabled)
-- Sentry error monitoring status
-- Real-time connection pool statistics
+## 📖 What's Included
 
-**Response Example:**
-```json
-{
-  "status": "healthy",
-  "timestamp": "2024-01-01T12:00:00.000000",
-  "version": "1.0.0",
-  "environment": "development",
-  "checks": {
-    "database": "healthy",
-    "application": "healthy",
-    "redis": "disabled",
-    "rate_limiting": "disabled",
-    "celery": "disabled",
-    "sentry": "disabled"
-  },
-  "database_pools": {
-    "async": {
-      "size": 20,
-      "checked_in": 18,
-      "checked_out": 2,
-      "overflow": 0
-    },
-    "sync": {
-      "size": 10,
-      "checked_in": 9,
-      "checked_out": 1,
-      "overflow": 0
-    }
-  }
-}
-```
+This project comes with several features out of the box:
 
-**Specialized Health Endpoints:**
-- **Simple Health** (`/health/simple`) - Basic uptime monitoring
-- **Readiness Check** (`/health/ready`) - Kubernetes readiness probes
-- **Liveness Check** (`/health/live`) - Kubernetes liveness probes
-- **Rate Limit Info** (`/health/rate-limit`) - Current rate limit status
-- **Sentry Test** (`/health/test-sentry`) - Error monitoring validation
+- **User Authentication** - Registration, login, and JWT tokens
+- **Database Management** - PostgreSQL with automatic migrations
+- **Admin Panel** - Built-in admin interface at `/admin`
+- **API Key Management** - Secure API key system
+- **Audit Logging** - Track important actions
+- **Testing Framework** - Comprehensive test suite
+- **Docker Support** - Easy containerized deployment
 
-### Audit Logging
-- **User Actions**: Complete activity tracking
-- **Security Events**: Authentication and authorization events
-- **API Key Usage**: Track which API keys are being used, when, and for what endpoints
-- **System Events**: Background tasks and health checks
-- **Database Storage**: Persistent audit trail
+## 🎯 Next Steps
 
----
+1. **Make it your own** - Run the customization script to personalize your project:
+   ```bash
+   ./scripts/customize_template.sh
+   ```
+   This will help you rename the project, update database names, and customize all template references.
+
+2. **Customize this README** - Update it to describe your specific project
+3. **Explore the code** - Check out the `app/` folder to see how everything is organized
+4. **Add your features** - Start building your application logic
+5. **Check the docs** - See the template documentation for advanced features
+
+## 📚 Template Documentation
+
+This project was built using a FastAPI template that provides a solid foundation. For detailed information about:
+
+- Template features and capabilities
+- Advanced configuration options
+- Deployment guides
+- Troubleshooting tips
+
+**Check out the documentation in the `docs/` folder:**
+- [Template Overview](docs/TEMPLATE_README.md)
+- [Getting Started Guide](docs/tutorials/getting-started.md)
+- [Complete Tutorials](docs/tutorials/TUTORIALS.md)
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests and linting
-5. Submit a pull request
-
-### Development Guidelines
-- Follow PEP 8 style guidelines
-- Add type annotations for all functions
-- Write comprehensive tests
-- Update documentation as needed
-
----
+This is your project! Feel free to:
+- Add new features
+- Modify existing code
+- Update documentation
+- Add tests for your changes
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+[Add your license information here]
 
 ---
 
-## 📞 Contact
+**Happy coding! 🚀**
 
-- **GitHub**: [@triciaward](https://github.com/triciaward)
-- **Issues**: [GitHub Issues](https://github.com/triciaward/fast-api-template/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/triciaward/fast-api-template/discussions)
+*This project was created using a FastAPI template. For template-specific information, see the `docs/` folder.* 

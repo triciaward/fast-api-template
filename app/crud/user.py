@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash, verify_password
-from app.models.models import User
+from app.models import User
 from app.schemas.user import UserCreate
 
 # Type alias for both sync and async sessions

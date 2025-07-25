@@ -6,7 +6,7 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from app.core.config import settings
-from app.models.models import Base
+from app.models import Base
 
 # Add the project root directory to the path so we can import our models
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))

@@ -23,7 +23,7 @@ class TestPasswordResetEndpoints:
         """Test successful password reset request."""
         # Create user
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -68,7 +68,7 @@ class TestPasswordResetEndpoints:
     ) -> None:
         """Test password reset request for OAuth user (should be blocked)."""
         # Create OAuth user
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="oauth@example.com",
@@ -98,7 +98,7 @@ class TestPasswordResetEndpoints:
         """Test password reset request when email is not configured."""
         # Create user
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -129,7 +129,7 @@ class TestPasswordResetEndpoints:
         """Test password reset request when token creation fails."""
         # Create user
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -161,7 +161,7 @@ class TestPasswordResetEndpoints:
         """Test password reset request when email sending fails."""
         # Create user
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -193,7 +193,7 @@ class TestPasswordResetEndpoints:
         """Test successful password reset."""
         # Create user with password reset token
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -273,7 +273,7 @@ class TestPasswordResetEndpoints:
         """Test password reset with expired token."""
         # Create user with expired password reset token
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -306,7 +306,7 @@ class TestPasswordResetEndpoints:
     ) -> None:
         """Test password reset for OAuth user (should be blocked)."""
         # Create OAuth user with password reset token
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="oauth@example.com",
@@ -362,7 +362,7 @@ class TestPasswordResetEndpoints:
         """Test password reset when user is not found."""
         # Create user with password reset token
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -428,7 +428,7 @@ class TestPasswordResetCRUDOperations:
         """Test getting user by password reset token."""
         from app.core.security import get_password_hash
         from app.crud.user import get_user_by_password_reset_token_sync
-        from app.models.models import User
+        from app.models import User
 
         # Create user with password reset token
         user = User(
@@ -460,7 +460,7 @@ class TestPasswordResetCRUDOperations:
         """Test updating password reset token."""
         from app.core.security import get_password_hash
         from app.crud.user import update_password_reset_token_sync
-        from app.models.models import User
+        from app.models import User
 
         # Create user
         user = User(
@@ -507,7 +507,7 @@ class TestPasswordResetCRUDOperations:
         """Test resetting user password."""
         from app.core.security import get_password_hash, verify_password
         from app.crud.user import reset_user_password_sync
-        from app.models.models import User
+        from app.models import User
 
         # Create user with password reset token
         user = User(
@@ -601,7 +601,7 @@ class TestPasswordResetEmailService:
     ) -> None:
         """Test successful password reset token creation."""
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
         from app.services.email import email_service
 
         # Create user
@@ -633,7 +633,7 @@ class TestPasswordResetEmailService:
     ) -> None:
         """Test successful password reset token verification."""
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
         from app.services.email import email_service
 
         # Create user with password reset token
@@ -660,7 +660,7 @@ class TestPasswordResetEmailService:
     ) -> None:
         """Test password reset token verification with expired token."""
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
         from app.services.email import email_service
 
         # Create user with expired password reset token
@@ -705,7 +705,7 @@ class TestPasswordResetIntegration:
         """Test complete password reset flow from request to completion."""
         # Create user
         from app.core.security import get_password_hash
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",

@@ -5,7 +5,7 @@ from uuid import uuid4
 from sqlalchemy.orm import Session
 
 from app.crud import user as crud_user
-from app.models.models import User
+from app.models import User
 from app.schemas.user import UserCreate
 from app.utils.search_filter import (
     DeletedUserSearchParams,

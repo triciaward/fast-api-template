@@ -314,8 +314,8 @@ def sync_db_session(setup_sync_test_db: None) -> Generator:
 def test_user_data() -> dict[str, str]:
     """Sample user data for testing."""
     return {
-        "email": "test@example.com",
-        "username": "testuser",
+        "email": "unique_test_user@example.com",
+        "username": "unique_testuser",
         "password": "TestPassword123!",
     }
 

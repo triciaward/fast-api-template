@@ -157,7 +157,7 @@ class TestCRUDGenerator:
                 )
                 assert "from sqlalchemy.dialects.postgresql import UUID" in model_code
                 assert "from app.database.database import Base" in model_code
-                assert "from app.models.models import SoftDeleteMixin" in model_code
+                assert "from app.models import SoftDeleteMixin" in model_code
 
                 # Check class definition
                 assert "class Post(Base, SoftDeleteMixin):" in model_code

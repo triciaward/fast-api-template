@@ -53,7 +53,7 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
     from app.core.logging_config import get_app_logger
     from app.crud import user as crud_user
     from app.database.database import get_db_sync
-    from app.models.models import User
+    from app.models import User
     from app.services import email_service
 
     logger = get_app_logger()

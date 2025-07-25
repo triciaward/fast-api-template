@@ -14,7 +14,7 @@ from app.core.security import generate_api_key
 from app.crud import api_key as crud_api_key
 from app.crud.audit_log import get_audit_logs_by_event_type_sync
 from app.database.database import SyncSessionLocal
-from app.models.models import User
+from app.models import User
 from app.schemas.user import APIKeyCreate
 
 

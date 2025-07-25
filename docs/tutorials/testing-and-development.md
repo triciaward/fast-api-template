@@ -1,473 +1,717 @@
-# Testing and Development Tutorial
+# Testing and Development
 
-Welcome to the testing and development tutorial! This guide will teach you how to test your FastAPI application, debug issues, and follow best practices for development.
+This guide covers testing strategies, development workflows, and how to implement skipped tests in the FastAPI template.
 
----
+## Test Structure
 
-## What is Testing?
+The template includes comprehensive tests organized into several categories:
 
-Think of testing like quality control for your app. Just like a car manufacturer tests every car before selling it, you need to test your app to make sure it works correctly before users see it.
+- **Core Tests**: Basic functionality tests that should always pass
+- **Template Tests**: Tests specifically for template functionality (marked with `@pytest.mark.template_only`)
+- **Integration Tests**: Tests that require external services or complex setup
+- **Skipped Tests**: Tests that are intentionally skipped due to template limitations
 
----
-
-## Why Testing is Important
-
-- **Catch bugs early**: Find problems before they reach users
-- **Ensure reliability**: Make sure your app works consistently
-- **Safe changes**: Modify code without breaking existing features
-- **Documentation**: Tests show how your code should work
-- **Confidence**: Know your app works before deploying
-
----
-
-## 🧪 Testing Tools Included
-
-### 🔍 Testing Framework
-- **Pytest**: Modern Python testing framework
-- **Test Coverage**: See how much of your code is tested
-- **Async Testing**: Test async functions properly
-- **Fixtures**: Reusable test setup and teardown
-
-### 🛠️ Code Quality Tools
-- **Mypy**: Type checking to catch type errors
-- **Ruff**: Fast Python linter and formatter
-- **Black**: Code formatting for consistent style
-- **Pre-commit**: Automatic checks before committing
-
-### 🚀 Development Tools
-- **Hot Reload**: Automatic server restart on code changes
-- **Debug Mode**: Detailed error messages and stack traces
-- **Logging**: Comprehensive logging for debugging
-- **Health Checks**: Monitor application status
-
----
-
-## How to Run Tests
+## Running Tests
 
 ### Basic Test Commands
 
 ```bash
 # Run all tests
-pytest tests/ -v
+pytest
 
-# Run tests with coverage report
-pytest --cov=app --cov-report=html
+# Run only template tests
+pytest -m "template_only"
 
-# Run only failed tests
-pytest --last-failed
+# Run tests with verbose output
+pytest -v
 
-# Run a specific test file
-pytest tests/template_tests/test_auth.py
+# Run tests and stop on first failure
+pytest -x
 
-# Run a specific test function
-pytest tests/template_tests/test_auth.py::test_login
+# Run tests with coverage
+pytest --cov=app
 
-# Run tests matching a keyword
-pytest -k "test_login"
-
-# Run tests in parallel (faster)
-pytest -n auto
+# Run specific test file
+pytest tests/template_tests/test_admin.py
 ```
 
-### Test Output Examples
+### Test Environment Setup
+
+The template uses Docker containers for testing:
 
 ```bash
-# Successful test run
-pytest tests/template_tests/test_auth.py -v
-============================= test session starts ==============================
-collecting ... collected 5 items
+# Start test database
+docker-compose up -d postgres redis
 
-tests/template_tests/test_auth.py::test_register_user PASSED        [ 20%]
-tests/template_tests/test_auth.py::test_login_user PASSED          [ 40%]
-tests/template_tests/test_auth.py::test_login_invalid_credentials PASSED [ 60%]
-tests/template_tests/test_auth.py::test_protected_route PASSED      [ 80%]
-tests/template_tests/test_auth.py::test_refresh_token PASSED       [100%]
+# Create test database
+docker exec -it fast-api-template-postgres-1 psql -U postgres -c "CREATE DATABASE fastapi_template_test;"
 
-============================== 5 passed in 2.34s ==============================
-
-# Failed test run
-pytest tests/template_tests/test_auth.py::test_login -v
-============================= test session starts ==============================
-collecting ... collected 1 item
-
-tests/template_tests/test_auth.py::test_login FAILED               [100%]
-
-================================= FAILURES ==================================
-_____________________________ test_login _____________________________
-
-def test_login(client, test_user):
-    response = client.post("/api/v1/auth/login", data={
-        "username": test_user.email,
-        "password": "wrongpassword"
-    })
->   assert response.status_code == 200
-E   assert 401 == 200
-E    +  where 401 = <Response [401]>.status_code
-
-tests/template_tests/test_auth.py:45: AssertionError
-============================== 1 failed in 0.12s ==============================
+# Run tests
+pytest
 ```
 
----
+## 🧪 Template Tests
 
-## Basic Test Examples
+The template includes a comprehensive suite of template-specific tests that verify the setup and configuration work correctly.
 
-### Simple API Test
+### Template Test Categories
 
-Here's a basic test you can add to `tests/test_example.py`:
+#### Setup and Configuration Tests
+```bash
+# Test setup scripts
+pytest tests/template_tests/test_setup_scripts.py
 
-```python
-def test_health_endpoint(client):
-    """Test that the health endpoint returns 200."""
-    response = client.get("/health")
-    assert response.status_code == 200
-    assert response.json()["status"] == "healthy"
+# Test configuration loading
+pytest tests/template_tests/test_config.py
 
-def test_users_endpoint_requires_auth(client):
-    """Test that protected endpoints require authentication."""
-    response = client.get("/api/v1/users/me")
-    assert response.status_code == 401  # Unauthorized
+# Test environment validation
+pytest tests/template_tests/test_environment.py
 ```
 
-### Authentication Test
+#### Development Tools Tests
+```bash
+# Test pre-commit hooks
+pytest tests/template_tests/test_precommit.py
 
-```python
-def test_user_registration(client):
-    """Test user registration flow."""
-    # Register a new user
-    response = client.post("/api/v1/auth/register", json={
-        "email": "test@example.com",
-        "username": "testuser",
-        "password": "TestPassword123!"
-    })
-    
-    assert response.status_code == 201
-    data = response.json()
-    assert data["email"] == "test@example.com"
-    assert data["username"] == "testuser"
-    assert "id" in data
+# Test CRUD scaffolding
+pytest tests/template_tests/test_crud_generator.py
 
-def test_user_login(client, test_user):
-    """Test user login with valid credentials."""
-    response = client.post("/api/v1/auth/login", data={
-        "username": test_user.email,
-        "password": "TestPassword123!"
-    })
-    
-    assert response.status_code == 200
-    data = response.json()
-    assert "access_token" in data
-    assert data["token_type"] == "bearer"
+# Test verification scripts
+pytest tests/template_tests/test_verification.py
 ```
 
-### Database Test
+#### Model and Schema Tests
+```bash
+# Test separated models
+pytest tests/template_tests/test_models.py
+
+# Test schema validation
+pytest tests/template_tests/test_schemas.py
+
+# Test CRUD operations
+pytest tests/template_tests/test_crud_user.py
+```
+
+#### Template Customization Tests
+```bash
+# Test template customization script
+pytest tests/template_tests/test_customize_template.py
+
+# Test customization functionality
+pytest tests/template_tests/test_customize_template.py -v
+```
+
+The template customization tests verify that the customization script correctly transforms all template references into project-specific names, including:
+- File content replacement
+- Configuration updates
+- Documentation changes
+- Git remote detection
+- Error handling and safety features
+
+### Template Test Features
+
+#### Automatic Test Isolation
+Template tests are automatically excluded from regular test runs:
 
 ```python
-def test_create_user_in_database(db_session):
-    """Test creating a user directly in the database."""
-    from app.crud.user import create_user_sync
-    from app.schemas.user import UserCreate
-    
-    user_data = UserCreate(
-        email="db_test@example.com",
-        username="dbtestuser",
-        password="TestPassword123!"
+# In tests/conftest.py
+def pytest_configure(config):
+    """Configure pytest to exclude template tests by default."""
+    config.addinivalue_line(
+        "markers",
+        "template_only: marks tests as template-specific (excluded by default)"
     )
     
-    user = create_user_sync(db_session, user_data)
-    assert user.email == "db_test@example.com"
-    assert user.username == "dbtestuser"
-    assert user.is_verified is False
+    # Set default marker expression to exclude template tests
+    if not config.getoption("markexpr"):
+        config.option.markexpr = "not template_only"
 ```
 
----
-
-## Where Tests Live
-
-Tests are organized in the `tests/` folder:
-
-```
-tests/
-├── __init__.py
-├── template_tests/
-│   ├── conftest.py              # Test configuration and fixtures
-│   ├── test_admin.py            # Admin functionality tests
-│   ├── test_api_auth.py         # Authentication API tests
-│   ├── test_api_users.py        # User management API tests
-│   ├── test_async_basic.py      # Async function tests
-│   ├── test_audit_log.py        # Audit logging tests
-│   ├── test_auth_account_deletion.py  # Account deletion tests
-│   ├── test_auth_email_verification.py # Email verification tests
-│   ├── test_auth_oauth.py       # OAuth authentication tests
-│   ├── test_auth_password_change.py # Password change tests
-│   ├── test_auth_password_reset.py # Password reset tests
-│   ├── test_auth_validation.py  # Input validation tests
-│   ├── test_celery_api.py       # Celery API tests
-│   ├── test_celery_health.py    # Celery health tests
-│   ├── test_celery_mocked.py    # Mocked Celery tests
-│   ├── test_celery.py           # Celery integration tests
-│   ├── test_connection_pooling.py # Database connection tests
-│   ├── test_cors.py             # CORS configuration tests
-│   ├── test_crud.py             # Database CRUD tests
-│   ├── test_email.py            # Email functionality tests
-│   ├── test_error_responses.py  # Error handling tests
-│   ├── test_health.py           # Health check tests
-│   ├── test_logging.py          # Logging configuration tests
-│   ├── test_main.py             # Main application tests
-│   ├── test_models.py           # Database model tests
-│   ├── test_oauth.py            # OAuth integration tests
-│   ├── test_optional_features.py # Optional features tests
-│   ├── test_pagination.py       # Pagination tests
-│   ├── test_pgbouncer_integration.py # Connection pooling tests
-│   ├── test_precommit.py        # Pre-commit hook tests
-│   ├── test_rate_limiting.py    # Rate limiting tests
-│   ├── test_redis.py            # Redis integration tests
-│   ├── test_refresh_token.py    # Refresh token tests
-│   ├── test_search_filter_api.py # Search and filter API tests
-│   ├── test_search_filter_patch.py # Search filter patch tests
-│   ├── test_search_filter.py    # Search and filter tests
-│   ├── test_security.py         # Security feature tests
-│   ├── test_sentry.py           # Sentry integration tests
-│   ├── test_soft_delete.py      # Soft delete tests
-│   ├── test_superuser.py        # Superuser functionality tests
-│   ├── test_users_pagination.py # User pagination tests
-│   └── test_websocket.py        # WebSocket tests
-```
-
----
-
-## Writing Your Own Tests
-
-### Test Structure
-
+#### Template Test Markers
 ```python
-def test_something(client, db_session):
-    """Test description - what you're testing."""
-    # Arrange - Set up test data
-    # Act - Perform the action you're testing
-    # Assert - Check the results
-```
-
-### Using Fixtures
-
-The template provides many useful fixtures:
-
-> **See all available fixtures in [`tests/template_tests/conftest.py`](../../tests/template_tests/conftest.py) for details and customization.**
-
-```python
-def test_with_user(client, test_user):
-    """Test that uses a pre-created test user."""
-    # test_user is automatically created and cleaned up
-    response = client.get(f"/api/v1/users/{test_user.id}")
-    assert response.status_code == 200
-
-def test_with_superuser(client, superuser):
-    """Test that uses a pre-created superuser."""
-    # superuser has admin privileges
-    response = client.get("/api/v1/admin/users")
-    assert response.status_code == 200
-```
-
-### Testing Async Functions
-
-```python
-import pytest
-
-@pytest.mark.asyncio
-async def test_async_function():
-    """Test an async function."""
-    from app.services.email import send_email_async
+@pytest.mark.template_only
+class TestSetupScripts:
+    """Test the comprehensive setup script functionality."""
     
-    result = await send_email_async("test@example.com", "Test", "Hello")
-    assert result is True
+    def test_setup_script_creates_env_file(self):
+        """Test that the setup script creates a .env file when it doesn't exist."""
+        # Test implementation
 ```
 
----
+#### Running Template Tests
+```bash
+# Run only template tests
+pytest -m "template_only"
 
-## CI/CD Test Lifecycle
+# Run template tests with coverage
+pytest -m "template_only" --cov=app
 
-```mermaid
-flowchart TD
-  A[Developer Pushes Code] --> B[Pre-commit Hooks]
-  B --> C[Code Formatting & Linting]
-  C --> D[GitHub Actions CI]
-  D --> E[Run All Tests]
-  E --> F[Generate Coverage Report]
-  F --> G{Tests Pass?}
-  G -- Yes --> H[Deploy to Production]
-  G -- No --> I[Report Failure]
-  I --> J[Developer Fixes Issues]
-  J --> A
+# Run specific template test category
+pytest tests/template_tests/test_setup_scripts.py -v
+pytest tests/template_tests/test_customize_template.py -v
 ```
 
----
+## Skipped Tests and Implementation Guide
 
-## What CI Does with Tests
+Several tests are intentionally skipped in the template due to complex setup requirements. This section explains why they're skipped and how to implement them properly.
 
-### GitHub Actions Workflow
+### Why Tests Are Skipped
 
-When you push code or create a pull request:
+Tests are skipped for the following reasons:
 
-1. **Pre-commit Hooks**: Automatic code formatting and linting
-2. **Run All Tests**: Execute the full test suite
-3. **Generate Coverage**: Calculate test coverage percentage
-4. **Report Results**: Show pass/fail status and coverage
-5. **Block Deployment**: Prevent deployment if tests fail
+1. **Template Limitations**: Some features require complex setup not suitable for a template
+2. **External Dependencies**: Tests requiring external services (email, OAuth, etc.)
+3. **Configuration Complexity**: Tests needing extensive configuration
+4. **Test Isolation Issues**: Tests requiring proper database cleanup and isolation
 
-### CI Configuration
+### Categories of Skipped Tests
 
-The template includes a GitHub Actions workflow (`.github/workflows/ci.yml`):
+#### 1. Authentication Tests
 
-```yaml
-name: CI
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Run tests
-        run: pytest --cov=app --cov-report=xml
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
+**Files**: `tests/template_tests/test_admin.py`, `tests/template_tests/test_api_auth.py`
+
+**Why Skipped**: These tests require proper JWT configuration and user verification workflows that are complex to set up in a template.
+
+**To Implement**:
+```python
+# Remove the skip decorator
+# @pytest.mark.skip(reason="Template test - requires proper user authentication setup")
+
+def test_admin_user_crud_operations(db_session: AsyncSession) -> None:
+    """Test admin CRUD operations."""
+    # Set up proper authentication
+    # Configure JWT tokens
+    # Create test users with proper roles
+    # Run the test
 ```
 
----
+#### 2. Email Verification Tests
 
-## Development Best Practices
+**Files**: `tests/template_tests/test_auth_email_verification.py`
+
+**Why Skipped**: These tests require a working email service (SMTP) configuration.
+
+**To Implement**:
+```python
+# Configure SMTP settings in .env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+
+# Remove skip decorator and run tests
+pytest tests/template_tests/test_auth_email_verification.py
+```
+
+#### 3. OAuth Tests
+
+**Files**: `tests/template_tests/test_oauth.py`
+
+**Why Skipped**: These tests require OAuth provider configuration (Google, Apple, etc.).
+
+**To Implement**:
+```python
+# Configure OAuth settings in .env
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+APPLE_CLIENT_ID=your-apple-client-id
+
+# Remove skip decorator and run tests
+pytest tests/template_tests/test_oauth.py
+```
+
+#### 4. Celery Tests
+
+**Files**: `tests/template_tests/test_celery.py`
+
+**Why Skipped**: These tests require a running Celery worker and Redis.
+
+**To Implement**:
+```bash
+# Start Redis and Celery
+docker-compose up -d redis
+celery -A app.services.celery_app worker --loglevel=info
+
+# Run Celery tests
+pytest tests/template_tests/test_celery.py
+```
+
+#### 5. Test Isolation Issues
+
+**Files**: `tests/template_tests/test_auth_validation.py`
+
+**Why Skipped**: These tests require proper database cleanup between tests.
+
+**To Implement**:
+```python
+# Set up proper test isolation
+@pytest.fixture(autouse=True)
+def clean_database():
+    """Clean database between tests."""
+    # Clean up test data
+    yield
+    # Clean up after test
+```
+
+### Implementation Steps
+
+1. **Identify Required Services**: Check what external services the test needs
+2. **Configure Environment**: Set up the required environment variables
+3. **Start Services**: Ensure all required services are running
+4. **Remove Skip Decorator**: Remove the `@pytest.mark.skip` decorator
+5. **Fix Test Issues**: Address any test-specific issues
+6. **Run Tests**: Execute the tests and verify they pass
+
+## Development Workflow
+
+### Setting Up Development Environment
+
+#### 1. Automated Setup
+```bash
+# Use the comprehensive setup script
+./scripts/setup_comprehensive.sh
+
+# This handles:
+# - Virtual environment creation
+# - Dependency installation
+# - Environment configuration
+# - Database setup
+# - Verification
+```
+
+#### 2. Manual Setup
+```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up environment
+cp .env.example .env
+# Edit .env with your settings
+
+# Start database
+docker-compose up -d postgres
+
+# Run migrations
+alembic upgrade head
+```
 
 ### Code Quality Tools
 
+#### Pre-commit Hooks
 ```bash
-# Format code with Black
+# Install pre-commit hooks
+./scripts/install_precommit.sh
+
+# Run hooks manually
+pre-commit run --all-files
+
+# Run specific hooks
+pre-commit run ruff --all-files
+pre-commit run black --all-files
+pre-commit run mypy --all-files
+```
+
+#### Manual Code Quality Checks
+```bash
+# Format code
 black app/ tests/
 
-# Lint code with Ruff
+# Lint code
 ruff check app/ tests/
 
-# Type check with Mypy
+# Type checking
 mypy app/
 
 # Run all quality checks
 ./scripts/lint.sh
 ```
 
-### Pre-commit Hooks
+### Development Scripts
 
-The template includes pre-commit hooks that run automatically:
+#### Setup and Verification
+```bash
+# Comprehensive setup
+./scripts/setup_comprehensive.sh
+
+# Fix common issues
+./scripts/fix_common_issues.sh
+
+# Verify setup
+python scripts/verify_setup.py
+```
+
+#### Testing and Debugging
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=app --cov-report=html
+
+# Run specific test file
+pytest tests/template_tests/test_auth.py -v
+
+# Debug tests
+pytest tests/template_tests/test_auth.py -v -s --pdb
+```
+
+#### Database Management
+```bash
+# Create migration
+alembic revision --autogenerate -m "Add new field"
+
+# Apply migrations
+alembic upgrade head
+
+# Reset database
+alembic downgrade base
+alembic upgrade head
+```
+
+## Testing Best Practices
+
+### 1. Test Organization
+
+#### File Structure
+```
+tests/
+├── conftest.py              # Global test configuration
+├── template_tests/          # Template-specific tests
+│   ├── conftest.py         # Template test configuration
+│   ├── test_setup_scripts.py
+│   ├── test_models.py
+│   ├── test_auth.py
+│   └── ...
+└── [your_tests]/           # Your application tests
+```
+
+#### Test Naming
+```python
+# Use descriptive test names
+def test_user_registration_with_valid_data():
+    """Test user registration with valid input data."""
+
+def test_user_registration_with_invalid_email():
+    """Test user registration with invalid email format."""
+
+def test_user_registration_with_existing_email():
+    """Test user registration with already existing email."""
+```
+
+### 2. Test Data Management
+
+#### Using Fixtures
+```python
+import pytest
+from app.schemas.user import UserCreate
+
+@pytest.fixture
+def valid_user_data():
+    """Provide valid user data for tests."""
+    return {
+        "email": "test@example.com",
+        "username": "testuser",
+        "password": "TestPassword123!"
+    }
+
+@pytest.fixture
+def user_create_schema(valid_user_data):
+    """Provide UserCreate schema for tests."""
+    return UserCreate(**valid_user_data)
+
+def test_create_user(db_session, user_create_schema):
+    """Test creating a user with valid data."""
+    user = crud_user.create(db_session, obj_in=user_create_schema)
+    assert user.email == user_create_schema.email
+```
+
+#### Database Cleanup
+```python
+@pytest.fixture(autouse=True)
+def clean_database(db_session):
+    """Clean database between tests."""
+    yield
+    # Clean up after each test
+    db_session.rollback()
+```
+
+### 3. Test Isolation
+
+#### Database Transactions
+```python
+@pytest.fixture
+def db_session():
+    """Provide database session with transaction rollback."""
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = Session(bind=connection)
+    
+    yield session
+    
+    session.close()
+    transaction.rollback()
+    connection.close()
+```
+
+#### Mocking External Services
+```python
+from unittest.mock import patch
+
+def test_email_sending(mock_smtp):
+    """Test email sending with mocked SMTP."""
+    with patch('app.services.email_service.send_email') as mock_send:
+        mock_send.return_value = True
+        
+        result = send_verification_email("user@example.com")
+        
+        assert result is True
+        mock_send.assert_called_once()
+```
+
+### 4. Assertion Best Practices
+
+#### Descriptive Assertions
+```python
+# Good: Descriptive assertion
+assert response.status_code == 201, f"Expected 201, got {response.status_code}"
+
+# Good: Check multiple conditions
+data = response.json()
+assert "id" in data, "Response should contain user ID"
+assert data["email"] == user_data["email"], "Email should match"
+assert "password" not in data, "Password should not be returned"
+
+# Good: Use pytest assertions
+import pytest
+pytest.raises(ValueError, create_user, invalid_data)
+```
+
+#### Testing Edge Cases
+```python
+def test_user_registration_edge_cases():
+    """Test user registration with edge cases."""
+    # Test empty data
+    response = client.post("/api/v1/auth/register", json={})
+    assert response.status_code == 422
+    
+    # Test invalid email
+    response = client.post("/api/v1/auth/register", json={
+        "email": "invalid-email",
+        "username": "testuser",
+        "password": "password123"
+    })
+    assert response.status_code == 422
+    
+    # Test weak password
+    response = client.post("/api/v1/auth/register", json={
+        "email": "test@example.com",
+        "username": "testuser",
+        "password": "123"
+    })
+    assert response.status_code == 422
+```
+
+## Debugging Tests
+
+### 1. Verbose Output
+```bash
+# Run tests with verbose output
+pytest -v
+
+# Run with even more detail
+pytest -vv
+
+# Show print statements
+pytest -s
+```
+
+### 2. Debugging Failed Tests
+```bash
+# Drop into debugger on failure
+pytest --pdb
+
+# Drop into debugger on first failure
+pytest -x --pdb
+
+# Show local variables on failure
+pytest --tb=long
+```
+
+### 3. Test Discovery
+```bash
+# Show which tests would be run
+pytest --collect-only
+
+# Show test names
+pytest --collect-only -q
+```
+
+### 4. Running Specific Tests
+```bash
+# Run test by name
+pytest -k "test_user_registration"
+
+# Run test by file
+pytest tests/template_tests/test_auth.py
+
+# Run test by class
+pytest tests/template_tests/test_auth.py::TestAuthEndpoint
+
+# Run test by method
+pytest tests/template_tests/test_auth.py::TestAuthEndpoint::test_user_registration
+```
+
+## Continuous Integration
+
+The template includes GitHub Actions for automated testing:
+
+```yaml
+# .github/workflows/ci.yml
+name: CI
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Run tests
+        run: |
+          pytest --cov=app --cov-report=xml
+```
+
+## Performance Testing
+
+### 1. Load Testing
+```python
+import asyncio
+import aiohttp
+import time
+
+async def load_test():
+    """Simple load test for API endpoints."""
+    async with aiohttp.ClientSession() as session:
+        start_time = time.time()
+        
+        # Make multiple concurrent requests
+        tasks = []
+        for i in range(100):
+            task = session.get("http://localhost:8000/health")
+            tasks.append(task)
+        
+        responses = await asyncio.gather(*tasks)
+        
+        end_time = time.time()
+        duration = end_time - start_time
+        
+        print(f"Made 100 requests in {duration:.2f} seconds")
+        print(f"Average response time: {duration/100:.3f} seconds")
+```
+
+### 2. Database Performance Testing
+```python
+import time
+from app.crud import user as crud_user
+
+def test_database_performance(db_session):
+    """Test database query performance."""
+    start_time = time.time()
+    
+    # Perform database operations
+    users = crud_user.get_multi(db_session, limit=1000)
+    
+    end_time = time.time()
+    duration = end_time - start_time
+    
+    assert duration < 1.0, f"Query took {duration:.2f} seconds, should be under 1 second"
+```
+
+## Troubleshooting
+
+### Common Test Issues
+
+1. **Database Connection Errors**:
+   - Ensure PostgreSQL container is running
+   - Check database URL configuration
+   - Verify test database exists
+
+2. **Import Errors**:
+   - Make sure you're in the project root
+   - Check that virtual environment is activated
+   - Verify all dependencies are installed
+
+3. **Test Isolation Issues**:
+   - Use database transactions for test isolation
+   - Clean up test data between tests
+   - Use unique identifiers for test data
+
+4. **Async Test Issues**:
+   - Use `pytest-asyncio` for async tests
+   - Mark async tests with `@pytest.mark.asyncio`
+   - Use proper async fixtures
+
+### Debugging Commands
 
 ```bash
-# Install pre-commit hooks
-pre-commit install
+# Check test environment
+python -c "import app; print('App imports successfully')"
 
-# Run manually
-pre-commit run --all-files
+# Check database connection
+python -c "from app.database.database import engine; print(engine.url)"
+
+# Check configuration
+python -c "from app.core.config import settings; print(settings.DATABASE_URL)"
+
+# Run tests with maximum verbosity
+pytest -vvv --tb=long -s
 ```
 
-**Example `.pre-commit-config.yaml`**
-```yaml
-repos:
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.3.0
-    hooks:
-      - id: ruff
-  - repo: https://github.com/psf/black
-    rev: 23.7.0
-    hooks:
-      - id: black
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1
-    hooks:
-      - id: mypy
-```
-This will automatically run Ruff, Black, and Mypy on every commit to ensure code quality and type safety.
+## Best Practices Summary
 
-### Debugging Tips
-
-```python
-# Add debug prints
-print(f"Debug: {variable}")
-
-# Use Python debugger
-import pdb; pdb.set_trace()
-
-# Use logging
-import logging
-logging.debug(f"Debug message: {variable}")
-```
-
----
-
-## Testing Database Operations
-
-### Test Database Setup
-
-The template automatically creates a test database:
-
-```python
-def test_database_operations(db_session):
-    """Test database operations with isolated test database."""
-    from app.models.models import User
-    
-    # Create a user
-    user = User(email="test@example.com", username="testuser")
-    db_session.add(user)
-    db_session.commit()
-    
-    # Query the user
-    found_user = db_session.query(User).filter_by(email="test@example.com").first()
-    assert found_user.username == "testuser"
-    
-    # Clean up is automatic
-```
-
-### Testing Migrations
-
-```python
-def test_migration_works(alembic_runner):
-    """Test that migrations can be applied and rolled back."""
-    # Apply all migrations
-    alembic_runner.migrate()
-    
-    # Check current revision
-    current = alembic_runner.current()
-    assert current is not None
-    
-    # Roll back one migration
-    alembic_runner.rollback()
-```
-
----
-
-## Glossary
-
-- **Pytest**: A modern Python testing framework that makes it easy to write simple and scalable test cases.
-- **Fixture**: A function that provides a fixed baseline for tests, setting up test data or objects.
-- **Coverage**: A measure of how much of your code is executed during testing.
-- **CI/CD**: Continuous Integration/Continuous Deployment, automated processes for building, testing, and deploying code.
-- **Linting**: Static code analysis that checks for programming errors, bugs, and suspicious constructs.
-- **Type Checking**: Verifying that variables are used with the correct data types.
-- **Pre-commit**: A framework for managing and maintaining pre-commit hooks.
-- **Async Testing**: Testing asynchronous functions that use `async`/`await` syntax.
-
----
+1. **Test Organization**: Keep tests organized by feature/component
+2. **Test Isolation**: Ensure tests don't interfere with each other
+3. **Meaningful Assertions**: Write clear, descriptive test assertions
+4. **Test Data Management**: Use fixtures for common test data
+5. **Error Handling**: Test both success and failure scenarios
+6. **Performance**: Keep tests fast and efficient
+7. **Documentation**: Document complex test scenarios
+8. **Template Tests**: Use template tests for setup verification
+9. **Code Quality**: Run pre-commit hooks before committing
+10. **Continuous Integration**: Set up automated testing in CI/CD
 
 ## Next Steps
 
-Now that you understand testing and development, you can:
-1. **Write comprehensive tests** for your new features
-2. **Set up continuous integration** for automated testing
-3. **Improve code quality** with linting and formatting
-4. **Debug issues efficiently** using the tools provided
-5. **Monitor your application** in production
-6. **Add test coverage** to ensure all code paths are tested
-7. **Create integration tests** for complex workflows
-8. **Set up performance testing** for critical endpoints
+Now that you understand testing and development:
 
-Remember: Good testing practices will save you time in the long run and give you confidence that your app works correctly! 
+1. **Write tests for your features** using the established patterns
+2. **Implement skipped tests** as you add the required services
+3. **Set up CI/CD** for automated testing
+4. **Monitor test performance** and optimize slow tests
+5. **Add integration tests** for complex workflows
+6. **Set up test coverage reporting** to track code quality
+
+For more advanced topics, check out:
+- [Authentication Tutorial](authentication.md) - Testing authentication flows
+- [Database Management](database-management.md) - Testing database operations
+- [Deployment Tutorial](deployment-and-production.md) - Testing in production 

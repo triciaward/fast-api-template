@@ -79,7 +79,7 @@ class TestOAuthAuthEndpoints:
     ) -> None:
         """Test successful OAuth login for existing Google user."""
         # Create existing OAuth user
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="existing@example.com",
@@ -116,7 +116,7 @@ class TestOAuthAuthEndpoints:
     ) -> None:
         """Test OAuth login when email is already registered with different provider."""
         # Create user with different OAuth provider
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",
@@ -228,7 +228,7 @@ class TestOAuthCRUDOperations:
     def test_get_user_by_oauth_id_sync(self, sync_db_session: Session) -> None:
         """Test getting user by OAuth ID using sync CRUD."""
         from app.crud import user as crud_user
-        from app.models.models import User
+        from app.models import User
 
         user = User(
             email="test@example.com",

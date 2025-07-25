@@ -139,7 +139,7 @@ class CRUDGenerator:
             imports.append("from sqlalchemy import JSON")
 
         if self.options.get("soft_delete"):
-            imports.append("from app.models.models import SoftDeleteMixin")
+            imports.append("from app.models import SoftDeleteMixin")
 
         model_class = f"""class {self.model_name}(Base{", SoftDeleteMixin" if self.options.get('soft_delete') else ""}):
     __tablename__ = "{self.model_name_plural.lower()}"

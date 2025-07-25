@@ -24,7 +24,7 @@ from app.crud import (
 from app.crud import (
     create_refresh_token as crud_create_refresh_token,
 )
-from app.models.models import RefreshToken, User
+from app.models import RefreshToken, User
 from app.services.refresh_token import (
     clear_refresh_token_cookie,
     create_user_session,

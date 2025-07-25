@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.models import User
+from app.models import User
 from app.schemas.user import Token, TokenData, UserCreate, UserResponse
 
 # mypy: disable-error-code="call-arg,unused-ignore"
