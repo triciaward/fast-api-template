@@ -75,6 +75,11 @@ The template has been enhanced with automatic fixes for common setup issues:
 
 **Fixed critical issues that were causing problems for users:**
 
+- **✅ Missing alembic.ini File**: Automatic creation of database migration configuration file
+- **✅ Commented Superuser Variables**: Uncommented `FIRST_SUPERUSER` and `FIRST_SUPERUSER_PASSWORD` in `.env.example`
+- **✅ Setup Script Directory Check**: Made setup script work with both renamed and original template directories
+- **✅ Automatic Superuser Creation**: Changed from optional to automatic superuser creation during setup
+- **✅ Docker Container Conflicts**: Ensured `COMPOSE_PROJECT_NAME` prevents container naming conflicts
 - **✅ CORS Environment Variable Parsing Bug**: Fixed `JSONDecodeError` by changing from `list[str]` to `str` with property conversion
 - **✅ Missing Docker Environment Variables**: Added comprehensive `.env.example` with all required Docker variables
 - **✅ Customization Script Coverage**: Enhanced file scanning to include `.env*` files and handle all environment files
@@ -82,6 +87,8 @@ The template has been enhanced with automatic fixes for common setup issues:
 - **✅ Test Configuration Updates**: Updated all tests to use new comma-separated CORS format
 
 **Impact**: These fixes eliminate the most common issues users encountered when setting up projects from this template.
+
+**🚀 New**: Run `python3 scripts/fix_template_issues.py` to automatically apply all fixes to the template.
 
 ### What Gets Customized:
 - **Project Name**: "FastAPI Template" → "Your Project Name"
