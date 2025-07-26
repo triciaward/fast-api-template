@@ -899,6 +899,16 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+**Problem:** Verification script fails with "No module named 'fastapi'"
+**Solution:**
+```bash
+# The verification script needs the virtual environment activated
+source venv/bin/activate && python3 scripts/verify_setup.py
+
+# Or run it directly with venv Python
+./venv/bin/python scripts/verify_setup.py
+```
+
 ### VS Code Workspace Issues
 
 **Problem:** Project disappeared from VS Code after customization
@@ -936,11 +946,11 @@ docker-compose ps
 # Check logs
 docker-compose logs api
 
-# Test API health
+# Test API health (note the correct path)
 curl http://localhost:8000/api/v1/health
 
-# Run verification
-python3 scripts/verify_setup.py
+# Run verification (with virtual environment)
+source venv/bin/activate && python3 scripts/verify_setup.py
 ```
 
 ---
@@ -954,5 +964,94 @@ Congratulations! You now have a fully functional FastAPI application running loc
 3. **Run Tests**: `pytest` to verify everything works
 4. **Read More Tutorials**: Check out the other guides in the `docs/tutorials/` folder
 5. **Start Building**: Add your own features and endpoints
+
+---
+
+## 🚀 Quick Start Guide
+
+### Test Your Setup
+
+Here are the exact commands to verify everything is working:
+
+```bash
+# 1. Activate virtual environment (if not already activated)
+source venv/bin/activate
+
+# 2. Verify your setup
+python3 scripts/verify_setup.py
+
+# 3. Test the API health endpoint
+curl http://localhost:8000/api/v1/health
+
+# 4. Run the test suite
+pytest
+
+# 5. Check that services are running
+docker-compose ps
+```
+
+### Common First Steps
+
+**View API Documentation:**
+- Open http://localhost:8000/docs in your browser
+- This shows all available endpoints and lets you test them
+
+**Create Your First User:**
+```bash
+# Create a superuser account
+python3 app/bootstrap_superuser.py
+```
+
+**Check the Admin Panel:**
+- Visit http://localhost:8000/admin
+- Login with your superuser credentials
+- Manage users, API keys, and audit logs
+
+**Start Developing:**
+```bash
+# Your API is running at: http://localhost:8000
+# API docs are at: http://localhost:8000/docs
+# Admin panel is at: http://localhost:8000/admin
+```
+
+### Environment Variables Explained
+
+**Local Development (.env file):**
+- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` - Database configuration
+- `SECRET_KEY` - Security key for JWT tokens
+- `FIRST_SUPERUSER` - Initial admin email (optional)
+
+**Docker Environment (set in docker-compose.yml):**
+- `DATABASE_URL` - Full database connection string
+- `API_PORT` - Port for the FastAPI application
+- `ENABLE_REDIS`, `ENABLE_CELERY` - Feature toggles
+
+**Note:** Some environment variables are set in Docker containers and won't appear in your local `.env` file. This is normal!
+
+### Health Endpoint Path
+
+The API uses versioned endpoints. The health check is available at:
+- ✅ **Correct**: `http://localhost:8000/api/v1/health`
+- ❌ **Wrong**: `http://localhost:8000/health`
+
+### Virtual Environment Tips
+
+**Always activate before running Python scripts:**
+```bash
+# Mac/Linux
+source venv/bin/activate
+
+# Windows
+venv\Scripts\activate
+```
+
+**Or run scripts directly with venv Python:**
+```bash
+# Mac/Linux
+./venv/bin/python scripts/verify_setup.py
+
+# Windows
+venv\Scripts\python.exe scripts\verify_setup.py
+```
 
 Happy coding! 🚀

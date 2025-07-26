@@ -18,6 +18,48 @@ class SetupVerifier:
         self.project_root = Path(__file__).parent.parent
         self.issues: list[str] = []
         self.warnings: list[str] = []
+        self.venv_activated = False
+
+    def detect_and_activate_venv(self) -> bool:
+        """Detect and activate virtual environment if needed."""
+        # Check if we're already in a virtual environment
+        if hasattr(sys, "real_prefix") or (
+            hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix
+        ):
+            print("✅ Virtual environment is already activated")
+            self.venv_activated = True
+            return True
+
+        # Check if venv directory exists
+        venv_path = self.project_root / "venv"
+        if not venv_path.exists():
+            print(
+                "❌ Virtual environment not found. Please run the setup script first."
+            )
+            self.issues.append("Virtual environment not found")
+            return False
+
+        # Try to activate the virtual environment
+        venv_python = venv_path / "bin" / "python"
+        if not venv_python.exists():
+            venv_python = venv_path / "Scripts" / "python.exe"  # Windows
+
+        if venv_python.exists():
+            print("🔄 Virtual environment detected but not activated")
+            print(
+                "💡 Tip: Run 'source venv/bin/activate' (Mac/Linux) or 'venv\\Scripts\\activate' (Windows) before running this script"
+            )
+            print(
+                "   Or run this script with: ./venv/bin/python scripts/verify_setup.py"
+            )
+            self.warnings.append(
+                "Virtual environment not activated - some checks may fail"
+            )
+            return False
+
+        print("❌ Virtual environment Python executable not found")
+        self.issues.append("Virtual environment Python executable not found")
+        return False
 
     def check_file_exists(self, file_path: str, description: str) -> bool:
         """Check if a file exists."""
@@ -220,8 +262,18 @@ class SetupVerifier:
             self.warnings.append("Environment file (.env) not found")
 
         # Check environment variables
+        # Note: Some variables are Docker-only and won't be set in local .env
         self.check_environment_variable("DATABASE_URL", "Database URL")
         self.check_environment_variable("SECRET_KEY", "Secret key")
+
+        # Add note about Docker environment variables
+        if not os.getenv("DATABASE_URL") or not os.getenv("SECRET_KEY"):
+            print(
+                "💡 Note: Some environment variables are set in Docker containers, not in your local .env file"
+            )
+            print(
+                "   This is normal - the API runs in Docker with its own environment configuration"
+            )
 
     def check_services(self) -> None:
         """Check if services are running."""
@@ -236,6 +288,9 @@ class SetupVerifier:
         """Run the complete verification process."""
         print("🔍 FastAPI Project Setup Verification")
         print("=" * 50)
+
+        # Check virtual environment first
+        self.detect_and_activate_venv()
 
         self.check_project_structure()
         self.check_python_environment()

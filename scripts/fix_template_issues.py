@@ -224,7 +224,7 @@ if [ "$(basename "$PWD")" = "fast-api-template" ]; then
     echo "3. Run ./scripts/customize_template.sh"
     echo "4. Then run this script"
     echo ""
-    read -p "Continue with current directory? (y/N): " CONTINUE_WITH_TEMPLATE
+    read -p "Continue with the current directory? (y/N): " CONTINUE_WITH_TEMPLATE
     if [[ ! $CONTINUE_WITH_TEMPLATE =~ ^[Yy]$ ]]; then
         echo "Exiting. Please rename and customize the template first."
         exit 1

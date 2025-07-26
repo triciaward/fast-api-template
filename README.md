@@ -398,6 +398,54 @@ Running superuser creation script...
   alembic revision --autogenerate -m 'description'  # Create migration
   alembic upgrade head          # Apply migrations
 
+---
+
+## 🚀 Quick Start Guide
+
+### Test Your Setup
+
+After completing the setup, verify everything is working:
+
+```bash
+# 1. Activate virtual environment
+source venv/bin/activate
+
+# 2. Verify your setup
+python3 scripts/verify_setup.py
+
+# 3. Test the API health endpoint
+curl http://localhost:8000/api/v1/health
+
+# 4. Run tests
+pytest
+
+# 5. Check services
+docker-compose ps
+```
+
+### Common Issues & Solutions
+
+**Virtual Environment Not Activated:**
+```bash
+# If verification script fails with "No module named 'fastapi'"
+source venv/bin/activate && python3 scripts/verify_setup.py
+```
+
+**Health Endpoint Path:**
+- ✅ **Correct**: `http://localhost:8000/api/v1/health`
+- ❌ **Wrong**: `http://localhost:8000/health`
+
+**Environment Variables:**
+- Some variables are set in Docker containers, not in your local `.env` file
+- This is normal - the API runs in Docker with its own configuration
+
+### First Steps
+
+1. **View API Docs**: http://localhost:8000/docs
+2. **Create Superuser**: `python3 app/bootstrap_superuser.py`
+3. **Check Admin Panel**: http://localhost:8000/admin
+4. **Start Developing**: Add your own endpoints and features
+
 ✨ Happy coding!
 ```
 
