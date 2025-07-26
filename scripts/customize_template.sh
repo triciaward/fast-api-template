@@ -52,15 +52,15 @@ fi
 print_info "Starting FastAPI Template Customization..."
 echo
 
-# Check if we're in the template directory
-if [ "$(basename "$PWD")" != "fast-api-template" ]; then
-    print_warning "You're not in the 'fast-api-template' directory!"
+# Check if we're in a renamed project directory (should end with _backend)
+if [[ ! "$(basename "$PWD")" =~ _backend$ ]]; then
+    print_warning "This doesn't appear to be a renamed project directory!"
     print_info "Current directory: $(basename "$PWD")"
-    print_info "This script should be run from the original template directory."
-    print_info "If you want to customize a new project, please:"
-    print_info "1. Clone the template again"
-    print_info "2. Navigate to the template directory"
-    print_info "3. Run this script"
+    print_info "This script should be run from a renamed project directory (ending with _backend)."
+    print_info "If you haven't renamed the template yet, please:"
+    print_info "1. Run the rename script first: ./scripts/rename_template.sh"
+    print_info "2. Restart VS Code and open the renamed directory"
+    print_info "3. Then run this script"
     echo
     confirm=$(read -p "Continue anyway? (y/N): " -n 1 -r)
     echo

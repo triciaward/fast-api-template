@@ -51,6 +51,18 @@ class TemplateCustomizer:
             print("")
             print("Then restart VS Code and open the renamed directory.")
             sys.exit(1)
+        elif not current_dir.endswith("_backend"):
+            print("❌ Error: This doesn't appear to be a renamed project directory!")
+            print("")
+            print(
+                "This script should be run from a renamed project directory (ending with _backend)."
+            )
+            print("")
+            print("Please run the rename script first:")
+            print("   ./scripts/rename_template.sh")
+            print("")
+            print("Then restart VS Code and open the renamed directory.")
+            sys.exit(1)
         else:
             print(f"✅ Directory name looks good: {current_dir}")
             print("   This appears to be a renamed template directory.")
