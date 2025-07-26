@@ -29,9 +29,9 @@ When helping users create new projects from this FastAPI template, follow this E
 🚨 IMPORTANT: You must restart VS Code now!
 
 Please:
-1. Close VS Code completely
+1. Close VS Code completely (quit the entire application)
 2. Open VS Code again
-3. Open the renamed folder: [project_name]_backend
+3. Use File → Open Folder and navigate to: [project_name]_backend
 4. Let me know when you're ready to continue
 
 I'll wait here until you confirm VS Code has been restarted.

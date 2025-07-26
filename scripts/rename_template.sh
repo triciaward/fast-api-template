@@ -81,7 +81,7 @@ if [ $? -eq 0 ]; then
     echo "3. Open the folder: $PROJECT_SLUG"
     echo "4. Run the next script: ./scripts/customize_template.sh"
     echo ""
-    echo "💡 Tip: You can also run: code $PROJECT_SLUG"
+
     echo ""
     echo "⚠️  CRITICAL FOR AI ASSISTANTS:"
     echo "   - STOP here and wait for user to restart VS Code"

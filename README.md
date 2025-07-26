@@ -39,10 +39,9 @@ This is your project's main README file - feel free to customize it to describe 
 
 **🚨 CRITICAL: Step 2 - Restart VS Code (MANDATORY)**
 ```bash
-# CLOSE VS CODE COMPLETELY
+# CLOSE VS CODE COMPLETELY (quit the entire application)
 # Open VS Code again
-# Open the renamed folder: myawesomeproject_backend
-# OR run: code myawesomeproject_backend
+# Use File → Open Folder and navigate to: myawesomeproject_backend
 ```
 
 **⚠️ IMPORTANT:** You MUST restart VS Code after renaming. Do NOT continue with the next steps until you have restarted VS Code and opened the renamed directory.
@@ -195,10 +194,7 @@ Next steps:
 2. **Open VS Code again**
 3. **Open the renamed folder**: `myawesomeproject_backend`
 
-**Quick way:**
-```bash
-code myawesomeproject_backend
-```
+
 
 #### Step 4: Customize the Template
 
