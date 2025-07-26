@@ -20,7 +20,9 @@ if [ ! -f "scripts/customize_template.py" ]; then
 fi
 
 # Check if we're in a renamed directory (not the original template)
-if [ "$(basename "$PWD")" = "fast-api-template" ]; then
+# This check works for both the original template and customized projects
+CURRENT_DIR=$(basename "$PWD")
+if [ "$CURRENT_DIR" = "fast-api-template" ]; then
     echo "⚠️  Warning: You're still in the 'fast-api-template' directory!"
     echo ""
     echo "This script can work with the original template directory, but it's recommended to:"
@@ -36,7 +38,7 @@ if [ "$(basename "$PWD")" = "fast-api-template" ]; then
     fi
     echo "✅ Continuing with template directory..."
 else
-    echo "✅ You're in a renamed project directory: $(basename "$PWD")"
+    echo "✅ You're in a renamed project directory: $CURRENT_DIR"
 fi
 echo ""
 
