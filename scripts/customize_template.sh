@@ -62,6 +62,9 @@ if [[ ! "$(basename "$PWD")" =~ _backend$ ]]; then
     print_info "2. Restart VS Code and open the renamed directory"
     print_info "3. Then run this script"
     echo
+    print_warning "⚠️  CRITICAL: Make sure you have restarted VS Code after renaming!"
+    print_info "   This script should only be run AFTER restarting VS Code and opening the renamed directory."
+    echo
     confirm=$(read -p "Continue anyway? (y/N): " -n 1 -r)
     echo
     if [[ ! $confirm =~ ^[Yy]$ ]]; then

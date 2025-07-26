@@ -4,6 +4,17 @@ Welcome to your new FastAPI project! 🎉
 
 This is your project's main README file - feel free to customize it to describe what your application does, how to use it, and any specific features you've built.
 
+## 🤖 AI ASSISTANT WORKFLOW INSTRUCTIONS
+
+**⚠️ CRITICAL:** When helping users create projects from this template, follow this EXACT workflow:
+
+1. **Run rename script:** `./scripts/rename_template.sh`
+2. **STOP and wait:** Tell user to restart VS Code and open renamed directory
+3. **Wait for confirmation:** Only continue after user confirms VS Code is restarted
+4. **Continue with customization:** `./scripts/customize_template.sh`
+
+**DO NOT automatically continue to step 3 without waiting for VS Code restart!**
+
 ## 🎯 Creating Your Own Project from This Template
 
 **This is a FastAPI template!** If you want to create your own project (let's say "My Awesome Project"), here's exactly how to do it:
@@ -26,12 +37,15 @@ This is your project's main README file - feel free to customize it to describe 
 #    (e.g., "My Awesome Project" becomes "myawesomeproject_backend")
 ```
 
-**Step 2: Restart VS Code**
+**🚨 CRITICAL: Step 2 - Restart VS Code (MANDATORY)**
 ```bash
-# Close VS Code completely, then:
-code myawesomeproject_backend
-# OR open VS Code and File → Open Folder → myawesomeproject_backend
+# CLOSE VS CODE COMPLETELY
+# Open VS Code again
+# Open the renamed folder: myawesomeproject_backend
+# OR run: code myawesomeproject_backend
 ```
+
+**⚠️ IMPORTANT:** You MUST restart VS Code after renaming. Do NOT continue with the next steps until you have restarted VS Code and opened the renamed directory.
 
 **Step 3: Customize the Template**
 ```bash

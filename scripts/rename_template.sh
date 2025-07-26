@@ -83,6 +83,12 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "💡 Tip: You can also run: code $PROJECT_SLUG"
     echo ""
+    echo "⚠️  CRITICAL FOR AI ASSISTANTS:"
+    echo "   - STOP here and wait for user to restart VS Code"
+    echo "   - DO NOT continue with next steps automatically"
+    echo "   - User must manually restart VS Code and open the renamed directory"
+    echo "   - Only continue after user confirms VS Code has been restarted"
+    echo ""
     echo "The template is now ready for customization!"
 else
     echo "❌ Error: Failed to rename directory."
