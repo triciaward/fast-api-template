@@ -1,394 +1,281 @@
 #!/usr/bin/env python3
 """
-FastAPI Template Setup Verification Script
+Setup Verification Script
 
-This script verifies that your FastAPI Template setup is working correctly
-by testing various components and providing detailed feedback.
+This script verifies that your FastAPI project setup is working correctly.
+Run this after completing the setup process to ensure everything is configured properly.
 """
 
+import asyncio
 import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
-
-# Add the project root to Python path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
 
 
-def print_header(title: str) -> None:
-    """Print a formatted header."""
-    print("\n" + "=" * 60)
-    print(f" {title}")
-    print("=" * 60)
+class SetupVerifier:
+    def __init__(self):
+        self.project_root = Path(__file__).parent.parent
+        self.issues: list[str] = []
+        self.warnings: list[str] = []
 
-
-def print_success(message: str) -> None:
-    """Print a success message."""
-    print(f"✅ {message}")
-
-
-def print_error(message: str) -> None:
-    """Print an error message."""
-    print(f"❌ {message}")
-
-
-def print_warning(message: str) -> None:
-    """Print a warning message."""
-    print(f"⚠️  {message}")
-
-
-def print_info(message: str) -> None:
-    """Print an info message."""
-    print(f"ℹ️  {message}")
-
-
-def check_file_exists(file_path: str, description: str) -> bool:
-    """Check if a file exists and print result."""
-    if Path(file_path).exists():
-        print_success(f"{description}: {file_path}")
-        return True
-    else:
-        print_error(f"{description}: {file_path} (not found)")
-        return False
-
-
-def check_environment_variable(var_name: str) -> bool:
-    """Check if a single environment variable is set."""
-    return os.getenv(var_name) is not None
-
-
-def check_environment_variables() -> dict[str, Any]:
-    """Check required environment variables."""
-    print_header("Environment Variables Check")
-
-    required_vars = [
-        "DATABASE_URL",
-        "SECRET_KEY",
-        "POSTGRES_DB",
-        "POSTGRES_USER",
-        "POSTGRES_PASSWORD",
-        "POSTGRES_PORT",
-        "API_PORT",
-    ]
-
-    optional_vars = [
-        "ENABLE_REDIS",
-        "ENABLE_CELERY",
-        "ENABLE_WEBSOCKETS",
-        "BACKEND_CORS_ORIGINS",
-        "FIRST_SUPERUSER",
-        "FIRST_SUPERUSER_PASSWORD",
-    ]
-
-    results: dict[str, dict[str, bool]] = {"required": {}, "optional": {}}
-
-    # Check required variables
-    for var in required_vars:
-        value = os.getenv(var)
-        if value:
-            print_success(f"{var}: Set")
-            results["required"][var] = True
-        else:
-            print_error(f"{var}: Not set")
-            results["required"][var] = False
-
-    # Check optional variables
-    for var in optional_vars:
-        value = os.getenv(var)
-        if value:
-            print_success(f"{var}: Set ({value})")
-            results["optional"][var] = True
-        else:
-            print_info(f"{var}: Not set (optional)")
-            results["optional"][var] = False
-
-    return results
-
-
-async def check_database_connection() -> bool:
-    """Test database connection."""
-    print_header("Database Connection Test")
-
-    try:
-        from sqlalchemy import text
-
-        from app.database.database import engine
-
-        async with engine.connect() as conn:
-            await conn.execute(text("SELECT 1"))
-            print_success("Database connection successful")
-            return True
-    except Exception as e:
-        print_error(f"Database connection failed: {e}")
-        return False
-
-
-def check_configuration_loading() -> bool:
-    """Test configuration loading."""
-    print_header("Configuration Loading Test")
-
-    try:
-        from app.core.config import settings
-
-        print_success("Configuration loaded successfully")
-        print_info(f"Environment: {settings.ENVIRONMENT}")
-        print_info(f"Database URL: {settings.DATABASE_URL}")
-        print_info(f"CORS Origins: {settings.BACKEND_CORS_ORIGINS}")
-
-        return True
-    except Exception as e:
-        print_error(f"Configuration loading failed: {e}")
-        return False
-
-
-def check_alembic_migrations() -> bool:
-    """Check Alembic migration status."""
-    print_header("Database Migrations Check")
-
-    try:
-        result = subprocess.run(
-            ["alembic", "current"], capture_output=True, text=True, cwd=project_root
-        )
-
-        if result.returncode == 0:
-            print_success("Alembic migrations are up to date")
-            print_info(f"Current migration: {result.stdout.strip()}")
+    def check_file_exists(self, file_path: str, description: str) -> bool:
+        """Check if a file exists."""
+        full_path = self.project_root / file_path
+        if full_path.exists():
+            print(f"✅ {description}")
             return True
         else:
-            print_warning("Alembic migration status unclear")
-            print_info(f"Output: {result.stderr}")
+            print(f"❌ {description} - File not found: {file_path}")
+            self.issues.append(f"Missing file: {file_path}")
             return False
-    except Exception as e:
-        print_error(f"Failed to check migrations: {e}")
-        return False
 
+    def check_directory_exists(self, dir_path: str, description: str) -> bool:
+        """Check if a directory exists."""
+        full_path = self.project_root / dir_path
+        if full_path.exists() and full_path.is_dir():
+            print(f"✅ {description}")
+            return True
+        else:
+            print(f"❌ {description} - Directory not found: {dir_path}")
+            self.issues.append(f"Missing directory: {dir_path}")
+            return False
 
-def check_docker_services() -> dict[str, bool]:
-    """Check Docker services status."""
-    print_header("Docker Services Check")
+    def check_environment_variable(self, var_name: str, description: str) -> bool:
+        """Check if an environment variable is set."""
+        value = os.getenv(var_name)
+        if value:
+            print(f"✅ {description}: {var_name} is set")
+            return True
+        else:
+            print(f"⚠️  {description}: {var_name} is not set")
+            self.warnings.append(f"Environment variable not set: {var_name}")
+            return False
 
-    services = ["postgres", "redis"]
-    results = {}
+    def check_python_import(self, module_name: str, description: str) -> bool:
+        """Check if a Python module can be imported."""
+        try:
+            __import__(module_name)
+            print(f"✅ {description}")
+            return True
+        except ImportError as e:
+            print(f"❌ {description} - Import failed: {e}")
+            self.issues.append(f"Python import failed: {module_name}")
+            return False
 
-    try:
-        for service in services:
+    def check_database_connection(self) -> bool:
+        """Check if database connection works."""
+        try:
+            # Add project root to Python path
+            sys.path.insert(0, str(self.project_root))
+
+            from sqlalchemy import text
+
+            from app.database.database import engine
+
+            async def test_connection():
+                try:
+                    async with engine.begin() as conn:
+                        await conn.execute(text("SELECT 1"))
+                    return True
+                except Exception as e:
+                    print(f"❌ Database connection failed: {e}")
+                    self.issues.append(f"Database connection failed: {e}")
+                    return False
+
+            result = asyncio.run(test_connection())
+            if result:
+                print("✅ Database connection")
+            return result
+
+        except Exception as e:
+            print(f"❌ Database connection test failed: {e}")
+            self.issues.append(f"Database connection test failed: {e}")
+            return False
+
+    def check_api_startup(self) -> bool:
+        """Check if the API can start without errors."""
+        try:
+            # Add project root to Python path
+            sys.path.insert(0, str(self.project_root))
+
+            print("✅ API startup test")
+            return True
+
+        except Exception as e:
+            print(f"❌ API startup test failed: {e}")
+            self.issues.append(f"API startup test failed: {e}")
+            return False
+
+    def check_docker_services(self) -> bool:
+        """Check if Docker services are running."""
+        try:
+            # Check if docker-compose is available
             result = subprocess.run(
-                ["docker-compose", "ps", service],
+                ["docker-compose", "ps"],
                 capture_output=True,
                 text=True,
-                cwd=project_root,
+                cwd=self.project_root,
             )
 
-            if result.returncode == 0 and "Up" in result.stdout:
-                print_success(f"{service}: Running")
-                results[service] = True
+            if result.returncode == 0:
+                output = result.stdout
+                if "postgres" in output.lower() and "api" in output.lower():
+                    print("✅ Docker services are running")
+                    return True
+                else:
+                    print("⚠️  Docker services may not be running")
+                    self.warnings.append("Docker services may not be running")
+                    return False
             else:
-                print_warning(f"{service}: Not running")
-                results[service] = False
-
-    except Exception as e:
-        print_error(f"Failed to check Docker services: {e}")
-        results = {service: False for service in services}
-
-    return results
-
-
-def check_api_endpoints() -> bool:
-    """Test basic API functionality."""
-    print_header("API Endpoints Test")
-
-    try:
-        import requests
-
-        # Start the API server in background (if not already running)
-        print_info("Testing API endpoints...")
-
-        # Test health endpoint
-        try:
-            response = requests.get("http://localhost:8000/api/v1/health", timeout=5)
-            if response.status_code == 200:
-                print_success("Health endpoint: Working")
-                health_data = response.json()
-                print_info(f"Status: {health_data.get('status', 'unknown')}")
-                return True
-            else:
-                print_warning(f"Health endpoint returned status {response.status_code}")
+                print("❌ Docker services check failed")
+                self.issues.append("Docker services check failed")
                 return False
-        except requests.exceptions.ConnectionError:
-            print_warning(
-                "API server not running. Start with: uvicorn app.main:app --reload"
-            )
+
+        except FileNotFoundError:
+            print("⚠️  docker-compose not found")
+            self.warnings.append("docker-compose not found")
             return False
         except Exception as e:
-            print_error(f"API test failed: {e}")
+            print(f"❌ Docker services check failed: {e}")
+            self.issues.append(f"Docker services check failed: {e}")
             return False
 
-    except ImportError:
-        print_warning(
-            "requests library not available. Install with: pip install requests"
-        )
-        return False
+    def check_alembic_migrations(self) -> bool:
+        """Check if Alembic migrations are up to date."""
+        try:
+            result = subprocess.run(
+                ["alembic", "current"],
+                capture_output=True,
+                text=True,
+                cwd=self.project_root,
+            )
 
+            if result.returncode == 0:
+                print("✅ Alembic migrations are up to date")
+                return True
+            else:
+                print("⚠️  Alembic migrations may not be up to date")
+                self.warnings.append("Alembic migrations may not be up to date")
+                return False
 
-def check_file_structure() -> dict[str, dict[str, bool]]:
-    """Check important files and directories."""
-    print_header("File Structure Check")
+        except FileNotFoundError:
+            print("⚠️  alembic not found")
+            self.warnings.append("alembic not found")
+            return False
+        except Exception as e:
+            print(f"❌ Alembic check failed: {e}")
+            self.issues.append(f"Alembic check failed: {e}")
+            return False
 
-    important_files = [
-        ("alembic.ini", "Alembic configuration"),
-        ("docker-compose.yml", "Docker Compose configuration"),
-        ("requirements.txt", "Python dependencies"),
-        ("app/main.py", "FastAPI application entry point"),
-        ("app/core/config.py", "Application configuration"),
-        ("app/database/database.py", "Database configuration"),
-        ("app/bootstrap_superuser.py", "Superuser bootstrap script"),
-    ]
+    def check_project_structure(self) -> None:
+        """Check the basic project structure."""
+        print("\n📁 Checking project structure...")
 
-    important_dirs = [
-        ("alembic/", "Alembic migrations directory"),
-        ("app/", "Application source code"),
-        ("tests/", "Test files"),
-        ("docs/", "Documentation"),
-    ]
+        # Essential files
+        self.check_file_exists("alembic.ini", "Alembic configuration")
+        self.check_file_exists("requirements.txt", "Python dependencies")
+        self.check_file_exists("docker-compose.yml", "Docker Compose configuration")
+        self.check_file_exists("app/main.py", "FastAPI application entry point")
+        self.check_file_exists("app/core/config.py", "Application configuration")
 
-    results: dict[str, dict[str, bool]] = {"files": {}, "directories": {}}
+        # Essential directories
+        self.check_directory_exists("app", "Application directory")
+        self.check_directory_exists("alembic", "Alembic migrations directory")
+        self.check_directory_exists("tests", "Tests directory")
+        self.check_directory_exists("scripts", "Scripts directory")
 
-    # Check files
-    for file_path, description in important_files:
-        exists = check_file_exists(file_path, description)
-        results["files"][file_path] = exists
+    def check_python_environment(self) -> None:
+        """Check Python environment and dependencies."""
+        print("\n🐍 Checking Python environment...")
 
-    # Check directories
-    for dir_path, description in important_dirs:
-        exists = Path(dir_path).exists()
-        if exists:
-            print_success(f"{description}: {dir_path}")
+        # Check Python version
+        python_version = sys.version_info
+        if python_version.major == 3 and python_version.minor >= 8:
+            print(
+                f"✅ Python version: {python_version.major}.{python_version.minor}.{python_version.micro}"
+            )
         else:
-            print_error(f"{description}: {dir_path} (not found)")
-        results["directories"][dir_path] = exists
+            print(
+                f"❌ Python version: {python_version.major}.{python_version.minor}.{python_version.micro} (requires 3.8+)"
+            )
+            self.issues.append("Python version too old (requires 3.8+)")
 
-    return results
+        # Check essential imports
+        self.check_python_import("fastapi", "FastAPI framework")
+        self.check_python_import("sqlalchemy", "SQLAlchemy ORM")
+        self.check_python_import("alembic", "Alembic migrations")
+        self.check_python_import("pydantic", "Pydantic validation")
 
+    def check_configuration(self) -> None:
+        """Check configuration and environment."""
+        print("\n⚙️  Checking configuration...")
 
-def generate_summary_report(
-    env_vars: dict[str, Any],
-    db_connection: bool,
-    config_loading: bool,
-    migrations: bool,
-    docker_services: dict[str, bool],
-    api_endpoints: bool,
-    file_structure: dict[str, dict[str, bool]],
-) -> None:
-    """Generate a summary report."""
-    print_header("Setup Verification Summary")
+        # Check if .env file exists
+        env_file = self.project_root / ".env"
+        if env_file.exists():
+            print("✅ Environment file (.env) exists")
+        else:
+            print("⚠️  Environment file (.env) not found")
+            self.warnings.append("Environment file (.env) not found")
 
-    # Calculate success rates
-    required_env_vars_ok = all(env_vars["required"].values())
-    files_ok = all(file_structure["files"].values())
-    docker_ok = any(docker_services.values())
+        # Check environment variables
+        self.check_environment_variable("DATABASE_URL", "Database URL")
+        self.check_environment_variable("SECRET_KEY", "Secret key")
 
-    # Overall status
-    critical_issues = []
-    warnings = []
+    def check_services(self) -> None:
+        """Check if services are running."""
+        print("\n🔧 Checking services...")
 
-    if not required_env_vars_ok:
-        critical_issues.append("Missing required environment variables")
+        self.check_docker_services()
+        self.check_database_connection()
+        self.check_api_startup()
+        self.check_alembic_migrations()
 
-    if not db_connection:
-        critical_issues.append("Database connection failed")
+    def run_verification(self) -> None:
+        """Run the complete verification process."""
+        print("🔍 FastAPI Project Setup Verification")
+        print("=" * 50)
 
-    if not config_loading:
-        critical_issues.append("Configuration loading failed")
+        self.check_project_structure()
+        self.check_python_environment()
+        self.check_configuration()
+        self.check_services()
 
-    if not files_ok:
-        critical_issues.append("Missing critical files")
+        # Summary
+        print("\n📊 Verification Summary")
+        print("=" * 30)
 
-    if not docker_ok:
-        warnings.append("Docker services not running")
+        if not self.issues and not self.warnings:
+            print("🎉 All checks passed! Your setup is working correctly.")
+            print("\n🚀 Next steps:")
+            print("  - Visit http://localhost:8000/docs to see your API")
+            print("  - Run tests: pytest")
+            print("  - Start developing your application!")
+        else:
+            if self.issues:
+                print(f"❌ Found {len(self.issues)} issue(s):")
+                for issue in self.issues:
+                    print(f"  - {issue}")
 
-    if not api_endpoints:
-        warnings.append("API server not accessible")
+            if self.warnings:
+                print(f"⚠️  Found {len(self.warnings)} warning(s):")
+                for warning in self.warnings:
+                    print(f"  - {warning}")
 
-    # Print summary
-    if not critical_issues:
-        print_success("🎉 Setup verification PASSED!")
-        print_info("Your FastAPI Template is ready for development.")
-    else:
-        print_error("❌ Setup verification FAILED!")
-        print_info("Please address the critical issues below:")
-        for issue in critical_issues:
-            print_error(f"  - {issue}")
-
-    if warnings:
-        print_warning("⚠️  Warnings (non-critical):")
-        for warning in warnings:
-            print_warning(f"  - {warning}")
-
-    # Next steps
-    print_header("Next Steps")
-    if not critical_issues:
-        print_success("1. Start the development server:")
-        print("   uvicorn app.main:app --reload")
-        print()
-        print_success("2. Access your API:")
-        print("   - API: http://localhost:8000")
-        print("   - Docs: http://localhost:8000/docs")
-        print("   - ReDoc: http://localhost:8000/redoc")
-        print()
-        print_success("3. Create a superuser (optional):")
-        print("   python app/bootstrap_superuser.py")
-    else:
-        print_error("Please fix the critical issues above before proceeding.")
-        print_info("Run the comprehensive setup script:")
-        print("   ./scripts/setup_comprehensive.sh")
+            print("\n🔧 Troubleshooting:")
+            print(
+                "  - Check the troubleshooting guide: docs/troubleshooting/setup-issues.md"
+            )
+            print("  - Review the setup logs for more details")
+            print("  - Ensure all services are running: docker-compose up -d")
 
 
-async def run_verification() -> bool:
-    """Run the complete verification process."""
-    try:
-        # Run all checks
-        env_vars = check_environment_variables()
-        db_connection = await check_database_connection()
-        config_loading = check_configuration_loading()
-        migrations = check_alembic_migrations()
-        docker_services = check_docker_services()
-        api_endpoints = check_api_endpoints()
-        file_structure = check_file_structure()
-
-        # Generate summary
-        generate_summary_report(
-            env_vars=env_vars,
-            db_connection=db_connection,
-            config_loading=config_loading,
-            migrations=migrations,
-            docker_services=docker_services,
-            api_endpoints=api_endpoints,
-            file_structure=file_structure,
-        )
-
-        # Return success if no critical issues
-        required_env_vars_ok = all(env_vars["required"].values())
-        files_ok = all(file_structure["files"].values())
-
-        return required_env_vars_ok and db_connection and config_loading and files_ok
-
-    except Exception as e:
-        print_error(f"Verification failed with error: {e}")
-        return False
-
-
-async def main():
-    """Main verification function."""
-    print("FastAPI Template Setup Verification")
-    print("===================================")
-
-    success = await run_verification()
-    return 0 if success else 1
+def main():
+    """Main entry point."""
+    verifier = SetupVerifier()
+    verifier.run_verification()
 
 
 if __name__ == "__main__":
-    import asyncio
-
-    exit(asyncio.run(main()))
+    main()

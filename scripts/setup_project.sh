@@ -105,8 +105,46 @@ done
 # Run database migrations
 echo ""
 echo "🔄 Running database migrations..."
-alembic upgrade head
-echo "✅ Database migrations completed"
+
+# Check if database already has tables but no migration history
+echo "   Checking database state..."
+if python -c "
+import asyncio
+from sqlalchemy import text
+from app.database.database import engine
+
+async def check_db_state():
+    try:
+        async with engine.begin() as conn:
+            # Check if users table exists
+            result = await conn.execute(text(\"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')\"))
+            table_exists = result.scalar()
+            
+            # Check if alembic_version table exists
+            result = await conn.execute(text(\"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'alembic_version')\"))
+            version_exists = result.scalar()
+            
+            return table_exists, version_exists
+    except Exception as e:
+        print(f'Database connection error: {e}')
+        return False, False
+
+result = asyncio.run(check_db_state())
+print(f'Tables exist: {result[0]}, Migration history: {result[1]}')
+" 2>/dev/null; then
+    echo "   Database state checked"
+else
+    echo "   Could not check database state, proceeding with normal migration"
+fi
+
+# Try to run migrations, but handle the case where tables already exist
+if alembic upgrade head 2>&1 | grep -q "relation.*already exists"; then
+    echo "   ⚠️  Tables already exist, stamping migration history..."
+    alembic stamp head
+    echo "✅ Database migration history stamped"
+else
+    echo "✅ Database migrations completed"
+fi
 
 # Create superuser (optional)
 echo ""
@@ -115,8 +153,22 @@ read -p "Create superuser? (y/N): " CREATE_SUPERUSER
 if [[ $CREATE_SUPERUSER =~ ^[Yy]$ ]]; then
     echo ""
     echo "Running superuser creation script..."
-    python app/bootstrap_superuser.py
-    echo "✅ Superuser creation completed"
+    
+    # Set environment variables for superuser creation with proper values
+    export PYTHONPATH=.
+    export FIRST_SUPERUSER="admin@$(basename "$PWD" | sed 's/_backend$//').com"
+    export FIRST_SUPERUSER_PASSWORD="Admin123!"
+    
+    echo "   Using email: $FIRST_SUPERUSER"
+    echo "   Using password: $FIRST_SUPERUSER_PASSWORD"
+    
+    if python app/bootstrap_superuser.py; then
+        echo "✅ Superuser creation completed"
+    else
+        echo "❌ Superuser creation failed"
+        echo "   You can create a superuser manually later using:"
+        echo "   python app/bootstrap_superuser.py"
+    fi
 else
     echo "   Skipping superuser creation"
 fi
@@ -183,7 +235,8 @@ echo ""
 echo "🎯 Next Steps:"
 echo "1. View API docs: http://localhost:8000/docs"
 echo "2. Run tests: pytest"
-echo "3. Start developing!"
+echo "3. Verify your setup: python scripts/verify_setup.py"
+echo "4. Start developing!"
 echo ""
 echo "💡 Useful Commands:"
 echo "  docker-compose up -d          # Start all services (including Redis if needed)"

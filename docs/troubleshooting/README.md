@@ -12,12 +12,25 @@ This directory contains detailed troubleshooting guides for common issues you mi
   - Alembic configuration errors
   - Test suite database issues
   - Virtual environment problems
+- **[Setup Issues](./setup-issues.md)** - Common setup and initialization problems
+  - Missing alembic.ini configuration
+  - Database migration conflicts
+  - Superuser creation issues
+  - Username and password validation errors
+  - Module import problems
 - **[Template Critical Fixes](./template-fixes.md)** - Critical fixes applied to prevent common template issues
   - CORS environment variable parsing bugs
   - Missing Docker environment variables
   - Customization script coverage issues
   - Setup verification problems
   - Test configuration updates
+
+### 🤖 AI Assistant & Workflow Issues
+- **[AI Assistant Workflow](./AI_ASSISTANT_WORKFLOW.md)** - Critical workflow for AI assistants helping users
+  - VS Code restart requirements after template rename
+  - Proper workflow for template customization
+  - Preventing setup issues through correct procedures
+  - AI assistant best practices for template usage
 
 ### 🧪 Testing & CI Issues
 - **[CI Test Hang Resolution](./ci-test-hang-resolution.md)** - CI pipeline and test infrastructure problems

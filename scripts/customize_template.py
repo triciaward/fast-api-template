@@ -186,8 +186,8 @@ class TemplateCustomizer:
         }
 
         # Files to skip (these are handled specially)
-        skip_files = {
-            "alembic.ini",  # Handled by env.py using settings
+        skip_files: dict[str, str] = {
+            # alembic.ini is now handled by the customization process
         }
 
         for pattern in patterns:
@@ -261,6 +261,35 @@ class TemplateCustomizer:
         )
 
         return content
+
+    def customize_alembic_ini(self) -> None:
+        """Customize the alembic.ini file with the new database name."""
+        alembic_file = self.project_root / "alembic.ini"
+
+        if alembic_file.exists():
+            try:
+                with open(alembic_file, encoding="utf-8") as f:
+                    content = f.read()
+
+                # Update the database URL with the new database name
+                old_db_name = "fastapi_template"
+                new_db_name = self.replacements.get("fastapi_template", old_db_name)
+
+                # Replace the database name in the URL
+                content = re.sub(
+                    r"sqlalchemy\.url = postgresql://[^/]+/[^/\s]+",
+                    f"sqlalchemy.url = postgresql://postgres:dev_password_123@localhost:5432/{new_db_name}",
+                    content,
+                )
+
+                # Write back the updated content
+                with open(alembic_file, "w", encoding="utf-8") as f:
+                    f.write(content)
+
+                print("   ✅ Updated: alembic.ini with new database name")
+
+            except Exception as e:
+                print(f"   ⚠️  Warning: Could not update alembic.ini: {e}")
 
     def update_git_remote(self) -> None:
         """Update git remote information."""
@@ -372,6 +401,9 @@ Original template: https://github.com/your-username/fast-api-template
 
         # Update .env file with Docker project name
         self.update_env_file()
+
+        # Customize alembic.ini file
+        self.customize_alembic_ini()
 
         # Create customization log
         self.create_customization_log()

@@ -160,6 +160,14 @@ When you send this message, your AI assistant will:
 - **FastAPI** application on port 8000 (docs at http://localhost:8000/docs)
 - **Optional services** (Redis, Celery) can be started when needed
 
+### 🆘 Need Help?
+
+If you encounter any issues during setup:
+
+- **📖 Troubleshooting Guide**: [Setup Issues & Solutions](docs/troubleshooting/setup-issues.md)
+- **🐛 Common Problems**: Missing alembic.ini, database errors, superuser creation issues
+- **🔧 Quick Fixes**: Most issues have simple solutions documented in the guide
+
 ### 📋 Complete Setup Process
 
 The template setup involves **5 steps** that must be done in order:
