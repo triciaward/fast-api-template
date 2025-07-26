@@ -226,7 +226,19 @@ class TemplateCustomizer:
 
             # Replace template references
             for old, new in self.replacements.items():
-                content = content.replace(old, new)
+                # Special handling for shell scripts to preserve directory name checks
+                if file_path.suffix == ".sh" and old == "fast-api-template":
+                    # Don't replace "fast-api-template" in directory name checks
+                    # Look for patterns like: basename "$PWD" = "fast-api-template"
+                    content = re.sub(
+                        r'(basename\s+"\$PWD"\s*=\s*)"fast-api-template"',
+                        r'\1"fast-api-template"',  # Keep the original for directory checks
+                        content,
+                    )
+                    # Replace other instances of fast-api-template
+                    content = content.replace(old, new)
+                else:
+                    content = content.replace(old, new)
 
             # Special handling for README.md
             if file_path.name == "README.md":

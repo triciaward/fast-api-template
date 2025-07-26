@@ -19,27 +19,9 @@ if [ ! -f "scripts/customize_template.py" ]; then
     exit 1
 fi
 
-# Check if we're in a renamed directory (not the original template)
-# This check works for both the original template and customized projects
+# Show current project directory
 CURRENT_DIR=$(basename "$PWD")
-if [ "$CURRENT_DIR" = "fast-api-template" ]; then
-    echo "⚠️  Warning: You're still in the 'fast-api-template' directory!"
-    echo ""
-    echo "This script can work with the original template directory, but it's recommended to:"
-    echo "1. Run ./scripts/rename_template.sh first"
-    echo "2. Restart VS Code and open the renamed directory"
-    echo "3. Run ./scripts/customize_template.sh"
-    echo "4. Then run this script"
-    echo ""
-    read -p "Continue with the current directory? (y/N): " CONTINUE_WITH_TEMPLATE
-    if [[ ! $CONTINUE_WITH_TEMPLATE =~ ^[Yy]$ ]]; then
-        echo "Exiting. Please rename and customize the template first."
-        exit 1
-    fi
-    echo "✅ Continuing with template directory..."
-else
-    echo "✅ You're in a renamed project directory: $CURRENT_DIR"
-fi
+echo "✅ Working in project directory: $CURRENT_DIR"
 echo ""
 
 # Check if .env file exists
