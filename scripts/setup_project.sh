@@ -35,9 +35,9 @@ if [ "$(basename "$PWD")" = "fast-api-template" ]; then
         exit 1
     fi
     echo "✅ Continuing with template directory..."
+else
+    echo "✅ You're in a renamed project directory: $(basename "$PWD")"
 fi
-
-echo "✅ You're in a renamed project directory: $(basename "$PWD")"
 echo ""
 
 # Check if .env file exists
