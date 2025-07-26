@@ -169,7 +169,7 @@ prepend_sys_path = .
 # sourceless = false
 
 # version number format
-version_num_format = %04d
+version_num_format = %%(version_num)04d
 
 # version path separator; As mentioned above, this is the character used to split
 # version_locations. The default within new alembic.ini files is "os", which uses
@@ -203,7 +203,7 @@ sqlalchemy.url = postgresql://postgres:dev_password_123@localhost:5432/{db_name}
 # lint with attempts to fix using "ruff" - use the exec runner, execute a binary
 # hooks = ruff
 # ruff.type = exec
-# ruff.executable = %(here)s/.venv/bin/ruff
+# ruff.executable = %%(here)s/.venv/bin/ruff
 # ruff.options = --fix REVISION_SCRIPT_FILENAME
 
 # Logging configuration
@@ -238,8 +238,8 @@ level = NOTSET
 formatter = generic
 
 [formatter_generic]
-format = %(levelname)-5.5s [%(name)s] %(message)s
-datefmt = %H:%M:%S
+format = %%(levelname)-5.5s [%%(name)s] %%(message)s
+datefmt = %%H:%%M:%%S
 """
 
     alembic_path = project_root / "alembic.ini"

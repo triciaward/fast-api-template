@@ -10,15 +10,34 @@ This document summarizes all the fixes implemented in the FastAPI template to pr
 
 **Fixes Applied**:
 - ✅ Fixed `version_num_format` in `alembic.ini`: `%%(version_num)04d` (proper escaping)
+- ✅ Fixed `format` and `datefmt` in logging configuration: `%%(levelname)-5.5s` and `%%H:%%M:%%S`
+- ✅ Fixed `ruff.executable` path: `%%(here)s/.venv/bin/ruff`
 - ✅ Added `alembic.ini` customization in `customize_template.py`
 - ✅ Database URL automatically updated during template customization
 - ✅ Proper database name replacement in configuration
 
 **Files Modified**:
-- `alembic.ini` - Fixed version format
+- `alembic.ini` - Fixed version format and logging configuration
 - `scripts/customize_template.py` - Added alembic.ini customization
+- `scripts/setup_comprehensive.py` - Fixed alembic.ini generation
+- `scripts/setup_comprehensive.sh` - Fixed alembic.ini generation
+- `scripts/fix_common_issues.py` - Fixed alembic.ini generation
+- `scripts/fix_common_issues.sh` - Fixed alembic.ini generation
 
-### 2. **Database Migration Handling**
+### 2. **Template Customization File Location**
+
+**Issue**: Template customization log was being saved to `docs/TEMPLATE_CUSTOMIZATION.md` instead of the troubleshooting folder.
+
+**Fixes Applied**:
+- ✅ Moved customization log to `docs/troubleshooting/TEMPLATE_CUSTOMIZATION.md`
+- ✅ Updated all references to point to the correct location
+- ✅ Ensures customization logs are properly organized with other troubleshooting docs
+
+**Files Modified**:
+- `scripts/customize_template.py` - Updated log file location
+- `README.md` - Updated reference to log file location
+
+### 3. **Database Migration Handling**
 
 **Issue**: Database tables already existed but no migration history.
 
@@ -31,7 +50,7 @@ This document summarizes all the fixes implemented in the FastAPI template to pr
 **Files Modified**:
 - `scripts/setup_project.sh` - Added database state detection and handling
 
-### 3. **Superuser Creation Improvements**
+### 4. **Superuser Creation Improvements**
 
 **Issue**: Username validation errors and password complexity requirements.
 
@@ -46,7 +65,7 @@ This document summarizes all the fixes implemented in the FastAPI template to pr
 - `app/bootstrap_superuser.py` - Enhanced validation and error handling
 - `scripts/setup_project.sh` - Improved superuser creation process
 
-### 4. **Setup Script Improvements**
+### 5. **Setup Script Improvements**
 
 **Issue**: Directory checking logic errors and poor error handling.
 
@@ -60,7 +79,7 @@ This document summarizes all the fixes implemented in the FastAPI template to pr
 - `scripts/setup_project.sh` - Enhanced error handling and validation
 - `scripts/customize_template.py` - Improved directory verification
 
-### 5. **Documentation and Troubleshooting**
+### 6. **Documentation and Troubleshooting**
 
 **Issue**: Lack of guidance for common setup issues.
 
@@ -117,52 +136,51 @@ This document summarizes all the fixes implemented in the FastAPI template to pr
 | Issue | Status | Fix Applied |
 |-------|--------|-------------|
 | Missing alembic.ini | ✅ Fixed | Template customization |
-| Alembic interpolation error | ✅ Fixed | Proper escaping |
-| Database tables exist | ✅ Fixed | Smart migration handling |
-| Username validation | ✅ Fixed | Improved generation logic |
-| Password validation | ✅ Fixed | Strong defaults |
-| Module import errors | ✅ Fixed | PYTHONPATH setting |
-| Directory checking | ✅ Fixed | Correct logic |
+| Alembic interpolation errors | ✅ Fixed | Proper escaping in config files |
+| Template customization file location | ✅ Fixed | Moved to troubleshooting folder |
+| Database migration conflicts | ✅ Fixed | Smart state detection |
+| Superuser creation errors | ✅ Fixed | Enhanced validation |
+| Setup script errors | ✅ Fixed | Improved error handling |
+| Documentation gaps | ✅ Fixed | Comprehensive guides |
 
 ### **User Experience Improvements**
 
-- **Setup Success Rate**: Significantly improved
-- **Error Recovery**: Automatic handling of common issues
-- **User Guidance**: Clear instructions and troubleshooting
-- **Verification**: Tools to confirm successful setup
+- **Faster Setup**: Automated fixes prevent common issues
+- **Better Error Messages**: Clear guidance when problems occur
+- **Organized Documentation**: Troubleshooting guides in logical locations
+- **Reliable Process**: Consistent setup experience across different environments
 
-## 🔄 **Maintenance and Updates**
+## 🔄 **Recent Updates (Latest)**
 
-### **Ongoing Improvements**
+### **Alembic Configuration Escaping (Latest Fix)**
 
-1. **Monitor User Feedback**: Track new issues and implement fixes
-2. **Update Dependencies**: Keep template dependencies current
-3. **Enhance Documentation**: Continuously improve guides and instructions
-4. **Add New Features**: Incorporate useful improvements from user requests
+**Problem**: The `alembic.ini` file had configuration interpolation syntax issues:
+- `version_num_format = %04d` caused `configparser.InterpolationSyntaxError`
+- `format = %(levelname)-5.5s` caused similar errors
+- `datefmt = %H:%M:%S` caused similar errors
 
-### **Quality Assurance**
+**Solution**: Properly escaped all `%` characters in configuration files:
+- `version_num_format = %%(version_num)04d`
+- `format = %%(levelname)-5.5s [%%(name)s] %%(message)s`
+- `datefmt = %%H:%%M:%%S`
 
-1. **Automated Testing**: Ensure fixes work across different environments
-2. **User Testing**: Validate fixes with real-world usage
-3. **Documentation Updates**: Keep troubleshooting guides current
-4. **Template Validation**: Regular verification of template functionality
+**Impact**: Eliminates the most common setup failure point for new users.
 
-## 📝 **For Template Maintainers**
+### **Template Customization Organization (Latest Fix)**
 
-### **When Adding New Features**
+**Problem**: Template customization logs were being saved to the main docs folder instead of the troubleshooting folder.
 
-1. **Consider Setup Impact**: How does this affect the setup process?
-2. **Add Validation**: Include proper error handling and validation
-3. **Update Documentation**: Document any new setup requirements
-4. **Test Thoroughly**: Verify the feature works in the setup process
+**Solution**: Moved customization logs to `docs/troubleshooting/TEMPLATE_CUSTOMIZATION.md` to keep them organized with other troubleshooting documentation.
 
-### **When Fixing Issues**
+**Impact**: Better organization and easier access to customization information.
 
-1. **Root Cause Analysis**: Understand why the issue occurred
-2. **Preventive Measures**: Implement fixes that prevent similar issues
-3. **Documentation**: Update troubleshooting guides
-4. **User Communication**: Provide clear guidance on fixes
+## ✅ **Verification**
 
----
+All fixes have been tested and verified:
 
-*This document should be updated whenever new fixes are implemented or new issues are discovered.* 
+1. **Alembic Configuration**: `configparser` can now parse the generated `alembic.ini` files without errors
+2. **Template Customization**: Scripts import and run successfully
+3. **File Organization**: Customization logs are now properly organized
+4. **Documentation**: All references updated to reflect new file locations
+
+The template is now robust and ready for production use with minimal setup issues. 

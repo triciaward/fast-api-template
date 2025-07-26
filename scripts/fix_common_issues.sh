@@ -253,8 +253,8 @@ level = NOTSET
 formatter = generic
 
 [formatter_generic]
-format = %(levelname)-5.5s [%(name)s] %(message)s
-datefmt = %H:%M:%S
+format = %%(levelname)-5.5s [%%(name)s] %%(message)s
+datefmt = %%H:%%M:%%S
 EOF
     
     print_success "Created alembic.ini with proper configuration"

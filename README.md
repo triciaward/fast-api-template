@@ -308,7 +308,7 @@ Proceed with customization? (y/N): y
 ==================
 
 📋 Next Steps:
-1. Review the changes in docs/TEMPLATE_CUSTOMIZATION.md
+1. Review the changes in docs/troubleshooting/TEMPLATE_CUSTOMIZATION.md
 2. Update your git remote: git remote set-url origin <your-repo-url>
 3. Run the setup script: ./scripts/setup_project.sh
 4. Start developing your application!

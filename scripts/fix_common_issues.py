@@ -225,8 +225,8 @@ level = NOTSET
 formatter = generic
 
 [formatter_generic]
-format = %(levelname)-5.5s [%(name)s] %(message)s
-datefmt = %H:%M:%S
+format = %%(levelname)-5.5s [%%(name)s] %%(message)s
+datefmt = %%H:%%M:%%S
 """
 
     alembic_path.write_text(alembic_content)

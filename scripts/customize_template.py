@@ -365,11 +365,11 @@ This project was created using the FastAPI Template.
 Original template: https://github.com/your-username/fast-api-template
 """
 
-        # Create docs directory if it doesn't exist
-        docs_dir = self.project_root / "docs"
-        docs_dir.mkdir(exist_ok=True)
+        # Create docs/troubleshooting directory if it doesn't exist
+        troubleshooting_dir = self.project_root / "docs" / "troubleshooting"
+        troubleshooting_dir.mkdir(parents=True, exist_ok=True)
 
-        log_file = docs_dir / "TEMPLATE_CUSTOMIZATION.md"
+        log_file = troubleshooting_dir / "TEMPLATE_CUSTOMIZATION.md"
         with open(log_file, "w", encoding="utf-8") as f:
             f.write(log_content)
 
@@ -407,7 +407,7 @@ Original template: https://github.com/your-username/fast-api-template
 
         # Create customization log
         self.create_customization_log()
-        print("   📝 Created: docs/TEMPLATE_CUSTOMIZATION.md")
+        print("   📝 Created: docs/troubleshooting/TEMPLATE_CUSTOMIZATION.md")
 
         # Update git remote info
         self.update_git_remote()
@@ -415,7 +415,7 @@ Original template: https://github.com/your-username/fast-api-template
         print("\n🎉 STEP 2 COMPLETE!")
         print("==================")
         print("\n📋 Next Steps:")
-        print("1. Review the changes in docs/TEMPLATE_CUSTOMIZATION.md")
+        print("1. Review the changes in docs/troubleshooting/TEMPLATE_CUSTOMIZATION.md")
         print("2. Update your git remote: git remote set-url origin <your-repo-url>")
         print("3. Run the setup script: ./scripts/setup_project.sh")
         print("4. Start developing your application!")
