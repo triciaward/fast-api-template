@@ -144,7 +144,7 @@ class TestVerifySetupScript:
             "API_PORT": "8000",
             "ENABLE_REDIS": "false",
             "ENABLE_CELERY": "false",
-            "BACKEND_CORS_ORIGINS": '["http://localhost:3000"]',
+            "BACKEND_CORS_ORIGINS": "http://localhost:3000",
             "FIRST_SUPERUSER": None,
             "FIRST_SUPERUSER_PASSWORD": None,
         }.get(var)
@@ -295,10 +295,7 @@ class TestFixCommonIssuesScript:
             content = env_path.read_text()
 
             # Check that CORS format was converted (with spaces as json.dumps adds them)
-            assert (
-                'BACKEND_CORS_ORIGINS=["http://localhost:3000", "http://localhost:8080"]'
-                in content
-            )
+            assert "BACKEND_CORS_ORIGINS=http://localhost:3000" in content
 
     def test_fix_script_handles_correct_cors_format(self):
         """Test that the fix script doesn't change already correct CORS format."""
@@ -306,7 +303,7 @@ class TestFixCommonIssuesScript:
             env_path = Path(temp_dir) / ".env"
 
             # Create .env with correct CORS format
-            original_content = 'BACKEND_CORS_ORIGINS=["http://localhost:3000","http://localhost:8080"]\n'
+            original_content = "BACKEND_CORS_ORIGINS=http://localhost:3000\n"
             env_path.write_text(original_content)
 
             from scripts.fix_common_issues import fix_cors_format
@@ -456,14 +453,14 @@ def test_environment_variable_checking(env_var, expected):
     [
         (
             "http://localhost:3000,http://localhost:8080",
-            '["http://localhost:3000", "http://localhost:8080"]',
+            "http://localhost:3000,http://localhost:8080",
         ),
         (
             '["http://localhost:3000","http://localhost:8080"]',
-            '["http://localhost:3000","http://localhost:8080"]',
+            "http://localhost:3000,http://localhost:8080",
         ),
-        ("http://localhost:3000", '["http://localhost:3000"]'),
-        ("", "[]"),
+        ("http://localhost:3000", "http://localhost:3000"),
+        ("", ""),
     ],
 )
 def test_cors_format_conversion(cors_input, expected):

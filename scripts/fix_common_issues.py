@@ -51,9 +51,9 @@ ALGORITHM=HS256
 DATABASE_URL=postgresql://postgres:dev_password_123@localhost:5432/fastapi_template
 
 # =============================================================================
-# CORS Configuration (JSON format)
+# CORS Configuration (comma-separated format)
 # =============================================================================
-BACKEND_CORS_ORIGINS=["http://localhost:3000","http://localhost:8080","http://localhost:4200"]
+BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://localhost:4200
 
 # =============================================================================
 # Optional Features (disabled by default)
@@ -114,17 +114,24 @@ API_PORT=8000
 
 
 def convert_cors_format(cors_input: str) -> str:
-    """Convert CORS format from comma-separated to JSON array."""
+    """Convert CORS format to comma-separated string."""
     if not cors_input.strip():
-        return "[]"
+        return ""
 
-    # If already in JSON format, return as is
-    if cors_input.strip().startswith("[") and cors_input.strip().endswith("]"):
+    # If already in comma-separated format, return as is
+    if "," in cors_input and not cors_input.strip().startswith("["):
         return cors_input.strip()
 
-    # Convert comma-separated to JSON array
-    origins = [origin.strip() for origin in cors_input.split(",") if origin.strip()]
-    return json.dumps(origins)
+    # Convert JSON array to comma-separated
+    try:
+        origins = json.loads(cors_input)
+        if isinstance(origins, list):
+            return ",".join(origins)
+    except json.JSONDecodeError:
+        pass
+
+    # If it's a single string, return as is
+    return cors_input.strip()
 
 
 def fix_cors_format(env_path: Path) -> None:
@@ -138,9 +145,9 @@ def fix_cors_format(env_path: Path) -> None:
     if match:
         cors_value = match.group(1)
 
-        # Check if it's in wrong format (comma-separated string)
-        if "," in cors_value and not cors_value.strip().startswith("["):
-            # Convert to JSON format
+        # Check if it's in wrong format (JSON array)
+        if cors_value.strip().startswith("[") and cors_value.strip().endswith("]"):
+            # Convert to comma-separated format
             new_cors_value = convert_cors_format(cors_value)
 
             # Replace in content
@@ -154,7 +161,7 @@ def fix_cors_format(env_path: Path) -> None:
             env_path.write_text(new_content)
     else:
         # Add CORS configuration if missing
-        content += '\nBACKEND_CORS_ORIGINS=["http://localhost:3000","http://localhost:8080","http://localhost:4200"]\n'
+        content += "\nBACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://localhost:4200\n"
         env_path.write_text(content)
 
 

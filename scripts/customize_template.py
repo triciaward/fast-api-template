@@ -171,6 +171,7 @@ class TemplateCustomizer:
             "*.json",
             "*.ini",
             "*.cfg",
+            ".env*",  # Include .env files
         ]
 
         # Directories to skip
@@ -184,10 +185,19 @@ class TemplateCustomizer:
             "alembic/versions",
         }
 
+        # Files to skip (these are handled specially)
+        skip_files = {
+            "alembic.ini",  # Handled by env.py using settings
+        }
+
         for pattern in patterns:
             for file_path in self.project_root.rglob(pattern):
                 # Skip directories in skip list
                 if any(skip_dir in file_path.parts for skip_dir in skip_dirs):
+                    continue
+
+                # Skip specific files
+                if file_path.name in skip_files:
                     continue
 
                 # Skip binary files and very large files

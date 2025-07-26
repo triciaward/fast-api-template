@@ -12,6 +12,12 @@ This directory contains detailed troubleshooting guides for common issues you mi
   - Alembic configuration errors
   - Test suite database issues
   - Virtual environment problems
+- **[Template Critical Fixes](./template-fixes.md)** - Critical fixes applied to prevent common template issues
+  - CORS environment variable parsing bugs
+  - Missing Docker environment variables
+  - Customization script coverage issues
+  - Setup verification problems
+  - Test configuration updates
 
 ### 🧪 Testing & CI Issues
 - **[CI Test Hang Resolution](./ci-test-hang-resolution.md)** - CI pipeline and test infrastructure problems
@@ -114,4 +120,11 @@ If you can't find a solution in these guides:
 - ✅ Enhanced troubleshooting documentation
 - ✅ Added automated fix scripts
 - ✅ Improved diagnostic commands
-- ✅ Better hidden file explanations 
+- ✅ Better hidden file explanations
+- ✅ **CRITICAL**: Fixed CORS environment variable parsing bugs
+- ✅ **CRITICAL**: Added comprehensive Docker environment variables
+- ✅ **CRITICAL**: Enhanced customization script coverage
+- ✅ **CRITICAL**: Added setup verification steps
+- ✅ **CRITICAL**: Updated test configuration for new CORS format
+
+**📋 For detailed information about these critical fixes**, see [Template Critical Fixes](./template-fixes.md). 

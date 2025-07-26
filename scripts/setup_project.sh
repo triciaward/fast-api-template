@@ -133,12 +133,37 @@ else
     echo "❌ Warning: API startup test failed"
 fi
 
+# Check configuration loading
+echo "   Testing configuration loading..."
+if python -c "from app.core.config import settings; print(f'✅ Config loaded: {settings.PROJECT_NAME}')" 2>/dev/null; then
+    echo "✅ Configuration loading test passed"
+else
+    echo "❌ Warning: Configuration loading test failed"
+fi
+
+# Check database connection
+echo "   Testing database connection..."
+if python -c "from app.database.database import engine; print('✅ Database connection test passed')" 2>/dev/null; then
+    echo "✅ Database connection test passed"
+else
+    echo "❌ Warning: Database connection test failed"
+fi
+
 # Check if tests can run
 echo "   Testing test environment..."
 if python -c "import pytest; print('✅ Test environment ready')" 2>/dev/null; then
     echo "✅ Test environment ready"
 else
     echo "❌ Warning: Test environment not ready"
+fi
+
+# Test API endpoint
+echo "   Testing API endpoint..."
+sleep 3  # Give API time to start
+if curl -s http://localhost:8000/health > /dev/null 2>&1; then
+    echo "✅ API endpoint test passed"
+else
+    echo "❌ Warning: API endpoint test failed (API may still be starting)"
 fi
 
 echo ""

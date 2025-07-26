@@ -347,7 +347,7 @@ ACCOUNT_DELETION_REMINDER_DAYS=[3,1]
 # CORS Configuration
 # =============================================================================
 # Format: JSON array of allowed origins
-BACKEND_CORS_ORIGINS=["http://localhost:3000","http://localhost:8080","http://localhost:4200"]
+BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://localhost:4200
 
 # =============================================================================
 # Logging Configuration

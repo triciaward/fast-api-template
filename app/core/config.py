@@ -1,6 +1,5 @@
-from typing import Optional, Union
+from typing import Optional
 
-from pydantic.functional_validators import field_validator
 from pydantic_settings.main import BaseSettings, SettingsConfigDict
 
 
@@ -123,11 +122,9 @@ class Settings(BaseSettings):
     ACCOUNT_DELETION_REMINDER_DAYS: list[int] = [3, 1]
 
     # CORS
-    BACKEND_CORS_ORIGINS: list[str] = [
-        "http://localhost:3000",  # React default
-        "http://localhost:8080",  # Vue default
-        "http://localhost:4200",  # Angular default
-    ]
+    BACKEND_CORS_ORIGINS: str = (
+        "http://localhost:3000,http://localhost:8080,http://localhost:4200"
+    )
 
     # Logging Configuration
     LOG_LEVEL: str = "INFO"
@@ -148,20 +145,14 @@ class Settings(BaseSettings):
     SENTRY_TRACES_SAMPLE_RATE: float = 0.1  # 10% of transactions
     SENTRY_PROFILES_SAMPLE_RATE: float = 0.1  # 10% of profiles
 
-    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    @classmethod
-    def assemble_cors_origins(cls, v: Union[str, list[str]]) -> list[str]:
-        if isinstance(v, str):
-            # Handle comma-separated string
-            if "," in v:
-                return [i.strip() for i in v.split(",")]
-            # Handle single string
-            elif v.strip():
-                return [v.strip()]
-            # Handle empty string
-            return []
-        elif isinstance(v, list):
-            return v
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """Convert comma-separated CORS origins string to list."""
+        return [
+            origin.strip()
+            for origin in self.BACKEND_CORS_ORIGINS.split(",")
+            if origin.strip()
+        ]
 
 
 settings = Settings()

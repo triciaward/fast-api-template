@@ -93,7 +93,7 @@ DATABASE_URL=postgresql://postgres:dev_password_123@localhost:5432/fastapi_templ
 # =============================================================================
 # CORS Configuration (JSON format)
 # =============================================================================
-BACKEND_CORS_ORIGINS=["http://localhost:3000","http://localhost:8080","http://localhost:4200"]
+BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://localhost:4200
 
 # =============================================================================
 # Optional Features (disabled by default)
@@ -187,7 +187,7 @@ if grep -q "BACKEND_CORS_ORIGINS=" .env; then
     fi
 else
     print_status "Adding CORS configuration..."
-    echo 'BACKEND_CORS_ORIGINS=["http://localhost:3000","http://localhost:8080","http://localhost:4200"]' >> .env
+    echo 'BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://localhost:4200' >> .env
     print_success "Added CORS configuration"
 fi
 

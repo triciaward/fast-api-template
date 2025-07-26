@@ -149,7 +149,7 @@ class TestCORS:
             "http://localhost:4200",  # Angular default
         ]
 
-        assert settings.BACKEND_CORS_ORIGINS == expected_origins
+        assert settings.cors_origins_list == expected_origins
 
     def test_cors_middleware_loaded(self, client: TestClient) -> None:
         """Test that CORS middleware is properly loaded in the app."""
@@ -214,5 +214,5 @@ class TestCORS:
         assert cors_middleware.options["allow_headers"] == ["*"]
 
         # Check that origins are properly configured
-        expected_origins = [str(origin) for origin in settings.BACKEND_CORS_ORIGINS]
+        expected_origins = settings.cors_origins_list
         assert cors_middleware.options["allow_origins"] == expected_origins

@@ -53,7 +53,7 @@ DATABASE_URL=postgresql://postgres:dev_password_123@localhost:5432/fastapi_templ
 # =============================================================================
 # CORS Configuration (JSON format)
 # =============================================================================
-BACKEND_CORS_ORIGINS=["http://localhost:3000","http://localhost:8080","http://localhost:4200"]
+BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://localhost:4200
 
 # =============================================================================
 # Optional Features (disabled by default)

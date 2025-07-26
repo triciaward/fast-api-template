@@ -9,11 +9,34 @@ This is your project's main README file - feel free to customize it to describe 
 **⚠️ CRITICAL:** When helping users create projects from this template, follow this EXACT workflow:
 
 1. **Run rename script:** `./scripts/rename_template.sh`
-2. **STOP and wait:** Tell user to restart VS Code and open renamed directory
-3. **Wait for confirmation:** Only continue after user confirms VS Code is restarted
-4. **Continue with customization:** `./scripts/customize_template.sh`
+2. **STOP and provide clear instructions:** Tell user to restart VS Code and open renamed directory
+3. **Provide the exact message:** Give user the exact message to copy/paste after restart
+4. **Wait for confirmation:** Only continue after user confirms VS Code is restarted
+5. **Continue with customization:** `./scripts/customize_template.sh`
 
 **DO NOT automatically continue to step 3 without waiting for VS Code restart!**
+
+**📋 EXACT MESSAGE TO GIVE USER AFTER RENAME:**
+```
+✅ Directory renamed successfully!
+
+🚨 CRITICAL: You must restart VS Code now!
+
+Next steps:
+1. Close VS Code completely
+2. Open VS Code again  
+3. Open the folder: [PROJECT_NAME]_backend
+4. Copy and paste this message to your AI assistant:
+
+"I've restarted VS Code and opened the renamed directory: [PROJECT_NAME]_backend
+
+Please help me continue with the template customization process. I need to:
+1. Run the customization script
+2. Set up my project environment  
+3. Get my FastAPI application running
+
+The directory has been renamed from "fast-api-template" to "[PROJECT_NAME]_backend" and I'm now in the renamed directory."
+```
 
 ## 🎯 Creating Your Own Project from This Template
 
@@ -45,6 +68,27 @@ This is your project's main README file - feel free to customize it to describe 
 ```
 
 **⚠️ IMPORTANT:** You MUST restart VS Code after renaming. Do NOT continue with the next steps until you have restarted VS Code and opened the renamed directory.
+
+**🤖 AI ASSISTANT INSTRUCTIONS:**
+After restarting VS Code and opening the renamed directory, copy and paste this message to your AI assistant:
+
+```
+I've restarted VS Code and opened the renamed directory: [YOUR_PROJECT_NAME]_backend
+
+Please help me continue with the template customization process. I need to:
+1. Run the customization script
+2. Set up my project environment
+3. Get my FastAPI application running
+
+The directory has been renamed from "fast-api-template" to "[YOUR_PROJECT_NAME]_backend" and I'm now in the renamed directory.
+```
+
+**💡 What your AI assistant will do:**
+When you send this message, your AI assistant will:
+1. Verify you're in the renamed directory
+2. Run the customization script: `./scripts/customize_template.sh`
+3. Help you set up your project: `./scripts/setup_project.sh`
+4. Get your FastAPI application running
 
 **Step 3: Customize the Template**
 ```bash

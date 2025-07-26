@@ -71,6 +71,18 @@ The template has been enhanced with automatic fixes for common setup issues:
 - **🔄 Migration Handling**: Automatically resolves migration conflicts with existing tables
 - **📁 Organized Documentation**: Customization logs saved in `docs/` folder
 
+### 🚨 **Critical Fixes Applied (July 2025)**
+
+**Fixed critical issues that were causing problems for users:**
+
+- **✅ CORS Environment Variable Parsing Bug**: Fixed `JSONDecodeError` by changing from `list[str]` to `str` with property conversion
+- **✅ Missing Docker Environment Variables**: Added comprehensive `.env.example` with all required Docker variables
+- **✅ Customization Script Coverage**: Enhanced file scanning to include `.env*` files and handle all environment files
+- **✅ Setup Verification**: Added comprehensive verification steps to confirm services are running correctly
+- **✅ Test Configuration Updates**: Updated all tests to use new comma-separated CORS format
+
+**Impact**: These fixes eliminate the most common issues users encountered when setting up projects from this template.
+
 ### What Gets Customized:
 - **Project Name**: "FastAPI Template" → "Your Project Name"
 - **Project Slug**: "fast-api-template" → "your_project_name"
@@ -397,6 +409,8 @@ This generates:
 - [Testing Guide](docs/tutorials/testing-and-development.md)
 - [Deployment Guide](docs/tutorials/deployment-and-production.md)
 - [Optional Features](docs/tutorials/optional-features.md)
+- [Troubleshooting](docs/troubleshooting/) - Common issues and solutions
+  - [Template Critical Fixes](docs/troubleshooting/template-fixes.md) - Critical fixes applied to prevent common issues
 
 ## 🔧 Configuration
 
@@ -468,6 +482,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Check the [documentation](docs/)
 - Review [troubleshooting guides](docs/troubleshooting/)
+- **🚨 Critical Fixes**: See [Template Critical Fixes](docs/troubleshooting/template-fixes.md) for issues that have been resolved
 - Open an issue for bugs
 - Start a discussion for questions
 
