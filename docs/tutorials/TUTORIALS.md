@@ -192,7 +192,7 @@ code your_project_name
 **Demo:**
 ```bash
 # See the customization process in action
-python scripts/demo_customization.py
+python3 scripts/demo_customization.py
 ```
 
 ### 🔧 Core Features
@@ -341,13 +341,13 @@ curl http://localhost:8000/health
 ### 🚀 **CRUD Scaffolding**
 ```bash
 # Generate a Post model with title, content, and is_published fields
-python scripts/generate_crud.py Post title:str content:str is_published:bool
+python3 scripts/generate_crud.py Post title:str content:str is_published:bool
 
 # Generate a Product model with soft delete and search capabilities
-python scripts/generate_crud.py Product name:str price:float description:str --soft-delete --searchable
+python3 scripts/generate_crud.py Product name:str price:float description:str --soft-delete --searchable
 
 # Generate an admin-managed Category model
-python scripts/generate_crud.py Category name:str slug:str --admin
+python3 scripts/generate_crud.py Category name:str slug:str --admin
 ```
 
 ### 🛠️ **Development Tools**
@@ -425,7 +425,7 @@ python scripts/verify_setup.py
 - Check the troubleshooting sections in each tutorial
 - Review the [troubleshooting folder](../troubleshooting/) for specific issues
 - Look at the test files for working examples
-- Run the verification script: `python scripts/verify_setup.py`
+- Run the verification script: `python3 scripts/verify_setup.py`
 
 ### 💬 **Community Support**
 - **FastAPI Discord**: https://discord.gg/VQjSZaeJmf

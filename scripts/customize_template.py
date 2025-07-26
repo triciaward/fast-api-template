@@ -10,7 +10,7 @@ IMPORTANT: This script should be run AFTER you have:
 2. Restarted VS Code and opened the renamed directory
 
 Usage:
-    python scripts/customize_template.py
+    python3 scripts/customize_template.py
     # or
     ./scripts/customize_template.py
 

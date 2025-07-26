@@ -11,9 +11,9 @@ Generates complete CRUD boilerplate for FastAPI resources including:
 - Auto-registration in router
 
 Usage:
-    python scripts/generate_crud.py Post title:str content:str is_published:bool
-    python scripts/generate_crud.py Product name:str price:float description:str --soft-delete --searchable
-    python scripts/generate_crud.py Category name:str slug:str --admin
+    python3 scripts/generate_crud.py Post title:str content:str is_published:bool
+    python3 scripts/generate_crud.py Product name:str price:float description:str --soft-delete --searchable
+    python3 scripts/generate_crud.py Category name:str slug:str --admin
 """
 
 import argparse

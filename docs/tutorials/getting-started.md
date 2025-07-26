@@ -416,7 +416,7 @@ This creates all the necessary database tables.
 A superuser is like an admin account that can access everything in your application.
 
 ```bash
-python scripts/bootstrap_superuser.py
+python3 scripts/bootstrap_superuser.py
 ```
 
 Follow the prompts to create your admin account.
@@ -742,10 +742,10 @@ The template includes several utility scripts to help with development:
 ./scripts/setup_glitchtip.sh
 
 # Demo error responses
-python scripts/demo_error_responses.py
+python3 scripts/demo_error_responses.py
 
 # Logging demo
-python scripts/logging_demo.py
+python3 scripts/logging_demo.py
 
 # Fix common issues
 ./scripts/fix_common_issues.sh
@@ -799,13 +799,13 @@ Generate complete CRUD boilerplate with one command:
 
 ```bash
 # Generate a Post model with title, content, and is_published fields
-python scripts/generate_crud.py Post title:str content:str is_published:bool
+python3 scripts/generate_crud.py Post title:str content:str is_published:bool
 
 # Generate a Product model with soft delete and search capabilities
-python scripts/generate_crud.py Product name:str price:float description:str --soft-delete --searchable
+python3 scripts/generate_crud.py Product name:str price:float description:str --soft-delete --searchable
 
 # Generate an admin-managed Category model
-python scripts/generate_crud.py Category name:str slug:str --admin
+python3 scripts/generate_crud.py Category name:str slug:str --admin
 ```
 
 This generates:
@@ -940,7 +940,7 @@ docker-compose logs api
 curl http://localhost:8000/api/v1/health
 
 # Run verification
-python scripts/verify_setup.py
+python3 scripts/verify_setup.py
 ```
 
 ---

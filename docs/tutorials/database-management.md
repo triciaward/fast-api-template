@@ -140,7 +140,7 @@ The template includes a powerful CRUD scaffolding tool that generates complete C
 
 ```bash
 # Generate a Post model with title, content, and is_published fields
-python scripts/generate_crud.py Post title:str content:str is_published:bool
+python3 scripts/generate_crud.py Post title:str content:str is_published:bool
 ```
 
 ### Advanced Options
