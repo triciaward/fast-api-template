@@ -43,8 +43,8 @@ if [ -z "$PROJECT_NAME" ]; then
     exit 1
 fi
 
-# Generate project slug from project name
-PROJECT_SLUG=$(echo "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/_/g' | sed 's/__*/_/g' | sed 's/^_//' | sed 's/_$//')
+# Generate project slug from project name and append _backend
+PROJECT_SLUG=$(echo "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/_/g' | sed 's/__*/_/g' | sed 's/^_//' | sed 's/_$//')_backend
 
 echo ""
 echo "📋 Summary:"

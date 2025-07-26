@@ -21,6 +21,9 @@ This is your project's main README file - feel free to customize it to describe 
 # The script will:
 # ✅ Rename: fast-api-template → myawesomeproject_backend
 # ✅ Give you clear next steps
+# 
+# 💡 Note: The folder will ALWAYS end with "_backend" 
+#    (e.g., "My Awesome Project" becomes "myawesomeproject_backend")
 ```
 
 **Step 2: Restart VS Code**
@@ -114,9 +117,14 @@ cd fast-api-template
 #### Step 2: Rename the Template Directory
 
 **What this does:**
-- Renames the template directory to your project name
+- Renames the template directory to your project name with "_backend" suffix
 - Prevents configuration conflicts
 - Sets up the foundation for customization
+
+**💡 Important:** The directory will ALWAYS be renamed to end with "_backend"
+- "My Awesome Project" → "myawesomeproject_backend"
+- "Todo App" → "todo_app_backend"
+- "E-commerce API" → "ecommerce_api_backend"
 
 **How to do it:**
 1. Make sure you're in the `fast-api-template` directory

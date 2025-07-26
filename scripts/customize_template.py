@@ -73,10 +73,15 @@ class TemplateCustomizer:
             "Project slug (e.g., 'myawesomeproject_backend'): "
         ).strip()
         if not project_slug:
-            # Auto-generate from project name
+            # Auto-generate from project name and append _backend
             project_slug = re.sub(r"[^a-zA-Z0-9]", "_", project_name.lower())
             project_slug = re.sub(r"_+", "_", project_slug).strip("_")
+            project_slug = f"{project_slug}_backend"
             print(f"   Auto-generated slug: {project_slug}")
+        elif not project_slug.endswith("_backend"):
+            # Ensure it ends with _backend
+            project_slug = f"{project_slug}_backend"
+            print(f"   Updated slug to: {project_slug}")
 
         # Database name
         db_name = input(
