@@ -27,11 +27,12 @@ Welcome to the tutorials section! Here you'll find comprehensive guides for ever
 
 **New to FastAPI?** Follow this path:
 1. **📖 [Getting Started Guide](getting-started.md)** - Set up your development environment
-2. **🔐 [Authentication System](authentication.md)** - Learn user login and registration
-3. **🗄️ [Database Management](database-management.md)** - Work with data, migrations, and CRUD scaffolding
-4. **🧪 [Testing and Development](testing-and-development.md)** - Write tests and debug
-5. **🌐 [Deployment and Production](deployment-and-production.md)** - Deploy to production
-6. **🔧 [Optional Features](optional-features.md)** - Add advanced features as needed
+2. **🎯 [Next Steps & Development Tips](next-steps-and-tips.md)** - What to build first and common mistakes to avoid
+3. **🔐 [Authentication System](authentication.md)** - Learn user login and registration
+4. **🗄️ [Database Management](database-management.md)** - Work with data, migrations, and CRUD scaffolding
+5. **🧪 [Testing and Development](testing-and-development.md)** - Write tests and debug
+6. **🌐 [Deployment and Production](deployment-and-production.md)** - Deploy to production
+7. **🔧 [Optional Features](optional-features.md)** - Add advanced features as needed
 
 **Experienced developer?** Jump to any tutorial or use the [Quick Reference](#️-quick-reference) section below.
 
@@ -153,6 +154,7 @@ fast-api-template/
 
 ### 🚀 Getting Started
 - **[Getting Started Guide](getting-started.md)** - Complete setup guide for creating a new app from this template
+- **[Next Steps & Development Tips](next-steps-and-tips.md)** - What to build first, common commands, and mistakes to avoid
 
 ### 🎯 Template Customization
 Transform the FastAPI template into your own project with the powerful customization system:

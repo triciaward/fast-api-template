@@ -477,6 +477,8 @@ If you're new to this project, here's how to get it running:
 - Python 3.11 or higher (for development tools)
 - Docker and Docker Compose (for running the application)
 
+
+
 ### Quick Setup
 
 **Option 1: Automated Setup (Recommended)**
@@ -765,6 +767,7 @@ If you're already working with your customized project:
 2. **Explore the code** - Check out the `app/` folder to see how everything is organized
 3. **Add your features** - Start building your application logic
 4. **Check the docs** - See the template documentation for advanced features
+5. **Read the Next Steps Guide** - [Next Steps & Development Tips](docs/tutorials/next-steps-and-tips.md)
 
 ## 🆕 Recent Improvements
 

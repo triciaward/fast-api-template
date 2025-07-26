@@ -315,6 +315,8 @@ fast-api-template/
 - PostgreSQL
 - Redis (optional)
 
+
+
 ### Environment Setup
 ```bash
 # Automated setup (recommended)
@@ -411,6 +413,7 @@ This generates:
 
 - [Getting Started](docs/tutorials/getting-started.md) - Complete setup guide
 - [Tutorials Index](docs/tutorials/TUTORIALS.md) - All tutorials in one place
+- [Next Steps & Development Tips](docs/tutorials/next-steps-and-tips.md) - What to build first, common commands, and mistakes to avoid
 - [Authentication Guide](docs/tutorials/authentication.md)
 - [Database Management](docs/tutorials/database-management.md)
 - [Testing Guide](docs/tutorials/testing-and-development.md)
