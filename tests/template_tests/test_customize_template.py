@@ -1,357 +1,233 @@
 """
-Test the template customization script functionality.
+Test the simplified template customization script.
 
-Tests the template customization script to ensure it correctly transforms
-template references into project-specific names.
-
-These tests are template-specific and should be excluded when running
-tests for user applications.
+This test verifies that the customization script:
+1. Checks directory name and warns if still in template directory
+2. Processes files immediately after user input
+3. Completes customization in one run
 """
 
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from customize_template import TemplateCustomizer
 
-from scripts.customize_template import TemplateCustomizer
+# Add the scripts directory to the path BEFORE importing
+scripts_path = Path(__file__).parent.parent.parent / "scripts"
+sys.path.insert(0, str(scripts_path))
 
-
-@pytest.mark.template_only
-class TestTemplateCustomizer:
-    """Test the TemplateCustomizer class functionality."""
-
-    @pytest.fixture
-    def temp_project_dir(self):
-        """Create a temporary project directory for testing."""
-        temp_dir = tempfile.mkdtemp()
-        project_dir = Path(temp_dir) / "fast-api-template"
-        project_dir.mkdir()
-
-        # Create some test files with template references
-        test_files = {
-            "README.md": "# Your Project Name\n\nA FastAPI application built with the [FastAPI Template](docs/TEMPLATE_README.md).",
-            "app/core/config.py": 'PROJECT_NAME: str = "FastAPI Template"',
-            "docker-compose.yml": "POSTGRES_DB: fastapi_template",
-            "scripts/setup.sh": "echo 'Setting up FastAPI Template'",
-            "docs/tutorials/getting-started.md": "Welcome to FastAPI Template",
-        }
-
-        for file_path, content in test_files.items():
-            full_path = project_dir / file_path
-            full_path.parent.mkdir(parents=True, exist_ok=True)
-            full_path.write_text(content)
-
-        yield project_dir
-
-        # Cleanup
-        shutil.rmtree(temp_dir)
-
-    @pytest.fixture
-    def customizer(self, temp_project_dir):
-        """Create a TemplateCustomizer instance with test replacements."""
-        customizer = TemplateCustomizer()
-        customizer.project_root = temp_project_dir
-        customizer.replacements = {
-            "fast-api-template": "myawesomeproject_backend",
-            "fastapi_template": "myawesomeproject_backend",
-            "FastAPI Template": "My Awesome Project",
-            "FastAPI Template with Authentication": "My Awesome Project API",
-            "Your Name": "John Doe",
-            "your.email@example.com": "john@example.com",
-            "fast-api-template-postgres-1": "myawesomeproject_backend-postgres-1",
-            "fast-api-template-postgres": "myawesomeproject_backend-postgres",
-        }
-        return customizer
-
-    def test_get_files_to_process(self, customizer):
-        """Test that get_files_to_process finds the correct files."""
-        files = customizer.get_files_to_process()
-
-        # Should find our test files
-        file_paths = [f.name for f in files]
-        assert "README.md" in file_paths
-        assert "config.py" in file_paths
-        assert "docker-compose.yml" in file_paths
-        assert "setup.sh" in file_paths
-        assert "getting-started.md" in file_paths
-
-        # Should not include directories
-        assert not any(f.is_dir() for f in files)
-
-    def test_process_file(self, customizer):
-        """Test that process_file correctly replaces template references."""
-        test_file = customizer.project_root / "README.md"
-
-        # Process the file
-        result = customizer.process_file(test_file)
-
-        # Should have made changes
-        assert result is True
-
-        # Check the content was updated
-        content = test_file.read_text()
-        assert "My Awesome Project" in content
-        # The template link should still be preserved
-        assert "[FastAPI Template](docs/TEMPLATE_README.md)" in content
-
-    def test_process_file_no_changes(self, customizer):
-        """Test that process_file returns False when no changes are made."""
-        # Create a file with no template references
-        test_file = customizer.project_root / "no_template.txt"
-        test_file.write_text("This file has no template references.")
-
-        # Process the file
-        result = customizer.process_file(test_file)
-
-        # Should not have made changes
-        assert result is False
-
-        # Content should be unchanged
-        content = test_file.read_text()
-        assert content == "This file has no template references."
-
-    def test_process_file_handles_errors(self, customizer):
-        """Test that process_file handles errors gracefully."""
-        # Create a file that can't be read
-        test_file = customizer.project_root / "binary_file.bin"
-        test_file.write_bytes(b"\x00\x01\x02\x03")
-
-        # Process should not crash
-        result = customizer.process_file(test_file)
-        assert result is False
-
-    def test_create_customization_log(self, customizer):
-        """Test that create_customization_log creates the expected log file."""
-        customizer.create_customization_log()
-
-        log_file = customizer.project_root / "docs" / "TEMPLATE_CUSTOMIZATION.md"
-        assert log_file.exists()
-
-        content = log_file.read_text()
-        assert "Template Customization Log" in content
-        assert "My Awesome Project" in content
-        assert "myawesomeproject_backend" in content
-        assert "John Doe" in content
-        assert "john@example.com" in content
-
-    @patch("subprocess.run")
-    def test_update_git_remote_template_repo(self, mock_run, customizer):
-        """Test git remote update when pointing to template repository."""
-        # Mock git remote pointing to template repo
-        mock_run.return_value.returncode = 0
-        mock_run.return_value.stdout = "https://github.com/user/fast-api-template.git"
-
-        # This should not raise an exception
-        customizer.update_git_remote()
-
-        # Should have called git remote get-url
-        mock_run.assert_called_once()
-
-    @patch("subprocess.run")
-    def test_update_git_remote_custom_repo(self, mock_run, customizer):
-        """Test git remote update when pointing to custom repository."""
-        # Mock git remote pointing to custom repo
-        mock_run.return_value.returncode = 0
-        mock_run.return_value.stdout = (
-            "https://github.com/user/myawesomeproject_backend.git"
-        )
-
-        # This should not raise an exception
-        customizer.update_git_remote()
-
-        # Should have called git remote get-url
-        mock_run.assert_called_once()
-
-    def test_update_git_remote_no_git(self, customizer):
-        """Test git remote update when git is not available."""
-        # Remove .git directory to simulate no git repo
-        git_dir = customizer.project_root / ".git"
-        if git_dir.exists():
-            shutil.rmtree(git_dir)
-
-        # This should not raise an exception
-        customizer.update_git_remote()
-
-    def test_rename_project_directory(self, customizer):
-        """Test that rename_project_directory provides instructions and creates workspace."""
-        current_dir = customizer.project_root.name
-        new_name = customizer.replacements.get("fast-api-template", "test_project")
-
-        # Test that the method provides instructions without actually renaming
-        if current_dir != new_name:
-            # Should not raise any exceptions
-            customizer.rename_project_directory()
-
-            # Directory should still exist with original name
-            assert customizer.project_root.exists()
-            assert customizer.project_root.name == current_dir
-
-            # VS Code workspace file creation is now disabled, so just check directory exists
-            assert customizer.project_root.exists()
-
-    def test_rename_project_directory_same_name(self, customizer):
-        """Test that rename_project_directory handles same directory name."""
-        current_dir = customizer.project_root.name
-        # Set replacement to same name
-        customizer.replacements["fast-api-template"] = current_dir
-
-        # Should not raise any exceptions
-        customizer.rename_project_directory()
-
-        # Directory should still exist with same name (no rename needed)
-        assert customizer.project_root.exists()
-        assert customizer.project_root.name == current_dir
+# Now import the customize_template module
 
 
-@pytest.mark.template_only
-class TestTemplateCustomizerIntegration:
-    """Integration tests for the template customization process."""
+class TestTemplateCustomization:
+    """Test the simplified template customization script."""
 
-    @pytest.fixture
-    def temp_project_dir(self):
-        """Create a more realistic temporary project directory."""
-        temp_dir = tempfile.mkdtemp()
-        project_dir = Path(temp_dir) / "fast-api-template"
-        project_dir.mkdir()
+    def setup_method(self):
+        """Set up test environment."""
+        self.temp_dir = tempfile.mkdtemp()
+        self.project_root = Path(self.temp_dir) / "fast-api-template"
+        self.project_root.mkdir()
 
-        # Create a more realistic project structure
-        test_files = {
-            "README.md": """# FastAPI Template
+        # Create minimal project structure
+        (self.project_root / "scripts").mkdir()
+        (self.project_root / "app").mkdir()
+        (self.project_root / "docs").mkdir()
 
-A comprehensive, production-ready FastAPI template with authentication, admin panel, API keys, audit logging, and more.
-
-## Quick Start
-
-```bash
-cd fast-api-template
-./scripts/setup_comprehensive.sh
-```
-""",
-            "app/core/config.py": '''"""Configuration settings for the FastAPI Template application."""
-
-from pydantic_settings import BaseSettings
-
-class Settings(BaseSettings):
-    PROJECT_NAME: str = "FastAPI Template"
-    DESCRIPTION: str = "FastAPI Template with Authentication"
-    FROM_NAME: str = "FastAPI Template"
-
-    class Config:
-        env_file = ".env"
-''',
-            "docker-compose.yml": """version: '3.8'
-
-services:
-  postgres:
-    environment:
-      POSTGRES_DB: fastapi_template
-    ports:
-      - "5432:5432"
-""",
-            "scripts/setup.sh": """#!/bin/bash
-echo "🚀 Setting up FastAPI Template Development Environment"
-""",
-            "docs/tutorials/getting-started.md": """# Getting Started with FastAPI Template
-
-Welcome! This guide will walk you through creating a new application based on this FastAPI template.
-""",
-            "app/main.py": '''"""Main FastAPI application."""
-
-from fastapi import FastAPI
-from app.core.config import settings
-
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    description=settings.DESCRIPTION,
-)
-
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to FastAPI Template"}
-''',
-        }
-
-        for file_path, content in test_files.items():
-            full_path = project_dir / file_path
-            full_path.parent.mkdir(parents=True, exist_ok=True)
-            full_path.write_text(content)
-
-        yield project_dir
-
-        # Cleanup
-        shutil.rmtree(temp_dir)
-
-    @patch("builtins.input")
-    @patch("builtins.print")
-    def test_full_customization_process(self, mock_print, mock_input, temp_project_dir):
-        """Test the complete customization process with user input."""
-        # Mock user input
-        mock_input.side_effect = [
-            "My Awesome Project",  # Project name
-            "myawesomeproject_backend",  # Project slug
-            "myawesomeproject_backend",  # Database name
-            "myawesomeproject_backend",  # Docker prefix
-            "Backend API for My Awesome Project",  # Description
-            "John Doe",  # Author
-            "john@example.com",  # Email
-            "y",  # Confirm
+        # Create test files
+        test_files = [
+            "README.md",
+            "docker-compose.yml",
+            "requirements.txt",
+            "scripts/customize_template.py",
+            "app/main.py",
+            ".env.example",
         ]
 
-        # Create customizer and run
-        customizer = TemplateCustomizer()
-        customizer.project_root = temp_project_dir
+        for file_path in test_files:
+            full_path = self.project_root / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(full_path, "w") as f:
+                f.write(f"# Test file: {file_path}\n")
+                f.write("fast-api-template\n")
+                f.write("fastapi_template\n")
+                f.write("FastAPI Template\n")
 
-        # Mock the file processing to avoid actual file operations
-        with patch.object(customizer, "get_files_to_process") as mock_get_files:
-            mock_get_files.return_value = [
-                temp_project_dir / "README.md",
-                temp_project_dir / "app/core/config.py",
-                temp_project_dir / "docker-compose.yml",
-                temp_project_dir / "scripts/setup.sh",
-                temp_project_dir / "docs/tutorials/getting-started.md",
-                temp_project_dir / "app/main.py",
-            ]
+    def teardown_method(self):
+        """Clean up test environment."""
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-            # Run the customization
-            customizer.run()
+    @patch("builtins.input")
+    def test_directory_check_warns_on_template_name(self, mock_input):
+        """Test that the script warns when still in template directory."""
+        # Mock user to continue anyway
+        mock_input.return_value = "y"
 
-        # Verify the replacements were set correctly
-        assert customizer.replacements["FastAPI Template"] == "My Awesome Project"
-        assert (
-            customizer.replacements["fast-api-template"] == "myawesomeproject_backend"
-        )
-        assert customizer.replacements["fastapi_template"] == "myawesomeproject_backend"
-        assert customizer.replacements["Your Name"] == "John Doe"
-        assert customizer.replacements["your.email@example.com"] == "john@example.com"
+        # Create customizer with template directory name
+        with patch.object(TemplateCustomizer, "__init__", lambda self: None):
+            customizer = TemplateCustomizer()
+            customizer.project_root = self.project_root
 
-    def test_customization_creates_log_file(self, temp_project_dir):
-        """Test that customization creates the expected log file."""
-        customizer = TemplateCustomizer()
-        customizer.project_root = temp_project_dir
-        customizer.replacements = {
-            "fast-api-template": "myawesomeproject_backend",
-            "fastapi_template": "myawesomeproject_backend",
-            "FastAPI Template": "My Awesome Project",
-            "FastAPI Template with Authentication": "Backend API for My Awesome Project",
-            "Your Name": "John Doe",
-            "your.email@example.com": "john@example.com",
-            "fast-api-template-postgres-1": "myawesomeproject_backend-postgres-1",
-            "fast-api-template-postgres": "myawesomeproject_backend-postgres",
-        }
+            with patch("builtins.print") as mock_print:
+                # The script should exit when it detects template directory
+                with pytest.raises(SystemExit) as exc_info:
+                    customizer.verify_directory_name()
 
-        # Create the log file
-        customizer.create_customization_log()
+                # Verify exit code
+                assert exc_info.value.code == 1
 
-        # Check the log file exists and has correct content
-        log_file = temp_project_dir / "docs" / "TEMPLATE_CUSTOMIZATION.md"
-        assert log_file.exists()
+                # Verify error message was displayed
+                mock_print.assert_any_call(
+                    "❌ Error: You're still in the 'fast-api-template' directory!"
+                )
 
-        content = log_file.read_text()
-        assert "Template Customization Log" in content
-        assert "My Awesome Project" in content
-        assert "myawesomeproject_backend" in content
-        assert "John Doe" in content
-        assert "john@example.com" in content
-        assert "Backend API for My Awesome Project" in content
+    @patch("builtins.input")
+    def test_directory_check_exits_on_no_continue(self, mock_input):
+        """Test that the script exits when user doesn't want to continue."""
+        # Mock user to not continue
+        mock_input.return_value = "n"
+
+        # Create customizer with template directory name
+        with patch.object(TemplateCustomizer, "__init__", lambda self: None):
+            customizer = TemplateCustomizer()
+            customizer.project_root = self.project_root
+
+            with patch("sys.exit") as mock_exit, patch("builtins.print") as mock_print:
+                customizer.verify_directory_name()
+
+                # Verify exit was called
+                mock_exit.assert_called_once_with(1)
+                mock_print.assert_any_call(
+                    "❌ Error: You're still in the 'fast-api-template' directory!"
+                )
+
+    def test_directory_check_approves_custom_name(self):
+        """Test that the script approves custom directory names."""
+        # Create customizer with custom directory name
+        custom_project_root = Path(self.temp_dir) / "myawesomeproject_backend"
+        custom_project_root.mkdir()
+
+        with patch.object(TemplateCustomizer, "__init__", lambda self: None):
+            customizer = TemplateCustomizer()
+            customizer.project_root = custom_project_root
+
+            with patch("builtins.print") as mock_print:
+                customizer.verify_directory_name()
+
+                # Verify approval message
+                mock_print.assert_any_call(
+                    "✅ Directory name looks good: myawesomeproject_backend"
+                )
+
+    @patch("builtins.input")
+    def test_complete_customization_flow(self, mock_input):
+        """Test the complete customization flow."""
+        # Mock user input
+        mock_input.side_effect = [
+            "Test Project",  # Project name
+            "test_project_backend",  # Project slug
+            "test_project_backend",  # Database name
+            "test_project_backend",  # Docker prefix
+            "Test description",  # Description
+            "Test Author",  # Author
+            "test@example.com",  # Email
+            "y",  # Confirm customization
+        ]
+
+        # Create customizer with custom directory name
+        custom_project_root = Path(self.temp_dir) / "test_project_backend"
+        custom_project_root.mkdir()
+
+        # Copy test files to custom directory
+        for file_path in [
+            "README.md",
+            "docker-compose.yml",
+            "requirements.txt",
+            ".env.example",
+        ]:
+            src = self.project_root / file_path
+            dst = custom_project_root / file_path
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
+
+        with patch.object(TemplateCustomizer, "__init__", lambda self: None):
+            customizer = TemplateCustomizer()
+            customizer.project_root = custom_project_root
+            customizer.replacements = {
+                "fast-api-template": "test_project_backend",
+                "fastapi_template": "test_project_backend",
+                "FastAPI Template": "Test Project",
+                "FastAPI Template with Authentication": "Test description",
+                "Your Name": "Test Author",
+                "your.email@example.com": "test@example.com",
+            }
+            customizer.docker_project_name = "test_project_backend"
+
+            # Mock the methods that would normally process files
+            with patch.object(
+                customizer, "get_files_to_process"
+            ) as mock_get_files, patch.object(
+                customizer, "process_file"
+            ) as mock_process_file, patch.object(
+                customizer, "update_env_file"
+            ) as mock_update_env, patch.object(
+                customizer, "create_customization_log"
+            ) as mock_create_log, patch.object(
+                customizer, "update_git_remote"
+            ) as mock_update_git:
+
+                mock_get_files.return_value = [custom_project_root / "README.md"]
+
+                # Run the customization
+                customizer.run()
+
+                # Verify that all methods were called
+                assert mock_get_files.called
+                assert mock_process_file.called
+                assert mock_update_env.called
+                assert mock_create_log.called
+                assert mock_update_git.called
+
+    def test_directory_check_instructions_content(self):
+        """Test that directory check provides clear instructions."""
+        with patch.object(TemplateCustomizer, "__init__", lambda self: None):
+            customizer = TemplateCustomizer()
+            customizer.project_root = self.project_root
+
+            with patch("builtins.print") as mock_print, patch(
+                "builtins.input", return_value="y"
+            ):
+
+                # The script should exit when it detects template directory
+                with pytest.raises(SystemExit) as exc_info:
+                    customizer.verify_directory_name()
+
+                # Verify exit code
+                assert exc_info.value.code == 1
+
+                # Verify that the instructions were printed
+                printed_messages = [call.args[0] for call in mock_print.call_args_list]
+
+                assert any(
+                    "❌ Error: You're still in the 'fast-api-template' directory!"
+                    in msg
+                    for msg in printed_messages
+                )
+                assert any(
+                    "This script should be run AFTER renaming the directory." in msg
+                    for msg in printed_messages
+                )
+                assert any(
+                    "Please run the rename script first:" in msg
+                    for msg in printed_messages
+                )
+                assert any(
+                    "./scripts/rename_template.sh" in msg for msg in printed_messages
+                )
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])

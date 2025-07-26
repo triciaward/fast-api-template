@@ -169,7 +169,13 @@ Transform the FastAPI template into your own project with the powerful customiza
 git clone <your-repo-url>
 cd fast-api-template
 
-# Customize for your project
+# Step 1: Rename the template directory
+./scripts/rename_template.sh
+
+# Step 2: Restart VS Code and open the renamed directory
+code your_project_name
+
+# Step 3: Customize for your project
 ./scripts/customize_template.sh
 
 # Follow the prompts and start developing!

@@ -18,11 +18,17 @@ A comprehensive, production-ready FastAPI template with authentication, admin pa
 git clone <your-repo-url>
 cd fast-api-template
 
-# Customize the template for your project
+# Step 1: Rename the template directory
+./scripts/rename_template.sh
+
+# Step 2: Restart VS Code and open the renamed directory
+code your_project_name
+
+# Step 3: Customize the template for your project
 ./scripts/customize_template.sh
 
-# Run the comprehensive setup script (handles everything automatically!)
-./scripts/setup_comprehensive.sh
+# Step 4: Set up your project environment
+./scripts/setup_project.sh
 
 # Install pre-commit hooks (recommended for code quality)
 pre-commit install
@@ -75,12 +81,14 @@ The template has been enhanced with automatic fixes for common setup issues:
 - **Environment Variables**: `COMPOSE_PROJECT_NAME` added to `.env` to prevent container conflicts
 
 ### Customization Process:
-1. Run `./scripts/customize_template.sh`
-2. Enter your project details when prompted
-3. Review the changes in `docs/TEMPLATE_CUSTOMIZATION.md`
-4. Update your git remote to point to your new repository
-5. **Important**: Update the license and README.md branding to reflect your project
-6. Start developing!
+1. **Step 1**: Run `./scripts/rename_template.sh` to rename the directory
+2. **Step 2**: Restart VS Code and open the renamed directory
+3. **Step 3**: Run `./scripts/customize_template.sh` to customize the template
+4. **Step 4**: Run `./scripts/setup_project.sh` to set up your environment
+5. Review the changes in `tests/template_tests/customization_improvements.md`
+6. Update your git remote to point to your new repository
+7. **Important**: Update the license and README.md branding to reflect your project
+8. Start developing!
 
 ### Example:
 ```bash

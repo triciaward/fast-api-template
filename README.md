@@ -8,54 +8,57 @@ This is your project's main README file - feel free to customize it to describe 
 
 **This is a FastAPI template!** If you want to create your own project (let's say "My Awesome Project"), here's exactly how to do it:
 
-### Step 1: Get the Template
-First, you need to get this template. You can either:
-- Clone the repository: `git clone <template-repo-url>`
-- Download it as a ZIP file
-- Or use it as a GitHub template
+### 🚀 Quick Start (3 Simple Steps)
 
-### Step 2: Copy the Template
-Copy the entire template folder to your desired location.
-
-### Step 3: Run the Customization Script
-This is where the magic happens! Run:
+**Step 1: Rename the Template**
 ```bash
+# Run the rename script
+./scripts/rename_template.sh
+
+# Enter your project name when prompted:
+# Project name: My Awesome Project
+# 
+# The script will:
+# ✅ Rename: fast-api-template → myawesomeproject_backend
+# ✅ Give you clear next steps
+```
+
+**Step 2: Restart VS Code**
+```bash
+# Close VS Code completely, then:
+code myawesomeproject_backend
+# OR open VS Code and File → Open Folder → myawesomeproject_backend
+```
+
+**Step 3: Customize the Template**
+```bash
+# Run the customization script
 ./scripts/customize_template.sh
+
+# Enter your project details when prompted:
+# Project name: My Awesome Project
+# Project slug: myawesomeproject_backend
+# Database name: myawesomeproject_backend
+# Docker name: myawesomeproject_backend
+# Description: A FastAPI backend for my awesome project
+# Author: Your Name
+# Email: your.email@example.com
 ```
 
-The script will ask you questions like:
-- "What's your project name?" → "My Awesome Project"
-- "What should the project slug be?" → "myawesomeproject_backend"
-- "What should the database be called?" → "myawesomeproject_backend"
-
-### Step 4: The Magic Happens
-The script automatically:
-- **Provides instructions** for renaming the project folder to your project slug (e.g., `myawesomeproject_backend`)
-- Renames all template references to your project name
-- Updates database names and connection strings
-- Changes import statements throughout the code
-- Updates documentation and README files
-- Modifies configuration files
-- Updates the Docker setup
-- **Creates a VS Code workspace file** to help with the transition
-
-### Step 5: Set Up Your New Project
-After customization, follow the instructions to rename the folder, then run:
+**Step 4: Set Up Your Project**
 ```bash
-cd your_project_name_backend
-./scripts/setup_comprehensive.sh
+# Run the setup script
+./scripts/setup_project.sh
+
+# This will:
+# ✅ Create Python virtual environment
+# ✅ Install all dependencies
+# ✅ Start PostgreSQL and Redis
+# ✅ Run database migrations
+# ✅ Set up everything you need
 ```
 
-This will:
-- Create a Python virtual environment
-- Install all dependencies
-- Set up your `.env` file with the right database name
-- Start PostgreSQL and Redis
-- Run database migrations
-- Verify everything works
-
-### Step 6: Start Building!
-Now you have a fully working project with:
+**That's it!** You now have a fully working project with:
 - User authentication system
 - Admin panel
 - API key management
@@ -64,7 +67,248 @@ Now you have a fully working project with:
 - Docker support
 - All template features, but branded for your project
 
-**That's it!** You've gone from "I want to build My Awesome Project" to "I have a working My Awesome Project API" in just a few commands.
+### 📋 Detailed Step-by-Step Instructions
+
+#### Step 1: Rename the Template Directory
+
+**What this does:**
+- Renames the template directory to your project name
+- Prevents configuration conflicts
+- Sets up the foundation for customization
+
+**How to do it:**
+1. Make sure you're in the `fast-api-template` directory
+2. Run: `./scripts/rename_template.sh`
+3. Enter your project name when prompted
+4. The script will rename the directory and give you next steps
+
+**Example:**
+```bash
+$ ./scripts/rename_template.sh
+🚀 FastAPI Template - Step 1: Rename Directory
+==============================================
+
+This script will rename the template directory to your project name.
+This is the FIRST step in customizing your template.
+
+Please enter your project name:
+  Examples: 'My Awesome Project', 'Todo App Backend', 'E-commerce API'
+
+Project name: My Awesome Project
+
+📋 Summary:
+  Project Name: My Awesome Project
+  Directory Name: myawesomeproject_backend
+
+Continue with renaming? (y/N): y
+
+🔄 Renaming directory...
+✅ Directory renamed successfully!
+
+🎉 STEP 1 COMPLETE!
+==================
+
+🚨 IMPORTANT: You must restart VS Code now!
+
+Next steps:
+1. Close VS Code completely
+2. Open VS Code again
+3. Open the folder: myawesomeproject_backend
+4. Run the next script: ./scripts/customize_template.sh
+
+💡 Tip: You can also run: code myawesomeproject_backend
+```
+
+#### Step 2: Restart VS Code
+
+**Why this is important:**
+- VS Code needs to recognize the new directory name
+- Prevents path conflicts and configuration issues
+- Ensures all tools work correctly
+
+**How to do it:**
+1. **Close VS Code completely** (not just the window)
+2. **Open VS Code again**
+3. **Open the renamed folder**: `myawesomeproject_backend`
+
+**Quick way:**
+```bash
+code myawesomeproject_backend
+```
+
+#### Step 3: Customize the Template
+
+**What this does:**
+- Replaces all template references with your project details
+- Updates database names and connection strings
+- Changes import statements throughout the code
+- Updates documentation and configuration files
+- Modifies Docker setup to prevent conflicts
+
+**How to do it:**
+1. Make sure you're in the renamed directory
+2. Run: `./scripts/customize_template.sh`
+3. Enter your project details when prompted
+4. Review the summary and confirm
+
+**Example:**
+```bash
+$ ./scripts/customize_template.sh
+🚀 FastAPI Template Customization - Step 2
+==========================================
+This script will transform the template into your custom project.
+Please provide the following information:
+
+Project name (e.g., 'My Awesome Project'): My Awesome Project
+Project slug (e.g., 'myawesomeproject_backend'): myawesomeproject_backend
+Database name (e.g., 'myawesomeproject_backend', default: myawesomeproject_backend): 
+Project description (e.g., 'A FastAPI backend for my awesome project'): A FastAPI backend for my awesome project
+Author name (e.g., 'Your Name'): Your Name
+Author email (e.g., 'your.email@example.com'): your.email@example.com
+
+📋 Customization Summary:
+  Project Name: My Awesome Project
+  Project Slug: myawesomeproject_backend
+  Database Name: myawesomeproject_backend
+  Docker Name: myawesomeproject_backend
+  Description: A FastAPI backend for my awesome project
+  Author: Your Name <your.email@example.com>
+
+Proceed with customization? (y/N): y
+
+🚀 Starting template customization...
+
+📁 Scanning files for template references...
+   Found 45 files to process
+
+🔄 Processing files...
+   ✅ Updated: README.md
+   ✅ Updated: docker-compose.yml
+   ✅ Updated: app/main.py
+   ✅ Updated: .env
+   ... (more files)
+
+📊 Customization Summary:
+   Files processed: 45
+   Files updated: 42
+
+🎉 STEP 2 COMPLETE!
+==================
+
+📋 Next Steps:
+1. Review the changes in docs/TEMPLATE_CUSTOMIZATION.md
+2. Update your git remote: git remote set-url origin <your-repo-url>
+3. Run the setup script: ./scripts/setup_project.sh
+4. Start developing your application!
+
+✨ Happy coding!
+```
+
+#### Step 4: Set Up Your Project
+
+**What this does:**
+- Creates Python virtual environment
+- Installs all dependencies
+- Starts PostgreSQL and Redis databases
+- Runs database migrations
+- Sets up everything you need to start developing
+
+**How to do it:**
+1. Make sure you're in the renamed directory
+2. Run: `./scripts/setup_project.sh`
+3. Follow the prompts (optional: create a superuser)
+4. Wait for all services to start
+
+**Example:**
+```bash
+$ ./scripts/setup_project.sh
+🚀 FastAPI Template - Step 3: Project Setup
+===========================================
+
+This script will set up your development environment and database.
+This is the FINAL step in getting your project ready.
+
+✅ You're in a renamed project directory: myawesomeproject_backend
+
+✅ .env file already exists
+✅ Virtual environment already exists
+
+📦 Installing Python dependencies...
+✅ Dependencies installed
+
+🐳 Checking Docker...
+✅ Docker is running
+
+🗄️  Starting database services...
+✅ Database services started
+
+⏳ Waiting for PostgreSQL to be ready...
+✅ PostgreSQL is ready
+
+🔄 Running database migrations...
+✅ Database migrations completed
+
+👤 Create a superuser account (optional):
+Create superuser? (y/N): y
+
+Running superuser creation script...
+✅ Superuser creation completed
+
+🔍 Running final checks...
+   Testing API startup...
+✅ API startup test passed
+   Testing test environment...
+✅ Test environment ready
+
+🎉 STEP 3 COMPLETE!
+==================
+
+🚀 Your project is ready!
+
+📋 What's been set up:
+  ✅ Python virtual environment
+  ✅ All dependencies installed
+  ✅ PostgreSQL database running
+  ✅ Redis cache running
+  ✅ Database migrations applied
+  ✅ Environment variables configured
+
+🎯 Next Steps:
+1. Start the API: docker-compose up -d
+2. View API docs: http://localhost:8000/docs
+3. Run tests: pytest
+4. Start developing!
+
+💡 Useful Commands:
+  docker-compose up -d          # Start all services
+  docker-compose logs -f        # View logs
+  docker-compose down           # Stop all services
+  pytest                        # Run tests
+  alembic revision --autogenerate -m 'description'  # Create migration
+  alembic upgrade head          # Apply migrations
+
+✨ Happy coding!
+```
+
+### 🎯 Start Your Project
+
+After completing all steps, start your project:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View API documentation
+open http://localhost:8000/docs
+
+# Run tests
+pytest
+
+# View logs
+docker-compose logs -f
+```
+
+Your API will be available at `http://localhost:8000`
 
 ## 🚀 Getting Started
 
@@ -366,18 +610,19 @@ If you're already working with your customized project:
 ## 🆕 Recent Improvements
 
 **Latest Updates (July 2025):**
-- ✅ **Enhanced Environment Variable Handling** - Robust detection and validation of hidden `.env` files
-- ✅ **Improved Setup Scripts** - Intelligent handling of existing configurations without overwriting
-- ✅ **New Environment Fix Script** - Dedicated `fix_env_issues.sh` for quick problem resolution
+- ✅ **Simplified Template Customization** - Now uses 3 separate scripts for clarity
+- ✅ **Step-by-Step Process** - Clear, easy-to-follow instructions
+- ✅ **No Complex State Management** - Each script runs independently
+- ✅ **Better User Experience** - Natural workflow that matches how users work
+- ✅ **Enhanced Documentation** - Crystal clear instructions with examples
 - ✅ **Comprehensive Test Coverage** - 416 passing tests with 0 failures
-- ✅ **Better Documentation** - Clear troubleshooting guides and hidden file explanations
 - ✅ **Stable Docker Infrastructure** - Improved container stability and connection handling
 
 **Key Features:**
-- **Smart .env Detection** - Scripts now properly find and read hidden environment files
-- **Non-Destructive Setup** - Preserves existing configurations while adding missing variables
-- **Automated Problem Resolution** - One-command fixes for common environment issues
-- **Comprehensive Testing** - Full test suite with 627 selected tests covering all functionality
+- **Separated Scripts** - Rename, customize, and setup are now separate steps
+- **Clear Instructions** - Each step has detailed, easy-to-follow directions
+- **Error Prevention** - Scripts check prerequisites and provide helpful error messages
+- **Comprehensive Testing** - Full test suite covering all functionality
 
 ## 📚 Template Documentation
 
@@ -392,6 +637,7 @@ This project was built using a FastAPI template that provides a solid foundation
 - [Template Overview](docs/TEMPLATE_README.md)
 - [Getting Started Guide](docs/tutorials/getting-started.md)
 - [Complete Tutorials](docs/tutorials/TUTORIALS.md)
+- [Customization Improvements](tests/template_tests/customization_improvements.md)
 
 ## 🤝 Contributing
 

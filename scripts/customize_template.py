@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """
-FastAPI Template Customization Script
+FastAPI Template Customization Script - Step 2
 
 This script transforms the FastAPI template into a custom project by replacing
 all template-specific references with user-provided project details.
+
+IMPORTANT: This script should be run AFTER you have:
+1. Renamed the template directory using rename_template.sh
+2. Restarted VS Code and opened the renamed directory
 
 Usage:
     python scripts/customize_template.py
@@ -29,33 +33,33 @@ class TemplateCustomizer:
         self.project_root = Path(__file__).parent.parent
         self.replacements: dict[str, str] = {}
 
-        # Check if already customized
-        self.check_already_customized()
+        # Verify we're in a renamed directory (not the original template)
+        self.verify_directory_name()
 
-    def check_already_customized(self) -> None:
-        """Check if the template has already been customized."""
-        # Check if the directory name is not the default template name
-        if self.project_root.name != "fast-api-template":
-            print("⚠️  Warning: This appears to be an already customized project!")
-            print(f"   Current directory name: {self.project_root.name}")
-            print("   Expected template name: fast-api-template")
-            print("\n   This script is designed to run on the original template.")
-            print("   If you want to customize a new project, please:")
-            print("   1. Clone the template again")
-            print("   2. Run this script on the fresh template")
+    def verify_directory_name(self) -> None:
+        """Verify that we're in a renamed directory, not the original template."""
+        current_dir = self.project_root.name
 
-            confirm = input("\nContinue anyway? (y/N): ").strip().lower()
-            if confirm not in ["y", "yes"]:
-                print("❌ Customization cancelled.")
-                sys.exit(0)
+        # If it's still the default template name, this is an error
+        if current_dir == "fast-api-template":
+            print("❌ Error: You're still in the 'fast-api-template' directory!")
+            print("")
+            print("This script should be run AFTER renaming the directory.")
+            print("")
+            print("Please run the rename script first:")
+            print("   ./scripts/rename_template.sh")
+            print("")
+            print("Then restart VS Code and open the renamed directory.")
+            sys.exit(1)
+        else:
+            print(f"✅ Directory name looks good: {current_dir}")
+            print("   This appears to be a renamed template directory.")
 
     def get_user_input(self) -> None:
         """Get project details from user input."""
-        print("🚀 FastAPI Template Customization")
+        print("🚀 FastAPI Template Customization - Step 2")
         print("=" * 50)
-        print(
-            "This script will transform the FastAPI template into your custom project."
-        )
+        print("This script will transform the template into your custom project.")
         print("Please provide the following information:\n")
 
         # Project name (human readable)
@@ -81,42 +85,40 @@ class TemplateCustomizer:
         if not db_name:
             db_name = project_slug
 
-        # Docker container prefix
-        docker_prefix = input(
-            f"Docker container prefix (e.g., '{project_slug}', default: {project_slug}): "
+        # Docker project name
+        docker_name = input(
+            f"Docker project name (e.g., '{project_slug}', default: {project_slug}): "
         ).strip()
-        if not docker_prefix:
-            docker_prefix = project_slug
+        if not docker_name:
+            docker_name = project_slug
 
         # Description
         description = input(
-            "Project description (default: 'FastAPI application'): "
+            "Project description (e.g., 'A FastAPI backend for my awesome project'): "
         ).strip()
         if not description:
-            description = "FastAPI application"
+            description = f"{project_name} with Authentication"
 
-        # Author
-        author = input("Author name (default: 'Your Name'): ").strip()
+        # Author information
+        author = input("Author name (e.g., 'Your Name'): ").strip()
         if not author:
             author = "Your Name"
 
-        # Email
-        email = input("Author email (default: 'your.email@example.com'): ").strip()
+        email = input("Author email (e.g., 'your.email@example.com'): ").strip()
         if not email:
             email = "your.email@example.com"
 
-        # Confirm
-        print("\n" + "=" * 50)
-        print("📋 Summary:")
-        print(f"   Project Name: {project_name}")
-        print(f"   Project Slug: {project_slug}")
-        print(f"   Database Name: {db_name}")
-        print(f"   Docker Prefix: {docker_prefix}")
-        print(f"   Description: {description}")
-        print(f"   Author: {author} <{email}>")
-        print("=" * 50)
+        # Confirm customization
+        print("\n📋 Customization Summary:")
+        print(f"  Project Name: {project_name}")
+        print(f"  Project Slug: {project_slug}")
+        print(f"  Database Name: {db_name}")
+        print(f"  Docker Name: {docker_name}")
+        print(f"  Description: {description}")
+        print(f"  Author: {author} <{email}>")
+        print("")
 
-        confirm = input("\nProceed with customization? (y/N): ").strip().lower()
+        confirm = input("Proceed with customization? (y/N): ").strip().lower()
         if confirm not in ["y", "yes"]:
             print("❌ Customization cancelled.")
             sys.exit(0)
@@ -129,41 +131,40 @@ class TemplateCustomizer:
             "FastAPI Template with Authentication": description,
             "Your Name": author,
             "your.email@example.com": email,
-            "fast-api-template-postgres-1": f"{docker_prefix}-postgres-1",
-            "fast-api-template-postgres": f"{docker_prefix}-postgres",
+            "fast-api-template-postgres-1": f"{docker_name}-postgres-1",
         }
-
-        # Store Docker project name for environment file
-        self.docker_project_name = docker_prefix
+        self.docker_project_name = docker_name
 
     def get_files_to_process(self) -> list[Path]:
-        """Get list of files that need template customization."""
+        """Get list of files that need template references replaced."""
         files_to_process = []
 
-        # File patterns to process
+        # Define file patterns to process
         patterns = [
             "*.py",
             "*.md",
             "*.yml",
             "*.yaml",
             "*.toml",
-            "*.ini",
-            "*.sh",
             "*.txt",
+            "*.sh",
+            "*.html",
+            "*.css",
+            "*.js",
+            "*.json",
+            "*.ini",
             "*.cfg",
-            "*.conf",
-            "*.env*",
-            "Dockerfile",
         ]
 
         # Directories to skip
         skip_dirs = {
             ".git",
             "__pycache__",
-            ".pytest_cache",
             "venv",
             "node_modules",
-            "alembic/versions",  # Skip migration files
+            ".pytest_cache",
+            "migrations",
+            "alembic/versions",
         }
 
         for pattern in patterns:
@@ -177,198 +178,102 @@ class TemplateCustomizer:
                     file_path.is_file() and file_path.stat().st_size < 1024 * 1024
                 ):  # 1MB limit
                     try:
-                        # Try to read as text to ensure it's a text file
                         with open(file_path, encoding="utf-8") as f:
-                            f.read()
-                        files_to_process.append(file_path)
-                    except (UnicodeDecodeError, PermissionError):
+                            content = f.read()
+                            # Check if file contains template references
+                            if any(old in content for old in self.replacements.keys()):
+                                files_to_process.append(file_path)
+                    except (OSError, UnicodeDecodeError):
                         # Skip binary files or files we can't read
                         continue
 
         return files_to_process
 
     def process_file(self, file_path: Path) -> bool:
-        """Process a single file and replace template references."""
+        """Process a single file, replacing template references."""
         try:
             with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             original_content = content
 
+            # Replace template references
+            for old, new in self.replacements.items():
+                content = content.replace(old, new)
+
             # Special handling for README.md
             if file_path.name == "README.md":
                 content = self.customize_readme(content)
 
-            # Apply replacements (but preserve template documentation links)
-            for old_text, new_text in self.replacements.items():
-                # Skip replacing "FastAPI Template" in template documentation links
-                if old_text == "FastAPI Template":
-                    # Replace all instances except those in template doc links
-                    import re
-
-                    content = re.sub(
-                        r"FastAPI Template(?!.*docs/TEMPLATE_README\.md)",
-                        new_text,
-                        content,
-                    )
-                else:
-                    content = content.replace(old_text, new_text)
-
-            # If content changed, write it back
+            # Write back if content changed
             if content != original_content:
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(content)
                 return True
 
+            return False
+
         except Exception as e:
             print(f"   ⚠️  Warning: Could not process {file_path}: {e}")
-
-        return False
+            return False
 
     def customize_readme(self, content: str) -> str:
-        """Customize the README.md content for the user's project."""
-        project_name = self.replacements.get("FastAPI Template", "Your Project Name")
+        """Customize the README.md file for the new project."""
+        # Replace the project title
+        content = re.sub(
+            r"# Your Project Name",
+            f"# {self.replacements.get('FastAPI Template', 'Your Project')}",
+            content,
+        )
 
-        # Replace the title
-        content = content.replace("# Your Project Name", f"# {project_name}")
-
-        # Keep the template link unchanged - we want to preserve the link to template docs
-        # The general replacements will handle other instances of "FastAPI Template"
+        # Update the welcome message
+        content = re.sub(
+            r"Welcome to your new FastAPI project! 🎉",
+            f"Welcome to {self.replacements.get('FastAPI Template', 'your new FastAPI project')}! 🎉",
+            content,
+        )
 
         return content
 
-    def rename_project_directory(self) -> None:
-        """Provide instructions for renaming the project directory and create VS Code workspace."""
-        current_dir = self.project_root.name
-        new_name = self.replacements.get("fast-api-template", current_dir)
-
-        if current_dir != new_name:
-            print("   📁 Directory Renaming Instructions:")
-            print(f"   Current directory: {current_dir}")
-            print(f"   Recommended name: {new_name}")
-
-            # Note: VS Code workspace file creation removed to prevent workspace conflicts
-
-            print("\n   🔧 To rename the directory and update VS Code:")
-            print("   1. Close VS Code completely")
-            print("   2. Open Terminal/Command Prompt")
-            print("   3. Navigate to the parent directory:")
-            print(f"      cd {self.project_root.parent}")
-            print("   4. Rename the directory:")
-            print(f"      mv {current_dir} {new_name}")
-            print("   5. Open the renamed directory in VS Code:")
-            print(f"      code {new_name}")
-            print("      # OR: File → Open Folder → select the renamed directory")
-            print("   6. After renaming, open the new directory in VS Code")
-
-            print(
-                "\n   📝 Note: VS Code workspace file creation disabled to prevent conflicts"
-            )
-
-        else:
-            print(f"   ✅ Directory name is already correct: {current_dir}")
-
-    def create_vscode_workspace(self, project_path: Path, project_name: str) -> None:
-        """Create a VS Code workspace file to help with the transition."""
-        vscode_dir = project_path / ".vscode"
-        vscode_dir.mkdir(exist_ok=True)
-
-        workspace_content = f"""{{
-    "folders": [
-        {{
-            "name": "{project_name}",
-            "path": "."
-        }}
-    ],
-    "settings": {{
-        "python.defaultInterpreterPath": "./venv/bin/python",
-        "python.terminal.activateEnvironment": true,
-        "files.exclude": {{
-            "**/__pycache__": true,
-            "**/*.pyc": true,
-            "**/.pytest_cache": true,
-            "**/.mypy_cache": true,
-            "**/.ruff_cache": true,
-            "**/venv": true
-        }}
-    }},
-    "extensions": {{
-        "recommendations": [
-            "ms-python.python",
-            "ms-python.black-formatter",
-            "ms-python.flake8",
-            "ms-python.mypy-type-checker",
-            "charliermarsh.ruff"
-        ]
-    }}
-}}"""
-
-        workspace_file = vscode_dir / "project.code-workspace"
-        with open(workspace_file, "w", encoding="utf-8") as f:
-            f.write(workspace_content)
-
-        print("   📝 Created VS Code workspace: .vscode/project.code-workspace")
-
     def update_git_remote(self) -> None:
-        """Update git remote if it points to the template repository."""
-        try:
-            import subprocess
-
-            result = subprocess.run(
-                ["git", "remote", "get-url", "origin"],
-                capture_output=True,
-                text=True,
-                cwd=self.project_root,
-            )
-
-            if result.returncode == 0:
-                remote_url = result.stdout.strip()
-                if "fast-api-template" in remote_url.lower():
-                    print("\n🔗 Git Remote Update")
-                    print(
-                        "   The current git remote points to the template repository."
-                    )
-                    print("   You should update it to point to your new repository:")
-                    print("   git remote set-url origin <your-new-repo-url>")
-                    print(
-                        "   git remote add upstream <template-repo-url>  # Optional: keep template as upstream"
-                    )
-
-        except Exception:
-            # Git not available or not a git repo
-            pass
+        """Update git remote information."""
+        git_config = self.project_root / ".git" / "config"
+        if git_config.exists():
+            print("   📝 Note: Remember to update your git remote:")
+            print("      git remote set-url origin <your-repo-url>")
 
     def update_env_file(self) -> None:
-        """Update or create .env file with project-specific Docker settings."""
+        """Update the .env file with the new Docker project name."""
         env_file = self.project_root / ".env"
+        env_example = self.project_root / ".env.example"
 
-        # Read existing .env file if it exists
-        env_content = ""
-        if env_file.exists():
-            with open(env_file, encoding="utf-8") as f:
-                env_content = f.read()
+        # Use .env.example if .env doesn't exist
+        source_file = env_file if env_file.exists() else env_example
 
-        # Add or update COMPOSE_PROJECT_NAME
-        if "COMPOSE_PROJECT_NAME=" in env_content:
-            # Update existing line
-            import re
+        if source_file.exists():
+            try:
+                with open(source_file, encoding="utf-8") as f:
+                    content = f.read()
 
-            env_content = re.sub(
-                r"COMPOSE_PROJECT_NAME=.*",
-                f"COMPOSE_PROJECT_NAME={self.docker_project_name}",
-                env_content,
-            )
-        else:
-            # Add new line
-            env_content += f"\n# Docker Compose project name (prevents container naming conflicts)\nCOMPOSE_PROJECT_NAME={self.docker_project_name}\n"
+                # Update COMPOSE_PROJECT_NAME
+                if "COMPOSE_PROJECT_NAME=" in content:
+                    content = re.sub(
+                        r"COMPOSE_PROJECT_NAME=.*",
+                        f"COMPOSE_PROJECT_NAME={self.docker_project_name}",
+                        content,
+                    )
+                else:
+                    # Add COMPOSE_PROJECT_NAME if it doesn't exist
+                    content += f"\n# Docker Compose project name\nCOMPOSE_PROJECT_NAME={self.docker_project_name}\n"
 
-        # Write back to file
-        with open(env_file, "w", encoding="utf-8") as f:
-            f.write(env_content)
+                # Write to .env file
+                with open(env_file, "w", encoding="utf-8") as f:
+                    f.write(content)
 
-        print(
-            f"   ✅ Updated: .env (added COMPOSE_PROJECT_NAME={self.docker_project_name})"
-        )
+                print("   ✅ Updated: .env file with Docker project name")
+
+            except Exception as e:
+                print(f"   ⚠️  Warning: Could not update .env file: {e}")
 
     def create_customization_log(self) -> None:
         """Create a log file documenting the customization."""
@@ -396,7 +301,7 @@ This file documents the customization performed on the FastAPI template.
 ## Next Steps
 1. Review the changes made to ensure they meet your requirements
 2. Update the git remote to point to your new repository
-3. Run the setup script: ./scripts/setup_comprehensive.sh
+3. Run the setup script: ./scripts/setup_project.sh
 4. Start developing your application!
 
 ## Template Credits
@@ -420,7 +325,7 @@ Original template: https://github.com/your-username/fast-api-template
         self.get_user_input()
 
         # Get files to process
-        print("📁 Scanning files for template references...")
+        print("\n📁 Scanning files for template references...")
         files_to_process = self.get_files_to_process()
         print(f"   Found {len(files_to_process)} files to process\n")
 
@@ -445,20 +350,16 @@ Original template: https://github.com/your-username/fast-api-template
         self.create_customization_log()
         print("   📝 Created: docs/TEMPLATE_CUSTOMIZATION.md")
 
-        # Provide renaming instructions
-        print("\n📁 Directory Renaming Instructions...")
-        self.rename_project_directory()
-
         # Update git remote info
         self.update_git_remote()
 
-        print("\n🎉 Template customization completed successfully!")
+        print("\n🎉 STEP 2 COMPLETE!")
+        print("==================")
         print("\n📋 Next Steps:")
-        print("   1. Review the changes in docs/TEMPLATE_CUSTOMIZATION.md")
-        print("   2. Follow the directory renaming instructions above")
-        print("   3. Update your git remote: git remote set-url origin <your-repo-url>")
-        print("   4. Run setup: ./scripts/setup_comprehensive.sh")
-        print("   5. Start developing your application!")
+        print("1. Review the changes in docs/TEMPLATE_CUSTOMIZATION.md")
+        print("2. Update your git remote: git remote set-url origin <your-repo-url>")
+        print("3. Run the setup script: ./scripts/setup_project.sh")
+        print("4. Start developing your application!")
         print("\n✨ Happy coding!")
 
 

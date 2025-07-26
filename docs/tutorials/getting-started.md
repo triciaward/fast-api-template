@@ -108,7 +108,58 @@ cd my-new-app
 
 > **💡 Pro Tip:** Before setting up your environment, consider customizing the template to match your project's name and branding. This step is optional but highly recommended for a professional setup.
 
-The template includes a powerful customization script that transforms all template references into your project-specific names:
+The template uses a simple 3-step process to transform it into your custom project:
+
+### 🚀 Step 1: Rename the Template Directory
+```bash
+# Run the rename script
+./scripts/rename_template.sh
+```
+
+This script will:
+- Prompt you for your project name
+- Generate a project slug automatically
+- Rename the directory from `fast-api-template` to your project name
+- Provide clear next steps
+
+### 🔄 Step 2: Restart VS Code
+After renaming, you need to restart VS Code to recognize the new directory:
+```bash
+# Close VS Code completely, then:
+code your_project_name
+# OR open VS Code and File → Open Folder → your_project_name
+```
+
+### ⚙️ Step 3: Customize the Template
+```bash
+# Run the customization script
+./scripts/customize_template.sh
+```
+
+The script will prompt you for:
+- **Project name** (e.g., "My Awesome Project")
+- **Project slug** (e.g., "myawesomeproject_backend") - auto-generated if not provided
+- **Database name** (e.g., "myawesomeproject_backend") - defaults to project slug
+- **Docker project name** (e.g., "myawesomeproject_backend") - defaults to project slug
+- **Description** (e.g., "Backend API for My Awesome Project application")
+- **Author information** (name and email)
+
+### Example Workflow:
+```bash
+# Step 1: Rename
+$ ./scripts/rename_template.sh
+Project name: My Awesome Project
+# Script renames: fast-api-template → myawesomeproject_backend
+
+# Step 2: Restart VS Code
+$ code myawesomeproject_backend
+
+# Step 3: Customize
+$ ./scripts/customize_template.sh
+Project name: My Awesome Project
+Project slug: myawesomeproject_backend
+# Script updates all files with your project details
+```
 
 ### What Gets Customized:
 - **Project Name**: "FastAPI Template" → "Your Project Name"
@@ -119,49 +170,15 @@ The template includes a powerful customization script that transforms all templa
 - **Configuration Files**: Database URLs, container names, etc.
 - **Environment Variables**: `COMPOSE_PROJECT_NAME` added to `.env` to prevent container conflicts
 
-### Run the Customization Script:
-```bash
-# Run the customization script
-./scripts/customize_template.sh
-```
-
-The script will prompt you for:
-- **Project name** (e.g., "My Awesome Project")
-- **Project slug** (e.g., "myawesomeproject_backend") - auto-generated if not provided
-- **Database name** (e.g., "myawesomeproject_backend") - defaults to project slug
-- **Docker container prefix** (e.g., "myawesomeproject_backend") - defaults to project slug
-- **Description** (e.g., "Backend API for My Awesome Project application")
-- **Author information** (name and email)
-
-### Example Customization:
-```bash
-# Input:
-Project name: My Awesome Project
-Project slug: myawesomeproject_backend
-Database name: myawesomeproject_backend
-
-# Result:
-- All "FastAPI Template" → "My Awesome Project"
-- All "fast-api-template" → "myawesomeproject_backend"
-- All "fastapi_template" → "myawesomeproject_backend"
-- Docker containers: "myawesomeproject_backend-postgres-1"
-- Documentation updated throughout
-```
-
 ### After Customization:
-1. Review the changes in `docs/TEMPLATE_CUSTOMIZATION.md`
+1. Review the changes in `tests/template_tests/customization_improvements.md`
 2. **Docker Container Naming**: The customization script adds `COMPOSE_PROJECT_NAME` to your `.env` file, ensuring each project gets unique container names and preventing conflicts when running multiple projects
-3. **VS Code Workspace**: Follow the directory renaming instructions provided by the script:
-   - Close VS Code completely
-   - Rename the directory using the provided commands
-   - Reopen the renamed directory in VS Code
-   - Or use the workspace file: `.vscode/project.code-workspace`
-4. Update your git remote to point to your new repository:
+3. Update your git remote to point to your new repository:
    ```bash
    git remote set-url origin <your-new-repo-url>
    git remote add upstream <template-repo-url>  # Optional: keep template as upstream
    ```
-5. Continue with the setup process below
+4. Continue with the setup process below
 
 ---
 
