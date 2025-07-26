@@ -77,11 +77,11 @@ if ! docker info > /dev/null 2>&1; then
 fi
 echo "✅ Docker is running"
 
-# Start PostgreSQL and Redis
+# Start PostgreSQL and FastAPI
 echo ""
-echo "🗄️  Starting database services..."
-docker-compose up -d postgres redis
-echo "✅ Database services started"
+echo "🗄️  Starting database and API services..."
+docker-compose up -d postgres api
+echo "✅ Database and API services started"
 
 # Wait for PostgreSQL to be ready
 echo ""
@@ -151,18 +151,17 @@ echo "📋 What's been set up:"
 echo "  ✅ Python virtual environment"
 echo "  ✅ All dependencies installed"
 echo "  ✅ PostgreSQL database running"
-echo "  ✅ Redis cache running"
+echo "  ✅ FastAPI application running"
 echo "  ✅ Database migrations applied"
 echo "  ✅ Environment variables configured"
 echo ""
 echo "🎯 Next Steps:"
-echo "1. Start the API: docker-compose up -d"
-echo "2. View API docs: http://localhost:8000/docs"
-echo "3. Run tests: pytest"
-echo "4. Start developing!"
+echo "1. View API docs: http://localhost:8000/docs"
+echo "2. Run tests: pytest"
+echo "3. Start developing!"
 echo ""
 echo "💡 Useful Commands:"
-echo "  docker-compose up -d          # Start all services"
+echo "  docker-compose up -d          # Start all services (including Redis if needed)"
 echo "  docker-compose logs -f        # View logs"
 echo "  docker-compose down           # Stop all services"
 echo "  pytest                        # Run tests"

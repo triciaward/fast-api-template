@@ -69,11 +69,17 @@ jobs:
           sleep 10
           echo "PostgreSQL should be ready now"
 
+      - name: Set PYTHONPATH for tests
+        run: |
+          echo "PYTHONPATH=$PYTHONPATH:$(pwd)/scripts" >> $GITHUB_ENV
+          echo "Set PYTHONPATH to include scripts directory"
+
       - name: Run tests
         run: |
           echo "Database URL: $DATABASE_URL"
           echo "Async Database URL: $ASYNC_DATABASE_URL"
           echo "Running in CI environment: $CI"
+          echo "PYTHONPATH: $PYTHONPATH"
           echo "Starting tests with timeout..."
           echo "CI DEBUG: Skipping async tests in CI"
           echo "CI DEBUG: Checking database connection..."

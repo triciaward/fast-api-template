@@ -45,7 +45,34 @@ code myawesomeproject_backend
 # Email: your.email@example.com
 ```
 
-**Step 4: Set Up Your Project**
+**Step 2: Rename the Template Directory**
+```bash
+# Run the rename script
+./scripts/rename_template.sh
+
+# This will:
+# ✅ Rename the directory to your project name
+# ✅ Set up the foundation for customization
+# ✅ Give you next steps
+```
+
+**Step 3: Restart VS Code**
+- Close VS Code completely
+- Open VS Code again
+- Open the renamed folder
+
+**Step 4: Customize the Template**
+```bash
+# Run the customization script
+./scripts/customize_template.sh
+
+# This will:
+# ✅ Replace all template references with your project details
+# ✅ Update database names and connection strings
+# ✅ Update documentation and configuration files
+```
+
+**Step 5: Set Up Your Project**
 ```bash
 # Run the setup script
 ./scripts/setup_project.sh
@@ -53,7 +80,7 @@ code myawesomeproject_backend
 # This will:
 # ✅ Create Python virtual environment
 # ✅ Install all dependencies
-# ✅ Start PostgreSQL and Redis
+# ✅ Start PostgreSQL and FastAPI
 # ✅ Run database migrations
 # ✅ Set up everything you need
 ```
@@ -62,14 +89,29 @@ code myawesomeproject_backend
 - User authentication system
 - Admin panel
 - API key management
-- Database setup
+- Database setup (PostgreSQL)
+- FastAPI application running
 - Testing framework
 - Docker support
 - All template features, but branded for your project
 
-### 📋 Detailed Step-by-Step Instructions
+**🚀 What's Running:**
+- **PostgreSQL** database on port 5432
+- **FastAPI** application on port 8000 (docs at http://localhost:8000/docs)
+- **Optional services** (Redis, Celery) can be started when needed
 
-#### Step 1: Rename the Template Directory
+### 📋 Complete Setup Process
+
+The template setup involves **5 steps** that must be done in order:
+
+#### Step 1: Clone and Navigate
+```bash
+# Clone the template
+git clone <your-repo-url>
+cd fast-api-template
+```
+
+#### Step 2: Rename the Template Directory
 
 **What this does:**
 - Renames the template directory to your project name
@@ -119,7 +161,7 @@ Next steps:
 💡 Tip: You can also run: code myawesomeproject_backend
 ```
 
-#### Step 2: Restart VS Code
+#### Step 3: Restart VS Code
 
 **Why this is important:**
 - VS Code needs to recognize the new directory name
@@ -136,7 +178,7 @@ Next steps:
 code myawesomeproject_backend
 ```
 
-#### Step 3: Customize the Template
+#### Step 4: Customize the Template
 
 **What this does:**
 - Replaces all template references with your project details
@@ -204,12 +246,12 @@ Proceed with customization? (y/N): y
 ✨ Happy coding!
 ```
 
-#### Step 4: Set Up Your Project
+#### Step 5: Set Up Your Project
 
 **What this does:**
 - Creates Python virtual environment
 - Installs all dependencies
-- Starts PostgreSQL and Redis databases
+- Starts PostgreSQL and FastAPI
 - Runs database migrations
 - Sets up everything you need to start developing
 
@@ -269,18 +311,17 @@ Running superuser creation script...
   ✅ Python virtual environment
   ✅ All dependencies installed
   ✅ PostgreSQL database running
-  ✅ Redis cache running
+  ✅ FastAPI application running
   ✅ Database migrations applied
   ✅ Environment variables configured
 
 🎯 Next Steps:
-1. Start the API: docker-compose up -d
-2. View API docs: http://localhost:8000/docs
-3. Run tests: pytest
-4. Start developing!
+1. View API docs: http://localhost:8000/docs
+2. Run tests: pytest
+3. Start developing!
 
 💡 Useful Commands:
-  docker-compose up -d          # Start all services
+  docker-compose up -d          # Start all services (including Redis if needed)
   docker-compose logs -f        # View logs
   docker-compose down           # Stop all services
   pytest                        # Run tests
@@ -329,7 +370,7 @@ This script will automatically:
 - Create a virtual environment for development tools
 - Install dependencies
 - Set up your `.env` file (hidden file starting with a dot)
-- Start all services in Docker (FastAPI, PostgreSQL, Redis)
+- Start all services in Docker (FastAPI, PostgreSQL)
 - Run database migrations
 - Verify everything is working
 

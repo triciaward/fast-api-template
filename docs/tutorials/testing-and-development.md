@@ -41,7 +41,7 @@ The template uses Docker containers for testing:
 
 ```bash
 # Start test database
-docker-compose up -d postgres redis
+docker-compose up -d postgres
 
 # Create test database
 docker exec -it ${COMPOSE_PROJECT_NAME:-fast-api-template}-postgres-1 psql -U postgres -c "CREATE DATABASE fastapi_template_test;"
@@ -268,8 +268,8 @@ def clean_database():
 
 #### 1. Automated Setup
 ```bash
-# Use the comprehensive setup script
-./scripts/setup_comprehensive.sh
+# Use the setup script
+./scripts/setup_project.sh
 
 # This handles:
 # - Virtual environment creation
@@ -334,8 +334,8 @@ mypy app/
 
 #### Setup and Verification
 ```bash
-# Comprehensive setup
-./scripts/setup_comprehensive.sh
+# Setup project
+./scripts/setup_project.sh
 
 # Fix common issues
 ./scripts/fix_common_issues.sh

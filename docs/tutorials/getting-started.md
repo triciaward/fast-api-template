@@ -182,22 +182,97 @@ Project slug: myawesomeproject_backend
 
 ---
 
-## 🔧 Step 2: Set Up Your Environment
+## 🔧 Step 2: Rename the Template Directory
+
+**What this does:**
+- Renames the template directory to your project name
+- Prevents configuration conflicts
+- Sets up the foundation for customization
+
+**How to do it:**
+```bash
+# Run the rename script
+./scripts/rename_template.sh
+```
+
+**Example:**
+```bash
+$ ./scripts/rename_template.sh
+🚀 FastAPI Template - Step 1: Rename Directory
+==============================================
+
+Please enter your project name:
+  Examples: 'My Awesome Project', 'Todo App Backend', 'E-commerce API'
+
+Project name: My Awesome Project
+
+📋 Summary:
+  Project Name: My Awesome Project
+  Directory Name: myawesomeproject_backend
+
+Continue with renaming? (y/N): y
+
+🔄 Renaming directory...
+✅ Directory renamed successfully!
+
+🎉 STEP 1 COMPLETE!
+==================
+
+🚨 IMPORTANT: You must restart VS Code now!
+
+Next steps:
+1. Close VS Code completely
+2. Open VS Code again
+3. Open the folder: myawesomeproject_backend
+4. Run the next script: ./scripts/customize_template.sh
+```
+
+## 🔄 Step 3: Restart VS Code
+
+**Why this is important:**
+- VS Code needs to recognize the new directory name
+- Prevents path conflicts and configuration issues
+- Ensures all tools work correctly
+
+**How to do it:**
+1. **Close VS Code completely** (not just the window)
+2. **Open VS Code again**
+3. **Open the renamed folder**: `myawesomeproject_backend`
+
+**Quick way:**
+```bash
+code myawesomeproject_backend
+```
+
+## 🎨 Step 4: Customize the Template
+
+**What this does:**
+- Replaces all template references with your project details
+- Updates database names and connection strings
+- Changes import statements throughout the code
+- Updates documentation and configuration files
+
+**How to do it:**
+```bash
+# Run the customization script
+./scripts/customize_template.sh
+```
+
+## 🚀 Step 5: Set Up Your Environment
 
 ### 🚀 Automated Setup (Recommended)
-The template includes a comprehensive setup script that handles everything automatically:
+The template includes a setup script that handles everything automatically:
 
 ```bash
-# Run the automated setup script
-./scripts/setup_comprehensive.sh
+# Run the setup script
+./scripts/setup_project.sh
 ```
 
 This script will:
-- ✅ Check Python version and prerequisites
-- ✅ Create and activate a virtual environment
+- ✅ Create Python virtual environment
 - ✅ Install all dependencies
 - ✅ Create a complete `.env` file with all required variables
-- ✅ Start the database services
+- ✅ Start PostgreSQL and FastAPI services
 - ✅ Run database migrations
 - ✅ Verify the setup is working correctly
 - ✅ Provide next steps and troubleshooting tips
@@ -230,18 +305,18 @@ This installs all the packages your project needs. It might take a few minutes t
 
 ---
 
-## 🗄️ Step 3: Configure Your Database
+## 🗄️ Step 6: Configure Your Database
 
-> **Note:** If you used the automated setup script, this step is already complete! You can skip to Step 4.
+> **Note:** If you used the automated setup script, this step is already complete! You can skip to the next section.
 
-### Start PostgreSQL with Docker
+### Start PostgreSQL and FastAPI with Docker
 ```bash
-docker-compose up -d postgres redis
+docker-compose up -d postgres api
 ```
 
 This uses the prebuilt `docker-compose.yml` file in the project, which spins up:
 - **PostgreSQL**: Your main database
-- **Redis**: A fast cache database (optional, but included for future use)
+- **FastAPI**: Your API application
 
 ### Set Up Your Environment Variables
 

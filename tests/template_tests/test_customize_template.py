@@ -1,3 +1,4 @@
+# mypy: disable-error-code="import-not-found"
 """
 Test the simplified template customization script.
 
@@ -14,13 +15,26 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from customize_template import TemplateCustomizer
 
 # Add the scripts directory to the path BEFORE importing
 scripts_path = Path(__file__).parent.parent.parent / "scripts"
 sys.path.insert(0, str(scripts_path))
 
 # Now import the customize_template module
+try:
+    # type: ignore[import-not-found]
+    from customize_template import TemplateCustomizer
+except ImportError:
+    # Fallback: try to import from scripts directory directly
+    import os
+
+    scripts_abs_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../../scripts")
+    )
+    if scripts_abs_path not in sys.path:
+        sys.path.insert(0, scripts_abs_path)
+    # type: ignore[import-not-found]
+    from customize_template import TemplateCustomizer
 
 
 class TestTemplateCustomization:
