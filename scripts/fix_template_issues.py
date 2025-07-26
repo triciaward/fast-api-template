@@ -200,7 +200,7 @@ datefmt = %H:%M:%S
         with open(setup_script) as f:
             content = f.read()
 
-        # Fix the directory name check to be more flexible
+        # Fix the directory name check to be clean and simple
         old_check = """# Check if we're in a renamed directory (not the original template)
 if [ "$(basename "$PWD")" = "fast-api-template" ]; then
     echo "❌ Error: You're still in the 'fast-api-template' directory!"
@@ -214,23 +214,10 @@ if [ "$(basename "$PWD")" = "fast-api-template" ]; then
     exit 1
 fi"""
 
-        new_check = """# Check if we're in a renamed directory (not the original template)
-if [ "$(basename "$PWD")" = "fast-api-template" ]; then
-    echo "⚠️  Warning: You're still in the 'fast-api-template' directory!"
-    echo ""
-    echo "This script can work with the original template directory, but it's recommended to:"
-    echo "1. Run ./scripts/rename_template.sh first"
-    echo "2. Restart VS Code and open the renamed directory"
-    echo "3. Run ./scripts/customize_template.sh"
-    echo "4. Then run this script"
-    echo ""
-    read -p "Continue with the current directory? (y/N): " CONTINUE_WITH_TEMPLATE
-    if [[ ! $CONTINUE_WITH_TEMPLATE =~ ^[Yy]$ ]]; then
-        echo "Exiting. Please rename and customize the template first."
-        exit 1
-    fi
-    echo "✅ Continuing with template directory..."
-fi"""
+        new_check = """# Show current project directory
+CURRENT_DIR=$(basename "$PWD")
+echo "✅ Working in project directory: $CURRENT_DIR"
+"""
 
         content = content.replace(old_check, new_check)
 
