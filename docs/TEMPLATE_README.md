@@ -56,6 +56,40 @@ pre-commit install
 docker-compose up -d
 ```
 
+## 🤖 AI ASSISTANT WORKFLOW INSTRUCTIONS
+
+**⚠️ CRITICAL:** When helping users create projects from this template, follow this EXACT workflow:
+
+1. **Run rename script:** `./scripts/rename_template.sh`
+2. **STOP and provide clear instructions:** Tell user to restart VS Code and open renamed directory
+3. **Provide the exact message:** Give user the exact message to copy/paste after restart
+4. **Wait for confirmation:** Only continue after user confirms VS Code is restarted
+5. **Continue with customization:** `./scripts/customize_template.sh`
+
+**DO NOT automatically continue to step 3 without waiting for VS Code restart!**
+
+**📋 EXACT MESSAGE TO GIVE USER AFTER RENAME:**
+```
+✅ Directory renamed successfully!
+
+🚨 CRITICAL: You must restart VS Code now!
+
+Next steps:
+1. Close VS Code completely
+2. Open VS Code again  
+3. Open the folder: [PROJECT_NAME]_backend
+4. Copy and paste this message to your AI assistant:
+
+"I've restarted VS Code and opened the renamed directory: [PROJECT_NAME]_backend
+
+Please help me continue with the template customization process. I need to:
+1. Run the customization script
+2. Set up my project environment  
+3. Get my FastAPI application running
+
+The directory has been renamed from "fast-api-template" to "[PROJECT_NAME]_backend" and I'm now in the renamed directory."
+```
+
 ## 🎯 Template Customization
 
 The template includes a powerful customization script that transforms all template references into your project-specific names:
@@ -130,6 +164,258 @@ python3 scripts/demo_customization.py
 ```
 
 This will show you exactly what gets changed during the customization process.
+
+## 📋 Complete Setup Process
+
+The template setup involves **5 steps** that must be done in order:
+
+### Step 1: Clone and Navigate
+```bash
+# Clone the template
+git clone <your-repo-url>
+cd fast-api-template
+```
+
+### Step 2: Rename the Template Directory
+
+**What this does:**
+- Renames the template directory to your project name with "_backend" suffix
+- Prevents configuration conflicts
+- Sets up the foundation for customization
+
+**💡 Important:** The directory will ALWAYS be renamed to end with "_backend"
+- "My Awesome Project" → "myawesomeproject_backend"
+- "Todo App" → "todo_app_backend"
+- "E-commerce API" → "ecommerce_api_backend"
+
+**How to do it:**
+1. Make sure you're in the `fast-api-template` directory
+2. Run: `./scripts/rename_template.sh`
+3. Enter your project name when prompted
+4. The script will rename the directory and give you next steps
+
+**Example:**
+```bash
+$ ./scripts/rename_template.sh
+🚀 FastAPI Template - Step 1: Rename Directory
+==============================================
+
+This script will rename the template directory to your project name.
+This is the FIRST step in customizing your template.
+
+Please enter your project name:
+  Examples: 'My Awesome Project', 'Todo App Backend', 'E-commerce API'
+
+Project name: My Awesome Project
+
+📋 Summary:
+  Project Name: My Awesome Project
+  Directory Name: myawesomeproject_backend
+
+Continue with renaming? (y/N): y
+
+🔄 Renaming directory...
+✅ Directory renamed successfully!
+
+🎉 STEP 1 COMPLETE!
+==================
+
+🚨 IMPORTANT: You must restart VS Code now!
+
+Next steps:
+1. Close VS Code completely
+2. Open VS Code again
+3. Open the folder: myawesomeproject_backend
+4. Run the next script: ./scripts/customize_template.sh
+
+💡 Tip: You can also run: code myawesomeproject_backend
+```
+
+### Step 3: Restart VS Code
+
+**Why this is important:**
+- VS Code needs to recognize the new directory name
+- Prevents path conflicts and configuration issues
+- Ensures all tools work correctly
+
+**How to do it:**
+1. **Close VS Code completely** (not just the window)
+2. **Open VS Code again**
+3. **Open the renamed folder**: `myawesomeproject_backend`
+
+### Step 4: Customize the Template
+
+**What this does:**
+- Replaces all template references with your project details
+- Updates database names and connection strings
+- Changes import statements throughout the code
+- Updates documentation and configuration files
+- Modifies Docker setup to prevent conflicts
+
+**How to do it:**
+1. Make sure you're in the renamed directory
+2. Run: `./scripts/customize_template.sh`
+3. Enter your project details when prompted
+4. Review the summary and confirm
+
+**Example:**
+```bash
+$ ./scripts/customize_template.sh
+🚀 FastAPI Template Customization - Step 2
+==========================================
+This script will transform the template into your custom project.
+Please provide the following information:
+
+Project name (e.g., 'My Awesome Project'): My Awesome Project
+Project slug (e.g., 'myawesomeproject_backend'): myawesomeproject_backend
+Database name (e.g., 'myawesomeproject_backend', default: myawesomeproject_backend): 
+Project description (e.g., 'A FastAPI backend for my awesome project'): A FastAPI backend for my awesome project
+Author name (e.g., 'Your Name'): Your Name
+Author email (e.g., 'your.email@example.com'): your.email@example.com
+
+📋 Customization Summary:
+  Project Name: My Awesome Project
+  Project Slug: myawesomeproject_backend
+  Database Name: myawesomeproject_backend
+  Docker Name: myawesomeproject_backend
+  Description: A FastAPI backend for my awesome project
+  Author: Your Name <your.email@example.com>
+
+Proceed with customization? (y/N): y
+
+🚀 Starting template customization...
+
+📁 Scanning files for template references...
+   Found 45 files to process
+
+🔄 Processing files...
+   ✅ Updated: README.md
+   ✅ Updated: docker-compose.yml
+   ✅ Updated: app/main.py
+   ✅ Updated: .env
+   ... (more files)
+
+📊 Customization Summary:
+   Files processed: 45
+   Files updated: 42
+
+🎉 STEP 2 COMPLETE!
+==================
+
+📋 Next Steps:
+1. Review the changes in docs/troubleshooting/TEMPLATE_CUSTOMIZATION.md
+2. Update your git remote: git remote set-url origin <your-repo-url>
+3. Run the setup script: ./scripts/setup_project.sh
+4. Start developing your application!
+
+✨ Happy coding!
+```
+
+### Step 5: Set Up Your Project
+
+**What this does:**
+- Creates Python virtual environment
+- Installs all dependencies
+- Starts PostgreSQL and FastAPI
+- Runs database migrations
+- Sets up everything you need to start developing
+
+**How to do it:**
+1. Make sure you're in the renamed directory
+2. Run: `./scripts/setup_project.sh`
+3. Follow the prompts (optional: create a superuser)
+4. Wait for all services to start
+
+**Example:**
+```bash
+$ ./scripts/setup_project.sh
+🚀 FastAPI Template - Step 3: Project Setup
+===========================================
+
+This script will set up your development environment and database.
+This is the FINAL step in getting your project ready.
+
+✅ You're in a renamed project directory: myawesomeproject_backend
+
+✅ .env file already exists
+✅ Virtual environment already exists
+
+📦 Installing Python dependencies...
+✅ Dependencies installed
+
+🐳 Checking Docker...
+✅ Docker is running
+
+🗄️  Starting database services...
+✅ Database services started
+
+⏳ Waiting for PostgreSQL to be ready...
+✅ PostgreSQL is ready
+
+🔄 Running database migrations...
+✅ Database migrations completed
+
+👤 Create a superuser account (optional):
+Create superuser? (y/N): y
+
+Running superuser creation script...
+✅ Superuser creation completed
+
+🔍 Running final checks...
+   Testing API startup...
+✅ API startup test passed
+   Testing test environment...
+✅ Test environment ready
+
+🎉 STEP 3 COMPLETE!
+==================
+
+🚀 Your project is ready!
+
+📋 What's been set up:
+  ✅ Python virtual environment
+  ✅ All dependencies installed
+  ✅ PostgreSQL database running
+  ✅ FastAPI application running
+  ✅ Database migrations applied
+  ✅ Environment variables configured
+
+🎯 Next Steps:
+1. View API docs: http://localhost:8000/docs
+2. Run tests: pytest
+3. Start developing!
+
+💡 Useful Commands:
+  docker-compose up -d          # Start all services (including Redis if needed)
+  docker-compose logs -f        # View logs
+  docker-compose down           # Stop all services
+  pytest                        # Run tests
+  alembic revision --autogenerate -m 'description'  # Create migration
+  alembic upgrade head          # Apply migrations
+```
+
+**That's it!** You now have a fully working project with:
+- User authentication system
+- Admin panel
+- API key management
+- Database setup (PostgreSQL)
+- FastAPI application running
+- Testing framework
+- Docker support
+- All template features, but branded for your project
+
+**🚀 What's Running:**
+- **PostgreSQL** database on port 5432
+- **FastAPI** application on port 8000 (docs at http://localhost:8000/docs)
+- **Optional services** (Redis, Celery) can be started when needed
+
+### 🆘 Need Help?
+
+If you encounter any issues during setup:
+
+- **📖 Troubleshooting Guide**: [Setup Issues & Solutions](docs/troubleshooting/setup-issues.md)
+- **🐛 Common Problems**: Missing alembic.ini, database errors, superuser creation issues
+- **🔧 Quick Fixes**: Most issues have simple solutions documented in the guide
 
 ## 📊 Test Status
 
@@ -408,6 +694,88 @@ This generates:
 - API endpoints with pagination
 - Basic tests
 - Auto-registration in the API router
+
+## 🔄 Tool Version Management
+
+### Why Tool Versions Matter
+
+CI environments update their tool versions **much more frequently** than you might think:
+
+| Tool | Update Frequency | Impact |
+|------|-----------------|---------|
+| **Black** | Every 2-4 weeks | Formatting rules change, breaking existing code |
+| **Ruff** | Every 1-2 weeks | New linting rules, different error messages |
+| **Mypy** | Every 3-6 weeks | Type checking behavior changes |
+| **Python** | Every 3-6 months | New language features, deprecations |
+| **Pre-commit** | Every 2-4 weeks | Hook behavior changes |
+
+### The "Whack-a-Mole" Problem
+
+**Without pinned versions:**
+```
+Week 1: Your local Black 24.4.2 ✅ "Code looks good!"
+Week 2: CI updates to Black 25.1.0 ❌ "Formatting error!"
+Week 3: You update local to 25.1.0 ✅ "Fixed!"
+Week 4: CI updates to Black 25.2.0 ❌ "New formatting error!"
+```
+
+**With our pinned versions:**
+```
+Week 1: Local & CI both use Black 25.1.0 ✅ "Consistent!"
+Week 2: CI updates to 25.2.0, but you're still on 25.1.0 ✅ "Still works!"
+Week 3: You choose when to update to 25.2.0 ✅ "Controlled upgrade!"
+```
+
+### Recommended Update Schedule
+
+**Monthly**: Check for new tool versions
+```bash
+./scripts/check_tool_updates.sh
+```
+
+**Quarterly**: Update to latest stable versions
+```bash
+# Update development tools
+pip install -r requirements-dev.txt --upgrade
+
+# Test everything still works
+./scripts/validate_ci.sh
+```
+
+**When needed**: Update for security patches or new features
+
+### How to Update Safely
+
+1. **Check what's new:**
+   ```bash
+   ./scripts/check_tool_updates.sh
+   ```
+
+2. **Update development tools:**
+   ```bash
+   pip install -r requirements-dev.txt --upgrade
+   ```
+
+3. **Test everything still works:**
+   ```bash
+   ./scripts/validate_ci.sh
+   ```
+
+4. **Update the pinned versions** in `requirements-dev.txt` if needed
+
+5. **Commit the changes:**
+   ```bash
+   git add requirements-dev.txt
+   git commit -m "Update development tool versions"
+   ```
+
+### Benefits of Controlled Updates
+
+- ✅ **Stability**: Your tools don't change unless you choose to update
+- ✅ **Predictability**: Same checks, same results, every time  
+- ✅ **Team consistency**: Everyone uses identical tool versions
+- ✅ **No surprises**: You control when to upgrade, not CI
+- ✅ **Testing**: You can test new versions before adopting them
 
 ## 📚 Documentation
 
