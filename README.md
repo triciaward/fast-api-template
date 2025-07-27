@@ -191,14 +191,19 @@ docker-compose exec postgres psql -U postgres -d your_project_name -c "SELECT 1;
 alembic current
 ```
 
-## 🧹 Code Quality
+## 🧹 Code Quality (Pre-commit Hooks)
 
-This project uses pre-commit hooks for code quality. To set them up:
+This project uses pre-commit hooks to ensure code quality.
 
-```bash
-# Install pre-commit hooks
-pre-commit install
-```
+- To install hooks, run:  
+  ```bash
+  pre-commit install
+  ```
+- You can also use the helper script:  
+  ```bash
+  ./scripts/install_precommit.sh
+  ```
+- Hooks are run automatically on every commit to check formatting and lint your code.
 
 The pre-commit hooks will automatically:
 - Format your code with `black`
