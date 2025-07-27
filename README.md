@@ -590,6 +590,56 @@ docker-compose up -d
 docker-compose logs -f api
 ```
 
+## 🚀 CI Validation Workflow
+
+**Prevent CI failures before they happen!** This template includes a comprehensive validation system that catches issues locally before they reach CI.
+
+### Quick Validation
+
+**Before pushing code, always run:**
+```bash
+./scripts/validate_ci.sh
+```
+
+This script automatically:
+- ✅ Checks Black formatting
+- ✅ Checks Ruff linting  
+- ✅ Validates pytest fixture discovery
+- ✅ Tests critical imports
+- ✅ Activates virtual environment automatically
+
+### Setup Automatic Validation
+
+**Install development tools and set up git hooks:**
+```bash
+# Install development tools with exact versions
+pip install -r requirements-dev.txt
+
+# Setup pre-commit hooks
+pre-commit install
+
+# Setup automatic validation before push
+./scripts/setup-git-hooks.sh
+```
+
+**Now validation runs automatically before every push!**
+
+### If Validation Fails
+
+1. **Black formatting issues**: `python3 -m black .`
+2. **Ruff linting issues**: `python3 -m ruff check . --fix`
+3. **Pytest issues**: Check `conftest.py` and fixture definitions
+4. **Import issues**: Verify module imports and dependencies
+
+### Benefits
+
+- 🎯 **No more CI surprises** - catch issues locally first
+- 🔧 **Consistent tooling** - same versions everywhere  
+- ⚡ **Faster feedback** - validate in seconds, not minutes
+- 👥 **Team consistency** - everyone uses the same validation process
+
+**📖 For detailed information:** See [CI Validation Workflow](docs/troubleshooting/ci-validation-workflow.md)
+
 ## 🛠️ Troubleshooting
 
 ### Understanding Hidden Files

@@ -3,19 +3,20 @@ repos:
     rev: v0.4.0
     hooks:
       - id: ruff
-        args: [--fix]
+        args: [--fix, --unsafe-fixes]
         types: [python]
 
   - repo: https://github.com/psf/black
-    rev: 24.4.2
+    rev: 25.1.0
     hooks:
       - id: black
         types: [python]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.9.0
+    rev: v1.17.0
     hooks:
       - id: mypy
         types: [python]
         exclude: ^alembic/versions/
+        args: [--ignore-missing-imports]
         additional_dependencies: [types-requests, types-redis, types-PyYAML, types-python-jose, types-authlib] 
