@@ -869,4 +869,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Happy coding! 🚀**
 
-*This project was created using a FastAPI template. For template-specific information, see the `docs/` folder.* 
+*This project was created using a FastAPI template. For template-specific information, see the `docs/` folder.* # Test comment for CI validation workflow
