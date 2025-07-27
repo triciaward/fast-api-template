@@ -63,6 +63,92 @@ user.name = "John"  # type: ignore
 user.email = "john@example.com"  # type: ignore
 ```
 
+## 🔄 Tool Version Updates
+
+### Why Tool Versions Matter
+
+CI environments update their tool versions **much more frequently** than you might think:
+
+| Tool | Update Frequency | Impact |
+|------|-----------------|---------|
+| **Black** | Every 2-4 weeks | Formatting rules change, breaking existing code |
+| **Ruff** | Every 1-2 weeks | New linting rules, different error messages |
+| **Mypy** | Every 3-6 weeks | Type checking behavior changes |
+| **Python** | Every 3-6 months | New language features, deprecations |
+| **Pre-commit** | Every 2-4 weeks | Hook behavior changes |
+
+### The "Whack-a-Mole" Problem
+
+**Without pinned versions:**
+```
+Week 1: Your local Black 24.4.2 ✅ "Code looks good!"
+Week 2: CI updates to Black 25.1.0 ❌ "Formatting error!"
+Week 3: You update local to 25.1.0 ✅ "Fixed!"
+Week 4: CI updates to Black 25.2.0 ❌ "New formatting error!"
+```
+
+**With our pinned versions:**
+```
+Week 1: Local & CI both use Black 25.1.0 ✅ "Consistent!"
+Week 2: CI updates to 25.2.0, but you're still on 25.1.0 ✅ "Still works!"
+Week 3: You choose when to update to 25.2.0 ✅ "Controlled upgrade!"
+```
+
+### Recommended Update Schedule
+
+**Monthly**: Check for new tool versions
+```bash
+# Use our convenient script
+./scripts/check_tool_updates.sh
+
+# Or check manually
+pip list --outdated
+```
+
+**Quarterly**: Update to latest stable versions
+```bash
+# Update development tools
+pip install -r requirements-dev.txt --upgrade
+
+# Test everything still works
+./scripts/validate_ci.sh
+```
+
+**When needed**: Update for security patches or new features
+
+### How to Update Safely
+
+1. **Check what's new:**
+   ```bash
+   pip list --outdated
+   ```
+
+2. **Update development tools:**
+   ```bash
+   pip install -r requirements-dev.txt --upgrade
+   ```
+
+3. **Test everything still works:**
+   ```bash
+   ./scripts/validate_ci.sh
+   ```
+
+4. **Update the pinned versions** in `requirements-dev.txt` if needed
+
+5. **Commit the changes:**
+   ```bash
+   git add requirements-dev.txt
+   git commit -m "Update development tool versions"
+   ```
+
+### Benefits of Controlled Updates
+
+- ✅ **Stability**: Your tools don't change unless you choose to update
+- ✅ **Predictability**: Same checks, same results, every time  
+- ✅ **Team consistency**: Everyone uses identical tool versions
+- ✅ **No surprises**: You control when to upgrade, not CI
+- ✅ **Testing**: You can test new versions before adopting them
+
 ## 🔧 Pre-commit Hooks
 
 The pre-commit hooks now use the same versions as your local environment:

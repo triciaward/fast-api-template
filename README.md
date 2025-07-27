@@ -640,6 +640,42 @@ pre-commit install
 
 **📖 For detailed information:** See [CI Validation Workflow](docs/troubleshooting/ci-validation-workflow.md)
 
+### 🔄 Managing Tool Versions
+
+**Why this matters:** CI environments update tool versions frequently (weekly to monthly), which can cause "whack-a-mole" failures where fixing one version mismatch only leads to another.
+
+**Our solution:** Pinned tool versions ensure your local environment matches CI exactly.
+
+**When to update:**
+- **Monthly**: Check for new versions with `./scripts/check_tool_updates.sh`
+- **Quarterly**: Update to latest stable versions
+- **When needed**: Security patches or new features
+
+**Safe update process:**
+```bash
+# 1. Check what's new
+./scripts/check_tool_updates.sh
+
+# 2. Update tools
+pip install -r requirements-dev.txt --upgrade
+
+# 3. Test everything works
+./scripts/validate_ci.sh
+
+# 4. Update pinned versions if needed
+# Edit requirements-dev.txt with new versions
+
+# 5. Commit changes
+git add requirements-dev.txt
+git commit -m "Update development tool versions"
+```
+
+**Benefits:**
+- 🛡️ **Stability**: Tools don't change unless you choose to update
+- 🎯 **Predictability**: Same checks, same results, every time
+- 👥 **Team consistency**: Everyone uses identical tool versions
+- 🚫 **No surprises**: You control when to upgrade, not CI
+
 ## 🛠️ Troubleshooting
 
 ### Understanding Hidden Files
