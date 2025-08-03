@@ -24,7 +24,7 @@ class TestPreventTemplatePush:
     def test_script_imports_correctly(self):
         """Test that the script can be imported without errors."""
         try:
-            from prevent_template_push import (
+            from prevent_template_push import (  # type: ignore[import-not-found]
                 get_remote_url,
                 is_template_repository,
                 main,
@@ -39,7 +39,7 @@ class TestPreventTemplatePush:
     @patch("prevent_template_push.subprocess.run")
     def test_get_remote_url_success(self, mock_run):
         """Test getting remote URL successfully."""
-        from prevent_template_push import get_remote_url
+        from prevent_template_push import get_remote_url  # type: ignore[import-not-found]
 
         mock_run.return_value = MagicMock(
             stdout="https://github.com/user/repo.git\n", returncode=0
@@ -57,7 +57,7 @@ class TestPreventTemplatePush:
     @patch("prevent_template_push.subprocess.run")
     def test_get_remote_url_failure(self, mock_run):
         """Test getting remote URL when git command fails."""
-        from prevent_template_push import get_remote_url
+        from prevent_template_push import get_remote_url  # type: ignore[import-not-found]
 
         mock_run.side_effect = subprocess.CalledProcessError(
             1, "git remote get-url origin"
@@ -68,7 +68,7 @@ class TestPreventTemplatePush:
 
     def test_is_template_repository_detection(self):
         """Test template repository detection logic."""
-        from prevent_template_push import is_template_repository
+        from prevent_template_push import is_template_repository  # type: ignore[import-not-found]
 
         # Test template repository URLs
         template_urls = [
@@ -97,7 +97,7 @@ class TestPreventTemplatePush:
 
     def test_is_template_repository_none_input(self):
         """Test template repository detection with None input."""
-        from prevent_template_push import is_template_repository
+        from prevent_template_push import is_template_repository  # type: ignore[import-not-found]
 
         assert not is_template_repository(None)
         assert not is_template_repository("")
@@ -110,7 +110,7 @@ class TestPreventTemplatePush:
         self, mock_input, mock_is_template, mock_get_remote, mock_exists
     ):
         """Test main function when not in a git repository."""
-        from prevent_template_push import main
+        from prevent_template_push import main  # type: ignore[import-not-found]
 
         mock_exists.return_value = False
 
@@ -128,7 +128,7 @@ class TestPreventTemplatePush:
         self, mock_input, mock_is_template, mock_get_remote, mock_exists
     ):
         """Test main function with non-template repository."""
-        from prevent_template_push import main
+        from prevent_template_push import main  # type: ignore[import-not-found]
 
         mock_exists.return_value = True
         mock_get_remote.return_value = "https://github.com/user/my-project.git"
@@ -146,7 +146,7 @@ class TestPreventTemplatePush:
         self, mock_input, mock_is_template, mock_get_remote, mock_exists
     ):
         """Test main function with template repository when user chooses to continue."""
-        from prevent_template_push import main
+        from prevent_template_push import main  # type: ignore[import-not-found]
 
         mock_exists.return_value = True
         mock_get_remote.return_value = (
@@ -167,7 +167,7 @@ class TestPreventTemplatePush:
         self, mock_input, mock_is_template, mock_get_remote, mock_exists
     ):
         """Test main function with template repository when user cancels."""
-        from prevent_template_push import main
+        from prevent_template_push import main  # type: ignore[import-not-found]
 
         mock_exists.return_value = True
         mock_get_remote.return_value = (
