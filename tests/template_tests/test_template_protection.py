@@ -29,6 +29,7 @@ class TestPreventTemplatePush:
                 is_template_repository,
                 main,
             )
+
             assert callable(get_remote_url)
             assert callable(is_template_repository)
             assert callable(main)
@@ -59,7 +60,8 @@ class TestPreventTemplatePush:
         from prevent_template_push import get_remote_url
 
         mock_run.side_effect = subprocess.CalledProcessError(
-            1, "git remote get-url origin")
+            1, "git remote get-url origin"
+        )
 
         result = get_remote_url()
         assert result is None
@@ -78,8 +80,7 @@ class TestPreventTemplatePush:
         ]
 
         for url in template_urls:
-            assert is_template_repository(
-                url), f"Should detect template repo: {url}"
+            assert is_template_repository(url), f"Should detect template repo: {url}"
 
         # Test non-template repository URLs
         non_template_urls = [
@@ -91,7 +92,8 @@ class TestPreventTemplatePush:
 
         for url in non_template_urls:
             assert not is_template_repository(
-                url), f"Should not detect template repo: {url}"
+                url
+            ), f"Should not detect template repo: {url}"
 
     def test_is_template_repository_none_input(self):
         """Test template repository detection with None input."""
@@ -104,7 +106,9 @@ class TestPreventTemplatePush:
     @patch("prevent_template_push.get_remote_url")
     @patch("prevent_template_push.is_template_repository")
     @patch("builtins.input")
-    def test_main_not_in_git_repo(self, mock_input, mock_is_template, mock_get_remote, mock_exists):
+    def test_main_not_in_git_repo(
+        self, mock_input, mock_is_template, mock_get_remote, mock_exists
+    ):
         """Test main function when not in a git repository."""
         from prevent_template_push import main
 
@@ -120,7 +124,9 @@ class TestPreventTemplatePush:
     @patch("prevent_template_push.get_remote_url")
     @patch("prevent_template_push.is_template_repository")
     @patch("builtins.input")
-    def test_main_non_template_repo(self, mock_input, mock_is_template, mock_get_remote, mock_exists):
+    def test_main_non_template_repo(
+        self, mock_input, mock_is_template, mock_get_remote, mock_exists
+    ):
         """Test main function with non-template repository."""
         from prevent_template_push import main
 
@@ -136,12 +142,16 @@ class TestPreventTemplatePush:
     @patch("prevent_template_push.get_remote_url")
     @patch("prevent_template_push.is_template_repository")
     @patch("builtins.input")
-    def test_main_template_repo_user_continues(self, mock_input, mock_is_template, mock_get_remote, mock_exists):
+    def test_main_template_repo_user_continues(
+        self, mock_input, mock_is_template, mock_get_remote, mock_exists
+    ):
         """Test main function with template repository when user chooses to continue."""
         from prevent_template_push import main
 
         mock_exists.return_value = True
-        mock_get_remote.return_value = "https://github.com/triciaward/fast-api-template.git"
+        mock_get_remote.return_value = (
+            "https://github.com/triciaward/fast-api-template.git"
+        )
         mock_is_template.return_value = True
         mock_input.return_value = "y"
 
@@ -153,12 +163,16 @@ class TestPreventTemplatePush:
     @patch("prevent_template_push.get_remote_url")
     @patch("prevent_template_push.is_template_repository")
     @patch("builtins.input")
-    def test_main_template_repo_user_cancels(self, mock_input, mock_is_template, mock_get_remote, mock_exists):
+    def test_main_template_repo_user_cancels(
+        self, mock_input, mock_is_template, mock_get_remote, mock_exists
+    ):
         """Test main function with template repository when user cancels."""
         from prevent_template_push import main
 
         mock_exists.return_value = True
-        mock_get_remote.return_value = "https://github.com/triciaward/fast-api-template.git"
+        mock_get_remote.return_value = (
+            "https://github.com/triciaward/fast-api-template.git"
+        )
         mock_is_template.return_value = True
         mock_input.return_value = "n"
 
@@ -174,8 +188,7 @@ class TestGitHooks:
         """Test that the git hook script exists and is executable."""
         hook_path = Path("scripts/git-hooks/pre-commit")
         assert hook_path.exists(), "Git hook script should exist"
-        assert os.access(
-            hook_path, os.X_OK), "Git hook script should be executable"
+        assert os.access(hook_path, os.X_OK), "Git hook script should be executable"
 
     def test_git_hook_script_content(self):
         """Test that the git hook script contains required logic."""
@@ -239,11 +252,12 @@ class TestPreCommitConfiguration:
                     if hook.get("id") == "prevent-template-push":
                         template_hook_found = True
                         assert "commit" in hook.get(
-                            "stages", []), "Should run on commit"
-                        assert "push" in hook.get(
-                            "stages", []), "Should run on push"
+                            "stages", []
+                        ), "Should run on commit"
+                        assert "push" in hook.get("stages", []), "Should run on push"
                         assert "prevent_template_push.py" in hook.get(
-                            "entry", ""), "Should use our script"
+                            "entry", ""
+                        ), "Should use our script"
                         break
 
         assert template_hook_found, "Template protection hook should be configured"
@@ -303,9 +317,9 @@ class TestDocumentationWarnings:
 
             # Check for git hooks mention (may be in different forms)
             git_hooks_mentioned = (
-                "git hooks" in content.lower() or
-                "git-hooks" in content.lower() or
-                "install_git_hooks" in content.lower()
+                "git hooks" in content.lower()
+                or "git-hooks" in content.lower()
+                or "install_git_hooks" in content.lower()
             )
             assert git_hooks_mentioned, f"Git hooks should be mentioned in {file_path}"
 
@@ -343,4 +357,6 @@ class TestIntegration:
         )
         # Should not crash and should return 0 or 1 depending on repository
         assert result.returncode in [
-            0, 1], f"Script should exit with 0 or 1, got {result.returncode}"
+            0,
+            1,
+        ], f"Script should exit with 0 or 1, got {result.returncode}"
