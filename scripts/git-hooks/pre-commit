@@ -1,0 +1,35 @@
+#!/bin/bash
+# Git pre-commit hook to prevent commits to template repository
+
+# Get the remote URL
+REMOTE_URL=$(git remote get-url origin 2>/dev/null)
+
+# Check if it's the template repository
+if [[ "$REMOTE_URL" == *"fast-api-template"* ]] || [[ "$REMOTE_URL" == *"triciaward/fast-api-template"* ]]; then
+    echo ""
+    echo "================================================================"
+    echo "🚨 CRITICAL WARNING: Template Repository Detected!"
+    echo "================================================================"
+    echo ""
+    echo "You are trying to commit to the template repository!"
+    echo ""
+    echo "⚠️  DANGER: This could overwrite the original template"
+    echo "   and cause problems for others using this template."
+    echo ""
+    echo "🔧 IMMEDIATE ACTION REQUIRED:"
+    echo "1. Create a new GitHub repository for your project"
+    echo "2. Update your git remote:"
+    echo "   git remote set-url origin https://github.com/yourusername/your-new-repo-name.git"
+    echo "3. Then try your commit again"
+    echo ""
+    echo "For detailed instructions, see the README.md file."
+    echo "================================================================"
+    echo ""
+    
+    read -p "Do you want to continue with the commit anyway? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Commit cancelled. Please set up your own repository first."
+        exit 1
+    fi
+fi 

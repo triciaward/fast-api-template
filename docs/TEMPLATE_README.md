@@ -11,6 +11,30 @@ A comprehensive, production-ready FastAPI template with authentication, admin pa
 
 ## 🚀 Quick Start
 
+### ⚠️ CRITICAL: Create a New GitHub Repository First!
+
+**🚨 IMPORTANT:** Before starting the setup process, you MUST create a new GitHub repository for your project. If you don't, you risk accidentally overwriting this template repository!
+
+**How to create your new repository:**
+1. Go to [GitHub](https://github.com) and sign in
+2. Click the "+" button in the top right corner
+3. Select "New repository"
+4. Name it something like "my-project-backend" or "my-awesome-api"
+5. **DO NOT** initialize with README, .gitignore, or license (we'll add these)
+6. Click "Create repository"
+7. Copy the repository URL (you'll need this later)
+
+**Why this is critical:**
+- The setup process will rename and customize the template
+- Without a new repo, you might accidentally push changes back to this template
+- Your customized project needs its own repository to track changes
+- This prevents confusion and protects the original template
+
+**🛡️ Safety Features:** This template includes multiple protection mechanisms:
+- **Pre-commit hooks** that warn about template repository operations
+- **Git hooks** that prevent commits to the template repository
+- **Documentation warnings** throughout the setup process
+
 ### Option 1: Use as Template (Recommended)
 
 ```bash
@@ -303,8 +327,11 @@ Proceed with customization? (y/N): y
 ==================
 
 📋 Next Steps:
-1. Review the changes in docs/troubleshooting/TEMPLATE_CUSTOMIZATION.md
-2. Update your git remote: git remote set-url origin <your-repo-url>
+1. Review the changes in docs/tutorials/TEMPLATE_CUSTOMIZATION.md
+2. **🚨 CRITICAL:** Update your git remote to point to your new repository:
+   ```bash
+   git remote set-url origin https://github.com/yourusername/your-new-repo-name.git
+   ```
 3. Run the setup script: ./scripts/setup_project.sh
 4. Start developing your application!
 

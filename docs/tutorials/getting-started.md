@@ -85,9 +85,35 @@ If any of these commands don't work, you'll need to install them first:
 
 ---
 
-## 📥 Step 1: Download the Template
+## 📥 Step 1: Create Your GitHub Repository
 
-### Option A: Clone with Git (Recommended)
+### ⚠️ CRITICAL: Create a New GitHub Repository First!
+
+**🚨 IMPORTANT:** Before downloading the template, you MUST create a new GitHub repository for your project. If you don't, you risk accidentally overwriting this template repository!
+
+**How to create your new repository:**
+1. Go to [GitHub](https://github.com) and sign in
+2. Click the "+" button in the top right corner
+3. Select "New repository"
+4. Name it something like "my-project-backend" or "my-awesome-api"
+5. **DO NOT** initialize with README, .gitignore, or license (we'll add these)
+6. Click "Create repository"
+7. Copy the repository URL (you'll need this later)
+
+**Why this is critical:**
+- The setup process will rename and customize the template
+- Without a new repo, you might accidentally push changes back to this template
+- Your customized project needs its own repository to track changes
+- This prevents confusion and protects the original template
+
+**🛡️ Safety Features:** This template includes multiple protection mechanisms:
+- **Pre-commit hooks** that warn about template repository operations
+- **Git hooks** that prevent commits to the template repository
+- **Documentation warnings** throughout the setup process
+
+### Step 2: Download the Template
+
+#### Option A: Clone with Git (Recommended)
 ```bash
 git clone https://github.com/your-username/fast-api-template.git my-new-app
 cd my-new-app

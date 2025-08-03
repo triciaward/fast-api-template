@@ -8,6 +8,30 @@ This is your project's main README file - feel free to customize it to describe 
 
 **If you're setting up this project for the first time, follow these steps in order:**
 
+### ⚠️ CRITICAL: Create a New GitHub Repository First!
+
+**🚨 IMPORTANT:** Before starting the setup process, you MUST create a new GitHub repository for your project. If you don't, you risk accidentally overwriting this template repository!
+
+**How to create your new repository:**
+1. Go to [GitHub](https://github.com) and sign in
+2. Click the "+" button in the top right corner
+3. Select "New repository"
+4. Name it something like "my-project-backend" or "my-awesome-api"
+5. **DO NOT** initialize with README, .gitignore, or license (we'll add these)
+6. Click "Create repository"
+7. Copy the repository URL (you'll need this later)
+
+**Why this is critical:**
+- The setup process will rename and customize the template
+- Without a new repo, you might accidentally push changes back to this template
+- Your customized project needs its own repository to track changes
+- This prevents confusion and protects the original template
+
+**🛡️ Safety Features:** This template includes multiple protection mechanisms:
+- **Pre-commit hooks** that warn about template repository operations
+- **Git hooks** that prevent commits to the template repository
+- **Documentation warnings** throughout the setup process
+
 ### Step 1: Clone and Navigate
 ```bash
 # Clone the template
@@ -143,7 +167,10 @@ Proceed with customization? (y/N): y
 
 📋 Next Steps:
 1. Review the changes in docs/troubleshooting/TEMPLATE_CUSTOMIZATION.md
-2. Update your git remote: git remote set-url origin <your-repo-url>
+2. **🚨 CRITICAL:** Update your git remote to point to your new repository:
+   ```bash
+   git remote set-url origin https://github.com/yourusername/your-new-repo-name.git
+   ```
 3. Run the setup script: ./scripts/setup_project.sh
 4. Start developing your application!
 
@@ -447,7 +474,7 @@ alembic current
 
 ## 🧹 Code Quality (Pre-commit Hooks)
 
-This project uses pre-commit hooks to ensure code quality.
+This project uses pre-commit hooks to ensure code quality and prevent common mistakes.
 
 - To install hooks, run:  
   ```bash
@@ -463,7 +490,25 @@ The pre-commit hooks will automatically:
 - Format your code with `black`
 - Check for linting issues with `ruff`
 - Verify type annotations with `mypy`
+- **🛡️ Prevent accidental pushes to the template repository**
 - Run on every commit to ensure code quality
+
+### 🛡️ Safety Features
+
+**Template Repository Protection:**
+- **Git hooks** prevent commits to the template repository
+- **Pre-commit hooks** warn about template repository operations
+- If detected, they will warn you and ask for confirmation before allowing the operation
+- This prevents accidentally overwriting the template and causing problems for others
+
+**To install the protection hooks:**
+```bash
+# Install git hooks (recommended)
+./scripts/install_git_hooks.sh
+
+# Install pre-commit hooks
+pre-commit install
+```
 
 ## 📖 What's Included
 

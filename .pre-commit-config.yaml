@@ -19,4 +19,14 @@ repos:
         types: [python]
         exclude: ^alembic/versions/
         args: [--ignore-missing-imports]
-        additional_dependencies: [types-requests, types-redis, types-PyYAML, types-python-jose, types-authlib] 
+        additional_dependencies: [types-requests, types-redis, types-PyYAML, types-python-jose, types-authlib]
+
+  # Custom hook to prevent accidental commits/pushes to template repository
+  - repo: local
+    hooks:
+      - id: prevent-template-push
+        name: Prevent Template Repository Operations
+        entry: python scripts/prevent_template_push.py
+        language: system
+        stages: [commit, push]
+        description: "Prevents accidental commits and pushes to the template repository" 
