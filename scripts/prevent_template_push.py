@@ -8,7 +8,6 @@ and warns them if they haven't set up their own repository yet.
 
 import subprocess
 import sys
-import os
 from pathlib import Path
 
 
