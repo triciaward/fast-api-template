@@ -1,6 +1,7 @@
 """Tests for Security Headers Middleware."""
 
 import logging
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -137,10 +138,7 @@ def test_security_headers_on_admin_endpoints(client):
 
 def test_request_size_validation(client):
     """Test that request size validation works correctly."""
-    # Test with a request that's too large (but not so large it breaks the test)
-    large_data = "x" * (5 * 1024 * 1024)  # 5MB - should be within limits
-
-    # First test that a reasonable size request works
+    # Test that a reasonable size request works
     response = client.post(
         "/api/v1/auth/login",
         data="username=test&password=test",
@@ -196,7 +194,7 @@ def test_security_event_logging_enabled(client, caplog):
     """Test that security events are logged when enabled."""
     # Test with a normal request to ensure logging works
     with caplog.at_level(logging.WARNING):
-        response = client.post(
+        client.post(
             "/api/v1/auth/login",
             data="username=test&password=test",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
