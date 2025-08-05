@@ -162,6 +162,17 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         content_type = request.headers.get("content-type", "")
         path = request.url.path
 
+        # Allow empty content-type for requests that don't have bodies
+        if not content_type:
+            # Check if this is a request that might have a body
+            if request.method in ["POST", "PUT", "PATCH"]:
+                # Only validate if there's actually a body
+                content_length = request.headers.get("content-length", "0")
+                if content_length == "0" or not content_length:
+                    return  # No body, so no content-type needed
+            else:
+                return  # GET, DELETE, etc. don't need content-type
+
         # Find matching endpoint pattern
         allowed_types = None
         for endpoint, types in self.allowed_content_types.items():
