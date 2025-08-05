@@ -380,7 +380,8 @@ async def get_account_deletion_status(
         scheduled_for = None
         if user.deletion_scheduled_for is not None:
             # Convert SQLAlchemy DateTime to Python datetime
-            scheduled_for = datetime.fromisoformat(str(user.deletion_scheduled_for))
+            date_str = str(user.deletion_scheduled_for)
+            scheduled_for = datetime.fromisoformat(date_str)
 
         return AccountDeletionStatusResponse(
             deletion_requested=deletion_requested,
