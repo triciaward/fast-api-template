@@ -44,6 +44,11 @@ This directory contains detailed troubleshooting guides for common issues you mi
   - API keys dashboard access issues
   - Superuser authentication problems
   - Admin panel configuration
+- **[Black vs Mypy Type Ignore Conflict](./black-mypy-type-ignore-conflict.md)** - Code formatting and type checking conflicts
+  - SQLAlchemy + Pydantic type conflicts
+  - Black formatter vs mypy type checker issues
+  - IDE auto-formatting problems
+  - Type ignore comment placement issues
 
 ## 🚀 Quick Solutions
 
