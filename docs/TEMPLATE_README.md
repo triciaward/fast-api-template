@@ -535,6 +535,7 @@ When you're ready to implement the skipped tests:
 - Account deletion with soft delete
 - Rate limiting
 - CORS configuration
+- **Modular Auth Architecture** - Clean, maintainable auth endpoints organized by functionality
 
 ### 👥 User Management
 - User registration and login
@@ -601,6 +602,19 @@ When you're ready to implement the skipped tests:
 fast-api-template/
 ├── app/                    # Main application code
 │   ├── api/               # API routes and endpoints
+│   │   └── api_v1/
+│   │       └── endpoints/
+│   │           ├── auth/   # Modular authentication endpoints
+│   │           │   ├── __init__.py
+│   │           │   ├── login.py
+│   │           │   ├── email_verification.py
+│   │           │   ├── password_management.py
+│   │           │   ├── account_deletion.py
+│   │           │   ├── session_management.py
+│   │           │   └── api_keys.py
+│   │           ├── admin.py
+│   │           ├── health.py
+│   │           └── users.py
 │   ├── core/              # Core configuration and utilities
 │   ├── crud/              # Database operations
 │   ├── models/            # Database models (separated by entity)

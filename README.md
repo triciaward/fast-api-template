@@ -515,7 +515,7 @@ pre-commit install
 This project comes with several features out of the box:
 
 - **Docker-First Architecture** - Everything runs in containers by default
-- **User Authentication** - Registration, login, and JWT tokens
+- **User Authentication** - Registration, login, and JWT tokens with modular architecture
 - **Database Management** - PostgreSQL with automatic migrations
 - **Admin Panel** - Built-in admin interface at `/admin`
 - **API Key Management** - Secure API key system

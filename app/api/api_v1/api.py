@@ -1,13 +1,14 @@
 from fastapi import APIRouter
 
-from app.api.api_v1.endpoints import admin, auth, health, users
+from app.api.api_v1.endpoints import admin, health, users
+from app.api.api_v1.endpoints.auth import router as auth_router
 from app.core.config import settings
 
 
 def create_api_router() -> APIRouter:
     """Create the API router dynamically based on current settings."""
     api_router = APIRouter()
-    api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
+    api_router.include_router(auth_router, prefix="/auth", tags=["authentication"])
     api_router.include_router(users.router, prefix="/users", tags=["users"])
     api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
     api_router.include_router(health.router, tags=["health"])
