@@ -147,8 +147,7 @@ async def reset_password(
         # Get user
         user = crud_user.get_user_by_id_sync(db, user_id)
         if not user:
-            logger.warning("User not found for password reset",
-                           user_id=user_id)
+            logger.warning("User not found for password reset", user_id=user_id)
             return PasswordResetConfirmResponse(
                 message="User not found.", password_reset=False
             )
@@ -166,8 +165,7 @@ async def reset_password(
             )
 
         # Reset the password
-        success = crud_user.reset_user_password_sync(
-            db, user_id, request.new_password)
+        success = crud_user.reset_user_password_sync(db, user_id, request.new_password)
         if not success:
             logger.error("Failed to reset user password", user_id=user_id)
             return PasswordResetConfirmResponse(
@@ -175,8 +173,7 @@ async def reset_password(
                 password_reset=False,
             )
 
-        logger.info("Password reset successful",
-                    user_id=str(user.id), email=user.email)
+        logger.info("Password reset successful", user_id=str(user.id), email=user.email)
         return PasswordResetConfirmResponse(
             message="Password reset successfully. You can now log in with your new password.",
             password_reset=True,
@@ -219,8 +216,7 @@ async def change_password(
         # Get the actual user object from database to access hashed_password
         db_user = crud_user.get_user_by_email_sync(db, current_user.email)
         if not db_user:
-            logger.error("User not found in database",
-                         user_id=str(current_user.id))
+            logger.error("User not found in database", user_id=str(current_user.id))
             raise HTTPException(
                 status_code=500, detail="User not found. Please try again later."
             )
@@ -233,16 +229,14 @@ async def change_password(
                 "Password change failed - incorrect current password",
                 user_id=str(current_user.id),
             )
-            raise HTTPException(
-                status_code=400, detail="Incorrect current password")
+            raise HTTPException(status_code=400, detail="Incorrect current password")
 
         # Change the password
         success = crud_user.update_user_password_sync(
             db, str(current_user.id), change_req.new_password
         )
         if not success:
-            logger.error("Failed to change user password",
-                         user_id=str(current_user.id))
+            logger.error("Failed to change user password", user_id=str(current_user.id))
             raise HTTPException(
                 status_code=500,
                 detail="Failed to change password. Please try again later.",

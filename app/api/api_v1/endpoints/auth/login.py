@@ -35,8 +35,7 @@ logger = get_auth_logger()
 async def register_user(
     user: UserCreate, db: Session = Depends(get_db_sync)
 ) -> UserResponse:
-    logger.info("User registration attempt",
-                email=user.email, username=user.username)
+    logger.info("User registration attempt", email=user.email, username=user.username)
 
     try:
         # Check if user with email already exists
@@ -51,8 +50,7 @@ async def register_user(
             )
 
         # Check if username already exists
-        db_user = crud_user.get_user_by_username_sync(
-            db, username=user.username)
+        db_user = crud_user.get_user_by_username_sync(db, username=user.username)
         if db_user:
             logger.warning(
                 "Registration failed - username already taken", username=user.username
@@ -85,8 +83,7 @@ async def register_user(
                     "Failed to create verification token", user_id=str(db_user.id)
                 )
         else:
-            logger.warning(
-                "Email service not configured - skipping verification email")
+            logger.warning("Email service not configured - skipping verification email")
 
         return db_user
 
@@ -204,8 +201,7 @@ async def login_user(
             set_refresh_token_cookie,
         )
 
-        access_token, refresh_token_value = create_user_session(
-            db, user, request)
+        access_token, refresh_token_value = create_user_session(db, user, request)
 
         # Set refresh token as HttpOnly cookie
         set_refresh_token_cookie(response, refresh_token_value)
@@ -213,8 +209,7 @@ async def login_user(
         # Log successful login
         await log_login_attempt(db, request, user=user, success=True)
 
-        logger.info("Login successful", user_id=str(
-            user.id), email=form_data.username)
+        logger.info("Login successful", user_id=str(user.id), email=form_data.username)
         return Token(access_token=access_token, token_type="bearer")
 
     except HTTPException:
@@ -245,16 +240,13 @@ async def oauth_login(
 
     if not oauth_service:
         logger.error("OAuth service not available")
-        raise HTTPException(
-            status_code=503, detail="OAuth service not available")
+        raise HTTPException(status_code=503, detail="OAuth service not available")
 
     provider = oauth_data.provider.lower()
 
     if provider not in ["google", "apple"]:
-        logger.warning(
-            "OAuth login failed - unsupported provider", provider=provider)
-        raise HTTPException(
-            status_code=400, detail="Unsupported OAuth provider")
+        logger.warning("OAuth login failed - unsupported provider", provider=provider)
+        raise HTTPException(status_code=400, detail="Unsupported OAuth provider")
 
     if not oauth_service.is_provider_configured(provider):
         logger.warning(
@@ -272,8 +264,7 @@ async def oauth_login(
                 logger.warning(
                     "OAuth login failed - invalid Google token", provider=provider
                 )
-                raise HTTPException(
-                    status_code=400, detail="Invalid Google token")
+                raise HTTPException(status_code=400, detail="Invalid Google token")
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
@@ -285,8 +276,7 @@ async def oauth_login(
                 logger.warning(
                     "OAuth login failed - invalid Apple token", provider=provider
                 )
-                raise HTTPException(
-                    status_code=400, detail="Invalid Apple token")
+                raise HTTPException(status_code=400, detail="Invalid Apple token")
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
@@ -299,8 +289,7 @@ async def oauth_login(
                 has_oauth_id=bool(oauth_id),
                 has_email=bool(email),
             )
-            raise HTTPException(
-                status_code=400, detail="Invalid OAuth user info")
+            raise HTTPException(status_code=400, detail="Invalid OAuth user info")
 
         logger.info(
             "OAuth token verified successfully",
@@ -310,8 +299,7 @@ async def oauth_login(
         )
 
         # Check if user already exists
-        existing_user = crud_user.get_user_by_oauth_id_sync(
-            db, provider, oauth_id)
+        existing_user = crud_user.get_user_by_oauth_id_sync(db, provider, oauth_id)
         if existing_user:
             # Create user session with refresh token
             from app.services.refresh_token import (
@@ -374,8 +362,7 @@ async def oauth_login(
             set_refresh_token_cookie,
         )
 
-        access_token, refresh_token_value = create_user_session(
-            db, new_user, request)
+        access_token, refresh_token_value = create_user_session(db, new_user, request)
 
         # Set refresh token as HttpOnly cookie
         set_refresh_token_cookie(response, refresh_token_value)
@@ -400,8 +387,7 @@ async def oauth_login(
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(
-            status_code=400, detail=f"OAuth login failed: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"OAuth login failed: {str(e)}")
 
 
 @router.get("/oauth/providers")
