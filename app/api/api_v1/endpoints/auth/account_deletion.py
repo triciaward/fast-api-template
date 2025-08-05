@@ -35,7 +35,8 @@ async def request_account_deletion(
 
     try:
         # Check if user exists
-        user = crud_user.get_user_by_email_sync(db, email=deletion_request.email)
+        user = crud_user.get_user_by_email_sync(
+            db, email=deletion_request.email)
         if not user:
             # Don't reveal if user exists or not for security
             logger.info(
@@ -185,7 +186,8 @@ async def confirm_account_deletion(
         # Get user
         user = crud_user.get_user_by_id_sync(db, user_id)
         if not user:
-            logger.warning("User not found for account deletion", user_id=user_id)
+            logger.warning(
+                "User not found for account deletion", user_id=user_id)
             return AccountDeletionConfirmResponse(
                 message="User not found.",
                 deletion_confirmed=False,
@@ -211,7 +213,7 @@ async def confirm_account_deletion(
 
         # Confirm deletion
         success = crud_user.confirm_account_deletion_sync(
-            db, user_id, deletion_scheduled_for
+            db, user_id
         )
         if not success:
             logger.error("Failed to confirm account deletion", user_id=user_id)
@@ -259,11 +261,13 @@ async def cancel_account_deletion(
     db: Session = Depends(get_db_sync),
 ) -> AccountDeletionCancelResponse:
     """Cancel account deletion."""
-    logger.info("Account deletion cancellation request", email=deletion_request.email)
+    logger.info("Account deletion cancellation request",
+                email=deletion_request.email)
 
     try:
         # Check if user exists
-        user = crud_user.get_user_by_email_sync(db, email=deletion_request.email)
+        user = crud_user.get_user_by_email_sync(
+            db, email=deletion_request.email)
         if not user:
             # Don't reveal if user exists or not for security
             logger.info(
@@ -374,12 +378,11 @@ async def get_account_deletion_status(
         deletion_confirmed = user.deletion_confirmed_at is not None
         can_cancel = deletion_requested and not user.is_deleted
 
-        return AccountDeletionStatusResponse(  # type: ignore[arg-type]
+        return AccountDeletionStatusResponse(
             deletion_requested=deletion_requested,
             deletion_confirmed=deletion_confirmed,
-            deletion_scheduled_for=(
-                user.deletion_scheduled_for if user.deletion_scheduled_for else None
-            ),  # type: ignore[arg-type]
+            # type: ignore[arg-type]
+            deletion_scheduled_for=user.deletion_scheduled_for,
             can_cancel=can_cancel,
             grace_period_days=settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS,
         )

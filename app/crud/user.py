@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, Union
 
 from sqlalchemy import select
@@ -326,6 +326,20 @@ def reset_user_password_sync(db: Session, user_id: str, new_password: str) -> bo
     return True
 
 
+def update_user_password_sync(db: Session, user_id: str, new_password: str) -> bool:
+    """Update user password (sync version)."""
+    result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.hashed_password = get_password_hash(new_password)  # type: ignore
+    db.commit()
+
+    return True
+
+
 # Account deletion operations
 def get_user_by_deletion_token_sync(db: Session, token: str) -> Optional[User]:
     result = db.execute(
@@ -345,6 +359,54 @@ def update_deletion_token_sync(
 
     user.deletion_token = token  # type: ignore
     user.deletion_token_expires = expires  # type: ignore
+    db.commit()
+
+    return True
+
+
+# Account deletion operations
+def request_account_deletion_sync(db: Session, user_id: str) -> bool:
+    """Request account deletion (sync version)."""
+    result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.deletion_requested_at = datetime.utcnow()  # type: ignore
+    db.commit()
+
+    return True
+
+
+def confirm_account_deletion_sync(db: Session, user_id: str) -> bool:
+    """Confirm account deletion (sync version)."""
+    result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.deletion_confirmed_at = datetime.utcnow()  # type: ignore
+    user.deletion_scheduled_for = datetime.utcnow() + timedelta(days=30)  # type: ignore
+    db.commit()
+
+    return True
+
+
+def cancel_account_deletion_sync(db: Session, user_id: str) -> bool:
+    """Cancel account deletion (sync version)."""
+    result = db.execute(select(User).filter(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return False
+
+    user.deletion_requested_at = None  # type: ignore
+    user.deletion_confirmed_at = None  # type: ignore
+    user.deletion_scheduled_for = None  # type: ignore
+    user.deletion_token = None  # type: ignore
+    user.deletion_token_expires = None  # type: ignore
     db.commit()
 
     return True

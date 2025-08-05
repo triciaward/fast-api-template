@@ -99,9 +99,10 @@ async def list_api_keys(
     )
 
     # Convert SQLAlchemy objects to Pydantic models
-    api_key_responses = [APIKeyResponse.model_validate(api_key) for api_key in api_keys]
+    api_key_responses = [APIKeyResponse.model_validate(
+        api_key) for api_key in api_keys]
 
-    return APIKeyListResponse.create(
+    return APIKeyListResponse.create(  # type: ignore[return-value]
         items=api_key_responses,
         page=pagination.page,
         size=pagination.limit,
@@ -186,7 +187,12 @@ async def rotate_api_key(
         key_id=key_id,
     )
 
+    if not new_raw_key:
+        raise HTTPException(
+            status_code=500, detail="Failed to rotate API key. Please try again later."
+        )
+
     return APIKeyRotateResponse(
-        api_key=api_key,
+        api_key=APIKeyResponse.model_validate(api_key),
         new_raw_key=new_raw_key,
     )

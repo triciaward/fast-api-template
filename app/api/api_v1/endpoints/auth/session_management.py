@@ -278,18 +278,24 @@ async def revoke_all_sessions(
     # Get user's IP address
     client_ip = request.client.host if request.client else None
 
+    # Get the actual user object from database
+    db_user = crud_user.get_user_by_id_sync(db, str(current_user.id))
+    if not db_user:
+        logger.error("User not found in database", user_id=str(current_user.id))
+        raise HTTPException(
+            status_code=500, detail="User not found. Please try again later."
+        )
+
     # Revoke all sessions for the user
-    revoked_count = await crud_refresh_token.revoke_all_user_sessions(
-        db, str(current_user.id)
+    revoked_count = crud_refresh_token.revoke_all_user_sessions(
+        db, current_user.id
     )
 
     # Log the action
     await log_logout(
-        user_id=str(current_user.id),
-        ip_address=client_ip,
-        user_agent=request.headers.get("user-agent"),
-        session_id=None,  # Revoking all sessions
-        success=True,
+        db=db,
+        request=request,
+        user=db_user,
     )
 
     logger.info(
