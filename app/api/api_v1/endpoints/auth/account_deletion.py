@@ -375,8 +375,7 @@ async def get_account_deletion_status(
         return AccountDeletionStatusResponse(
             deletion_requested=deletion_requested,
             deletion_confirmed=deletion_confirmed,
-            # type: ignore[arg-type]
-            deletion_scheduled_for=user.deletion_scheduled_for,
+            deletion_scheduled_for=user.deletion_scheduled_for,  # type: ignore[arg-type]
             can_cancel=can_cancel,
             grace_period_days=settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS,
         )
