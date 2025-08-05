@@ -55,7 +55,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         # Content Security Policy (CSP)
         # Restricts which resources can be loaded
-        response.headers["Content-Security-Policy"] = (
+        csp_policy = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
             "style-src 'self' 'unsafe-inline'; "
@@ -66,6 +66,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "base-uri 'self'; "
             "form-action 'self'"
         )
+        response.headers["Content-Security-Policy"] = csp_policy
 
         # X-Content-Type-Options
         # Prevents MIME type sniffing
@@ -85,7 +86,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         # Permissions Policy (formerly Feature Policy)
         # Controls which browser features can be used
-        response.headers["Permissions-Policy"] = (
+        permissions_policy = (
             "accelerometer=(), "
             "ambient-light-sensor=(), "
             "autoplay=(), "
@@ -114,6 +115,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "web-share=(), "
             "xr-spatial-tracking=()"
         )
+        response.headers["Permissions-Policy"] = permissions_policy
 
         # Strict-Transport-Security (HSTS)
         # Forces HTTPS connections (only add in production)
@@ -214,19 +216,17 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         if not settings.ENABLE_SECURITY_EVENT_LOGGING:
             return
 
-        logger.warning(
-            f"Security event: {event_type} - {message}",
-            extra={
-                "event_type": event_type,
-                "security_message": message,
-                "path": request.url.path,
-                "method": request.method,
-                "client_ip": request.client.host if request.client else "unknown",
-                "user_agent": request.headers.get("user-agent", "unknown"),
-                "content_type": request.headers.get("content-type", "unknown"),
-                "content_length": request.headers.get("content-length", "unknown"),
-            },
-        )
+        extra_data = {
+            "event_type": event_type,
+            "security_message": message,
+            "path": request.url.path,
+            "method": request.method,
+            "client_ip": request.client.host if request.client else "unknown",
+            "user_agent": request.headers.get("user-agent", "unknown"),
+            "content_type": request.headers.get("content-type", "unknown"),
+            "content_length": request.headers.get("content-length", "unknown"),
+        }
+        logger.warning(f"Security event: {event_type} - {message}", extra=extra_data)
 
 
 def configure_security_headers(app: Any) -> None:
