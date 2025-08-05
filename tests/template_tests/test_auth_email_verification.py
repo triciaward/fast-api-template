@@ -18,11 +18,12 @@ def always_configured_email(monkeypatch: pytest.MonkeyPatch) -> None:
 class TestEmailVerificationEndpoints:
     def test_register_user_with_email_verification(self, client: TestClient) -> None:
         """Test user registration with email verification."""
-        with patch(
-            "app.services.email.email_service.is_configured", return_value=True
-        ), patch(
-            "app.services.email.email_service.send_verification_email",
-            return_value=True,
+        with (
+            patch("app.services.email.email_service.is_configured", return_value=True),
+            patch(
+                "app.services.email.email_service.send_verification_email",
+                return_value=True,
+            ),
         ):
             response = client.post(
                 "/api/v1/auth/register",
@@ -121,11 +122,12 @@ class TestEmailVerificationEndpoints:
         sync_db_session.add(user)
         sync_db_session.commit()
 
-        with patch(
-            "app.services.email.email_service.is_configured", return_value=True
-        ), patch(
-            "app.services.email.email_service.send_verification_email",
-            return_value=True,
+        with (
+            patch("app.services.email.email_service.is_configured", return_value=True),
+            patch(
+                "app.services.email.email_service.send_verification_email",
+                return_value=True,
+            ),
         ):
             response = client.post(
                 "/api/v1/auth/resend-verification", json={"email": "test@example.com"}
@@ -335,11 +337,12 @@ class TestEmailVerificationIntegration:
         self, client: TestClient, sync_db_session: Session
     ) -> None:
         """Test complete email verification flow."""
-        with patch(
-            "app.services.email.email_service.is_configured", return_value=True
-        ), patch(
-            "app.services.email.email_service.send_verification_email",
-            return_value=True,
+        with (
+            patch("app.services.email.email_service.is_configured", return_value=True),
+            patch(
+                "app.services.email.email_service.send_verification_email",
+                return_value=True,
+            ),
         ):
             # Step 1: Register user
             register_response = client.post(

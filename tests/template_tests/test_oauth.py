@@ -57,9 +57,10 @@ class TestOAuthService:
     @pytest.mark.asyncio
     async def test_verify_google_token_success(self) -> None:
         """Test successful Google token verification."""
-        with patch("app.services.oauth.settings") as mock_settings, patch(
-            "httpx.AsyncClient"
-        ) as mock_client:
+        with (
+            patch("app.services.oauth.settings") as mock_settings,
+            patch("httpx.AsyncClient") as mock_client,
+        ):
             mock_settings.GOOGLE_CLIENT_ID = "test_client_id"
 
             mock_response = Mock()
@@ -84,9 +85,10 @@ class TestOAuthService:
     @pytest.mark.asyncio
     async def test_verify_google_token_invalid_audience(self) -> None:
         """Test Google token verification with invalid audience."""
-        with patch("app.services.oauth.settings") as mock_settings, patch(
-            "httpx.AsyncClient"
-        ) as mock_client:
+        with (
+            patch("app.services.oauth.settings") as mock_settings,
+            patch("httpx.AsyncClient") as mock_client,
+        ):
             mock_settings.GOOGLE_CLIENT_ID = "test_client_id"
 
             mock_response = Mock()
@@ -121,9 +123,11 @@ class TestOAuthService:
     @pytest.mark.asyncio
     async def test_verify_apple_token_success(self) -> None:
         """Test successful Apple token verification."""
-        with patch("app.services.oauth.settings") as mock_settings, patch(
-            "jwt.decode"
-        ) as mock_jwt_decode, patch("time.time") as mock_time:
+        with (
+            patch("app.services.oauth.settings") as mock_settings,
+            patch("jwt.decode") as mock_jwt_decode,
+            patch("time.time") as mock_time,
+        ):
             mock_settings.APPLE_CLIENT_ID = "test_client_id"
             mock_settings.APPLE_TEAM_ID = "test_team_id"
             mock_settings.APPLE_KEY_ID = "test_key_id"
@@ -142,9 +146,11 @@ class TestOAuthService:
     @pytest.mark.asyncio
     async def test_verify_apple_token_expired(self) -> None:
         """Test Apple token verification with expired token."""
-        with patch("app.services.oauth.settings") as mock_settings, patch(
-            "jwt.decode"
-        ) as mock_jwt_decode, patch("time.time") as mock_time:
+        with (
+            patch("app.services.oauth.settings") as mock_settings,
+            patch("jwt.decode") as mock_jwt_decode,
+            patch("time.time") as mock_time,
+        ):
             mock_settings.APPLE_CLIENT_ID = "test_client_id"
             mock_settings.APPLE_TEAM_ID = "test_team_id"
             mock_settings.APPLE_KEY_ID = "test_key_id"

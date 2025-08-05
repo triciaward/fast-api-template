@@ -55,9 +55,12 @@ class TestOAuthAuthEndpoints:
         self, client: TestClient, sync_db_session: Session
     ) -> None:
         """Test successful OAuth login for new Google user."""
-        with patch("app.services.oauth.settings") as mock_settings, patch(
-            "app.services.oauth.oauth_service.verify_google_token"
-        ) as mock_verify:
+        with (
+            patch("app.services.oauth.settings") as mock_settings,
+            patch(
+                "app.services.oauth.oauth_service.verify_google_token"
+            ) as mock_verify,
+        ):
             mock_settings.GOOGLE_CLIENT_ID = "test_client_id"
             mock_verify.return_value = {
                 "sub": "google_user_id",
@@ -92,9 +95,12 @@ class TestOAuthAuthEndpoints:
         sync_db_session.add(user)
         sync_db_session.commit()
 
-        with patch("app.services.oauth.settings") as mock_settings, patch(
-            "app.services.oauth.oauth_service.verify_google_token"
-        ) as mock_verify:
+        with (
+            patch("app.services.oauth.settings") as mock_settings,
+            patch(
+                "app.services.oauth.oauth_service.verify_google_token"
+            ) as mock_verify,
+        ):
             mock_settings.GOOGLE_CLIENT_ID = "test_client_id"
             mock_verify.return_value = {
                 "sub": "google_user_id",
@@ -129,9 +135,12 @@ class TestOAuthAuthEndpoints:
         sync_db_session.add(user)
         sync_db_session.commit()
 
-        with patch("app.services.oauth.settings") as mock_settings, patch(
-            "app.services.oauth.oauth_service.verify_google_token"
-        ) as mock_verify:
+        with (
+            patch("app.services.oauth.settings") as mock_settings,
+            patch(
+                "app.services.oauth.oauth_service.verify_google_token"
+            ) as mock_verify,
+        ):
             mock_settings.GOOGLE_CLIENT_ID = "test_client_id"
             mock_verify.return_value = {
                 "sub": "google_user_id",
@@ -151,9 +160,12 @@ class TestOAuthAuthEndpoints:
 
     def test_oauth_login_invalid_token(self, client: TestClient) -> None:
         """Test OAuth login with invalid token."""
-        with patch("app.services.oauth.settings") as mock_settings, patch(
-            "app.services.oauth.oauth_service.verify_google_token"
-        ) as mock_verify:
+        with (
+            patch("app.services.oauth.settings") as mock_settings,
+            patch(
+                "app.services.oauth.oauth_service.verify_google_token"
+            ) as mock_verify,
+        ):
             mock_settings.GOOGLE_CLIENT_ID = "test_client_id"
             mock_verify.return_value = None
 
@@ -166,9 +178,12 @@ class TestOAuthAuthEndpoints:
 
     def test_oauth_login_missing_user_info(self, client: TestClient) -> None:
         """Test OAuth login with missing user info."""
-        with patch("app.services.oauth.settings") as mock_settings, patch(
-            "app.services.oauth.oauth_service.verify_google_token"
-        ) as mock_verify:
+        with (
+            patch("app.services.oauth.settings") as mock_settings,
+            patch(
+                "app.services.oauth.oauth_service.verify_google_token"
+            ) as mock_verify,
+        ):
             mock_settings.GOOGLE_CLIENT_ID = "test_client_id"
             # Missing email and name
             mock_verify.return_value = {"sub": "google_user_id"}
@@ -193,11 +208,14 @@ class TestOAuthAuthEndpoints:
 
     def test_get_oauth_providers_google_configured(self, client: TestClient) -> None:
         """Test getting OAuth providers when Google is configured."""
-        with patch(
-            "app.services.oauth.oauth_service.is_provider_configured"
-        ) as mock_configured, patch(
-            "app.services.oauth.oauth_service.get_oauth_provider_config"
-        ) as mock_config:
+        with (
+            patch(
+                "app.services.oauth.oauth_service.is_provider_configured"
+            ) as mock_configured,
+            patch(
+                "app.services.oauth.oauth_service.get_oauth_provider_config"
+            ) as mock_config,
+        ):
             mock_configured.side_effect = lambda provider: provider == "google"
             mock_config.return_value = {"client_id": "test_client_id"}
 
@@ -209,11 +227,15 @@ class TestOAuthAuthEndpoints:
 
     def test_get_oauth_providers_both_configured(self, client: TestClient) -> None:
         """Test getting OAuth providers when both are configured."""
-        with patch(
-            "app.services.oauth.oauth_service.is_provider_configured", return_value=True
-        ), patch(
-            "app.services.oauth.oauth_service.get_oauth_provider_config"
-        ) as mock_config:
+        with (
+            patch(
+                "app.services.oauth.oauth_service.is_provider_configured",
+                return_value=True,
+            ),
+            patch(
+                "app.services.oauth.oauth_service.get_oauth_provider_config"
+            ) as mock_config,
+        ):
             mock_config.return_value = {"client_id": "test_client_id"}
 
             response = client.get("/api/v1/auth/oauth/providers")

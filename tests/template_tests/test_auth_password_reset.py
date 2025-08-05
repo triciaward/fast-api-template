@@ -557,11 +557,12 @@ class TestPasswordResetEmailService:
         """Test successful password reset email sending."""
         from app.services.email import email_service
 
-        with patch(
-            "app.services.email.email_service.is_configured", return_value=True
-        ), patch(
-            "emails.Message.send",
-            return_value=type("Response", (), {"status_code": 250})(),
+        with (
+            patch("app.services.email.email_service.is_configured", return_value=True),
+            patch(
+                "emails.Message.send",
+                return_value=type("Response", (), {"status_code": 250})(),
+            ),
         ):
             success = email_service.send_password_reset_email(
                 "test@example.com", "testuser", "reset_token_123"
@@ -584,11 +585,12 @@ class TestPasswordResetEmailService:
         """Test password reset email sending failure."""
         from app.services.email import email_service
 
-        with patch(
-            "app.services.email.email_service.is_configured", return_value=True
-        ), patch(
-            "emails.Message.send",
-            return_value=type("Response", (), {"status_code": 500})(),
+        with (
+            patch("app.services.email.email_service.is_configured", return_value=True),
+            patch(
+                "emails.Message.send",
+                return_value=type("Response", (), {"status_code": 500})(),
+            ),
         ):
             success = email_service.send_password_reset_email(
                 "test@example.com", "testuser", "reset_token_123"

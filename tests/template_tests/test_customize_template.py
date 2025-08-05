@@ -181,17 +181,13 @@ class TestTemplateCustomization:
             customizer.docker_project_name = "test_project_backend"
 
             # Mock the methods that would normally process files
-            with patch.object(
-                customizer, "get_files_to_process"
-            ) as mock_get_files, patch.object(
-                customizer, "process_file"
-            ) as mock_process_file, patch.object(
-                customizer, "update_env_file"
-            ) as mock_update_env, patch.object(
-                customizer, "create_customization_log"
-            ) as mock_create_log, patch.object(
-                customizer, "update_git_remote"
-            ) as mock_update_git:
+            with (
+                patch.object(customizer, "get_files_to_process") as mock_get_files,
+                patch.object(customizer, "process_file") as mock_process_file,
+                patch.object(customizer, "update_env_file") as mock_update_env,
+                patch.object(customizer, "create_customization_log") as mock_create_log,
+                patch.object(customizer, "update_git_remote") as mock_update_git,
+            ):
 
                 mock_get_files.return_value = [custom_project_root / "README.md"]
 
@@ -211,8 +207,9 @@ class TestTemplateCustomization:
             customizer = TemplateCustomizer()
             customizer.project_root = self.project_root
 
-            with patch("builtins.print") as mock_print, patch(
-                "builtins.input", return_value="y"
+            with (
+                patch("builtins.print") as mock_print,
+                patch("builtins.input", return_value="y"),
             ):
 
                 # The script should exit when it detects template directory
