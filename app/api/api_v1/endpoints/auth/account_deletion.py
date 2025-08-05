@@ -376,10 +376,15 @@ async def get_account_deletion_status(
         deletion_confirmed = user.deletion_confirmed_at is not None
         can_cancel = deletion_requested and not user.is_deleted
 
+        # Extract the datetime value properly to avoid type issues
+        scheduled_for = None
+        if hasattr(user, 'deletion_scheduled_for') and user.deletion_scheduled_for is not None:
+            scheduled_for = datetime.fromisoformat(str(user.deletion_scheduled_for))
+
         return AccountDeletionStatusResponse(
             deletion_requested=deletion_requested,
             deletion_confirmed=deletion_confirmed,
-            deletion_scheduled_for=user.deletion_scheduled_for,  # type: ignore[arg-type]
+            deletion_scheduled_for=scheduled_for,
             can_cancel=can_cancel,
             grace_period_days=settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS,
         )
