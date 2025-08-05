@@ -519,6 +519,7 @@ This project comes with several features out of the box:
 - **Database Management** - PostgreSQL with automatic migrations
 - **Admin Panel** - Built-in admin interface at `/admin`
 - **API Key Management** - Secure API key system
+- **Security Headers** - HTTP security headers for protection against common vulnerabilities
 - **Audit Logging** - Track important actions
 - **Testing Framework** - Comprehensive test suite
 - **Development Tools** - Local Python environment for linting, testing, and formatting

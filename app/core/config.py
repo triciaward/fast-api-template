@@ -145,6 +145,13 @@ class Settings(BaseSettings):
     SENTRY_TRACES_SAMPLE_RATE: float = 0.1  # 10% of transactions
     SENTRY_PROFILES_SAMPLE_RATE: float = 0.1  # 10% of profiles
 
+    # Security Headers
+    ENABLE_SECURITY_HEADERS: bool = True
+    ENABLE_HSTS: bool = False  # Only enable in production with HTTPS
+    HSTS_MAX_AGE: int = 31536000  # 1 year
+    HSTS_INCLUDE_SUBDOMAINS: bool = True
+    HSTS_PRELOAD: bool = False
+
     @property
     def cors_origins_list(self) -> list[str]:
         """Convert comma-separated CORS origins string to list."""

@@ -26,6 +26,7 @@ Think of optional features like add-ons for your car. The basic car works great,
 | **Email** | SMTP settings | User notifications | Easy |
 | **Admin CLI** | CLI scripts | Terminal admin | Easy |
 | **Admin HTML Dashboard** | Built-in | Visual admin interface | Easy |
+| **Security Headers** | `ENABLE_SECURITY_HEADERS=true` | HTTP security headers | Easy |
 
 ---
 
@@ -561,6 +562,166 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
 ```
 
 For complete documentation, see the **[Admin HTML Dashboard section](#️-admin-html-dashboard---visual-api-key-management)** above.
+
+---
+
+## 🛡️ Security Headers - HTTP Security Protection
+
+**One-liner**: Security headers protect your application from common web vulnerabilities by adding protective HTTP headers to all responses.
+
+**Why use it**: Prevents XSS attacks, clickjacking, MIME type sniffing, and other security vulnerabilities that can compromise your application and users.
+
+**Relevant code**: [`app/core/security_headers.py`](../../app/core/security_headers.py)
+
+### How to Enable Security Headers
+
+Security headers are **enabled by default** in this template. You can configure them in your `.env` file:
+
+```env
+# Security Headers (enabled by default)
+ENABLE_SECURITY_HEADERS=true
+
+# HSTS (only enable in production with HTTPS)
+ENABLE_HSTS=false
+HSTS_MAX_AGE=31536000
+HSTS_INCLUDE_SUBDOMAINS=true
+HSTS_PRELOAD=false
+```
+
+### Security Headers Lifecycle
+
+```mermaid
+flowchart TD
+  A[HTTP Request] --> B[FastAPI Application]
+  B --> C[Security Headers Middleware]
+  C --> D[Add Security Headers]
+  D --> E[HTTP Response with Security Headers]
+  E --> F[Browser Enforces Security Policies]
+```
+
+### What Security Headers Do
+
+- **Content Security Policy (CSP)**: Controls which resources can be loaded (scripts, styles, images)
+- **X-Content-Type-Options**: Prevents MIME type sniffing attacks
+- **X-Frame-Options**: Prevents clickjacking by controlling iframe embedding
+- **X-XSS-Protection**: Enables browser's built-in XSS filtering
+- **Referrer Policy**: Controls how much referrer information is sent with requests
+- **Permissions Policy**: Restricts browser features like camera, microphone, geolocation
+- **Strict Transport Security (HSTS)**: Forces HTTPS connections (production only)
+
+> **Security Headers Explained:**
+> - **CSP**: Tells the browser "only load scripts from trusted sources" to prevent malicious code injection
+> - **X-Frame-Options**: Prevents your site from being embedded in malicious iframes
+> - **X-XSS-Protection**: Adds an extra layer of XSS protection in older browsers
+> - **HSTS**: Once enabled, browsers will only connect to your site via HTTPS
+>
+> **Tradeoff:** Security headers make your app more secure but can break functionality if not configured correctly. The template provides sensible defaults that work for most applications.
+
+### Test Security Headers
+
+```bash
+# Check security headers on any endpoint
+curl -I http://localhost:8000/
+
+# You should see headers like:
+# Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'...
+# X-Content-Type-Options: nosniff
+# X-Frame-Options: DENY
+# X-XSS-Protection: 1; mode=block
+# Referrer-Policy: strict-origin-when-cross-origin
+# Permissions-Policy: accelerometer=(), camera=(), microphone=()...
+```
+
+### Security Headers Configuration
+
+#### Content Security Policy (CSP)
+
+The default CSP allows:
+- Scripts from same origin (`'self'`)
+- Inline scripts and styles (`'unsafe-inline'`)
+- Images from same origin and HTTPS sources
+- WebSocket connections for real-time features
+
+To customize CSP for your application:
+
+```python
+# In app/core/security_headers.py
+response.headers["Content-Security-Policy"] = (
+    "default-src 'self'; "
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+    "style-src 'self' 'unsafe-inline'; "
+    "img-src 'self' data: https:; "
+    "font-src 'self' data:; "
+    "connect-src 'self' ws: wss:; "
+    "frame-ancestors 'none'; "
+    "base-uri 'self'; "
+    "form-action 'self'"
+)
+```
+
+#### HSTS (HTTP Strict Transport Security)
+
+**⚠️ Important**: Only enable HSTS in production with HTTPS!
+
+```env
+# Production settings (only with HTTPS)
+ENABLE_HSTS=true
+HSTS_MAX_AGE=31536000  # 1 year
+HSTS_INCLUDE_SUBDOMAINS=true
+HSTS_PRELOAD=false
+```
+
+### Security Headers Features
+
+- **Automatic Protection**: All responses get security headers automatically
+- **Configurable CSP**: Customize content security policy for your needs
+- **HSTS Support**: Force HTTPS in production environments
+- **Cache Control**: Sensitive endpoints (auth) get no-cache headers
+- **Comprehensive Coverage**: Protects against XSS, clickjacking, MIME sniffing, and more
+
+### Security Headers Lifecycle
+
+```mermaid
+flowchart TD
+  A[HTTP Request] --> B[FastAPI Router]
+  B --> C[Security Headers Middleware]
+  C --> D{Is Auth Endpoint?}
+  D -- Yes --> E[Add No-Cache Headers]
+  D -- No --> F[Add Standard Security Headers]
+  E --> G[Add CSP, X-Frame-Options, etc.]
+  F --> G
+  G --> H[HTTP Response with Security Headers]
+```
+
+### What Security Headers Do
+
+- **Prevent XSS**: Content Security Policy blocks malicious scripts
+- **Prevent Clickjacking**: X-Frame-Options prevents iframe embedding
+- **Prevent MIME Sniffing**: X-Content-Type-Options blocks content type attacks
+- **Control Features**: Permissions Policy restricts browser capabilities
+- **Force HTTPS**: HSTS ensures secure connections (production only)
+- **Protect Sensitive Data**: Cache control headers on auth endpoints
+
+> **Security Headers Benefits:**
+> - **Zero Configuration**: Works out of the box with sensible defaults
+> - **Comprehensive Protection**: Covers all major web security vulnerabilities
+> - **Production Ready**: Includes HSTS support for HTTPS environments
+> - **Customizable**: Adjust CSP and other policies for your specific needs
+>
+> **Use Cases:** All web applications, especially those handling user data, authentication, or sensitive information.
+
+### Test Security Headers
+
+```bash
+# Check headers on root endpoint
+curl -I http://localhost:8000/
+
+# Check headers on API endpoint
+curl -I http://localhost:8000/api/v1/health
+
+# Check headers on auth endpoint (should have cache control)
+curl -I http://localhost:8000/api/v1/auth/login
+```
 
 ---
 

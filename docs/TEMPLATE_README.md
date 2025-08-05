@@ -535,6 +535,7 @@ When you're ready to implement the skipped tests:
 - Account deletion with soft delete
 - Rate limiting
 - CORS configuration
+- **Security Headers** - HTTP security headers for protection against common vulnerabilities
 - **Modular Auth Architecture** - Clean, maintainable auth endpoints organized by functionality
 
 ### 👥 User Management

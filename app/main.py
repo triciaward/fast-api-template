@@ -13,6 +13,7 @@ from app.core.config import settings
 from app.core.cors import configure_cors
 from app.core.error_handlers import register_error_handlers
 from app.core.logging_config import get_app_logger, setup_logging
+from app.core.security_headers import configure_security_headers
 from app.database.database import engine
 from app.models import Base
 from app.services.sentry import init_sentry
@@ -86,6 +87,10 @@ app = FastAPI(
 
 # Configure CORS
 configure_cors(app)
+
+# Configure Security Headers
+if settings.ENABLE_SECURITY_HEADERS:
+    configure_security_headers(app)
 
 # Setup Sentry ASGI middleware for better request context
 if settings.ENABLE_SENTRY:
