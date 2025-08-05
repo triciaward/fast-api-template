@@ -152,6 +152,12 @@ class Settings(BaseSettings):
     HSTS_INCLUDE_SUBDOMAINS: bool = True
     HSTS_PRELOAD: bool = False
 
+    # Security Headers Enhanced Features
+    ENABLE_REQUEST_SIZE_VALIDATION: bool = True
+    MAX_REQUEST_SIZE: int = 10 * 1024 * 1024  # 10MB
+    ENABLE_CONTENT_TYPE_VALIDATION: bool = True
+    ENABLE_SECURITY_EVENT_LOGGING: bool = True
+
     @property
     def cors_origins_list(self) -> list[str]:
         """Convert comma-separated CORS origins string to list."""

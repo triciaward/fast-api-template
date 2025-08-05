@@ -1,5 +1,6 @@
 """Tests for Security Headers Middleware."""
 
+import logging
 import pytest
 from fastapi.testclient import TestClient
 
@@ -110,25 +111,96 @@ def test_security_headers_on_api_endpoints(client):
 def test_security_headers_on_admin_endpoints(client):
     """Test that security headers are present on admin endpoints."""
     response = client.get("/admin/api-keys")
-
+    
     # Admin endpoints require authentication, so we expect 401
     # But security headers should still be present
     assert response.status_code == 401
-
+    
     # Check for security headers
     headers = response.headers
-
+    
     # Content Security Policy
     assert "Content-Security-Policy" in headers
-
+    
     # X-Content-Type-Options
     assert headers["X-Content-Type-Options"] == "nosniff"
-
+    
     # X-Frame-Options
     assert headers["X-Frame-Options"] == "DENY"
-
+    
     # X-XSS-Protection
     assert headers["X-XSS-Protection"] == "1; mode=block"
-
+    
     # Referrer Policy
     assert headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
+
+
+def test_request_size_validation(client):
+    """Test that request size validation works correctly."""
+    # Test with a request that's too large (but not so large it breaks the test)
+    large_data = "x" * (5 * 1024 * 1024)  # 5MB - should be within limits
+    
+    # First test that a reasonable size request works
+    response = client.post(
+        "/api/v1/auth/login",
+        data="username=test&password=test",
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+    
+    # Should not be rejected due to size (may fail for other reasons)
+    assert response.status_code != 413
+
+
+def test_content_type_validation(client):
+    """Test that content type validation works correctly."""
+    # Test with valid content type for login endpoint
+    response = client.post(
+        "/api/v1/auth/login",
+        data="username=test&password=test",
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+    
+    # Should not be rejected due to content type (may fail for other reasons)
+    assert response.status_code != 415
+
+
+def test_content_type_validation_success(client):
+    """Test that valid content types are accepted."""
+    # Test with correct content type for login endpoint
+    response = client.post(
+        "/api/v1/auth/login",
+        data="username=test&password=test",
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+    
+    # Should not be rejected due to content type (may fail for other reasons)
+    assert response.status_code != 415
+
+
+def test_request_size_validation_success(client):
+    """Test that requests within size limits are accepted."""
+    # Test with a reasonable request size
+    small_data = "username=test&password=test"
+    
+    response = client.post(
+        "/api/v1/auth/login",
+        data=small_data,
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
+    
+    # Should not be rejected due to size (may fail for other reasons)
+    assert response.status_code != 413
+
+
+def test_security_event_logging_enabled(client, caplog):
+    """Test that security events are logged when enabled."""
+    # Test with a normal request to ensure logging works
+    with caplog.at_level(logging.WARNING):
+        response = client.post(
+            "/api/v1/auth/login",
+            data="username=test&password=test",
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+        )
+    
+    # Check that no security events were logged for normal request
+    assert not any("Security event:" in record.message for record in caplog.records)

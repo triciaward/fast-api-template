@@ -4,19 +4,51 @@ This module provides middleware to add security headers to HTTP responses.
 These headers help protect against various security vulnerabilities.
 """
 
+import logging
 from typing import Any
 
-from fastapi import Request, Response
+from fastapi import HTTPException, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Middleware to add security headers to HTTP responses."""
 
+    def __init__(self, app: Any):
+        super().__init__(app)
+        # Define allowed content types for different endpoints
+        self.allowed_content_types = {
+            "/api/v1/auth/login": ["application/x-www-form-urlencoded"],
+            "/api/v1/auth/register": ["application/json"],
+            "/api/v1/auth/refresh": ["application/json"],
+            "/api/v1/auth/verify-email": ["application/json"],
+            "/api/v1/auth/reset-password": ["application/json"],
+            "/api/v1/auth/change-password": ["application/json"],
+            "/api/v1/auth/delete-account": ["application/json"],
+            "/api/v1/users": ["application/json"],
+            "/api/v1/admin": ["application/json"],
+            "/api/v1/health": ["application/json"],
+            "/": ["text/html", "application/json"],
+            "/docs": ["text/html"],
+            "/redoc": ["text/html"],
+            "/openapi.json": ["application/json"],
+        }
+
     async def dispatch(self, request: Request, call_next: Any) -> Response:
-        """Add security headers to the response."""
+        """Add security headers to the response and validate requests."""
+        
+        # Request Size Validation
+        if settings.ENABLE_REQUEST_SIZE_VALIDATION:
+            await self._validate_request_size(request)
+        
+        # Content-Type Validation
+        if settings.ENABLE_CONTENT_TYPE_VALIDATION:
+            await self._validate_content_type(request)
+        
         response = await call_next(request)
 
         # Content Security Policy (CSP)
@@ -100,6 +132,86 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             response.headers["Expires"] = "0"
 
         return response
+
+    async def _validate_request_size(self, request: Request) -> None:
+        """Validate request size to prevent large payload attacks."""
+        content_length = request.headers.get("content-length")
+        
+        if content_length:
+            try:
+                size = int(content_length)
+                if size > settings.MAX_REQUEST_SIZE:
+                    self._log_security_event(
+                        "request_size_violation",
+                        f"Request size {size} exceeds limit {settings.MAX_REQUEST_SIZE}",
+                        request
+                    )
+                    raise HTTPException(
+                        status_code=413,
+                        detail="Request too large"
+                    )
+            except ValueError:
+                self._log_security_event(
+                    "invalid_content_length",
+                    f"Invalid content-length header: {content_length}",
+                    request
+                )
+
+    async def _validate_content_type(self, request: Request) -> None:
+        """Validate content type to prevent MIME confusion attacks."""
+        if request.method in ["GET", "HEAD", "OPTIONS"]:
+            return  # No body expected for these methods
+        
+        content_type = request.headers.get("content-type", "")
+        path = request.url.path
+        
+        # Find matching endpoint pattern
+        allowed_types = None
+        for endpoint, types in self.allowed_content_types.items():
+            if path.startswith(endpoint):
+                allowed_types = types
+                break
+        
+        if allowed_types is None:
+            # No specific rules for this endpoint, allow common types
+            allowed_types = ["application/json", "application/x-www-form-urlencoded", "multipart/form-data"]
+        
+        # Check if content type is allowed
+        content_type_lower = content_type.lower()
+        is_allowed = any(
+            allowed_type.lower() in content_type_lower 
+            for allowed_type in allowed_types
+        )
+        
+        if not is_allowed:
+            self._log_security_event(
+                "content_type_violation",
+                f"Invalid content-type '{content_type}' for path '{path}'. Allowed: {allowed_types}",
+                request
+            )
+            raise HTTPException(
+                status_code=415,
+                detail=f"Unsupported media type. Allowed: {', '.join(allowed_types)}"
+            )
+
+    def _log_security_event(self, event_type: str, message: str, request: Request) -> None:
+        """Log security events for monitoring and alerting."""
+        if not settings.ENABLE_SECURITY_EVENT_LOGGING:
+            return
+        
+        logger.warning(
+            f"Security event: {event_type} - {message}",
+            extra={
+                "event_type": event_type,
+                "security_message": message,
+                "path": request.url.path,
+                "method": request.method,
+                "client_ip": request.client.host if request.client else "unknown",
+                "user_agent": request.headers.get("user-agent", "unknown"),
+                "content_type": request.headers.get("content-type", "unknown"),
+                "content_length": request.headers.get("content-length", "unknown"),
+            }
+        )
 
 
 def configure_security_headers(app: Any) -> None:

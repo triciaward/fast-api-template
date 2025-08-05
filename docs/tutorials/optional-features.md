@@ -634,6 +634,39 @@ curl -I http://localhost:8000/
 
 ### Security Headers Configuration
 
+#### Request Size Validation
+
+Configure maximum request size to prevent DoS attacks:
+
+```env
+# Security Headers Enhanced Features
+ENABLE_REQUEST_SIZE_VALIDATION=true
+MAX_REQUEST_SIZE=10485760  # 10MB in bytes
+```
+
+#### Content-Type Validation
+
+The middleware automatically validates content types for different endpoints:
+
+- **Login endpoints**: `application/x-www-form-urlencoded`
+- **API endpoints**: `application/json`
+- **File uploads**: `multipart/form-data`
+
+#### Security Event Logging
+
+Monitor security violations with detailed logging:
+
+```env
+ENABLE_SECURITY_EVENT_LOGGING=true
+```
+
+Logs include:
+- Event type (request_size_violation, content_type_violation)
+- Client IP address
+- User agent
+- Request path and method
+- Content type and size
+
 #### Content Security Policy (CSP)
 
 The default CSP allows:
@@ -674,6 +707,9 @@ HSTS_PRELOAD=false
 ### Security Headers Features
 
 - **Automatic Protection**: All responses get security headers automatically
+- **Request Size Validation**: Prevents large payload attacks (configurable limit)
+- **Content-Type Validation**: Ensures proper content types for each endpoint
+- **Security Event Logging**: Logs security violations for monitoring
 - **Configurable CSP**: Customize content security policy for your needs
 - **HSTS Support**: Force HTTPS in production environments
 - **Cache Control**: Sensitive endpoints (auth) get no-cache headers
