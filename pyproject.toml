@@ -56,4 +56,4 @@ line-ending = "auto"
 [tool.black]
 line-length = 88
 target-version = ['py39']
-extend-exclude = "app/api/api_v1/endpoints/auth/account_deletion.py" 
+extend-exclude = "app/api/api_v1/endpoints/auth/account_deletion.py|app/core/security_headers.py" 

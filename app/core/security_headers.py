@@ -1,8 +1,10 @@
+# fmt: off
 """Security Headers Middleware for FastAPI.
 
 This module provides middleware to add security headers to HTTP responses.
 These headers help protect against various security vulnerabilities.
 """
+# fmt: on
 
 import logging
 from typing import Any
