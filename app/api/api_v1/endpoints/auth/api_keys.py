@@ -99,8 +99,7 @@ async def list_api_keys(
     )
 
     # Convert SQLAlchemy objects to Pydantic models
-    api_key_responses = [APIKeyResponse.model_validate(
-        api_key) for api_key in api_keys]
+    api_key_responses = [APIKeyResponse.model_validate(api_key) for api_key in api_keys]
 
     return APIKeyListResponse.create(  # type: ignore[return-value]
         items=api_key_responses,
