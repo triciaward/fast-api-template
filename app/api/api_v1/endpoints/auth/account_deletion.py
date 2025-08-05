@@ -35,8 +35,7 @@ async def request_account_deletion(
 
     try:
         # Check if user exists
-        user = crud_user.get_user_by_email_sync(
-            db, email=deletion_request.email)
+        user = crud_user.get_user_by_email_sync(db, email=deletion_request.email)
         if not user:
             # Don't reveal if user exists or not for security
             logger.info(
@@ -186,8 +185,7 @@ async def confirm_account_deletion(
         # Get user
         user = crud_user.get_user_by_id_sync(db, user_id)
         if not user:
-            logger.warning(
-                "User not found for account deletion", user_id=user_id)
+            logger.warning("User not found for account deletion", user_id=user_id)
             return AccountDeletionConfirmResponse(
                 message="User not found.",
                 deletion_confirmed=False,
@@ -259,13 +257,11 @@ async def cancel_account_deletion(
     db: Session = Depends(get_db_sync),
 ) -> AccountDeletionCancelResponse:
     """Cancel account deletion."""
-    logger.info("Account deletion cancellation request",
-                email=deletion_request.email)
+    logger.info("Account deletion cancellation request", email=deletion_request.email)
 
     try:
         # Check if user exists
-        user = crud_user.get_user_by_email_sync(
-            db, email=deletion_request.email)
+        user = crud_user.get_user_by_email_sync(db, email=deletion_request.email)
         if not user:
             # Don't reveal if user exists or not for security
             logger.info(
