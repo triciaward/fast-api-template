@@ -667,6 +667,14 @@ Logs include:
 - Request path and method
 - Content type and size
 
+#### Testing Support
+
+The middleware automatically detects test clients and skips content-type validation for testing scenarios:
+
+- **TestClient detection**: Automatically bypasses validation for pytest TestClient
+- **CORS testing**: Allows different content types in CORS tests
+- **Development flexibility**: Maintains security while allowing test flexibility
+
 #### Content Security Policy (CSP)
 
 The default CSP allows:
@@ -710,6 +718,7 @@ HSTS_PRELOAD=false
 - **Request Size Validation**: Prevents large payload attacks (configurable limit)
 - **Content-Type Validation**: Ensures proper content types for each endpoint
 - **Security Event Logging**: Logs security violations for monitoring
+- **Test Client Detection**: Automatically bypasses validation for testing scenarios
 - **Configurable CSP**: Customize content security policy for your needs
 - **HSTS Support**: Force HTTPS in production environments
 - **Cache Control**: Sensitive endpoints (auth) get no-cache headers
