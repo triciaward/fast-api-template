@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.logging_config import get_auth_logger
 from app.crud import user as crud_user
-from app.database.database import get_db, get_db_sync
+from app.database.database import get_db_sync
 from app.schemas.user import (
     AccountDeletionCancelRequest,
     AccountDeletionCancelResponse,

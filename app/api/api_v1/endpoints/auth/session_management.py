@@ -8,7 +8,7 @@ from app.api.api_v1.endpoints.users import get_current_user
 from app.core.logging_config import get_auth_logger
 from app.crud import refresh_token as crud_refresh_token
 from app.crud import user as crud_user
-from app.database.database import get_db, get_db_sync
+from app.database.database import get_db_sync
 from app.schemas.user import (
     RefreshTokenResponse,
     SessionInfo,
