@@ -263,7 +263,6 @@ async def oauth_login(
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
-            name = user_info.get("name")
 
         elif provider == "apple":
             user_info = await oauth_service.verify_apple_token(oauth_data.access_token)
@@ -275,7 +274,6 @@ async def oauth_login(
 
             oauth_id = user_info.get("sub")
             email = user_info.get("email")
-            name = user_info.get("name", "")
 
         if not oauth_id or not email:
             logger.warning(

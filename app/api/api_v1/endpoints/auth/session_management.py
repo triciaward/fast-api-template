@@ -275,9 +275,6 @@ async def revoke_all_sessions(
         email=current_user.email,
     )
 
-    # Get user's IP address
-    client_ip = request.client.host if request.client else None
-
     # Get the actual user object from database
     db_user = crud_user.get_user_by_id_sync(db, str(current_user.id))
     if not db_user:
