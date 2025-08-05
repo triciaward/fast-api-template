@@ -61,8 +61,6 @@ SYNC_TEST_DATABASE_URL = os.getenv(
 )
 
 # Create async engine for direct database tests
-if RUNNING_IN_CI:
-    print("CI DEBUG: About to create async test engine")
 test_engine = create_async_engine(
     TEST_DATABASE_URL,
     echo=False,
@@ -71,12 +69,8 @@ test_engine = create_async_engine(
     max_overflow=10,
     pool_recycle=300,
 )
-if RUNNING_IN_CI:
-    print("CI DEBUG: Async test engine created")
 
 # Create sync engine for TestClient tests
-if RUNNING_IN_CI:
-    print("CI DEBUG: About to create sync test engine")
 sync_test_engine = create_engine(
     SYNC_TEST_DATABASE_URL,
     echo=False,
@@ -84,8 +78,6 @@ sync_test_engine = create_engine(
     pool_size=5,
     max_overflow=10,
 )
-if RUNNING_IN_CI:
-    print("CI DEBUG: Sync test engine created")
 
 # Create session makers
 TestingAsyncSessionLocal = async_sessionmaker(

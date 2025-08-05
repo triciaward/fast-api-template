@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Middleware to add security headers to HTTP responses."""
 
-    def __init__(self, app: Any):
+    def __init__(self, app: Any) -> None:
         super().__init__(app)
         # Define allowed content types for different endpoints
         self.allowed_content_types = {
