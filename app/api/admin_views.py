@@ -6,7 +6,7 @@ All endpoints require superuser privileges.
 """
 
 import logging
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from fastapi import Depends, Form, HTTPException, Query, Request, status
 from fastapi.responses import RedirectResponse
@@ -34,7 +34,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 async def admin_api_keys_view(

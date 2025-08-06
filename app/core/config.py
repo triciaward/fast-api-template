@@ -32,8 +32,8 @@ class Settings(BaseSettings):
     SESSION_CLEANUP_INTERVAL_HOURS: int = 24
 
     # Superuser Bootstrap
-    FIRST_SUPERUSER: str | None = None
-    FIRST_SUPERUSER_PASSWORD: str | None = None
+    FIRST_SUPERUSER: Optional[str] = None
+    FIRST_SUPERUSER_PASSWORD: Optional[str] = None
 
     # Database
     DATABASE_URL: str = (
@@ -87,18 +87,18 @@ class Settings(BaseSettings):
     RATE_LIMIT_ACCOUNT_DELETION: str = "3/minute"
 
     # OAuth Configuration
-    GOOGLE_CLIENT_ID: str | None = None
-    GOOGLE_CLIENT_SECRET: str | None = None
-    APPLE_CLIENT_ID: str | None = None
-    APPLE_TEAM_ID: str | None = None
-    APPLE_KEY_ID: str | None = None
-    APPLE_PRIVATE_KEY: str | None = None
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    APPLE_CLIENT_ID: Optional[str] = None
+    APPLE_TEAM_ID: Optional[str] = None
+    APPLE_KEY_ID: Optional[str] = None
+    APPLE_PRIVATE_KEY: Optional[str] = None
 
     # Email Configuration
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
-    SMTP_USERNAME: str | None = None
-    SMTP_PASSWORD: str | None = None
+    SMTP_USERNAME: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
     FROM_EMAIL: str = "noreply@example.com"
@@ -138,7 +138,7 @@ class Settings(BaseSettings):
 
     # Error Monitoring (GlitchTip/Sentry)
     ENABLE_SENTRY: bool = False
-    SENTRY_DSN: str | None = None
+    SENTRY_DSN: Optional[str] = None
     SENTRY_ENVIRONMENT: str = "development"
     SENTRY_TRACES_SAMPLE_RATE: float = 0.1  # 10% of transactions
     SENTRY_PROFILES_SAMPLE_RATE: float = 0.1  # 10% of profiles
