@@ -184,6 +184,16 @@ jobs:
           timeout 60s pytest tests/template_tests/test_websocket.py::TestConnectionManager::test_send_personal_message_success -v --tb=short || echo "WebSocket personal message test failed"
           timeout 60s pytest tests/template_tests/test_websocket.py::TestConnectionManager::test_broadcast_success -v --tb=short || echo "WebSocket broadcast test failed"
           timeout 60s pytest tests/template_tests/test_websocket.py::TestConnectionManager::test_broadcast_json -v --tb=short || echo "WebSocket broadcast JSON test failed"
+          
+      - name: Run async tests (crud - completion phase)
+        run: |
+          echo "CI DEBUG: Running completion phase async CRUD tests individually..."
+          timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_create_user -v --tb=short || echo "CRUD create user test failed"
+          timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_get_user_by_email -v --tb=short || echo "CRUD get user by email test failed"
+          timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_authenticate_user_success -v --tb=short || echo "CRUD authenticate user test failed"
+          timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_user_password_hashing -v --tb=short || echo "CRUD password hashing test failed"
+          timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_user_uuid_generation -v --tb=short || echo "CRUD UUID generation test failed"
+          timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_user_timestamp_generation -v --tb=short || echo "CRUD timestamp generation test failed"
 
   lint:
     name: 🔍 Lint (ruff)
