@@ -41,20 +41,19 @@ async def list_users(
         oauth_provider=oauth_provider,
     )
 
-    user_list = []
-    for user in users:
-        user_list.append(
-            {
-                "id": str(user.id),
-                "email": user.email,
-                "username": user.username,
-                "is_superuser": user.is_superuser,
-                "is_verified": user.is_verified,
-                "is_deleted": user.is_deleted,
-                "date_created": user.date_created,
-                "oauth_provider": user.oauth_provider,
-            },
-        )
+    user_list = [
+        {
+            "id": str(user.id),
+            "email": user.email,
+            "username": user.username,
+            "is_superuser": user.is_superuser,
+            "is_verified": user.is_verified,
+            "is_deleted": user.is_deleted,
+            "date_created": user.date_created,
+            "oauth_provider": user.oauth_provider,
+        }
+        for user in users
+    ]
 
     print_json(
         {

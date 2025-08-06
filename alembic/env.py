@@ -1,6 +1,6 @@
-import os
 import sys
 from logging.config import fileConfig
+from pathlib import Path
 
 from sqlalchemy import engine_from_config, pool
 
@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.models import Base
 
 # Add the project root directory to the path so we can import our models
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+sys.path.append(Path(__file__).parent.parent)
 
 
 # this is the Alembic Config object, which provides

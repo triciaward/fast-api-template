@@ -12,7 +12,7 @@ This script provides automated database backup functionality with:
 import os
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from app.core.config import settings
@@ -69,7 +69,7 @@ class DatabaseBackup:
         Returns:
             Path to the backup file, or None if backup failed
         """
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         backup_filename = f"backup_{self.database}_{timestamp}.sql"
         backup_path = self.backup_dir / backup_filename
 
@@ -118,8 +118,8 @@ class DatabaseBackup:
         except subprocess.CalledProcessError as e:
             logger.exception(f"Backup failed: {e.stderr}")
             return None
-        except Exception as e:
-            logger.exception(f"Backup failed with unexpected error: {e}")
+        except Exception:
+            logger.exception("Backup failed with unexpected error")
             return None
 
     def _compress_backup(self, backup_path: Path) -> Path:
