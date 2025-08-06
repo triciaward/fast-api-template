@@ -51,7 +51,7 @@ class TestRateLimiterInitialization:
         assert result == mock_limiter_instance
 
     @patch("app.services.rate_limiter.settings")
-    @patch("app.services.rate_limiter.get_redis_client")
+    @patch("app.services.redis.get_redis_client")
     @patch("app.services.rate_limiter.Limiter")
     def test_get_limiter_redis_backend_available(
         self, mock_limiter, mock_get_redis, mock_settings
@@ -79,7 +79,7 @@ class TestRateLimiterInitialization:
         assert result == mock_limiter_instance
 
     @patch("app.services.rate_limiter.settings")
-    @patch("app.services.rate_limiter.get_redis_client")
+    @patch("app.services.redis.get_redis_client")
     @patch("app.services.rate_limiter.Limiter")
     def test_get_limiter_redis_backend_unavailable(
         self, mock_limiter, mock_get_redis, mock_settings
@@ -117,6 +117,10 @@ class TestRateLimiterInitialization:
         # Mock Limiter
         mock_limiter_instance = MagicMock()
         mock_limiter.return_value = mock_limiter_instance
+
+        # Reset the global limiter for this test
+        import app.services.rate_limiter as rate_limiter_module
+        rate_limiter_module.limiter = None
 
         # Get limiter twice
         limiter1 = get_limiter()
