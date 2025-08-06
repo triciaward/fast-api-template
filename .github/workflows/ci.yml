@@ -131,6 +131,23 @@ jobs:
         run: |
           echo "CI DEBUG: Running async rate limiting tests individually..."
           timeout 60s pytest tests/template_tests/test_rate_limiting.py::TestRateLimitingIntegration::test_init_rate_limiter -v --tb=short || echo "Rate limiter init test failed"
+          
+      - name: Run async tests (redis - additional)
+        run: |
+          echo "CI DEBUG: Running additional async Redis tests individually..."
+          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_close_redis_success -v --tb=short || echo "Redis close test failed"
+          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_init_redis_connection_error -v --tb=short || echo "Redis connection error test failed"
+          
+      - name: Run async tests (email - additional)
+        run: |
+          echo "CI DEBUG: Running additional async email tests individually..."
+          timeout 60s pytest tests/template_tests/test_email.py::TestEmailService::test_verify_token_user_not_found -v --tb=short || echo "Email token user not found test failed"
+          timeout 60s pytest tests/template_tests/test_email.py::TestEmailService::test_verify_token_expired -v --tb=short || echo "Email token expired test failed"
+          
+      - name: Run async tests (connection pooling - additional)
+        run: |
+          echo "CI DEBUG: Running additional async connection pooling tests individually..."
+          timeout 60s pytest tests/template_tests/test_connection_pooling.py::TestConnectionPooling::test_concurrent_async_connections -v --tb=short || echo "Concurrent async connections test failed"
 
   lint:
     name: 🔍 Lint (ruff)
