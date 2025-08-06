@@ -254,7 +254,10 @@ def raise_not_found_error(
 ) -> None:
     """Raise a resource not found error."""
     raise NotFoundException(
-        message=message, code=code, resource_type=resource_type, resource_id=resource_id,
+        message=message,
+        code=code,
+        resource_type=resource_type,
+        resource_id=resource_id,
     )
 
 
@@ -274,7 +277,8 @@ def raise_conflict_error(
 
 
 def raise_rate_limit_error(
-    message: str = "Rate limit exceeded", retry_after: int | None = None,
+    message: str = "Rate limit exceeded",
+    retry_after: int | None = None,
 ) -> None:
     """Raise a rate limit error."""
     raise RateLimitError(message=message, retry_after=retry_after)

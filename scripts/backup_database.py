@@ -306,15 +306,21 @@ def main():
 
     parser = argparse.ArgumentParser(description="Database backup utility")
     parser.add_argument(
-        "action", choices=["backup", "restore", "list", "cleanup", "verify"],
+        "action",
+        choices=["backup", "restore", "list", "cleanup", "verify"],
     )
     parser.add_argument("--backup-dir", default="backups", help="Backup directory")
     parser.add_argument("--file", help="Backup file for restore/verify operations")
     parser.add_argument(
-        "--days", type=int, default=30, help="Days to keep backups (for cleanup)",
+        "--days",
+        type=int,
+        default=30,
+        help="Days to keep backups (for cleanup)",
     )
     parser.add_argument(
-        "--no-compress", action="store_true", help="Don't compress backup",
+        "--no-compress",
+        action="store_true",
+        help="Don't compress backup",
     )
 
     args = parser.parse_args()

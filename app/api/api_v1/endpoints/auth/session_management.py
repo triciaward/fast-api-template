@@ -326,7 +326,8 @@ async def revoke_all_sessions(
 
     # Revoke all sessions for the user
     revoked_count = await crud_refresh_token.revoke_all_user_sessions(
-        db, str(current_user.id),
+        db,
+        str(current_user.id),
     )
 
     # Log the action

@@ -610,7 +610,9 @@ class TestRefreshTokenAPI:
     """Test refresh token API endpoints."""
 
     async def test_refresh_token_endpoint_success(
-        self, client, sync_db_session: Session,
+        self,
+        client,
+        sync_db_session: Session,
     ):
         """Test successful token refresh."""
         # Create user and session
