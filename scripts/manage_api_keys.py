@@ -37,7 +37,7 @@ def validate_datetime(datetime_string: str) -> datetime:
         return datetime.fromisoformat(datetime_string.replace("Z", "+00:00"))
     except ValueError as e:
         raise argparse.ArgumentTypeError(
-            f"'{datetime_string}' is not a valid datetime (use ISO format: YYYY-MM-DDTHH:MM:SS)"
+            f"'{datetime_string}' is not a valid datetime (use ISO format: YYYY-MM-DDTHH:MM:SS)",
         ) from e
 
 
@@ -69,24 +69,11 @@ def create_api_key(args: argparse.Namespace) -> None:
                 raw_key=raw_key,
             )
 
-            print("✅ API key created successfully!")
-            print(f"   ID: {api_key.id}")
-            print(f"   Label: {api_key.label}")
-            print(f"   User ID: {api_key.user_id}")
-            print(
-                f"   Scopes: {', '.join(api_key.scopes) if api_key.scopes else 'None'}"
-            )
-            print(f"   Active: {api_key.is_active}")
-            print(f"   Created: {api_key.created_at}")
             if api_key.expires_at:
-                print(f"   Expires: {api_key.expires_at}")
+                pass
 
-            print("\n🔑 RAW API KEY (save this securely - it won't be shown again):")
-            print(f"   {raw_key}")
-            print("\n⚠️  Warning: This is the only time you'll see the raw key!")
 
-        except Exception as e:
-            print(f"❌ Error creating API key: {e}")
+        except Exception:
             sys.exit(1)
 
 
@@ -101,14 +88,11 @@ def deactivate_api_key(args: argparse.Namespace) -> None:
             )
 
             if success:
-                print(f"✅ API key {args.key_id} deactivated successfully!")
+                pass
             else:
-                print(f"❌ Failed to deactivate API key {args.key_id}")
-                print("   Key not found or not owned by the specified user")
                 sys.exit(1)
 
-        except Exception as e:
-            print(f"❌ Error deactivating API key: {e}")
+        except Exception:
             sys.exit(1)
 
 
@@ -122,33 +106,20 @@ def list_api_keys(args: argparse.Namespace) -> None:
             )
 
             if not api_keys:
-                print(f"📭 No API keys found for user {args.user_id}")
                 return
 
-            print(f"📋 API keys for user {args.user_id}:")
-            print("-" * 80)
 
-            for i, api_key in enumerate(api_keys, 1):
-                status = "🟢 Active" if api_key.is_active else "🔴 Inactive"
-                expired = (
+            for _i, api_key in enumerate(api_keys, 1):
+                (
                     " (Expired)"
                     if api_key.expires_at and api_key.expires_at <= datetime.utcnow()
                     else ""
                 )
 
-                print(f"{i}. {api_key.label}")
-                print(f"   ID: {api_key.id}")
-                print(f"   Status: {status}{expired}")
-                print(
-                    f"   Scopes: {', '.join(api_key.scopes) if api_key.scopes else 'None'}"
-                )
-                print(f"   Created: {api_key.created_at}")
                 if api_key.expires_at:
-                    print(f"   Expires: {api_key.expires_at}")
-                print()
+                    pass
 
-        except Exception as e:
-            print(f"❌ Error listing API keys: {e}")
+        except Exception:
             sys.exit(1)
 
 
@@ -163,8 +134,6 @@ def rotate_api_key(args: argparse.Namespace) -> None:
             )
 
             if not result[0]:
-                print(f"❌ Failed to rotate API key {args.key_id}")
-                print("   Key not found or not owned by the specified user")
                 sys.exit(1)
 
             api_key, new_raw_key = result
@@ -172,22 +141,9 @@ def rotate_api_key(args: argparse.Namespace) -> None:
             # api_key is guaranteed to be not None here due to the check above
             assert api_key is not None
 
-            print(f"✅ API key {args.key_id} rotated successfully!")
-            print(f"   Label: {api_key.label}")
-            print(f"   User ID: {api_key.user_id}")
-            print(
-                f"   Scopes: {', '.join(api_key.scopes) if api_key.scopes else 'None'}"
-            )
-            print(f"   Status: {'Active' if api_key.is_active else 'Inactive'}")
 
-            print(
-                "\n🔑 NEW RAW API KEY (save this securely - it won't be shown again):"
-            )
-            print(f"   {new_raw_key}")
-            print("\n⚠️  Warning: This is the only time you'll see the new raw key!")
 
-        except Exception as e:
-            print(f"❌ Error rotating API key: {e}")
+        except Exception:
             sys.exit(1)
 
 
@@ -243,7 +199,7 @@ Examples:
 
     # Deactivate command
     deactivate_parser = subparsers.add_parser(
-        "deactivate", help="Deactivate an API key"
+        "deactivate", help="Deactivate an API key",
     )
     deactivate_parser.add_argument(
         "--key-id",
@@ -296,7 +252,6 @@ Examples:
     elif args.command == "rotate":
         rotate_api_key(args)
     else:
-        print(f"❌ Unknown command: {args.command}")
         sys.exit(1)
 
 

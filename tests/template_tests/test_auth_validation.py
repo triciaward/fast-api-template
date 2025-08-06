@@ -22,7 +22,7 @@ from tests.template_tests.conftest import TestingSyncSessionLocal
     5. Implement proper test data management
 
     See docs/tutorials/testing-and-development.md for implementation details.
-    """
+    """,
 )
 class TestAuthEndpointValidation:
     """Test authentication endpoint validation."""
@@ -120,7 +120,7 @@ class TestAuthEndpointValidation:
         5. Implement proper test data management
 
         See docs/tutorials/testing-and-development.md for implementation details.
-        """
+        """,
     )
     def test_register_duplicate_email(self, client: TestClient) -> None:
         """Test registration with duplicate email."""
@@ -157,7 +157,7 @@ class TestAuthEndpointValidation:
         5. Implement proper test data management
 
         See docs/tutorials/testing-and-development.md for implementation details.
-        """
+        """,
     )
     def test_register_duplicate_username(self, client: TestClient) -> None:
         """Test registration with duplicate username."""
@@ -181,7 +181,6 @@ class TestAuthEndpointValidation:
         """Test login with valid credentials."""
         # This test would require creating a user first, which is complex
         # due to email verification requirements
-        pass
 
     def test_login_invalid_credentials(self, client: TestClient) -> None:
         """Test login with invalid credentials."""
@@ -223,7 +222,7 @@ class TestAuthEndpointValidation:
     5. Implement proper test data management
 
     See docs/tutorials/testing-and-development.md for implementation details.
-    """
+    """,
 )
 class TestInputSanitization:
     """Test input sanitization and validation."""
@@ -314,7 +313,7 @@ class TestInputSanitization:
     5. Implement proper test data management
 
     See docs/tutorials/testing-and-development.md for implementation details.
-    """
+    """,
 )
 class TestEmailVerificationValidation:
     """Test email verification validation."""
@@ -362,7 +361,7 @@ class TestEmailVerificationValidation:
     5. Implement proper test data management
 
     See docs/tutorials/testing-and-development.md for implementation details.
-    """
+    """,
 )
 class TestSecurityValidation:
     """Test security-related validation."""
@@ -416,7 +415,7 @@ class TestSecurityValidation:
     5. Implement proper test data management
 
     See docs/tutorials/testing-and-development.md for implementation details.
-    """
+    """,
 )
 class TestBoundaryValidation:
     """Test boundary value validation."""
@@ -483,7 +482,7 @@ class TestBoundaryValidation:
     5. Implement proper test data management
 
     See docs/tutorials/testing-and-development.md for implementation details.
-    """
+    """,
 )
 class TestInputSanitizationEdgeCases:
     """Test edge cases in input sanitization."""
@@ -549,7 +548,7 @@ class TestInputSanitizationEdgeCases:
     5. Implement proper test data management
 
     See docs/tutorials/testing-and-development.md for implementation details.
-    """
+    """,
 )
 class TestWeakPasswordValidation:
     """Test weak password detection."""

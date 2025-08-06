@@ -4,7 +4,7 @@ Tests for Core Security module.
 This module tests the security functionality including password hashing, JWT token creation, refresh tokens, and API key management.
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import jwt
@@ -94,7 +94,7 @@ class TestJWTAccessTokens:
 
         # Decode and verify token
         decoded = jwt.decode(
-            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM]
+            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM],
         )
         assert decoded["sub"] == subject
         assert "exp" in decoded
@@ -113,13 +113,13 @@ class TestJWTAccessTokens:
 
         # Decode and verify token
         decoded = jwt.decode(
-            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM]
+            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM],
         )
         assert decoded["sub"] == subject
 
         # Verify expiry is approximately 2 hours from now
         exp_timestamp = decoded["exp"]
-        now_timestamp = datetime.now(UTC).timestamp()
+        now_timestamp = datetime.now(timezone.utc).timestamp()
         time_diff = exp_timestamp - now_timestamp
 
         # Should be approximately 2 hours (7200 seconds) with some tolerance
@@ -144,7 +144,7 @@ class TestJWTAccessTokens:
 
         # Decode and verify token
         decoded = jwt.decode(
-            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM]
+            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM],
         )
         assert decoded["sub"] == str(subject)
 
@@ -162,7 +162,7 @@ class TestJWTAccessTokens:
 
         # Decode and verify token
         decoded = jwt.decode(
-            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM]
+            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM],
         )
         assert decoded["sub"] == "12345"
 
@@ -180,7 +180,7 @@ class TestJWTAccessTokens:
 
         # Decode and verify token
         decoded = jwt.decode(
-            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM]
+            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM],
         )
 
         # Verify expiry is a valid timestamp

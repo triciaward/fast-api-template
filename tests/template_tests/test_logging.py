@@ -26,7 +26,7 @@ class TestLoggingConfiguration:
                     setup_logging()
                     logger = get_app_logger()
                     assert hasattr(logger, "_logger") or hasattr(
-                        logger, "logger_factory_args"
+                        logger, "logger_factory_args",
                     )
                     logger.info("Test message", test_field="test_value")
 
@@ -38,7 +38,7 @@ class TestLoggingConfiguration:
                     setup_logging()
                     logger = get_app_logger()
                     assert hasattr(logger, "_logger") or hasattr(
-                        logger, "logger_factory_args"
+                        logger, "logger_factory_args",
                     )
                     logger.info("Test message", test_field="test_value")
 
@@ -108,12 +108,11 @@ class TestLoggingConfiguration:
                     setup_logging()
                     logger = get_app_logger()
                     with tempfile.NamedTemporaryFile(
-                        mode="w+", delete=False
-                    ) as temp_file:
-                        with patch("sys.stdout", temp_file):
-                            logger.info("Test message")
-                            temp_file.seek(0)
-                            log_output = temp_file.read()
+                        mode="w+", delete=False,
+                    ) as temp_file, patch("sys.stdout", temp_file):
+                        logger.info("Test message")
+                        temp_file.seek(0)
+                        log_output = temp_file.read()
                     if log_output.strip():
                         log_entry = json.loads(log_output.strip())
                         assert "pid" in log_entry

@@ -20,11 +20,10 @@ try:
     import dotenv
 
     dotenv.load_dotenv(".env.test", override=True)
-    print("CI DEBUG: .env.test loaded successfully")
 except ImportError:
-    print("CI DEBUG: python-dotenv not available, using default test environment")
-except Exception as e:
-    print(f"CI DEBUG: Error loading .env.test: {e}")
+    pass
+except Exception:
+    pass
 
 # Set environment variables for testing
 os.environ.setdefault("TESTING", "1")
@@ -40,13 +39,10 @@ sys.modules.pop("app.api.api_v1.api", None)
 RUNNING_IN_CI = os.getenv("RUNNING_IN_CI", "false").lower() == "true"
 
 if RUNNING_IN_CI:
-    print("CI DEBUG: conftest.py module loaded")
-    print("CI DEBUG: RUNNING_IN_CI =", RUNNING_IN_CI)
+    pass
 
 
 # Verify environment variables are set
-print(f"ENABLE_CELERY: {os.getenv('ENABLE_CELERY')}")
-print(f"CELERY_TASK_ALWAYS_EAGER: {os.getenv('CELERY_TASK_ALWAYS_EAGER')}")
 
 # Import app AFTER environment variables are set
 
@@ -73,7 +69,7 @@ test_engine = create_async_engine(
         "server_settings": {
             "application_name": "fastapi_template_test",
             "jit": "off",
-        }
+        },
     },
 )
 
@@ -101,7 +97,7 @@ test_session_engine = create_async_engine(
         "server_settings": {
             "application_name": "fastapi_template_test_sessions",
             "jit": "off",
-        }
+        },
     },
 )
 
@@ -115,7 +111,7 @@ TestingAsyncSessionLocal = async_sessionmaker(
 )
 
 TestingSyncSessionLocal = sessionmaker(
-    bind=sync_test_engine, expire_on_commit=False, autocommit=False, autoflush=False
+    bind=sync_test_engine, expire_on_commit=False, autocommit=False, autoflush=False,
 )
 
 
@@ -123,68 +119,53 @@ TestingSyncSessionLocal = sessionmaker(
 def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     """Create an instance of the default event loop for the test session."""
     if RUNNING_IN_CI:
-        print("CI DEBUG: event_loop fixture started")
+        pass
     loop = asyncio.get_event_loop_policy().new_event_loop()
     if RUNNING_IN_CI:
-        print("CI DEBUG: event_loop created")
+        pass
     yield loop
     if RUNNING_IN_CI:
-        print("CI DEBUG: event_loop fixture cleanup")
+        pass
     loop.close()
     if RUNNING_IN_CI:
-        print("CI DEBUG: event_loop closed")
+        pass
 
 
 @pytest_asyncio.fixture(scope="session")
 async def setup_test_db() -> AsyncGenerator[None, None]:
     """Setup test database tables once for the session."""
     if RUNNING_IN_CI:
-        print("CI DEBUG: setup_test_db fixture started - SKIPPING ASYNC IN CI")
         # In CI, just create sync tables and skip async entirely
         Base.metadata.create_all(bind=sync_test_engine)
-        print("CI DEBUG: Sync tables created in CI")
         yield
         Base.metadata.drop_all(bind=sync_test_engine)
         sync_test_engine.dispose()
-        print("CI DEBUG: Sync tables dropped in CI")
         return
 
     # Normal async setup for local development
-    print("CI DEBUG: setup_test_db fixture started")
 
     # Create tables for async engine with timeout
-    print("CI DEBUG: About to create async tables")
     try:
         # Add timeout to async operations (Python 3.11+ compatible)
         if hasattr(asyncio, "timeout"):
             async with asyncio.timeout(30):  # 30 second timeout
                 async with test_engine.begin() as conn:
-                    print("CI DEBUG: Inside async engine.begin()")
                     await conn.run_sync(Base.metadata.create_all)
-                    print("CI DEBUG: Async tables created")
         else:
             # Fallback for Python < 3.11
             async with test_engine.begin() as conn:
-                print("CI DEBUG: Inside async engine.begin() (no timeout)")
                 await conn.run_sync(Base.metadata.create_all)
-                print("CI DEBUG: Async tables created")
     except TimeoutError:
-        print("CI DEBUG: Timeout creating async tables - falling back to sync only")
-    except Exception as e:
-        print(f"CI DEBUG: Error creating async tables: {e}")
-        print("CI DEBUG: Falling back to sync table creation only")
-        # Fall back to sync only
         pass
+    except Exception:
+        pass
+        # Fall back to sync only
 
     # Create tables for sync engine
-    print("CI DEBUG: About to create sync tables")
     Base.metadata.create_all(bind=sync_test_engine)
-    print("CI DEBUG: Sync tables created")
 
-    print("CI DEBUG: setup_test_db fixture yielding")
     yield
 
-    print("CI DEBUG: setup_test_db fixture cleanup started")
     # Drop tables for async engine
     try:
         if hasattr(asyncio, "timeout"):
@@ -200,9 +181,8 @@ async def setup_test_db() -> AsyncGenerator[None, None]:
             await test_engine.dispose()
             await test_session_engine.dispose()
     except TimeoutError:
-        print("CI DEBUG: Timeout dropping async tables")
-    except Exception as e:
-        print(f"CI DEBUG: Error dropping async tables: {e}")
+        pass
+    except Exception:
         try:
             await test_session_engine.dispose()
         except Exception:
@@ -211,7 +191,6 @@ async def setup_test_db() -> AsyncGenerator[None, None]:
     # Drop tables for sync engine
     Base.metadata.drop_all(bind=sync_test_engine)
     sync_test_engine.dispose()
-    print("CI DEBUG: setup_test_db fixture cleanup completed")
 
 
 @pytest_asyncio.fixture
@@ -225,9 +204,8 @@ async def db_session(setup_test_db: None) -> AsyncGenerator[AsyncSession, None]:
         try:
             await session.execute(text("DELETE FROM users WHERE id IS NOT NULL"))
             await session.commit()
-        except Exception as e:
+        except Exception:
             # If async database doesn't have tables, that's okay
-            print(f"CI DEBUG: Async cleanup failed (expected if no tables): {e}")
             await session.rollback()
 
         # Yield the session for the test
@@ -245,8 +223,8 @@ async def db_session(setup_test_db: None) -> AsyncGenerator[AsyncSession, None]:
                 await session.commit()
             except Exception:
                 await session.rollback()
-        except Exception as e:
-            print(f"CI DEBUG: Session cleanup failed: {e}")
+        except Exception:
+            pass
         finally:
             # Always close the session
             await session.close()
@@ -256,26 +234,26 @@ async def db_session(setup_test_db: None) -> AsyncGenerator[AsyncSession, None]:
 def setup_sync_test_db() -> Generator[None, None, None]:
     """Setup test database tables for sync operations."""
     if RUNNING_IN_CI:
-        print("CI DEBUG: setup_sync_test_db fixture started")
+        pass
     # Create tables for sync engine
     Base.metadata.create_all(bind=sync_test_engine)
     if RUNNING_IN_CI:
-        print("CI DEBUG: setup_sync_test_db tables created")
+        pass
     yield
     if RUNNING_IN_CI:
-        print("CI DEBUG: setup_sync_test_db cleanup started")
+        pass
     # Drop tables for sync engine
     Base.metadata.drop_all(bind=sync_test_engine)
     sync_test_engine.dispose()
     if RUNNING_IN_CI:
-        print("CI DEBUG: setup_sync_test_db cleanup completed")
+        pass
 
 
 @pytest.fixture
 def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
     """Create a test client with synchronous database session override."""
     if RUNNING_IN_CI:
-        print("CI DEBUG: client fixture started")
+        pass
 
     def override_get_db_sync() -> Generator:
         """Override to use our test-specific sync session."""
@@ -288,7 +266,7 @@ def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
     # Override the database dependency with our test-specific sync version
     app.dependency_overrides[get_db] = override_get_db_sync
     if RUNNING_IN_CI:
-        print("CI DEBUG: client fixture dependency overrides set")
+        pass
 
     # Clean the database before each test - more robust cleanup
     with sync_test_engine.begin() as conn:

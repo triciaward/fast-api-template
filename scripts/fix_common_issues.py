@@ -175,11 +175,7 @@ def validate_alembic_config(alembic_path: Path) -> bool:
     # Check for required sections
     required_sections = ["[alembic]", "script_location", "sqlalchemy.url"]
 
-    for section in required_sections:
-        if section not in content:
-            return False
-
-    return True
+    return all(section in content for section in required_sections)
 
 
 def create_alembic_config(alembic_path: Path) -> None:

@@ -22,7 +22,7 @@ from app.services.rate_limiter import (
 # Suppress the RuntimeWarning about coroutine not being awaited
 # This is a known issue with the test setup and doesn't affect functionality
 warnings.filterwarnings(
-    "ignore", message=".*coroutine.*was never awaited.*", category=RuntimeWarning
+    "ignore", message=".*coroutine.*was never awaited.*", category=RuntimeWarning,
 )
 
 
@@ -263,7 +263,7 @@ class TestRateLimitingEdgeCases:
 
     @patch("app.services.rate_limiter.settings")
     def test_get_rate_limit_info_with_limiter_error(
-        self, mock_settings: MagicMock
+        self, mock_settings: MagicMock,
     ) -> None:
         """Test get_rate_limit_info when limiter raises an error."""
         mock_settings.ENABLE_RATE_LIMITING = True

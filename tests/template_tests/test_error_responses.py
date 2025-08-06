@@ -187,13 +187,11 @@ class TestStandardizedErrorResponses:
         """Test that rate limit errors follow the standardized format."""
         # This would require hitting rate limits, which is harder to test
         # For now, we'll test the error handler structure
-        pass
 
     def test_server_error_format(self, client: TestClient) -> None:
         """Test that server errors follow the standardized format."""
         # This would require triggering a server error, which is harder to test
         # For now, we'll test the error handler structure
-        pass
 
 
 class TestCustomExceptions:

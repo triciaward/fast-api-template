@@ -7,7 +7,7 @@ from tests.template_tests.conftest import TestingSyncSessionLocal
 
 
 @pytest.mark.skip(
-    reason="Requires complex password change functionality - not implemented yet"
+    reason="Requires complex password change functionality - not implemented yet",
 )
 class TestPasswordChange:
     """Test password change endpoint."""

@@ -14,10 +14,10 @@ from app.schemas.user import UserCreate
 
 
 @pytest.mark.skip(
-    reason="Requires complex pagination functionality - not implemented yet"
+    reason="Requires complex pagination functionality - not implemented yet",
 )
 def test_list_users_with_pagination(
-    client: TestClient, sync_db_session: Session
+    client: TestClient, sync_db_session: Session,
 ) -> None:
     """Test user listing with pagination."""
     # Create test users
@@ -92,7 +92,7 @@ def test_list_users_with_pagination(
 
 
 @pytest.mark.skip(
-    reason="Requires complex pagination functionality - not implemented yet"
+    reason="Requires complex pagination functionality - not implemented yet",
 )
 def test_list_users_with_filters(client: TestClient, sync_db_session: Session) -> None:
     """Test user listing with filters."""
@@ -151,10 +151,10 @@ def test_list_users_with_filters(client: TestClient, sync_db_session: Session) -
 
 
 @pytest.mark.skip(
-    reason="Requires complex pagination functionality - not implemented yet"
+    reason="Requires complex pagination functionality - not implemented yet",
 )
 def test_list_users_default_pagination(
-    client: TestClient, sync_db_session: Session
+    client: TestClient, sync_db_session: Session,
 ) -> None:
     """Test user listing with default pagination parameters."""
     # Create a test user for authentication
@@ -189,7 +189,7 @@ def test_list_users_unauthorized(client: TestClient) -> None:
 
 
 def test_list_users_invalid_pagination(
-    client: TestClient, sync_db_session: Session
+    client: TestClient, sync_db_session: Session,
 ) -> None:
     """Test user listing with invalid pagination parameters."""
     # Create a test user for authentication

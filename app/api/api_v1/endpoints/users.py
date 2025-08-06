@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.crud import api_key as crud_api_key
 from app.crud import user as crud_user
+from app.crud.admin import AdminUserCRUD
 from app.database.database import get_db
 from app.schemas.user import (
     APIKeyUser,
@@ -27,17 +28,20 @@ from app.utils.search_filter import DeletedUserSearchParams, UserSearchParams
 
 router = APIRouter()
 
+# Initialize admin CRUD for user operations
+admin_user_crud = AdminUserCRUD()
+
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db),
 ) -> UserResponse:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -46,7 +50,7 @@ async def get_current_user(
     )
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM],
         )
         email = payload.get("sub")
         if email is None:
@@ -193,14 +197,14 @@ async def list_users(
     - ?date_created_after=2024-01-01T00:00:00Z
     """
     # Get users with pagination and search
-    users = await crud_user.get_users(
+    users = await admin_user_crud.get_users(
         db=db,
         skip=pagination.skip,
         limit=pagination.limit,
     )
 
     # Get total count with same filters
-    total = await crud_user.count_users(
+    total = await admin_user_crud.count(
         db=db,
     )
 
@@ -253,14 +257,14 @@ async def search_users(
     - sort_order: Sort direction used
     """
     # Get users with pagination and search
-    users = await crud_user.get_users(
+    users = await admin_user_crud.get_users(
         db=db,
         skip=pagination.skip,
         limit=pagination.limit,
     )
 
     # Get total count with same filters
-    total = await crud_user.count_users(
+    total = await admin_user_crud.count(
         db=db,
     )
 
@@ -344,12 +348,12 @@ async def soft_delete_user(
     user = crud_user.get_user_by_id_sync(db, user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found",
         )
 
     if user.is_deleted:  # type: ignore
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="User is already deleted"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="User is already deleted",
         )
 
     # Perform soft delete
@@ -396,12 +400,12 @@ async def restore_user(
     user = crud_user.get_user_by_id_sync(db, user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found",
         )
 
     if not user.is_deleted:  # type: ignore
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="User is not deleted"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="User is not deleted",
         )
 
     # Perform restore
@@ -446,14 +450,14 @@ async def list_deleted_users(
     - ?deletion_reason=spam&deleted_after=2024-01-01T00:00:00Z
     """
     # Get deleted users with pagination and search
-    users = await crud_user.get_deleted_users(
+    users = await admin_user_crud.get_deleted_users(
         db=db,
         skip=pagination.skip,
         limit=pagination.limit,
     )
 
     # Get total count with same filters
-    total = await crud_user.count_deleted_users(
+    total = await admin_user_crud.count_deleted_users(
         db=db,
     )
 
@@ -505,14 +509,14 @@ async def search_deleted_users(
     - sort_order: Sort direction used
     """
     # Get deleted users with pagination and search
-    users = await crud_user.get_deleted_users(
+    users = await admin_user_crud.get_deleted_users(
         db=db,
         skip=pagination.skip,
         limit=pagination.limit,
     )
 
     # Get total count with same filters
-    total = await crud_user.count_deleted_users(
+    total = await admin_user_crud.count_deleted_users(
         db=db,
     )
 
@@ -585,7 +589,7 @@ async def permanently_delete_user(
     user = crud_user.get_user_by_id_sync(db, user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found",
         )
 
     # Perform permanent delete
@@ -598,4 +602,4 @@ async def permanently_delete_user(
         )
 
     # Return 204 No Content
-    return None
+    return

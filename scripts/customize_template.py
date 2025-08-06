@@ -41,77 +41,49 @@ class TemplateCustomizer:
         current_dir = self.project_root.name
 
         # If it's still the default template name, this is an error
-        if current_dir == "fast-api-template":
-            print("❌ Error: You're still in the 'fast-api-template' directory!")
-            print("")
-            print("This script should be run AFTER renaming the directory.")
-            print("")
-            print("Please run the rename script first:")
-            print("   ./scripts/rename_template.sh")
-            print("")
-            print("Then restart VS Code and open the renamed directory.")
-            sys.exit(1)
-        elif not current_dir.endswith("_backend"):
-            print("❌ Error: This doesn't appear to be a renamed project directory!")
-            print("")
-            print(
-                "This script should be run from a renamed project directory (ending with _backend)."
-            )
-            print("")
-            print("Please run the rename script first:")
-            print("   ./scripts/rename_template.sh")
-            print("")
-            print("Then restart VS Code and open the renamed directory.")
+        if current_dir == "fast-api-template" or not current_dir.endswith("_backend"):
             sys.exit(1)
         else:
-            print(f"✅ Directory name looks good: {current_dir}")
-            print("   This appears to be a renamed template directory.")
+            pass
 
     def get_user_input(self) -> None:
         """Get project details from user input."""
-        print("🚀 FastAPI Template Customization - Step 2")
-        print("=" * 50)
-        print("This script will transform the template into your custom project.")
-        print("Please provide the following information:\n")
 
         # Project name (human readable)
         project_name = input("Project name (e.g., 'My Awesome Project'): ").strip()
         if not project_name:
-            print("❌ Project name is required!")
             sys.exit(1)
 
         # Project slug (for directories, databases, etc.)
         project_slug = input(
-            "Project slug (e.g., 'myawesomeproject_backend'): "
+            "Project slug (e.g., 'myawesomeproject_backend'): ",
         ).strip()
         if not project_slug:
             # Auto-generate from project name and append _backend
             project_slug = re.sub(r"[^a-zA-Z0-9]", "_", project_name.lower())
             project_slug = re.sub(r"_+", "_", project_slug).strip("_")
             project_slug = f"{project_slug}_backend"
-            print(f"   Auto-generated slug: {project_slug}")
         elif not project_slug.endswith("_backend"):
             # Ensure it ends with _backend
             project_slug = f"{project_slug}_backend"
-            print(f"   Updated slug to: {project_slug}")
 
         # Database name
         db_name = input(
-            f"Database name (e.g., '{project_slug}', default: {project_slug}): "
+            f"Database name (e.g., '{project_slug}', default: {project_slug}): ",
         ).strip()
         if not db_name:
             db_name = project_slug
 
         # Docker project name
         docker_name = input(
-            f"Docker project name (e.g., '{project_slug}', default: {project_slug}): "
+            f"Docker project name (e.g., '{project_slug}', default: {project_slug}): ",
         ).strip()
         if not docker_name:
             docker_name = project_slug
 
         # Description
         description = input(
-            "Project description (e.g., 'A FastAPI backend for my awesome project'): "
+            "Project description (e.g., 'A FastAPI backend for my awesome project'): ",
         ).strip()
         if not description:
             description = f"{project_name} with Authentication"
@@ -126,18 +98,9 @@ class TemplateCustomizer:
             email = "your.email@example.com"
 
         # Confirm customization
-        print("\n📋 Customization Summary:")
-        print(f"  Project Name: {project_name}")
-        print(f"  Project Slug: {project_slug}")
-        print(f"  Database Name: {db_name}")
-        print(f"  Docker Name: {docker_name}")
-        print(f"  Description: {description}")
-        print(f"  Author: {author} <{email}>")
-        print("")
 
         confirm = input("Proceed with customization? (y/N): ").strip().lower()
         if confirm not in ["y", "yes"]:
-            print("❌ Customization cancelled.")
             sys.exit(0)
 
         # Store replacements
@@ -208,7 +171,7 @@ class TemplateCustomizer:
                         with open(file_path, encoding="utf-8") as f:
                             content = f.read()
                             # Check if file contains template references
-                            if any(old in content for old in self.replacements.keys()):
+                            if any(old in content for old in self.replacements):
                                 files_to_process.append(file_path)
                     except (OSError, UnicodeDecodeError):
                         # Skip binary files or files we can't read
@@ -252,8 +215,7 @@ class TemplateCustomizer:
 
             return False
 
-        except Exception as e:
-            print(f"   ⚠️  Warning: Could not process {file_path}: {e}")
+        except Exception:
             return False
 
     def customize_readme(self, content: str) -> str:
@@ -266,13 +228,12 @@ class TemplateCustomizer:
         )
 
         # Update the welcome message
-        content = re.sub(
+        return re.sub(
             r"Welcome to your new FastAPI project! 🎉",
             f"Welcome to {self.replacements.get('FastAPI Template', 'your new FastAPI project')}! 🎉",
             content,
         )
 
-        return content
 
     def customize_alembic_ini(self) -> None:
         """Customize the alembic.ini file with the new database name."""
@@ -298,17 +259,15 @@ class TemplateCustomizer:
                 with open(alembic_file, "w", encoding="utf-8") as f:
                     f.write(content)
 
-                print("   ✅ Updated: alembic.ini with new database name")
 
-            except Exception as e:
-                print(f"   ⚠️  Warning: Could not update alembic.ini: {e}")
+            except Exception:
+                pass
 
     def update_git_remote(self) -> None:
         """Update git remote information."""
         git_config = self.project_root / ".git" / "config"
         if git_config.exists():
-            print("   📝 Note: Remember to update your git remote:")
-            print("      git remote set-url origin <your-repo-url>")
+            pass
 
     def update_env_file(self) -> None:
         """Update the .env file with the new Docker project name."""
@@ -338,10 +297,9 @@ class TemplateCustomizer:
                 with open(env_file, "w", encoding="utf-8") as f:
                     f.write(content)
 
-                print("   ✅ Updated: .env file with Docker project name")
 
-            except Exception as e:
-                print(f"   ⚠️  Warning: Could not update .env file: {e}")
+            except Exception:
+                pass
 
     def create_customization_log(self) -> None:
         """Create a log file documenting the customization."""
@@ -387,29 +345,21 @@ Original template: https://github.com/your-username/fast-api-template
 
     def run(self) -> None:
         """Run the complete customization process."""
-        print("🚀 Starting template customization...\n")
 
         # Get user input
         self.get_user_input()
 
         # Get files to process
-        print("\n📁 Scanning files for template references...")
         files_to_process = self.get_files_to_process()
-        print(f"   Found {len(files_to_process)} files to process\n")
 
         # Process files
-        print("🔄 Processing files...")
         processed_count = 0
 
         for file_path in files_to_process:
-            relative_path = file_path.relative_to(self.project_root)
+            file_path.relative_to(self.project_root)
             if self.process_file(file_path):
-                print(f"   ✅ Updated: {relative_path}")
                 processed_count += 1
 
-        print("\n📊 Customization Summary:")
-        print(f"   Files processed: {len(files_to_process)}")
-        print(f"   Files updated: {processed_count}")
 
         # Update .env file with Docker project name
         self.update_env_file()
@@ -419,19 +369,10 @@ Original template: https://github.com/your-username/fast-api-template
 
         # Create customization log
         self.create_customization_log()
-        print("   📝 Created: docs/troubleshooting/TEMPLATE_CUSTOMIZATION.md")
 
         # Update git remote info
         self.update_git_remote()
 
-        print("\n🎉 STEP 2 COMPLETE!")
-        print("==================")
-        print("\n📋 Next Steps:")
-        print("1. Review the changes in docs/troubleshooting/TEMPLATE_CUSTOMIZATION.md")
-        print("2. Update your git remote: git remote set-url origin <your-repo-url>")
-        print("3. Run the setup script: ./scripts/setup_project.sh")
-        print("4. Start developing your application!")
-        print("\n✨ Happy coding!")
 
 
 def main():
@@ -440,10 +381,8 @@ def main():
         customizer = TemplateCustomizer()
         customizer.run()
     except KeyboardInterrupt:
-        print("\n❌ Customization cancelled by user.")
         sys.exit(1)
-    except Exception as e:
-        print(f"\n❌ Error during customization: {e}")
+    except Exception:
         sys.exit(1)
 
 

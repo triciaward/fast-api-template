@@ -282,7 +282,7 @@ class TestFixCommonIssuesScript:
 
             # Create .env with wrong CORS format
             env_path.write_text(
-                "BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8080\n"
+                "BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8080\n",
             )
 
             from scripts.fix_common_issues import fix_cors_format
@@ -327,7 +327,7 @@ class TestFixCommonIssuesScript:
 [alembic]
 script_location = alembic
 sqlalchemy.url = postgresql://postgres:dev_password_123@localhost:5432/fastapi_template
-"""
+""",
             )
 
             from scripts.fix_common_issues import validate_alembic_config
@@ -379,7 +379,7 @@ class TestScriptIntegration:
             "POSTGRES_PASSWORD": "test_pass",
             "POSTGRES_PORT": "5432",
             "API_PORT": "8000",
-        }.get(var, None)
+        }.get(var)
 
         # Mock successful subprocess calls
         mock_run.return_value.returncode = 0

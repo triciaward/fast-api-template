@@ -46,7 +46,7 @@ class TestOAuthServiceInitialization:
     @patch("app.services.oauth.OAuth")
     @patch("app.services.oauth.Config")
     def test_oauth_service_initialization_no_google_config(
-        self, mock_config, mock_oauth, mock_settings
+        self, mock_config, mock_oauth, mock_settings,
     ):
         """Test OAuth service initialization without Google configuration."""
         # Mock settings - no Google config
@@ -198,7 +198,7 @@ class TestGoogleOAuth:
     @patch("app.services.oauth.settings")
     @patch("app.services.oauth.httpx.AsyncClient")
     async def test_verify_google_token_invalid_audience(
-        self, mock_client, mock_settings
+        self, mock_client, mock_settings,
     ):
         """Test Google token verification with invalid audience."""
         # Mock settings
@@ -281,7 +281,7 @@ class TestAppleOAuth:
 
         # Verify JWT decode call
         mock_jwt_decode.assert_called_once_with(
-            "valid_id_token", options={"verify_signature": False}
+            "valid_id_token", options={"verify_signature": False},
         )
 
     @patch("app.services.oauth.settings")
@@ -305,7 +305,7 @@ class TestAppleOAuth:
     @patch("app.services.oauth.settings")
     @patch("app.services.oauth.jwt.decode")
     async def test_verify_apple_token_invalid_audience(
-        self, mock_jwt_decode, mock_settings
+        self, mock_jwt_decode, mock_settings,
     ):
         """Test Apple token verification with invalid audience."""
         # Mock settings
@@ -514,7 +514,7 @@ class TestOAuthIntegration:
     @patch("app.services.oauth.httpx.AsyncClient")
     @patch("app.services.oauth.jwt.decode")
     async def test_oauth_lifecycle_google(
-        self, mock_jwt_decode, mock_client, mock_settings
+        self, mock_jwt_decode, mock_client, mock_settings,
     ):
         """Test complete Google OAuth lifecycle."""
         # Mock settings

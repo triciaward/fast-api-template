@@ -160,7 +160,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                         request,
                     )
                     raise HTTPException(
-                        status_code=400, detail="Invalid content length"
+                        status_code=400, detail="Invalid content length",
                     )
 
                 if size > settings.MAX_REQUEST_SIZE:
@@ -177,7 +177,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                     request,
                 )
                 raise HTTPException(
-                    status_code=400, detail="Invalid content length"
+                    status_code=400, detail="Invalid content length",
                 ) from None
 
     async def _validate_content_type(self, request: Request) -> None:
@@ -237,7 +237,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             )
 
     def _log_security_event(
-        self, event_type: str, message: str, request: Request
+        self, event_type: str, message: str, request: Request,
     ) -> None:
         """Log security events for monitoring and alerting."""
         if not settings.ENABLE_SECURITY_EVENT_LOGGING:

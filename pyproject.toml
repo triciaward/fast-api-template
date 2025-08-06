@@ -37,10 +37,38 @@ select = [
     "B",  # flake8-bugbear
     "C4", # flake8-comprehensions
     "UP", # pyupgrade
+    "A",  # flake8-builtins
+    "COM", # flake8-commas
+    "DTZ", # flake8-datetimez
+    "T20", # flake8-print
+    "TCH", # flake8-type-checking
+    "ARG", # flake8-unused-arguments
+    "PIE", # flake8-pie
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "Q",   # flake8-quotes
+    "RSE", # flake8-raise
+    "RET", # flake8-return
+    "SLF", # flake8-self
+    "SLOT", # flake8-slots
+    "TRY", # flake8-try
+    "NPY", # flake8-numpy
+    "AIR", # flake8-import-conventions
+    "PERF", # flake8-perf
+    "PTH", # flake8-use-pathlib
+    "LOG", # flake8-logging-format
+    "RUF", # ruff-specific rules
 ]
 ignore = [
     "E501",  # line too long, handled by formatter
     "B008",  # do not perform function calls in argument defaults
+    "UP017",  # Use datetime.UTC alias - disabled for Python 3.11 compatibility
+    "TCH001", # Type checking imports should be in TYPE_CHECKING block
+    "TCH002", # Type checking imports should be in TYPE_CHECKING block
+    "TCH003", # Type checking imports should be in TYPE_CHECKING block
+    "ARG001", # Unused function argument
+    "SIM105", # Use contextlib.suppress instead of try-except-pass
+    "RUF012", # Mutable class attributes should be annotated with typing.ClassVar
 ]
 
 [tool.ruff.lint.isort]

@@ -1,5 +1,5 @@
-from datetime import UTC, datetime, timedelta
-from typing import Any, Union
+from datetime import datetime, timedelta, timezone
+from typing import Any
 
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,12 +8,12 @@ from sqlalchemy.orm import Session
 from app.models import AuditLog
 
 # Type alias for both sync and async sessions
-DBSession = Union[AsyncSession, Session]
+DBSession = AsyncSession | Session
 
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 async def create_audit_log(
@@ -94,7 +94,7 @@ async def get_audit_logs_by_user(
             .filter(AuditLog.user_id == user_id)
             .order_by(desc(AuditLog.timestamp))
             .offset(offset)
-            .limit(limit)
+            .limit(limit),
         )
     else:
         result = db.execute(
@@ -102,10 +102,10 @@ async def get_audit_logs_by_user(
             .filter(AuditLog.user_id == user_id)
             .order_by(desc(AuditLog.timestamp))
             .offset(offset)
-            .limit(limit)
+            .limit(limit),
         )
 
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 def get_audit_logs_by_user_sync(
@@ -122,7 +122,7 @@ def get_audit_logs_by_user_sync(
             .filter(AuditLog.user_id.is_(None))
             .order_by(desc(AuditLog.timestamp))
             .offset(offset)
-            .limit(limit)
+            .limit(limit),
         )
     else:
         result = db.execute(
@@ -130,9 +130,9 @@ def get_audit_logs_by_user_sync(
             .filter(AuditLog.user_id == user_id)
             .order_by(desc(AuditLog.timestamp))
             .offset(offset)
-            .limit(limit)
+            .limit(limit),
         )
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def get_audit_logs_by_event_type(
@@ -148,7 +148,7 @@ async def get_audit_logs_by_event_type(
             .filter(AuditLog.event_type == event_type)
             .order_by(desc(AuditLog.timestamp))
             .offset(offset)
-            .limit(limit)
+            .limit(limit),
         )
     else:
         result = db.execute(
@@ -156,10 +156,10 @@ async def get_audit_logs_by_event_type(
             .filter(AuditLog.event_type == event_type)
             .order_by(desc(AuditLog.timestamp))
             .offset(offset)
-            .limit(limit)
+            .limit(limit),
         )
 
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def get_audit_logs_by_session(
@@ -175,7 +175,7 @@ async def get_audit_logs_by_session(
             .filter(AuditLog.session_id == session_id)
             .order_by(desc(AuditLog.timestamp))
             .offset(offset)
-            .limit(limit)
+            .limit(limit),
         )
     else:
         result = db.execute(
@@ -183,10 +183,10 @@ async def get_audit_logs_by_session(
             .filter(AuditLog.session_id == session_id)
             .order_by(desc(AuditLog.timestamp))
             .offset(offset)
-            .limit(limit)
+            .limit(limit),
         )
 
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def get_recent_audit_logs(
@@ -200,17 +200,17 @@ async def get_recent_audit_logs(
             select(AuditLog)
             .order_by(desc(AuditLog.timestamp))
             .offset(offset)
-            .limit(limit)
+            .limit(limit),
         )
     else:
         result = db.execute(
             select(AuditLog)
             .order_by(desc(AuditLog.timestamp))
             .offset(offset)
-            .limit(limit)
+            .limit(limit),
         )
 
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def get_failed_audit_logs(
@@ -225,7 +225,7 @@ async def get_failed_audit_logs(
             .filter(AuditLog.success.is_(False))
             .order_by(desc(AuditLog.timestamp))
             .offset(offset)
-            .limit(limit)
+            .limit(limit),
         )
     else:
         result = db.execute(
@@ -233,10 +233,10 @@ async def get_failed_audit_logs(
             .filter(AuditLog.success.is_(False))
             .order_by(desc(AuditLog.timestamp))
             .offset(offset)
-            .limit(limit)
+            .limit(limit),
         )
 
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def cleanup_old_audit_logs(db: DBSession, days_to_keep: int = 90) -> int:
@@ -245,7 +245,7 @@ async def cleanup_old_audit_logs(db: DBSession, days_to_keep: int = 90) -> int:
 
     if isinstance(db, AsyncSession):
         result = await db.execute(
-            select(AuditLog).filter(AuditLog.timestamp < cutoff_date)
+            select(AuditLog).filter(AuditLog.timestamp < cutoff_date),
         )
         old_logs = result.scalars().all()
     else:
@@ -266,3 +266,20 @@ async def cleanup_old_audit_logs(db: DBSession, days_to_keep: int = 90) -> int:
         db.commit()
 
     return count
+
+
+def get_audit_logs_by_event_type_sync(
+    db: Session,
+    event_type: str,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[AuditLog]:
+    """Get audit logs by event type (sync version)."""
+    result = db.execute(
+        select(AuditLog)
+        .filter(AuditLog.event_type == event_type)
+        .order_by(desc(AuditLog.timestamp))
+        .offset(offset)
+        .limit(limit),
+    )
+    return list(result.scalars().all())

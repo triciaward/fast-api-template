@@ -45,7 +45,7 @@ class TestAuthEndpoints:
         5. Implement proper test data management
 
         See docs/tutorials/testing-and-development.md for implementation details.
-        """
+        """,
     )
     def test_register_user_duplicate_email(self, client: TestClient) -> None:
         """Test user registration with duplicate email."""
@@ -82,7 +82,7 @@ class TestAuthEndpoints:
         5. Implement proper test data management
 
         See docs/tutorials/testing-and-development.md for implementation details.
-        """
+        """,
     )
     def test_register_user_duplicate_username(self, client: TestClient) -> None:
         """Test user registration with duplicate username."""
@@ -156,7 +156,7 @@ class TestAuthEndpoints:
         5. Implement proper test data management
 
         See docs/tutorials/testing-and-development.md for implementation details.
-        """
+        """,
     )
     def test_login_success(self, client: TestClient) -> None:
         """Test successful user login."""
@@ -205,7 +205,7 @@ class TestAuthEndpoints:
         5. Implement proper test data management
 
         See docs/tutorials/testing-and-development.md for implementation details.
-        """
+        """,
     )
     def test_login_wrong_password(self, client: TestClient) -> None:
         """Test login with wrong password."""
@@ -250,7 +250,7 @@ class TestAuthEndpoints:
         5. Implement proper test data management
 
         See docs/tutorials/testing-and-development.md for implementation details.
-        """
+        """,
     )
     def test_login_wrong_email(self, client: TestClient) -> None:
         """Test login with non-existent email."""
@@ -301,7 +301,7 @@ class TestAuthEndpoints:
         5. Implement proper test data management
 
         See docs/tutorials/testing-and-development.md for implementation details.
-        """
+        """,
     )
     def test_login_unverified_user(self, client: TestClient) -> None:
         """Test login with unverified user."""

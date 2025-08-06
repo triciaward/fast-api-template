@@ -4,7 +4,7 @@ Tests for Email service.
 This module tests the Email service functionality including email sending, token generation, and verification.
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
 from app.services.email import EmailService
@@ -111,7 +111,7 @@ class TestEmailService:
 
         email_service = EmailService()
         result = email_service.send_verification_email(
-            "user@example.com", "testuser", "test-token-123"
+            "user@example.com", "testuser", "test-token-123",
         )
 
         # Verify result
@@ -137,7 +137,7 @@ class TestEmailService:
 
         email_service = EmailService()
         result = email_service.send_verification_email(
-            "user@example.com", "testuser", "test-token-123"
+            "user@example.com", "testuser", "test-token-123",
         )
 
         # Verify result
@@ -146,7 +146,7 @@ class TestEmailService:
     @patch("app.services.email.settings")
     @patch("app.services.email.emails.Message")
     def test_send_verification_email_send_error(
-        self, mock_message_class, mock_settings
+        self, mock_message_class, mock_settings,
     ):
         """Test verification email sending with send error."""
         # Mock settings
@@ -166,7 +166,7 @@ class TestEmailService:
 
         email_service = EmailService()
         result = email_service.send_verification_email(
-            "user@example.com", "testuser", "test-token-123"
+            "user@example.com", "testuser", "test-token-123",
         )
 
         # Verify result
@@ -175,7 +175,7 @@ class TestEmailService:
     @patch("app.services.email.settings")
     @patch("app.services.email.crud_user.update_verification_token_sync")
     async def test_create_verification_token_success(
-        self, mock_update_token, mock_settings
+        self, mock_update_token, mock_settings,
     ):
         """Test successful verification token creation."""
         # Mock settings
@@ -202,7 +202,7 @@ class TestEmailService:
     @patch("app.services.email.settings")
     @patch("app.services.email.crud_user.update_verification_token_sync")
     async def test_create_verification_token_db_error(
-        self, mock_update_token, mock_settings
+        self, mock_update_token, mock_settings,
     ):
         """Test verification token creation with database error."""
         # Mock settings
@@ -224,7 +224,7 @@ class TestEmailService:
         # Mock user found with proper datetime
         mock_user = MagicMock()
         mock_user.id = "user-123"
-        mock_user.verification_token_expires = datetime.now(UTC) + timedelta(hours=1)
+        mock_user.verification_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
         mock_get_user.return_value = mock_user
 
         email_service = EmailService()
@@ -272,7 +272,7 @@ class TestEmailService:
 
         email_service = EmailService()
         result = email_service.send_password_reset_email(
-            "user@example.com", "testuser", "reset-token-123"
+            "user@example.com", "testuser", "reset-token-123",
         )
 
         # Verify result
@@ -288,7 +288,7 @@ class TestEmailService:
     @patch("app.services.email.settings")
     @patch("app.services.email.crud_user.update_password_reset_token_sync")
     async def test_create_password_reset_token_success(
-        self, mock_update_token, mock_settings
+        self, mock_update_token, mock_settings,
     ):
         """Test successful password reset token creation."""
         # Mock settings
@@ -314,7 +314,7 @@ class TestEmailService:
         # Mock user found with proper datetime
         mock_user = MagicMock()
         mock_user.id = "user-123"
-        mock_user.password_reset_token_expires = datetime.now(UTC) + timedelta(hours=1)
+        mock_user.password_reset_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
         mock_get_user.return_value = mock_user
 
         email_service = EmailService()
@@ -327,7 +327,7 @@ class TestEmailService:
     @patch("app.services.email.settings")
     @patch("app.services.email.emails.Message")
     def test_send_account_deletion_email_success(
-        self, mock_message_class, mock_settings
+        self, mock_message_class, mock_settings,
     ):
         """Test successful account deletion email sending."""
         # Mock settings
@@ -348,7 +348,7 @@ class TestEmailService:
 
         email_service = EmailService()
         result = email_service.send_account_deletion_email(
-            "user@example.com", "testuser", "deletion-token-123"
+            "user@example.com", "testuser", "deletion-token-123",
         )
 
         # Verify result
@@ -364,7 +364,7 @@ class TestEmailService:
     @patch("app.services.email.settings")
     @patch("app.services.email.emails.Message")
     def test_send_account_deletion_reminder_email_success(
-        self, mock_message_class, mock_settings
+        self, mock_message_class, mock_settings,
     ):
         """Test successful account deletion reminder email sending."""
         # Mock settings
@@ -384,7 +384,7 @@ class TestEmailService:
 
         email_service = EmailService()
         result = email_service.send_account_deletion_reminder_email(
-            "user@example.com", "testuser", 5, "2023-12-31"
+            "user@example.com", "testuser", 5, "2023-12-31",
         )
 
         # Verify result
@@ -400,7 +400,7 @@ class TestEmailService:
     @patch("app.services.email.settings")
     @patch("app.services.email.crud_user.update_deletion_token_sync")
     async def test_create_deletion_token_success(
-        self, mock_update_token, mock_settings
+        self, mock_update_token, mock_settings,
     ):
         """Test successful deletion token creation."""
         # Mock settings
@@ -426,7 +426,7 @@ class TestEmailService:
         # Mock user found with proper datetime
         mock_user = MagicMock()
         mock_user.id = "user-123"
-        mock_user.deletion_token_expires = datetime.now(UTC) + timedelta(hours=1)
+        mock_user.deletion_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
         mock_get_user.return_value = mock_user
 
         email_service = EmailService()
@@ -445,7 +445,7 @@ class TestEmailServiceIntegration:
     @patch("app.services.email.crud_user.update_verification_token_sync")
     @patch("app.services.email.crud_user.get_user_by_verification_token_sync")
     async def test_email_verification_lifecycle(
-        self, mock_get_user, mock_update_token, mock_message_class, mock_settings
+        self, mock_get_user, mock_update_token, mock_message_class, mock_settings,
     ):
         """Test complete email verification lifecycle."""
         # Mock settings
@@ -469,7 +469,7 @@ class TestEmailServiceIntegration:
         mock_update_token.return_value = True
         mock_user = MagicMock()
         mock_user.id = "user-123"
-        mock_user.verification_token_expires = datetime.now(UTC) + timedelta(hours=1)
+        mock_user.verification_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
         mock_get_user.return_value = mock_user
 
         email_service = EmailService()
@@ -481,7 +481,7 @@ class TestEmailServiceIntegration:
 
         # Test email sending
         email_sent = email_service.send_verification_email(
-            "user@example.com", "testuser", token
+            "user@example.com", "testuser", token,
         )
         assert email_sent is True
 

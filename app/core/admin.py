@@ -6,7 +6,7 @@ This module provides admin-only utilities, base classes, and dependencies for ad
 
 import logging
 from collections.abc import Callable
-from typing import Any, Generic, Protocol, TypeVar, Union
+from typing import Any, Generic, Protocol, TypeVar
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
@@ -38,13 +38,13 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 ResponseSchemaType = TypeVar("ResponseSchemaType", bound=BaseModel)
 
 # Type alias for database sessions
-DBSession = Union[Session, AsyncSession]
+DBSession = Session | AsyncSession
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db_sync)
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db_sync),
 ) -> UserResponse:
     """
     Get the current authenticated user.
@@ -69,7 +69,7 @@ async def get_current_user(
     )
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM],
         )
         email = payload.get("sub")
         if email is None:
@@ -118,7 +118,7 @@ async def require_superuser(
 
 
 class BaseAdminCRUD(
-    Generic[ModelType, CreateSchemaType, UpdateSchemaType, ResponseSchemaType]
+    Generic[ModelType, CreateSchemaType, UpdateSchemaType, ResponseSchemaType],
 ):
     """
     Base class for admin CRUD operations.
@@ -178,7 +178,7 @@ class BaseAdminCRUD(
 
         return list(result.scalars().all())
 
-    async def get(self, db: DBSession, id: str | UUID) -> ModelType | None:
+    async def get(self, db: DBSession, record_id: str | UUID) -> ModelType | None:
         """
         Get a single record by ID.
 
@@ -191,10 +191,10 @@ class BaseAdminCRUD(
         """
         if isinstance(db, AsyncSession):
             # type: ignore
-            result = await db.execute(select(self.model).filter(self.model.id == id))
+            result = await db.execute(select(self.model).filter(self.model.id == record_id))
         else:
             result = db.execute(
-                select(self.model).filter(self.model.id == id)  # type: ignore
+                select(self.model).filter(self.model.id == record_id),  # type: ignore
             )
         return result.scalar_one_or_none()
 
@@ -259,7 +259,7 @@ class BaseAdminCRUD(
 
         return db_obj
 
-    async def delete(self, db: DBSession, id: str | UUID) -> bool:
+    async def delete(self, db: DBSession, record_id: str | UUID) -> bool:
         """
         Delete a record by ID.
 
@@ -270,7 +270,7 @@ class BaseAdminCRUD(
         Returns:
             bool: True if deleted, False if not found
         """
-        obj = await self.get(db, id)
+        obj = await self.get(db, record_id)
         if not obj:
             return False
 

@@ -18,7 +18,7 @@ class AuditLog(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     timestamp = Column(DateTime, default=utc_now, nullable=False, index=True)
     user_id = Column(
-        UUID(as_uuid=True), nullable=True, index=True
+        UUID(as_uuid=True), nullable=True, index=True,
     )  # Nullable for anonymous events
     # e.g., 'login_success', 'password_change'
     event_type = Column(String(100), nullable=False, index=True)

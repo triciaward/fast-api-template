@@ -151,7 +151,7 @@ async def get_user(
 
 
 @router.post(
-    "/users", response_model=AdminUserResponse, status_code=status.HTTP_201_CREATED
+    "/users", response_model=AdminUserResponse, status_code=status.HTTP_201_CREATED,
 )
 async def create_user(
     user_data: AdminUserCreate,
@@ -181,7 +181,7 @@ async def create_user(
         )
 
     existing_username = await admin_user_crud.get_user_by_username(
-        db, user_data.username
+        db, user_data.username,
     )
     if existing_username:
         raise HTTPException(
@@ -260,7 +260,7 @@ async def update_user(
     # Check for username conflicts if username is being updated
     if user_data.username and user_data.username != existing_user.username:
         username_user = await admin_user_crud.get_user_by_username(
-            db, user_data.username
+            db, user_data.username,
         )
         if username_user:
             raise HTTPException(
@@ -332,7 +332,7 @@ async def delete_user(
 
 
 @router.post(
-    "/users/{user_id}/toggle-superuser", response_model=AdminUserToggleResponse
+    "/users/{user_id}/toggle-superuser", response_model=AdminUserToggleResponse,
 )
 async def toggle_superuser_status(
     user_id: UUID,
@@ -372,7 +372,7 @@ async def toggle_superuser_status(
 
 
 @router.post(
-    "/users/{user_id}/toggle-verification", response_model=AdminUserToggleResponse
+    "/users/{user_id}/toggle-verification", response_model=AdminUserToggleResponse,
 )
 async def toggle_verification_status(
     user_id: UUID,

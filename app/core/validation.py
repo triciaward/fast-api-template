@@ -4,7 +4,6 @@ import re
 class ValidationError(Exception):
     """Custom exception for validation errors."""
 
-    pass
 
 
 def validate_password(password: str) -> tuple[bool, str]:
@@ -81,10 +80,10 @@ def validate_username(username: str) -> tuple[bool, str]:
         )
 
     # Check that username doesn't start or end with special characters
-    if username.startswith("_") or username.startswith("-"):
+    if username.startswith(("_", "-")):
         return False, "Username cannot start with underscore or hyphen"
 
-    if username.endswith("_") or username.endswith("-"):
+    if username.endswith(("_", "-")):
         return False, "Username cannot end with underscore or hyphen"
 
     # Check for consecutive special characters
@@ -143,9 +142,8 @@ def clean_input(text: str) -> str:
     text = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "", text)
 
     # Trim whitespace
-    text = text.strip()
+    return text.strip()
 
-    return text
 
 
 def sanitize_input(text: str, max_length: int = 100) -> str:

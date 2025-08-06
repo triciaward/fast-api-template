@@ -38,7 +38,7 @@ def test_text_search_contains_case_insensitive():
 
 def test_text_search_equals_case_sensitive():
     config = create_text_search(
-        "TestUser", ["username"], operator=SearchOperator.EQUALS, case_sensitive=True
+        "TestUser", ["username"], operator=SearchOperator.EQUALS, case_sensitive=True,
     )
     builder = SearchFilterBuilder(FakeUser)
     clause = builder._build_text_search_condition(config)
@@ -91,7 +91,7 @@ def test_build_query_with_sorting():
 def test_text_search_contains_case_sensitive():
     """Test case-sensitive CONTAINS operator (line 146)."""
     config = create_text_search(
-        "TestUser", ["username"], operator=SearchOperator.CONTAINS, case_sensitive=True
+        "TestUser", ["username"], operator=SearchOperator.CONTAINS, case_sensitive=True,
     )
     builder = SearchFilterBuilder(FakeUser)
     clause = builder._build_text_search_condition(config)
@@ -114,7 +114,7 @@ def test_text_search_starts_with_case_sensitive():
 def test_text_search_ends_with_case_sensitive():
     """Test case-sensitive ENDS_WITH operator (lines 161-163)."""
     config = create_text_search(
-        "TestUser", ["username"], operator=SearchOperator.ENDS_WITH, case_sensitive=True
+        "TestUser", ["username"], operator=SearchOperator.ENDS_WITH, case_sensitive=True,
     )
     builder = SearchFilterBuilder(FakeUser)
     clause = builder._build_text_search_condition(config)

@@ -26,16 +26,12 @@ class SetupVerifier:
         if hasattr(sys, "real_prefix") or (
             hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix
         ):
-            print("✅ Virtual environment is already activated")
             self.venv_activated = True
             return True
 
         # Check if venv directory exists
         venv_path = self.project_root / "venv"
         if not venv_path.exists():
-            print(
-                "❌ Virtual environment not found. Please run the setup script first."
-            )
             self.issues.append("Virtual environment not found")
             return False
 
@@ -45,19 +41,11 @@ class SetupVerifier:
             venv_python = venv_path / "Scripts" / "python.exe"  # Windows
 
         if venv_python.exists():
-            print("🔄 Virtual environment detected but not activated")
-            print(
-                "💡 Tip: Run 'source venv/bin/activate' (Mac/Linux) or 'venv\\Scripts\\activate' (Windows) before running this script"
-            )
-            print(
-                "   Or run this script with: ./venv/bin/python scripts/verify_setup.py"
-            )
             self.warnings.append(
-                "Virtual environment not activated - some checks may fail"
+                "Virtual environment not activated - some checks may fail",
             )
             return False
 
-        print("❌ Virtual environment Python executable not found")
         self.issues.append("Virtual environment Python executable not found")
         return False
 
@@ -65,10 +53,8 @@ class SetupVerifier:
         """Check if a file exists."""
         full_path = self.project_root / file_path
         if full_path.exists():
-            print(f"✅ {description}")
             return True
         else:
-            print(f"❌ {description} - File not found: {file_path}")
             self.issues.append(f"Missing file: {file_path}")
             return False
 
@@ -76,10 +62,8 @@ class SetupVerifier:
         """Check if a directory exists."""
         full_path = self.project_root / dir_path
         if full_path.exists() and full_path.is_dir():
-            print(f"✅ {description}")
             return True
         else:
-            print(f"❌ {description} - Directory not found: {dir_path}")
             self.issues.append(f"Missing directory: {dir_path}")
             return False
 
@@ -87,10 +71,8 @@ class SetupVerifier:
         """Check if an environment variable is set."""
         value = os.getenv(var_name)
         if value:
-            print(f"✅ {description}: {var_name} is set")
             return True
         else:
-            print(f"⚠️  {description}: {var_name} is not set")
             self.warnings.append(f"Environment variable not set: {var_name}")
             return False
 
@@ -98,10 +80,8 @@ class SetupVerifier:
         """Check if a Python module can be imported."""
         try:
             __import__(module_name)
-            print(f"✅ {description}")
             return True
-        except ImportError as e:
-            print(f"❌ {description} - Import failed: {e}")
+        except ImportError:
             self.issues.append(f"Python import failed: {module_name}")
             return False
 
@@ -121,17 +101,15 @@ class SetupVerifier:
                         await conn.execute(text("SELECT 1"))
                     return True
                 except Exception as e:
-                    print(f"❌ Database connection failed: {e}")
                     self.issues.append(f"Database connection failed: {e}")
                     return False
 
             result = asyncio.run(test_connection())
             if result:
-                print("✅ Database connection")
+                pass
             return result
 
         except Exception as e:
-            print(f"❌ Database connection test failed: {e}")
             self.issues.append(f"Database connection test failed: {e}")
             return False
 
@@ -141,11 +119,9 @@ class SetupVerifier:
             # Add project root to Python path
             sys.path.insert(0, str(self.project_root))
 
-            print("✅ API startup test")
             return True
 
         except Exception as e:
-            print(f"❌ API startup test failed: {e}")
             self.issues.append(f"API startup test failed: {e}")
             return False
 
@@ -163,23 +139,18 @@ class SetupVerifier:
             if result.returncode == 0:
                 output = result.stdout
                 if "postgres" in output.lower() and "api" in output.lower():
-                    print("✅ Docker services are running")
                     return True
                 else:
-                    print("⚠️  Docker services may not be running")
                     self.warnings.append("Docker services may not be running")
                     return False
             else:
-                print("❌ Docker services check failed")
                 self.issues.append("Docker services check failed")
                 return False
 
         except FileNotFoundError:
-            print("⚠️  docker-compose not found")
             self.warnings.append("docker-compose not found")
             return False
         except Exception as e:
-            print(f"❌ Docker services check failed: {e}")
             self.issues.append(f"Docker services check failed: {e}")
             return False
 
@@ -194,25 +165,20 @@ class SetupVerifier:
             )
 
             if result.returncode == 0:
-                print("✅ Alembic migrations are up to date")
                 return True
             else:
-                print("⚠️  Alembic migrations may not be up to date")
                 self.warnings.append("Alembic migrations may not be up to date")
                 return False
 
         except FileNotFoundError:
-            print("⚠️  alembic not found")
             self.warnings.append("alembic not found")
             return False
         except Exception as e:
-            print(f"❌ Alembic check failed: {e}")
             self.issues.append(f"Alembic check failed: {e}")
             return False
 
     def check_project_structure(self) -> None:
         """Check the basic project structure."""
-        print("\n📁 Checking project structure...")
 
         # Essential files
         self.check_file_exists("alembic.ini", "Alembic configuration")
@@ -229,18 +195,12 @@ class SetupVerifier:
 
     def check_python_environment(self) -> None:
         """Check Python environment and dependencies."""
-        print("\n🐍 Checking Python environment...")
 
         # Check Python version
         python_version = sys.version_info
         if python_version.major == 3 and python_version.minor >= 8:
-            print(
-                f"✅ Python version: {python_version.major}.{python_version.minor}.{python_version.micro}"
-            )
+            pass
         else:
-            print(
-                f"❌ Python version: {python_version.major}.{python_version.minor}.{python_version.micro} (requires 3.8+)"
-            )
             self.issues.append("Python version too old (requires 3.8+)")
 
         # Check essential imports
@@ -251,14 +211,12 @@ class SetupVerifier:
 
     def check_configuration(self) -> None:
         """Check configuration and environment."""
-        print("\n⚙️  Checking configuration...")
 
         # Check if .env file exists
         env_file = self.project_root / ".env"
         if env_file.exists():
-            print("✅ Environment file (.env) exists")
+            pass
         else:
-            print("⚠️  Environment file (.env) not found")
             self.warnings.append("Environment file (.env) not found")
 
         # Check environment variables
@@ -268,16 +226,10 @@ class SetupVerifier:
 
         # Add note about Docker environment variables
         if not os.getenv("DATABASE_URL") or not os.getenv("SECRET_KEY"):
-            print(
-                "💡 Note: Some environment variables are set in Docker containers, not in your local .env file"
-            )
-            print(
-                "   This is normal - the API runs in Docker with its own environment configuration"
-            )
+            pass
 
     def check_services(self) -> None:
         """Check if services are running."""
-        print("\n🔧 Checking services...")
 
         self.check_docker_services()
         self.check_database_connection()
@@ -286,8 +238,6 @@ class SetupVerifier:
 
     def run_verification(self) -> None:
         """Run the complete verification process."""
-        print("🔍 FastAPI Project Setup Verification")
-        print("=" * 50)
 
         # Check virtual environment first
         self.detect_and_activate_venv()
@@ -298,32 +248,18 @@ class SetupVerifier:
         self.check_services()
 
         # Summary
-        print("\n📊 Verification Summary")
-        print("=" * 30)
 
         if not self.issues and not self.warnings:
-            print("🎉 All checks passed! Your setup is working correctly.")
-            print("\n🚀 Next steps:")
-            print("  - Visit http://localhost:8000/docs to see your API")
-            print("  - Run tests: pytest")
-            print("  - Start developing your application!")
+            pass
         else:
             if self.issues:
-                print(f"❌ Found {len(self.issues)} issue(s):")
-                for issue in self.issues:
-                    print(f"  - {issue}")
+                for _issue in self.issues:
+                    pass
 
             if self.warnings:
-                print(f"⚠️  Found {len(self.warnings)} warning(s):")
-                for warning in self.warnings:
-                    print(f"  - {warning}")
+                for _warning in self.warnings:
+                    pass
 
-            print("\n🔧 Troubleshooting:")
-            print(
-                "  - Check the troubleshooting guide: docs/troubleshooting/setup-issues.md"
-            )
-            print("  - Review the setup logs for more details")
-            print("  - Ensure all services are running: docker-compose up -d")
 
 
 def main():

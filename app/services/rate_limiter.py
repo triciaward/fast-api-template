@@ -169,13 +169,7 @@ def get_rate_limit_info(request: Request) -> dict[str, Any]:
 
         # Get current limits for the client
         # Note: slowapi doesn't have get_window_stats, so we return basic info
-        return {
-            "enabled": True,
-            "client_ip": client_ip,
-            "remaining": 100,  # Default value
-            "reset_time": 0,
-            "limit": 100,  # Default value
-        }
+
     except Exception:
         # Return a fallback response if there's an error
         return {
@@ -185,4 +179,12 @@ def get_rate_limit_info(request: Request) -> dict[str, Any]:
             "remaining": 0,
             "reset_time": 0,
             "limit": 0,
+        }
+    else:
+        return {
+            "enabled": True,
+            "client_ip": client_ip,
+            "remaining": 100,  # Default value
+            "reset_time": 0,
+            "limit": 100,  # Default value
         }

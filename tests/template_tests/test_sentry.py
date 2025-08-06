@@ -148,7 +148,7 @@ class TestSentryIntegration:
                 {
                     "id": "123",
                     "email": "test@example.com",
-                }
+                },
             )
 
     @patch("app.services.sentry.sentry_sdk.set_user")

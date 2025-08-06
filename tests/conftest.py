@@ -31,5 +31,5 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "template_only" in item.keywords:
                 item.add_marker(
-                    pytest.mark.skip(reason="Template test excluded by default")
+                    pytest.mark.skip(reason="Template test excluded by default"),
                 )

@@ -32,7 +32,7 @@ class CRUDGenerator:
     """Generates CRUD boilerplate for FastAPI resources."""
 
     def __init__(
-        self, model_name: str, fields: list[tuple[str, str]], options: dict[str, bool]
+        self, model_name: str, fields: list[tuple[str, str]], options: dict[str, bool],
     ):
         self.model_name = model_name
         self.model_name_lower = model_name.lower()
@@ -55,11 +55,7 @@ class CRUDGenerator:
             return word[:-1] + "ies"
         # Handle words ending in 's', 'sh', 'ch', 'x', 'z' (add 'es')
         elif (
-            word.endswith("s")
-            or word.endswith("sh")
-            or word.endswith("ch")
-            or word.endswith("x")
-            or word.endswith("z")
+            word.endswith(("s", "sh", "ch", "x", "z"))
         ):
             return word + "es"
         # Handle words ending in 'f' or 'fe' (change to 'ves')
@@ -230,7 +226,7 @@ class CRUDGenerator:
                     "    deleted_at: Optional[datetime] = None",
                     "    deleted_by: Optional[uuid.UUID] = None",
                     "    deletion_reason: Optional[str] = None",
-                ]
+                ],
             )
 
         response_schema = f"""class {self.model_name}Response({self.model_name}Base):
@@ -243,8 +239,7 @@ class CRUDGenerator:
     pass"""
 
         return "\n\n".join(
-            imports
-            + [base_schema, create_schema, update_schema, response_schema, list_schema]
+            [*imports, base_schema, create_schema, update_schema, response_schema, list_schema],
         )
 
     def generate_crud(self) -> str:
@@ -386,7 +381,7 @@ class CRUDGenerator:
     return len(result.scalars().all())"""
         crud_functions.append(count_func)
 
-        return "\n\n".join(imports + [type_alias] + crud_functions)
+        return "\n\n".join([*imports, type_alias, *crud_functions])
 
     def generate_endpoints(self) -> str:
         """Generate API endpoints."""
@@ -406,7 +401,7 @@ class CRUDGenerator:
             imports.extend(
                 [
                     f"from app.utils.search_filter import {self.model_name}SearchParams",
-                ]
+                ],
             )
 
         router = """router = APIRouter()"""
@@ -520,15 +515,7 @@ async def delete_{self.model_name_lower}(
         )"""
 
         return "\n\n".join(
-            imports
-            + [
-                router,
-                list_endpoint,
-                get_endpoint,
-                create_endpoint,
-                update_endpoint,
-                delete_endpoint,
-            ]
+            [*imports, router, list_endpoint, get_endpoint, create_endpoint, update_endpoint, delete_endpoint],
         )
 
     def generate_tests(self) -> str:
@@ -643,17 +630,16 @@ test_{self.model_name_lower}_data = {{
     assert response.status_code == 204"""
 
         test_functions.extend(
-            [test_create, test_get, test_list, test_update, test_delete]
+            [test_create, test_get, test_list, test_update, test_delete],
         )
 
-        return "\n\n".join(imports + [test_data] + test_functions)
+        return "\n\n".join([*imports, test_data, *test_functions])
 
     def update_api_router(self):
         """Update the API router to include the new endpoints."""
         api_file = self.app_dir / "api" / "api_v1" / "api.py"
 
         if not api_file.exists():
-            print(f"Warning: API router file not found at {api_file}")
             return
 
         with open(api_file) as f:
@@ -679,7 +665,7 @@ test_{self.model_name_lower}_data = {{
             # Add after the last include_router call
             new_include = f'    api_router.include_router({self.model_name_lower}.router, prefix="/{self.model_name_plural}", tags=["{self.model_name_lower}"])'
             content = content.replace(
-                match.group(0), match.group(0) + "\n" + new_include
+                match.group(0), match.group(0) + "\n" + new_include,
             )
 
         with open(api_file, "w") as f:
@@ -691,35 +677,29 @@ test_{self.model_name_lower}_data = {{
         model_file = self.models_dir / f"{self.model_name_lower}.py"
         with open(model_file, "w") as f:
             f.write(self.generate_model())
-        print(f"✅ Created model: {model_file}")
 
         # Create schema file
         schema_file = self.schemas_dir / f"{self.model_name_lower}.py"
         with open(schema_file, "w") as f:
             f.write(self.generate_schemas())
-        print(f"✅ Created schemas: {schema_file}")
 
         # Create CRUD file
         crud_file = self.crud_dir / f"{self.model_name_lower}.py"
         with open(crud_file, "w") as f:
             f.write(self.generate_crud())
-        print(f"✅ Created CRUD: {crud_file}")
 
         # Create endpoints file
         endpoint_file = self.endpoints_dir / f"{self.model_name_lower}.py"
         with open(endpoint_file, "w") as f:
             f.write(self.generate_endpoints())
-        print(f"✅ Created endpoints: {endpoint_file}")
 
         # Create test file
         test_file = self.tests_dir / f"test_{self.model_name_lower}.py"
         with open(test_file, "w") as f:
             f.write(self.generate_tests())
-        print(f"✅ Created tests: {test_file}")
 
         # Update API router
         self.update_api_router()
-        print("✅ Updated API router")
 
         # Update models __init__.py
         self._update_models_init()
@@ -738,17 +718,16 @@ test_{self.model_name_lower}_data = {{
             if f"from .{self.model_name_lower} import {self.model_name}" not in content:
                 with open(init_file, "a") as f:
                     f.write(
-                        f"\nfrom .{self.model_name_lower} import {self.model_name}\n"
+                        f"\nfrom .{self.model_name_lower} import {self.model_name}\n",
                     )
 
-        print("✅ Updated models __init__.py")
 
 
 def parse_field_spec(field_spec: str) -> tuple[str, str]:
     """Parse field specification like 'name:str' into (name, type)."""
     if ":" not in field_spec:
         raise ValueError(
-            f"Invalid field specification: {field_spec}. Use format 'name:type'"
+            f"Invalid field specification: {field_spec}. Use format 'name:type'",
         )
 
     name, field_type = field_spec.split(":", 1)
@@ -758,7 +737,7 @@ def parse_field_spec(field_spec: str) -> tuple[str, str]:
     # Validate that both name and type are not empty
     if not name or not field_type:
         raise ValueError(
-            f"Invalid field specification: {field_spec}. Both name and type must be provided"
+            f"Invalid field specification: {field_spec}. Both name and type must be provided",
         )
 
     return name, field_type
@@ -766,7 +745,7 @@ def parse_field_spec(field_spec: str) -> tuple[str, str]:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate CRUD boilerplate for FastAPI resources"
+        description="Generate CRUD boilerplate for FastAPI resources",
     )
     parser.add_argument("model_name", help="Name of the model (e.g., Post, Product)")
     parser.add_argument(
@@ -775,13 +754,13 @@ def main():
         help="Field specifications (e.g., title:str content:str is_published:bool)",
     )
     parser.add_argument(
-        "--soft-delete", action="store_true", help="Include soft delete functionality"
+        "--soft-delete", action="store_true", help="Include soft delete functionality",
     )
     parser.add_argument(
-        "--searchable", action="store_true", help="Include search functionality"
+        "--searchable", action="store_true", help="Include search functionality",
     )
     parser.add_argument(
-        "--admin", action="store_true", help="Include admin functionality"
+        "--admin", action="store_true", help="Include admin functionality",
     )
     parser.add_argument("--slug", action="store_true", help="Include slug field")
 
@@ -790,8 +769,7 @@ def main():
     # Parse fields
     try:
         fields = [parse_field_spec(field) for field in args.fields]
-    except ValueError as e:
-        print(f"Error: {e}")
+    except ValueError:
         sys.exit(1)
 
     # Add slug field if requested
@@ -808,37 +786,11 @@ def main():
     # Generate CRUD
     generator = CRUDGenerator(args.model_name, fields, options)
 
-    print(f"🚀 Generating CRUD for {args.model_name}...")
-    print(f"📝 Fields: {', '.join(f'{name}:{type}' for name, type in fields)}")
-    print(f"⚙️  Options: {', '.join(k for k, v in options.items() if v)}")
-    print()
 
     try:
         generator.create_files()
-        print()
-        print("🎉 CRUD generation complete!")
-        print()
-        print("📋 Next steps:")
-        print(
-            f"1. Review the generated files in app/models/{args.model_name.lower()}.py"
-        )
-        print(
-            f"2. Run database migrations: alembic revision --autogenerate -m 'Add {args.model_name} model'"
-        )
-        print("3. Apply migrations: alembic upgrade head")
-        print(
-            f"4. Test the endpoints: pytest tests/template_tests/test_{args.model_name.lower()}.py"
-        )
-        print()
-        print("🔗 API endpoints available at:")
-        print(f"   GET    /api/v1/{generator.model_name_plural}")
-        print(f"   POST   /api/v1/{generator.model_name_plural}")
-        print(f"   GET    /api/v1/{generator.model_name_plural}/{{id}}")
-        print(f"   PUT    /api/v1/{generator.model_name_plural}/{{id}}")
-        print(f"   DELETE /api/v1/{generator.model_name_plural}/{{id}}")
 
-    except Exception as e:
-        print(f"❌ Error generating CRUD: {e}")
+    except Exception:
         sys.exit(1)
 
 

@@ -56,11 +56,11 @@ def init_sentry() -> None:
         sentry_sdk.set_tag("version", settings.VERSION)
 
         logger.info(
-            f"Sentry initialized for environment: {settings.SENTRY_ENVIRONMENT}"
+            f"Sentry initialized for environment: {settings.SENTRY_ENVIRONMENT}",
         )
 
-    except Exception as e:
-        logger.error(f"Failed to initialize Sentry: {e}")
+    except Exception:
+        logger.exception("Failed to initialize Sentry")
         # Don't raise the exception - we don't want Sentry to break the app
 
 
@@ -95,7 +95,7 @@ def capture_exception(exception: Exception, context: dict | None = None) -> None
 
 
 def capture_message(
-    message: str, level: str = "info", context: dict | None = None
+    message: str, level: str = "info", context: dict | None = None,
 ) -> None:
     """Capture a message with optional context."""
     if not settings.ENABLE_SENTRY:
@@ -123,7 +123,7 @@ def set_user_context(user_id: int | None = None, email: str | None = None) -> No
                 {
                     "id": str(user_id) if user_id else None,
                     "email": email,
-                }
+                },
             )
     except Exception:
         # Fail-silent fallback - never let error logging cause new failures

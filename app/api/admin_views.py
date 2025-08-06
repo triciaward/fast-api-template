@@ -7,6 +7,7 @@ All endpoints require superuser privileges.
 
 import logging
 from datetime import datetime, timezone
+from typing import NoReturn
 
 from fastapi import Depends, Form, HTTPException, Query, Request, status
 from fastapi.responses import RedirectResponse
@@ -119,7 +120,7 @@ async def admin_create_api_key(
         if expires_at:
             try:
                 expires_datetime = datetime.fromisoformat(
-                    expires_at.replace("Z", "+00:00")
+                    expires_at.replace("Z", "+00:00"),
                 )
             except ValueError as e:
                 raise HTTPException(
@@ -157,17 +158,16 @@ async def admin_create_api_key(
         )
 
         # Redirect with success message
-        response = RedirectResponse(
+        return RedirectResponse(
             url=(
                 "/admin/api-keys?message=API key created successfully"
                 "&message_type=success"
             ),
             status_code=status.HTTP_303_SEE_OTHER,
         )
-        return response
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Failed to create API key via admin",
             extra={
                 "admin_id": str(current_admin.id),
@@ -176,14 +176,13 @@ async def admin_create_api_key(
         )
 
         # Redirect with error message
-        response = RedirectResponse(
+        return RedirectResponse(
             url=(
-                f"/admin/api-keys?message=Failed to create API key: {str(e)}"
+                f"/admin/api-keys?message=Failed to create API key: {e!s}"
                 "&message_type=danger"
             ),
             status_code=status.HTTP_303_SEE_OTHER,
         )
-        return response
 
 
 async def admin_rotate_api_key(
@@ -203,6 +202,13 @@ async def admin_rotate_api_key(
         },
     )
 
+    def _handle_rotation_failure() -> NoReturn:
+        """Handle rotation failure by raising appropriate exception."""
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="API key not found",
+        )
+
     try:
         # Rotate the key
         result = rotate_api_key_sync(
@@ -211,10 +217,7 @@ async def admin_rotate_api_key(
         )
 
         if not result[0]:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="API key not found",
-            )
+            _handle_rotation_failure()
 
         api_key, new_raw_key = result
 
@@ -228,7 +231,7 @@ async def admin_rotate_api_key(
         )
 
         # Redirect with success message
-        response = RedirectResponse(
+        return RedirectResponse(
             url=(
                 f"/admin/api-keys?message=API key "
                 f"'{api_key.label if api_key else 'Unknown'}' "
@@ -236,10 +239,9 @@ async def admin_rotate_api_key(
             ),
             status_code=status.HTTP_303_SEE_OTHER,
         )
-        return response
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Failed to rotate API key via admin",
             extra={
                 "admin_id": str(current_admin.id),
@@ -249,14 +251,13 @@ async def admin_rotate_api_key(
         )
 
         # Redirect with error message
-        response = RedirectResponse(
+        return RedirectResponse(
             url=(
-                f"/admin/api-keys?message=Failed to rotate API key: {str(e)}"
+                f"/admin/api-keys?message=Failed to rotate API key: {e!s}"
                 "&message_type=danger"
             ),
             status_code=status.HTTP_303_SEE_OTHER,
         )
-        return response
 
 
 async def admin_revoke_api_key(
@@ -276,14 +277,18 @@ async def admin_revoke_api_key(
         },
     )
 
+    def _handle_revoke_failure() -> NoReturn:
+        """Handle revoke failure by raising appropriate exception."""
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="API key not found",
+        )
+
     try:
         # Get the key first to get the label for the message
         api_key = get_api_key_by_id_sync(db=db, key_id=key_id)
         if not api_key:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="API key not found",
-            )
+            _handle_revoke_failure()
 
         # Deactivate the key
         success = deactivate_api_key_sync(
@@ -292,10 +297,7 @@ async def admin_revoke_api_key(
         )
 
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="API key not found",
-            )
+            _handle_revoke_failure()
 
         logger.info(
             "API key revoked successfully via admin",
@@ -307,14 +309,13 @@ async def admin_revoke_api_key(
         )
 
         # Redirect with success message
-        response = RedirectResponse(
+        return RedirectResponse(
             url=f"/admin/api-keys?message=API key '{api_key.label if api_key else 'Unknown'}' revoked successfully&message_type=success",
             status_code=status.HTTP_303_SEE_OTHER,
         )
-        return response
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Failed to revoke API key via admin",
             extra={
                 "admin_id": str(current_admin.id),
@@ -324,8 +325,7 @@ async def admin_revoke_api_key(
         )
 
         # Redirect with error message
-        response = RedirectResponse(
-            url=f"/admin/api-keys?message=Failed to revoke API key: {str(e)}&message_type=danger",
+        return RedirectResponse(
+            url=f"/admin/api-keys?message=Failed to revoke API key: {e!s}&message_type=danger",
             status_code=status.HTTP_303_SEE_OTHER,
         )
-        return response

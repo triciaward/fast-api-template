@@ -9,7 +9,7 @@ from app.core.config import settings
 
 # Convert DATABASE_URL to async format if needed
 async_database_url = settings.DATABASE_URL.replace(
-    "postgresql://", "postgresql+asyncpg://"
+    "postgresql://", "postgresql+asyncpg://",
 )
 
 # Create async engine with connection pooling
@@ -27,11 +27,11 @@ engine = create_async_engine(
         "server_settings": {
             "application_name": "fastapi_template",
             "jit": "off",  # Disable JIT for better performance
-        }
+        },
     },
 )
 AsyncSessionLocal = async_sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False
+    engine, class_=AsyncSession, expire_on_commit=False,
 )
 
 # Create sync engine for testing
@@ -42,7 +42,7 @@ if os.getenv("TESTING") == "1":
         sync_database_url = settings.DATABASE_URL
     else:
         sync_database_url = settings.DATABASE_URL.replace(
-            "fastapi_template", "fastapi_template_test"
+            "fastapi_template", "fastapi_template_test",
         )
 else:
     sync_database_url = settings.DATABASE_URL
@@ -63,11 +63,11 @@ sync_engine = create_engine(
             "fastapi_template_test"
             if os.getenv("TESTING") == "1"
             else "fastapi_template"
-        )
+        ),
     },
 )
 SyncSessionLocal = sessionmaker(
-    bind=sync_engine, expire_on_commit=False, autocommit=False, autoflush=False
+    bind=sync_engine, expire_on_commit=False, autocommit=False, autoflush=False,
 )
 
 Base = declarative_base()

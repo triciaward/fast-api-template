@@ -20,6 +20,14 @@ from app.core.validation import (
 from app.utils.pagination import PaginatedResponse
 
 
+class ScopesTypeError(TypeError):
+    """Raised when scopes is not a list."""
+
+
+class InvalidScopeError(ValueError):
+    """Raised when a scope is invalid."""
+
+
 class UserBase(BaseModel):
     email: EmailStr
     username: str
@@ -131,7 +139,7 @@ class OAuthLogin(BaseModel):
     def validate_provider(cls, v: str) -> str:
         """Validate OAuth provider."""
         if v.lower() not in ["google", "apple"]:
-            raise ValueError("Provider must be 'google' or 'apple'")
+            raise ValueError("Invalid")
         return v.lower()
 
 
@@ -304,7 +312,6 @@ class AccountDeletionStatusResponse(BaseModel):
 class UserListResponse(PaginatedResponse[UserResponse]):
     """Paginated response for user list."""
 
-    pass
 
 
 class UserSearchResponse(BaseModel):
@@ -344,7 +351,7 @@ class SoftDeleteRequest(BaseModel):
     """Request model for soft deleting a user."""
 
     reason: str | None = Field(
-        None, max_length=500, description="Optional reason for deletion"
+        None, max_length=500, description="Optional reason for deletion",
     )
 
 
@@ -369,7 +376,6 @@ class RestoreUserResponse(BaseModel):
 class DeletedUserListResponse(PaginatedResponse[DeletedUserResponse]):
     """Paginated response for deleted user list."""
 
-    pass
 
 
 class DeletedUserSearchResponse(BaseModel):
@@ -396,10 +402,10 @@ class APIKeyBase(BaseModel):
         description="Human-readable label for the API key",
     )
     scopes: list[str] = Field(
-        default_factory=list, description="List of scopes the key has access to"
+        default_factory=list, description="List of scopes the key has access to",
     )
     expires_at: datetime | None = Field(
-        None, description="Optional expiration date for the key"
+        None, description="Optional expiration date for the key",
     )
 
     @field_validator("label")
@@ -413,12 +419,12 @@ class APIKeyBase(BaseModel):
     def validate_scopes(cls, v: list[str]) -> list[str]:
         """Validate scopes are non-empty strings."""
         if not isinstance(v, list):
-            raise ValueError("Scopes must be a list")
+            raise ScopesTypeError
 
         validated_scopes = []
         for scope in v:
             if not isinstance(scope, str) or not scope.strip():
-                raise ValueError("Each scope must be a non-empty string")
+                raise InvalidScopeError
             validated_scopes.append(scope.strip())
 
         return validated_scopes
@@ -431,7 +437,7 @@ class APIKeyCreate(BaseModel):
 
     label: str = Field(..., description="Human-readable label for the API key")
     scopes: list[str] = Field(
-        default_factory=list, description="List of scopes for the API key"
+        default_factory=list, description="List of scopes for the API key",
     )
     expires_at: datetime | None = Field(None, description="Optional expiration date")
 
@@ -459,7 +465,7 @@ class APIKeyCreateResponse(BaseModel):
 
     api_key: APIKeyResponse
     raw_key: str = Field(
-        ..., description="The raw API key (only returned once upon creation)"
+        ..., description="The raw API key (only returned once upon creation)",
     )
 
 
@@ -468,14 +474,13 @@ class APIKeyRotateResponse(BaseModel):
 
     api_key: APIKeyResponse
     new_raw_key: str = Field(
-        ..., description="The new raw API key (only returned once upon rotation)"
+        ..., description="The new raw API key (only returned once upon rotation)",
     )
 
 
 class APIKeyListResponse(PaginatedResponse[APIKeyResponse]):
     """Paginated response for API key list."""
 
-    pass
 
 
 class APIKeyUser(BaseModel):

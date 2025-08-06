@@ -121,7 +121,7 @@ class TestPaginatedResponse:
     def test_response_with_empty_items(self) -> None:
         """Test response with empty items list."""
         response: PaginatedResponse[list] = PaginatedResponse.create(
-            items=[], page=1, size=20, total=0
+            items=[], page=1, size=20, total=0,
         )
 
         assert response.items == []
@@ -209,7 +209,7 @@ class TestPaginationIntegration:
 
         # Create response
         response = PaginatedResponse.create(
-            items=items, page=params.page, size=params.size, total=total
+            items=items, page=params.page, size=params.size, total=total,
         )
 
         # Verify response structure

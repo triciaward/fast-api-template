@@ -18,6 +18,12 @@ This directory contains detailed troubleshooting guides for common issues you mi
   - Superuser creation issues
   - Username and password validation errors
   - Module import problems
+- **[Python 3.11 Environment Parity](./python-311-upgrade.md)** - Python version upgrade and environment consistency
+  - Mixed Python version issues (3.9 vs 3.11)
+  - datetime.UTC compatibility problems
+  - Environment parity solutions
+  - Modern Python features implementation
+  - Performance improvements and benefits
 - **[Template Critical Fixes](./template-fixes.md)** - Critical fixes applied to prevent common template issues
   - CORS environment variable parsing bugs
   - Missing Docker environment variables
@@ -54,6 +60,12 @@ This directory contains detailed troubleshooting guides for common issues you mi
   - Improved type annotations and error handling
   - Dependency updates and backward compatibility
   - Performance impact and migration guide
+- **[Template Improvements Applied](./IMPROVEMENTS_APPLIED.md)** - Comprehensive improvements and enhancements
+  - Performance monitoring and optimization tools
+  - Enhanced error handling with custom exceptions
+  - Comprehensive health monitoring system
+  - Database backup and production readiness features
+  - Code quality improvements and dependency alignment
 
 ## 🚀 Quick Solutions
 

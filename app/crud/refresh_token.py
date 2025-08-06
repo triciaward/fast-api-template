@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, timezone
-from typing import Union
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +8,7 @@ from app.core.config import settings
 from app.models import RefreshToken
 
 # Type alias for both sync and async sessions
-DBSession = Union[AsyncSession, Session]
+DBSession = AsyncSession | Session
 
 
 def utc_now() -> datetime:
@@ -59,7 +58,7 @@ async def cleanup_expired_tokens(db: DBSession) -> int:
             select(RefreshToken).filter(
                 RefreshToken.expires_at > utc_now(),
                 RefreshToken.is_revoked.is_(False),
-            )
+            ),
         )
         expired_tokens = result.scalars().all()
     else:
@@ -67,7 +66,7 @@ async def cleanup_expired_tokens(db: DBSession) -> int:
             select(RefreshToken).filter(
                 RefreshToken.expires_at > utc_now(),
                 RefreshToken.is_revoked.is_(False),
-            )
+            ),
         )
         expired_tokens = result.scalars().all()
 
@@ -85,7 +84,7 @@ async def cleanup_expired_tokens(db: DBSession) -> int:
 
 
 async def get_refresh_token_by_hash(
-    db: DBSession, token_hash: str
+    db: DBSession, token_hash: str,
 ) -> RefreshToken | None:
     """Get refresh token by hash."""
     if isinstance(db, AsyncSession):
@@ -94,7 +93,7 @@ async def get_refresh_token_by_hash(
                 RefreshToken.token_hash == token_hash,
                 RefreshToken.expires_at > utc_now(),
                 RefreshToken.is_revoked.is_(False),
-            )
+            ),
         )
     else:
         result = db.execute(
@@ -102,7 +101,7 @@ async def get_refresh_token_by_hash(
                 RefreshToken.token_hash == token_hash,
                 RefreshToken.expires_at > utc_now(),
                 RefreshToken.is_revoked.is_(False),
-            )
+            ),
         )
 
     return result.scalar_one_or_none()
@@ -137,7 +136,7 @@ async def get_user_sessions(db: DBSession, user_id: str) -> list[RefreshToken]:
                 RefreshToken.user_id == user_id,
                 RefreshToken.expires_at > utc_now(),
                 RefreshToken.is_revoked.is_(False),
-            )
+            ),
         )
     else:
         result = db.execute(
@@ -145,10 +144,10 @@ async def get_user_sessions(db: DBSession, user_id: str) -> list[RefreshToken]:
                 RefreshToken.user_id == user_id,
                 RefreshToken.expires_at > utc_now(),
                 RefreshToken.is_revoked.is_(False),
-            )
+            ),
         )
 
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def get_user_session_count(db: DBSession, user_id: str) -> int:
@@ -175,21 +174,23 @@ async def revoke_all_user_sessions(db: DBSession, user_id: str) -> int:
 
 
 async def verify_refresh_token_in_db(
-    db: DBSession, token_hash: str
+    db: DBSession, token_hash: str,
 ) -> RefreshToken | None:
     """Verify a refresh token in the database."""
     return await get_refresh_token_by_hash(db, token_hash)
 
 
 async def enforce_session_limit(
-    db: DBSession, user_id: str, max_sessions: int = 5
+    db: DBSession, user_id: str, max_sessions: int = 5,
 ) -> None:
     """Enforce session limit by revoking oldest sessions if needed."""
     sessions = await get_user_sessions(db, user_id)
 
     if len(sessions) >= max_sessions:
         # Sort by creation date (oldest first)
-        sessions.sort(key=lambda s: s.created_at)
+        def get_sort_key(s: RefreshToken) -> datetime:
+            return s.created_at if s.created_at is not None else utc_now()  # type: ignore
+        sessions.sort(key=get_sort_key)
 
         # Revoke oldest sessions to stay under limit
         sessions_to_revoke = sessions[: -max_sessions + 1]

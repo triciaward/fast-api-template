@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import pytest
@@ -13,7 +13,7 @@ def always_configured_email(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.skip(
-    reason="Requires complex email verification workflow - not implemented yet"
+    reason="Requires complex email verification workflow - not implemented yet",
 )
 class TestEmailVerificationEndpoints:
     def test_register_user_with_email_verification(self, client: TestClient) -> None:
@@ -42,7 +42,7 @@ class TestEmailVerificationEndpoints:
     def test_register_user_email_not_configured(self, client: TestClient) -> None:
         """Test user registration when email is not configured."""
         with patch(
-            "app.services.email.email_service.is_configured", return_value=False
+            "app.services.email.email_service.is_configured", return_value=False,
         ):
             response = client.post(
                 "/api/v1/auth/register",
@@ -57,7 +57,7 @@ class TestEmailVerificationEndpoints:
             assert user_data["is_verified"] is False
 
     def test_login_unverified_user(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ) -> None:
         """Test login attempt by unverified user."""
         # Create unverified user
@@ -81,7 +81,7 @@ class TestEmailVerificationEndpoints:
         assert "Please verify your email before logging in" in response.json()["detail"]
 
     def test_login_verified_user(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ) -> None:
         """Test successful login by verified user."""
         # Create verified user
@@ -107,7 +107,7 @@ class TestEmailVerificationEndpoints:
         assert token_data["token_type"] == "bearer"
 
     def test_resend_verification_email_success(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ) -> None:
         """Test successful resend verification email."""
         # Create unverified user
@@ -130,7 +130,7 @@ class TestEmailVerificationEndpoints:
             ),
         ):
             response = client.post(
-                "/api/v1/auth/resend-verification", json={"email": "test@example.com"}
+                "/api/v1/auth/resend-verification", json={"email": "test@example.com"},
             )
             assert response.status_code == 200
             data = response.json()
@@ -147,7 +147,7 @@ class TestEmailVerificationEndpoints:
         assert "User not found" in response.json()["detail"]
 
     def test_resend_verification_email_already_verified(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ) -> None:
         """Test resend verification email for already verified user."""
         # Create verified user
@@ -163,7 +163,7 @@ class TestEmailVerificationEndpoints:
         sync_db_session.commit()
 
         response = client.post(
-            "/api/v1/auth/resend-verification", json={"email": "verified@example.com"}
+            "/api/v1/auth/resend-verification", json={"email": "verified@example.com"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -171,7 +171,7 @@ class TestEmailVerificationEndpoints:
         assert data["email_sent"] is False
 
     def test_resend_verification_email_not_configured(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ) -> None:
         """Test resend verification email when email is not configured."""
         # Create unverified user
@@ -187,10 +187,10 @@ class TestEmailVerificationEndpoints:
         sync_db_session.commit()
 
         with patch(
-            "app.services.email.email_service.is_configured", return_value=False
+            "app.services.email.email_service.is_configured", return_value=False,
         ):
             response = client.post(
-                "/api/v1/auth/resend-verification", json={"email": "test@example.com"}
+                "/api/v1/auth/resend-verification", json={"email": "test@example.com"},
             )
             assert response.status_code == 200
             data = response.json()
@@ -198,7 +198,7 @@ class TestEmailVerificationEndpoints:
             assert data["email_sent"] is False
 
     def test_verify_email_success(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ) -> None:
         """Test successful email verification."""
         # Create user with verification token
@@ -209,14 +209,14 @@ class TestEmailVerificationEndpoints:
             username="testuser",
             hashed_password="hashed_password",
             verification_token="test_token",
-            verification_token_expires=datetime.now(UTC) + timedelta(hours=1),
+            verification_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
             is_verified=False,
         )
         sync_db_session.add(user)
         sync_db_session.commit()
 
         response = client.post(
-            "/api/v1/auth/verify-email", json={"token": "test_token"}
+            "/api/v1/auth/verify-email", json={"token": "test_token"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -226,7 +226,7 @@ class TestEmailVerificationEndpoints:
     def test_verify_email_invalid_token(self, client: TestClient) -> None:
         """Test email verification with invalid token."""
         response = client.post(
-            "/api/v1/auth/verify-email", json={"token": "invalid_token"}
+            "/api/v1/auth/verify-email", json={"token": "invalid_token"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -236,7 +236,7 @@ class TestEmailVerificationEndpoints:
 
 class TestEmailVerificationCRUDOperations:
     def test_get_user_by_verification_token_sync(
-        self, sync_db_session: Session
+        self, sync_db_session: Session,
     ) -> None:
         """Test getting user by verification token using sync CRUD."""
         from app.crud import user as crud_user
@@ -247,13 +247,13 @@ class TestEmailVerificationCRUDOperations:
             username="testuser",
             hashed_password="hashed_password",
             verification_token="test_token",
-            verification_token_expires=datetime.now(UTC) + timedelta(hours=1),
+            verification_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
 
         found_user = crud_user.get_user_by_verification_token_sync(
-            sync_db_session, "test_token"
+            sync_db_session, "test_token",
         )
         assert found_user is not None
         assert found_user.email == "test@example.com"
@@ -271,9 +271,9 @@ class TestEmailVerificationCRUDOperations:
         sync_db_session.add(user)
         sync_db_session.commit()
 
-        expires = datetime.now(UTC) + timedelta(hours=1)
+        expires = datetime.now(timezone.utc) + timedelta(hours=1)
         success = crud_user.update_verification_token_sync(
-            sync_db_session, str(user.id), "new_token", expires
+            sync_db_session, str(user.id), "new_token", expires,
         )
         assert success is True
 
@@ -282,7 +282,7 @@ class TestEmailVerificationCRUDOperations:
         assert user.verification_token == "new_token"
 
     def test_update_verification_token_user_not_found(
-        self, sync_db_session: Session
+        self, sync_db_session: Session,
     ) -> None:
         """Test updating verification token for non-existent user."""
         import uuid
@@ -290,9 +290,9 @@ class TestEmailVerificationCRUDOperations:
         from app.crud import user as crud_user
 
         non_existent_uuid = str(uuid.uuid4())
-        expires = datetime.now(UTC) + timedelta(hours=1)
+        expires = datetime.now(timezone.utc) + timedelta(hours=1)
         success = crud_user.update_verification_token_sync(
-            sync_db_session, non_existent_uuid, "new_token", expires
+            sync_db_session, non_existent_uuid, "new_token", expires,
         )
         assert success is False
 
@@ -331,11 +331,11 @@ class TestEmailVerificationCRUDOperations:
 
 
 @pytest.mark.skip(
-    reason="Requires complex email verification workflow - not implemented yet"
+    reason="Requires complex email verification workflow - not implemented yet",
 )
 class TestEmailVerificationIntegration:
     def test_full_email_verification_flow(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ) -> None:
         """Test complete email verification flow."""
         with (
@@ -381,12 +381,12 @@ class TestEmailVerificationIntegration:
 
             # Set verification token manually
             user.verification_token = "test_verification_token"  # type: ignore
-            user.verification_token_expires = datetime.now(UTC) + timedelta(hours=1)  # type: ignore
+            user.verification_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)  # type: ignore
             sync_db_session.commit()
 
         # Step 4: Verify email
         verify_response = client.post(
-            "/api/v1/auth/verify-email", json={"token": "test_verification_token"}
+            "/api/v1/auth/verify-email", json={"token": "test_verification_token"},
         )
         assert verify_response.status_code == 200
         verify_data = verify_response.json()

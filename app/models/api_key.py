@@ -18,7 +18,7 @@ class APIKey(Base, SoftDeleteMixin):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     user_id = Column(
-        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True,
     )  # Nullable for system-level keys
     key_hash = Column(String(255), nullable=False, index=True, unique=True)
     label = Column(String(255), nullable=False)

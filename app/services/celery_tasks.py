@@ -5,7 +5,7 @@ This module is only imported when Celery is enabled, and is not loaded by the ma
 """
 
 import time
-from datetime import UTC
+from datetime import timezone
 from typing import Any
 
 from app.services.celery_app import celery_app
@@ -62,7 +62,7 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
 
     def utc_now() -> datetime:
         """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-        return datetime.now(UTC)
+        return datetime.now(timezone.utc)
 
     try:
         db = next(get_db_sync())
@@ -76,7 +76,7 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
                     User.deletion_scheduled_for <= utc_now(),
                     User.is_deleted == False,  # noqa: E712
                     User.deletion_confirmed_at.isnot(None),
-                )
+                ),
             )
             .scalars()
             .all()
@@ -122,7 +122,7 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
                         User.deletion_scheduled_for > utc_now(),
                         User.is_deleted == False,  # noqa: E712
                         User.deletion_confirmed_at.isnot(None),
-                    )
+                    ),
                 )
                 .scalars()
                 .all()
@@ -140,7 +140,7 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
                             str(user.username),
                             days_remaining,
                             user.deletion_scheduled_for.strftime(
-                                "%Y-%m-%d %H:%M:%S UTC"
+                                "%Y-%m-%d %H:%M:%S UTC",
                             ),
                         )
 
@@ -158,6 +158,7 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
                                 user_id=str(user.id),
                                 email=user.email,
                             )
+                            # Continue processing other accounts
                 except Exception as e:
                     logger.error(
                         "Error sending account deletion reminder",
@@ -167,6 +168,14 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
                         exc_info=True,
                     )
 
+    except Exception as e:
+        logger.error(
+            "Permanent account deletion task failed",
+            error=str(e),
+            exc_info=True,
+        )
+        return {"status": "failed", "error": str(e)}
+    else:
         logger.info(
             "Permanent account deletion task completed",
             accounts_deleted=deleted_count,
@@ -178,11 +187,3 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
             "accounts_deleted": deleted_count,
             "reminders_sent": reminder_sent_count,
         }
-
-    except Exception as e:
-        logger.error(
-            "Permanent account deletion task failed",
-            error=str(e),
-            exc_info=True,
-        )
-        return {"status": "failed", "error": str(e)}

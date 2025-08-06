@@ -136,7 +136,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         return db_user
 
     async def update_user(
-        self, db: DBSession, user_id: str | UUID, user_data: AdminUserUpdate
+        self, db: DBSession, user_id: str | UUID, user_data: AdminUserUpdate,
     ) -> User | None:
         """
         Update user data (admin-only).
@@ -158,7 +158,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         # Handle password hashing if password is being updated
         if "password" in update_data:
             update_data["hashed_password"] = get_password_hash(
-                update_data.pop("password")
+                update_data.pop("password"),
             )
 
         for field, value in update_data.items():
@@ -190,7 +190,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         return await self.delete(db, user_id)
 
     async def toggle_superuser_status(
-        self, db: DBSession, user_id: str | UUID
+        self, db: DBSession, user_id: str | UUID,
     ) -> User | None:
         """
         Toggle superuser status for a user.
@@ -219,7 +219,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         return user
 
     async def toggle_verification_status(
-        self, db: DBSession, user_id: str | UUID
+        self, db: DBSession, user_id: str | UUID,
     ) -> User | None:
         """
         Toggle verification status for a user.
@@ -259,11 +259,10 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
             bool: True if deleted, False if not found
         """
         # Use the soft delete function with admin context
-        success = await crud_user.soft_delete_user(
+        return await crud_user.soft_delete_user(
             db=db,
             user_id=str(user_id),
         )
-        return success
 
     async def get_user_statistics(self, db: DBSession) -> dict:
         """
@@ -326,6 +325,39 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
             "regular_users": total_users - superusers,
             "unverified_users": total_users - verified_users,
         }
+
+    async def get_deleted_users(
+        self,
+        db: DBSession,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> list[User]:
+        """
+        Get deleted users with pagination.
+
+        Args:
+            db: Database session
+            skip: Number of users to skip
+            limit: Maximum number of users to return
+
+        Returns:
+            List[User]: List of deleted users
+        """
+        filters = {"is_deleted": True}
+        return await self.get_multi(db, skip=skip, limit=limit, filters=filters)
+
+    async def count_deleted_users(self, db: DBSession) -> int:
+        """
+        Count deleted users.
+
+        Args:
+            db: Database session
+
+        Returns:
+            int: Number of deleted users
+        """
+        filters = {"is_deleted": True}
+        return await self.count(db, filters=filters)
 
 
 # Create a singleton instance for easy import

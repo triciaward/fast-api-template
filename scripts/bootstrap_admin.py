@@ -28,7 +28,7 @@ os.environ["PYTHONPATH"] = str(project_root)
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ async def main() -> None:
     parser.add_argument("--email", help="Superuser email address")
     parser.add_argument("--password", help="Superuser password")
     parser.add_argument(
-        "--username", help="Superuser username (optional, defaults to email prefix)"
+        "--username", help="Superuser username (optional, defaults to email prefix)",
     )
     parser.add_argument(
         "--force",
@@ -70,7 +70,7 @@ async def main() -> None:
                         sys.exit(1)
 
             except Exception as e:
-                logger.error(f"Error creating superuser: {e}")
+                logger.exception(f"Error creating superuser: {e}")
                 sys.exit(1)
             break
     else:

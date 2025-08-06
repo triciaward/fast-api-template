@@ -29,7 +29,7 @@ except ImportError:
     import os
 
     scripts_abs_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../../scripts")
+        os.path.join(os.path.dirname(__file__), "../../scripts"),
     )
     if scripts_abs_path not in sys.path:
         sys.path.insert(0, scripts_abs_path)
@@ -95,7 +95,7 @@ class TestTemplateCustomization:
 
                 # Verify error message was displayed
                 mock_print.assert_any_call(
-                    "❌ Error: You're still in the 'fast-api-template' directory!"
+                    "❌ Error: You're still in the 'fast-api-template' directory!",
                 )
 
     @patch("builtins.input")
@@ -115,7 +115,7 @@ class TestTemplateCustomization:
                 # Verify exit was called
                 mock_exit.assert_called_once_with(1)
                 mock_print.assert_any_call(
-                    "❌ Error: You're still in the 'fast-api-template' directory!"
+                    "❌ Error: You're still in the 'fast-api-template' directory!",
                 )
 
     def test_directory_check_approves_custom_name(self):
@@ -133,7 +133,7 @@ class TestTemplateCustomization:
 
                 # Verify approval message
                 mock_print.assert_any_call(
-                    "✅ Directory name looks good: myawesomeproject_backend"
+                    "✅ Directory name looks good: myawesomeproject_backend",
                 )
 
     @patch("builtins.input")

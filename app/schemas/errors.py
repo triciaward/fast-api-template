@@ -133,9 +133,9 @@ class ErrorResponse(BaseModel):
                     "type": "ValidationError",
                     "message": "Email is invalid",
                     "code": "invalid_email",
-                }
-            }
-        }
+                },
+            },
+        },
     )
 
 
@@ -154,8 +154,8 @@ class ErrorDetail(BaseModel):
                 "message": "Email is invalid",
                 "code": "invalid_email",
                 "details": {"field": "email", "value": "invalid-email"},
-            }
-        }
+            },
+        },
     )
 
 
@@ -174,8 +174,8 @@ class ValidationErrorDetail(ErrorDetail):
                 "code": "invalid_email",
                 "field": "email",
                 "value": "invalid-email",
-            }
-        }
+            },
+        },
     )
 
 
@@ -190,8 +190,8 @@ class AuthenticationErrorDetail(ErrorDetail):
                 "type": "AuthenticationError",
                 "message": "Invalid email or password",
                 "code": "invalid_credentials",
-            }
-        }
+            },
+        },
     )
 
 
@@ -200,7 +200,7 @@ class AuthorizationErrorDetail(ErrorDetail):
 
     type: ErrorType = Field(default=ErrorType.AUTHORIZATION_ERROR)
     required_permissions: list[str] | None = Field(
-        None, description="Required permissions for this operation"
+        None, description="Required permissions for this operation",
     )
 
     model_config = ConfigDict(
@@ -210,8 +210,8 @@ class AuthorizationErrorDetail(ErrorDetail):
                 "message": "Superuser privileges required",
                 "code": "superuser_required",
                 "required_permissions": ["superuser"],
-            }
-        }
+            },
+        },
     )
 
 
@@ -230,8 +230,8 @@ class ResourceErrorDetail(ErrorDetail):
                 "code": "user_not_found",
                 "resource_type": "user",
                 "resource_id": "123e4567-e89b-12d3-a456-426614174000",
-            }
-        }
+            },
+        },
     )
 
 
@@ -240,10 +240,10 @@ class ConflictErrorDetail(ErrorDetail):
 
     type: ErrorType = Field(default=ErrorType.CONFLICT)
     conflicting_field: str | None = Field(
-        None, description="Field that caused the conflict"
+        None, description="Field that caused the conflict",
     )
     conflicting_value: str | None = Field(
-        None, description="Value that caused the conflict"
+        None, description="Value that caused the conflict",
     )
 
     model_config = ConfigDict(
@@ -254,8 +254,8 @@ class ConflictErrorDetail(ErrorDetail):
                 "code": "email_already_exists",
                 "conflicting_field": "email",
                 "conflicting_value": "user@example.com",
-            }
-        }
+            },
+        },
     )
 
 
@@ -274,8 +274,8 @@ class RateLimitErrorDetail(ErrorDetail):
                 "code": "rate_limit_exceeded",
                 "retry_after": 60,
                 "limit": 100,
-            }
-        }
+            },
+        },
     )
 
 
@@ -292,6 +292,6 @@ class ServerErrorDetail(ErrorDetail):
                 "message": "An unexpected error occurred",
                 "code": "internal_error",
                 "request_id": "req_123456",
-            }
-        }
+            },
+        },
     )

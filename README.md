@@ -288,8 +288,14 @@ If you encounter any issues during setup:
 **If you've already completed the initial setup above, you can use these quick commands:**
 
 ### Prerequisites
-- Python 3.11 or higher (for development tools)
+- **Python 3.11.13** (recommended for development tools)
 - Docker and Docker Compose (for running the application)
+
+**💡 Environment Parity:** This project is optimized for Python 3.11 across all environments:
+- **Local Development**: Python 3.11.13
+- **Docker Container**: Python 3.11.13  
+- **GitHub CI**: Python 3.11
+- **Perfect environment consistency** for reliable development
 
 ### Quick Setup
 
@@ -344,6 +350,56 @@ Once your app is running, you can explore your API:
 
 - **Interactive API Docs**: http://localhost:8000/docs
 - **Alternative API Docs**: http://localhost:8000/redoc
+
+## 🏥 Health Monitoring
+
+This template includes comprehensive health monitoring endpoints for production use:
+
+### Health Check Endpoints
+
+- **Basic Health**: `GET /api/v1/health` - Application status and version
+- **Simple Health**: `GET /api/v1/health/simple` - Load balancer health check
+- **Readiness Probe**: `GET /api/v1/health/ready` - Kubernetes readiness check
+- **Liveness Probe**: `GET /api/v1/health/live` - Kubernetes liveness check
+- **Detailed Health**: `GET /api/v1/health/detailed` - Comprehensive status with database/Redis checks
+- **Database Health**: `GET /api/v1/health/database` - Database-specific health and performance
+- **Metrics**: `GET /api/v1/health/metrics` - Application metrics and performance data
+
+### Performance Monitoring
+
+The template includes built-in performance monitoring utilities:
+
+```python
+from app.utils.performance import monitor_request_performance, cache_result, QueryAnalyzer
+
+# Monitor request performance
+@monitor_request_performance()
+async def my_endpoint():
+    # Your code here
+    pass
+
+# Cache expensive operations
+@cache_result(ttl=300)  # 5 minutes
+async def expensive_operation():
+    # Your code here
+    pass
+
+# Analyze database queries
+analyzer = QueryAnalyzer(db_session)
+analysis = analyzer.analyze_query(my_query)
+```
+
+### Database Backup
+
+Automated database backup system included:
+
+```bash
+# Run backup manually
+python scripts/backup_database.py
+
+# Setup automated backups (cron job)
+0 2 * * * /path/to/your/project/scripts/backup_database.py
+```
 
 ## 🧪 Testing Your Application
 
@@ -527,6 +583,20 @@ The pre-commit hooks will automatically:
 pre-commit install
 ```
 
+## 🆕 Recent Improvements
+
+**Latest Updates (August 2025):**
+- ✅ **Python 3.11 Environment Parity** - All environments now use Python 3.11.13
+- ✅ **Modern Python Features** - Access to union types (`dict[str, str] | None`), better error messages
+- ✅ **Fixed datetime.UTC Compatibility** - Resolved Python 3.11 compatibility issues
+- ✅ **Updated Dependencies** - Latest pip (25.2) and all packages
+- ✅ **Enhanced Type Safety** - Better type checking and modern syntax support
+- ✅ **Performance Monitoring** - Added comprehensive performance utilities and query analysis
+- ✅ **Enhanced Error Handling** - Custom exception classes and standardized error responses
+- ✅ **Production Health Checks** - Comprehensive health check endpoints for monitoring
+- ✅ **Database Backup System** - Automated backup script with compression and retention
+- ✅ **Code Quality Improvements** - Enhanced ruff configuration and dependency alignment
+
 ## 📖 What's Included
 
 This project comes with several features out of the box:
@@ -541,6 +611,10 @@ This project comes with several features out of the box:
 - **Testing Framework** - Comprehensive test suite
 - **Development Tools** - Local Python environment for linting, testing, and formatting
 - **Type Safety** - Full type annotations with proper error handling
+- **Performance Monitoring** - Built-in performance utilities and query analysis
+- **Health Monitoring** - Comprehensive health check endpoints for production
+- **Error Handling** - Custom exception classes and standardized error responses
+- **Database Backup** - Automated backup system with compression and retention
 
 ## 🎯 Next Steps
 
@@ -559,6 +633,7 @@ This project comes with several features out of the box:
 - [Database Management](docs/tutorials/database-management.md)
 - [Testing Guide](docs/tutorials/testing-and-development.md)
 - [Deployment Guide](docs/tutorials/deployment-and-production.md)
+- [Cost Optimization](docs/tutorials/cost-optimization.md) - Deploy on a budget ($10-15/month)
 - [Optional Features](docs/tutorials/optional-features.md)
 - [Troubleshooting](docs/troubleshooting/) - Common issues and solutions
   - [Template Critical Fixes](docs/troubleshooting/template-fixes.md) - Critical fixes applied to prevent common issues

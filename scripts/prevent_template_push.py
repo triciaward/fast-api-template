@@ -50,31 +50,10 @@ def main():
     remote_url = get_remote_url()
 
     if is_template_repository(remote_url):
-        print("\n" + "=" * 80)
-        print("🚨 CRITICAL WARNING: Template Repository Detected!")
-        print("=" * 80)
-        print()
-        print("You are working with the template repository!")
-        print()
-        print("⚠️  DANGER: Any commits or pushes could overwrite the original template")
-        print("   and cause problems for others using this template.")
-        print()
-        print("🔧 IMMEDIATE ACTION REQUIRED:")
-        print("1. Create a new GitHub repository for your project")
-        print("2. Update your git remote:")
-        print(
-            "   git remote set-url origin https://github.com/yourusername/your-new-repo-name.git"
-        )
-        print("3. Then continue with your git operations")
-        print()
-        print("For detailed instructions, see the README.md file.")
-        print("=" * 80)
-        print()
 
         # Ask user if they want to continue anyway
         response = input("Do you want to continue with git operations anyway? (y/N): ")
         if response.lower() != "y":
-            print("Git operation cancelled. Please set up your own repository first.")
             return 1
 
     return 0

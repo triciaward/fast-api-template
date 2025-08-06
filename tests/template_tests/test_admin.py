@@ -1,6 +1,6 @@
 """Tests for admin-only functionality."""
 
-from datetime import UTC
+from datetime import timezone
 
 import pytest
 from fastapi.testclient import TestClient
@@ -27,7 +27,7 @@ from app.schemas.user import UserCreate
     5. Ensure all dependencies are compatible
 
     See docs/tutorials/testing-and-development.md for implementation details.
-    """
+    """,
 )
 @pytest.mark.asyncio
 async def test_admin_user_crud_operations(db_session: AsyncSession) -> None:
@@ -98,7 +98,7 @@ async def test_admin_user_crud_operations(db_session: AsyncSession) -> None:
         is_verified=None,
     )
     updated_user = await admin_user_crud.update_user(
-        db_session, str(user.id), update_data
+        db_session, str(user.id), update_data,
     )
     assert updated_user is not None
     assert updated_user.username == "updatedadmin"
@@ -128,14 +128,14 @@ async def test_admin_user_toggle_operations(db_session: AsyncSession) -> None:
 
     # Toggle to superuser
     updated_user = await admin_user_crud.toggle_superuser_status(
-        db_session, str(user.id)
+        db_session, str(user.id),
     )
     assert updated_user is not None
     assert updated_user.is_superuser is True
 
     # Toggle back to regular user
     updated_user = await admin_user_crud.toggle_superuser_status(
-        db_session, str(user.id)
+        db_session, str(user.id),
     )
     assert updated_user is not None
     assert updated_user.is_superuser is False
@@ -143,13 +143,13 @@ async def test_admin_user_toggle_operations(db_session: AsyncSession) -> None:
     # Test toggle verification status
     assert user.is_verified is False
     updated_user = await admin_user_crud.toggle_verification_status(
-        db_session, str(user.id)
+        db_session, str(user.id),
     )
     assert updated_user is not None
     assert updated_user.is_verified is True
 
     updated_user = await admin_user_crud.toggle_verification_status(
-        db_session, str(user.id)
+        db_session, str(user.id),
     )
     assert updated_user is not None
     assert updated_user.is_verified is False
@@ -209,10 +209,10 @@ async def test_admin_user_statistics(db_session: AsyncSession) -> None:
     5. Configure test database with proper user states
 
     See docs/tutorials/authentication.md for implementation details.
-    """
+    """,
 )
 def test_admin_endpoints_require_superuser(
-    client: TestClient, sync_db_session: Session
+    client: TestClient, sync_db_session: Session,
 ) -> None:
     """Test that admin endpoints require superuser privileges."""
     # Test without authentication
@@ -266,10 +266,10 @@ def test_admin_endpoints_require_superuser(
     5. Configure test database with proper user states
 
     See docs/tutorials/authentication.md for implementation details.
-    """
+    """,
 )
 def test_admin_endpoints_with_superuser(
-    client: TestClient, sync_db_session: Session
+    client: TestClient, sync_db_session: Session,
 ) -> None:
     """Test admin endpoints with superuser authentication."""
     # Create a superuser directly in database
@@ -325,7 +325,7 @@ def test_admin_endpoints_with_superuser(
     5. Configure test database with proper user states
 
     See docs/tutorials/authentication.md for implementation details.
-    """
+    """,
 )
 def test_admin_user_management(client: TestClient, sync_db_session: Session) -> None:
     """Test admin user management operations."""
@@ -377,7 +377,7 @@ def test_admin_user_management(client: TestClient, sync_db_session: Session) -> 
         "is_verified": False,
     }
     response = client.put(
-        f"/api/v1/admin/users/{user_id}", json=update_data, headers=headers
+        f"/api/v1/admin/users/{user_id}", json=update_data, headers=headers,
     )
     assert response.status_code == 200
     assert response.json()["username"] == "updateduser"
@@ -385,14 +385,14 @@ def test_admin_user_management(client: TestClient, sync_db_session: Session) -> 
 
     # Toggle superuser status
     response = client.post(
-        f"/api/v1/admin/users/{user_id}/toggle-superuser", headers=headers
+        f"/api/v1/admin/users/{user_id}/toggle-superuser", headers=headers,
     )
     assert response.status_code == 200
     assert response.json()["is_superuser"] is True
 
     # Toggle verification status
     response = client.post(
-        f"/api/v1/admin/users/{user_id}/toggle-verification", headers=headers
+        f"/api/v1/admin/users/{user_id}/toggle-verification", headers=headers,
     )
     assert response.status_code == 200
     assert response.json()["is_verified"] is True
@@ -423,7 +423,7 @@ def test_admin_user_management(client: TestClient, sync_db_session: Session) -> 
     5. Configure test database with proper user states
 
     See docs/tutorials/authentication.md for implementation details.
-    """
+    """,
 )
 def test_admin_bulk_operations(client: TestClient, sync_db_session: Session) -> None:
     """Test admin bulk operations."""
@@ -525,7 +525,7 @@ def test_admin_bulk_operations(client: TestClient, sync_db_session: Session) -> 
     5. Configure test database with proper user states
 
     See docs/tutorials/authentication.md for implementation details.
-    """
+    """,
 )
 def test_admin_self_protection(client: TestClient, sync_db_session: Session) -> None:
     """Test that admins cannot delete or modify their own accounts."""
@@ -562,7 +562,7 @@ def test_admin_self_protection(client: TestClient, sync_db_session: Session) -> 
 
     # Try to toggle own superuser status
     response = client.post(
-        f"/api/v1/admin/users/{user_id}/toggle-superuser", headers=headers
+        f"/api/v1/admin/users/{user_id}/toggle-superuser", headers=headers,
     )
     assert response.status_code == 400
     assert (
@@ -587,10 +587,10 @@ def test_admin_self_protection(client: TestClient, sync_db_session: Session) -> 
     5. Configure test database with proper user states
 
     See docs/tutorials/authentication.md for implementation details.
-    """
+    """,
 )
 def test_admin_html_api_keys_dashboard(
-    client: TestClient, sync_db_session: Session
+    client: TestClient, sync_db_session: Session,
 ) -> None:
     """Test admin HTML API keys dashboard."""
     # Create a superuser directly in database
@@ -671,10 +671,10 @@ def test_admin_html_api_keys_dashboard(
     5. Configure test database with proper user states
 
     See docs/tutorials/authentication.md for implementation details.
-    """
+    """,
 )
 def test_admin_html_api_key_operations(
-    client: TestClient, sync_db_session: Session
+    client: TestClient, sync_db_session: Session,
 ) -> None:
     """Test admin HTML API key operations."""
     # Create a superuser directly in database
@@ -709,7 +709,7 @@ def test_admin_html_api_key_operations(
         "expires_at": "",  # No expiration
     }
     response = client.post(
-        "/admin/api-keys", data=form_data, headers=headers, follow_redirects=False
+        "/admin/api-keys", data=form_data, headers=headers, follow_redirects=False,
     )
     assert response.status_code == 303  # Redirect after creation
     assert "API%20key%20created%20successfully" in response.headers["location"]
@@ -717,14 +717,14 @@ def test_admin_html_api_key_operations(
     # Test creating an API key with expiration
     from datetime import datetime, timedelta
 
-    expires_at = (datetime.now(UTC) + timedelta(days=30)).strftime("%Y-%m-%dT%H:%M")
+    expires_at = (datetime.now(timezone.utc) + timedelta(days=30)).strftime("%Y-%m-%dT%H:%M")
     form_data = {
         "label": "Test API Key with Expiration",
         "scopes": "read_events",
         "expires_at": expires_at,
     }
     response = client.post(
-        "/admin/api-keys", data=form_data, headers=headers, follow_redirects=False
+        "/admin/api-keys", data=form_data, headers=headers, follow_redirects=False,
     )
     assert response.status_code == 303  # Redirect after creation
     assert "API%20key%20created%20successfully" in response.headers["location"]
@@ -743,7 +743,7 @@ def test_admin_html_api_key_operations(
     # Note: In a real implementation, you would extract the API key ID from the response
     # and then test deletion. For now, we just verify the endpoint exists
     response = client.post(
-        "/admin/api-keys/delete", data={"key_id": "test_id"}, headers=headers
+        "/admin/api-keys/delete", data={"key_id": "test_id"}, headers=headers,
     )
     # This might return 404 if the key doesn't exist, or 200 if it does
     assert response.status_code in [200, 404]

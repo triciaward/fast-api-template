@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 async def create_superuser(
-    db: AsyncSession, email: str, password: str, username: str | None = None
+    db: AsyncSession, email: str, password: str, username: str | None = None,
 ) -> bool:
     """
     Create a superuser account.
@@ -64,7 +64,7 @@ async def create_superuser(
         if len(username) < 3:
             username = f"admin_{domain}"
 
-    # Validate and fix username if needed
+        # Validate and fix username if needed
     from app.core.validation import validate_username
 
     is_valid, error_msg = validate_username(username)
@@ -77,6 +77,7 @@ async def create_superuser(
         if not is_valid:
             logger.error(f"Could not generate valid username: {error_msg}")
             return False
+    # Username is valid, continue
 
     # Validate password
     from app.core.validation import validate_password
@@ -91,20 +92,21 @@ async def create_superuser(
     from app.crud.user import create_user
 
     superuser_data = UserCreate(
-        email=email, username=username, password=password, is_superuser=True
+        email=email, username=username, password=password, is_superuser=True,
     )
 
     try:
         superuser = await create_user(db, superuser_data)
         logger.info(
-            f"Superuser created successfully: {superuser.email} (ID: {superuser.id})"
+            f"Superuser created successfully: {superuser.email} (ID: {superuser.id})",
         )
         logger.info(f"Username: {superuser.username}")
         logger.info(f"Password: {password}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to create superuser: {e}")
+    except Exception:
+        logger.exception("Failed to create superuser")
         return False
+    else:
+        return True
 
 
 async def bootstrap_superuser() -> None:
@@ -114,7 +116,7 @@ async def bootstrap_superuser() -> None:
     # Check if superuser environment variables are set
     if not settings.FIRST_SUPERUSER or not settings.FIRST_SUPERUSER_PASSWORD:
         logger.info(
-            "FIRST_SUPERUSER or FIRST_SUPERUSER_PASSWORD not set, skipping superuser creation"
+            "FIRST_SUPERUSER or FIRST_SUPERUSER_PASSWORD not set, skipping superuser creation",
         )
         return
 
@@ -133,7 +135,7 @@ async def bootstrap_superuser() -> None:
 
             if existing_superusers:
                 logger.info(
-                    f"Superuser(s) already exist: {[u.email for u in existing_superusers]}"
+                    f"Superuser(s) already exist: {[u.email for u in existing_superusers]}",
                 )
                 return
 
@@ -149,8 +151,8 @@ async def bootstrap_superuser() -> None:
             else:
                 logger.warning("Superuser bootstrap failed")
 
-        except Exception as e:
-            logger.error(f"Error during superuser bootstrap: {e}")
+        except Exception:
+            logger.exception("Error during superuser bootstrap")
         break
 
 

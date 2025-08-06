@@ -23,7 +23,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "app"))
 
 def demo_basic_logging() -> None:
     """Demonstrate basic logging functionality."""
-    print("\n=== Basic Logging Demo ===")
     logger = get_app_logger()
     logger.info("Application started", version=settings.VERSION)
     logger.warning("This is a warning message", component="demo")
@@ -39,11 +38,10 @@ def demo_basic_logging() -> None:
 
 def demo_auth_logging() -> None:
     """Demonstrate authentication-specific logging."""
-    print("\n=== Authentication Logging Demo ===")
     auth_logger = get_auth_logger()
     auth_logger.info("Login attempt", email="user@example.com", ip="192.168.1.100")
     auth_logger.warning(
-        "Failed login attempt", email="user@example.com", reason="invalid_password"
+        "Failed login attempt", email="user@example.com", reason="invalid_password",
     )
     auth_logger.info(
         "Successful login",
@@ -62,7 +60,6 @@ def demo_auth_logging() -> None:
 
 def demo_database_logging() -> None:
     """Demonstrate database-specific logging."""
-    print("\n=== Database Logging Demo ===")
     db_logger = get_db_logger()
     db_logger.info(
         "Database connection established",
@@ -70,7 +67,7 @@ def demo_database_logging() -> None:
         database="fastapi_template",
     )
     db_logger.info(
-        "Query executed", query_type="SELECT", table="users", execution_time_ms=15.5
+        "Query executed", query_type="SELECT", table="users", execution_time_ms=15.5,
     )
     db_logger.warning(
         "Slow query detected",
@@ -80,13 +77,12 @@ def demo_database_logging() -> None:
         threshold_ms=1000.0,
     )
     db_logger.error(
-        "Database connection failed", error="connection_timeout", retry_count=3
+        "Database connection failed", error="connection_timeout", retry_count=3,
     )
 
 
 def demo_error_logging() -> None:
     """Demonstrate error logging with exceptions."""
-    print("\n=== Error Logging Demo ===")
     logger = get_app_logger()
     try:
         _ = 10 / 0
@@ -102,20 +98,17 @@ def demo_error_logging() -> None:
         raise ValueError("Invalid input provided")
     except ValueError as e:
         logger.error(
-            "Validation error", error_type="value_error", message=str(e), exc_info=True
+            "Validation error", error_type="value_error", message=str(e), exc_info=True,
         )
 
 
 def demo_different_formats() -> None:
     """Demonstrate different log formats."""
-    print("\n=== Log Format Demo ===")
-    print("\n--- JSON Format ---")
     with open(".env", "a") as f:
         f.write("\nLOG_FORMAT=json\n")
     setup_logging()
     logger = get_app_logger()
     logger.info("JSON format test", test_field="json_value")
-    print("\n--- Text Format ---")
     with open(".env", "a") as f:
         f.write("\nLOG_FORMAT=text\n")
     setup_logging()
@@ -125,20 +118,11 @@ def demo_different_formats() -> None:
 
 def main() -> None:
     """Main demo function."""
-    print("FastAPI Template - Logging Demo")
-    print("=" * 50)
     setup_logging()
     demo_basic_logging()
     demo_auth_logging()
     demo_database_logging()
     demo_error_logging()
-    print("\n" + "=" * 50)
-    print("Logging demo completed!")
-    print("\nTo see different log formats, run:")
-    print("  python scripts/logging_demo.py")
-    print("\nTo enable file logging, set in your .env file:")
-    print("  ENABLE_FILE_LOGGING=true")
-    print("  LOG_FILE_PATH=logs/app.log")
 
 
 if __name__ == "__main__":

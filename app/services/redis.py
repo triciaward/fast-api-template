@@ -44,12 +44,13 @@ async def init_redis() -> redis.Redis | None:
         # Test the connection
         await redis_client.ping()
         logger.info("Redis connection established successfully")
-        return redis_client
 
-    except Exception as e:
-        logger.error(f"Failed to initialize Redis: {e}")
+    except Exception:
+        logger.exception("Failed to initialize Redis")
         redis_client = None
         return None
+    else:
+        return redis_client
 
 
 async def close_redis() -> None:
@@ -60,8 +61,8 @@ async def close_redis() -> None:
         try:
             await redis_client.close()
             logger.info("Redis connection closed")
-        except Exception as e:
-            logger.error(f"Error closing Redis connection: {e}")
+        except Exception:
+            logger.exception("Error closing Redis connection")
         finally:
             redis_client = None
 
@@ -88,7 +89,8 @@ async def health_check_redis() -> bool:
 
     try:
         await redis_client.ping()
-        return True
-    except Exception as e:
-        logger.error(f"Redis health check failed: {e}")
+    except Exception:
+        logger.exception("Redis health check failed")
         return False
+    else:
+        return True

@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock
 
 import pytest
@@ -69,12 +69,12 @@ class TestRefreshTokenSecurity:
 
 
 @pytest.mark.skip(
-    reason="Requires complex refresh token functionality - not implemented yet"
+    reason="Requires complex refresh token functionality - not implemented yet",
 )
 class TestRefreshTokenCRUD:
     """Test refresh token CRUD operations."""
 
-    def test_create_refresh_token_crud(self, sync_db_session: Session):
+    async def test_create_refresh_token_crud(self, sync_db_session: Session):
         """Test creating a refresh token in the database."""
         user = User(
             id=uuid.uuid4(),
@@ -86,8 +86,8 @@ class TestRefreshTokenCRUD:
         sync_db_session.commit()
 
         token = create_refresh_token()
-        db_refresh_token = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token, "Test Device", "127.0.0.1"
+        db_refresh_token = await crud_create_refresh_token(
+            sync_db_session, str(user.id), token, "Test Device", "127.0.0.1",
         )
 
         assert db_refresh_token.user_id == user.id
@@ -96,9 +96,9 @@ class TestRefreshTokenCRUD:
         assert db_refresh_token.device_info == "Test Device"
         assert db_refresh_token.ip_address == "127.0.0.1"
         assert db_refresh_token.is_revoked is False
-        assert db_refresh_token.expires_at > datetime.now(UTC)
+        assert db_refresh_token.expires_at > datetime.now(timezone.utc)
 
-    def test_get_refresh_token_by_hash(self, sync_db_session: Session):
+    async def test_get_refresh_token_by_hash(self, sync_db_session: Session):
         """Test retrieving a refresh token by hash."""
         user = User(
             id=uuid.uuid4(),
@@ -110,20 +110,20 @@ class TestRefreshTokenCRUD:
         sync_db_session.commit()
 
         token = create_refresh_token()
-        db_refresh_token = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token
+        db_refresh_token = await crud_create_refresh_token(
+            sync_db_session, str(user.id), token,
         )
 
         # Test valid token - use verify_refresh_token_in_db instead
-        retrieved = verify_refresh_token_in_db(sync_db_session, token)
+        retrieved = await verify_refresh_token_in_db(sync_db_session, token)
         assert retrieved is not None
         assert retrieved.id == db_refresh_token.id
 
         # Test invalid hash
-        retrieved = get_refresh_token_by_hash(sync_db_session, "invalid_hash")
+        retrieved = await get_refresh_token_by_hash(sync_db_session, "invalid_hash")
         assert retrieved is None
 
-    def test_verify_refresh_token_in_db(self, sync_db_session: Session):
+    async def test_verify_refresh_token_in_db(self, sync_db_session: Session):
         """Test verifying a refresh token against the database."""
         user = User(
             id=uuid.uuid4(),
@@ -135,18 +135,18 @@ class TestRefreshTokenCRUD:
         sync_db_session.commit()
 
         token = create_refresh_token()
-        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token)
+        await crud_create_refresh_token(sync_db_session, str(user.id), token)
 
         # Test valid token
-        result = verify_refresh_token_in_db(sync_db_session, token)
+        result = await verify_refresh_token_in_db(sync_db_session, token)
         assert result is not None
         assert result.user_id == user.id
 
         # Test invalid token
-        result = verify_refresh_token_in_db(sync_db_session, "invalid_token")
+        result = await verify_refresh_token_in_db(sync_db_session, "invalid_token")
         assert result is None
 
-    def test_revoke_refresh_token(self, sync_db_session: Session):
+    async def test_revoke_refresh_token(self, sync_db_session: Session):
         """Test revoking a refresh token."""
         user = User(
             id=uuid.uuid4(),
@@ -158,13 +158,13 @@ class TestRefreshTokenCRUD:
         sync_db_session.commit()
 
         token = create_refresh_token()
-        db_refresh_token = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token
+        db_refresh_token = await crud_create_refresh_token(
+            sync_db_session, str(user.id), token,
         )
 
         # Revoke token
-        success = revoke_refresh_token(
-            sync_db_session, uuid.UUID(str(db_refresh_token.id))
+        success = await revoke_refresh_token(
+            sync_db_session, str(db_refresh_token.id),
         )
         assert success is True
 
@@ -173,10 +173,10 @@ class TestRefreshTokenCRUD:
         assert db_refresh_token.is_revoked is True
 
         # Test revoking non-existent token
-        success = revoke_refresh_token(sync_db_session, uuid.uuid4())
+        success = await revoke_refresh_token(sync_db_session, str(uuid.uuid4()))
         assert success is False
 
-    def test_revoke_refresh_token_by_hash(self, sync_db_session: Session):
+    async def test_revoke_refresh_token_by_hash(self, sync_db_session: Session):
         """Test revoking a refresh token by hash."""
         user = User(
             id=uuid.uuid4(),
@@ -188,17 +188,17 @@ class TestRefreshTokenCRUD:
         sync_db_session.commit()
 
         token = create_refresh_token()
-        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token)
+        await crud_create_refresh_token(sync_db_session, str(user.id), token)
 
         # Revoke token - use revoke_session instead
-        success = revoke_session(sync_db_session, token)
+        success = await revoke_session(sync_db_session, token)
         assert success is True
 
         # Verify token is no longer valid
-        result = verify_refresh_token_in_db(sync_db_session, token)
+        result = await verify_refresh_token_in_db(sync_db_session, token)
         assert result is None
 
-    def test_get_user_sessions(self, sync_db_session: Session):
+    async def test_get_user_sessions(self, sync_db_session: Session):
         """Test getting user sessions."""
         user = User(
             id=uuid.uuid4(),
@@ -212,26 +212,26 @@ class TestRefreshTokenCRUD:
         # Create multiple sessions
         token1 = create_refresh_token()
         token2 = create_refresh_token()
-        db_token1 = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token1, "Device 1"
+        db_token1 = await crud_create_refresh_token(
+            sync_db_session, str(user.id), token1, "Device 1",
         )
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token2, "Device 2"
+        await crud_create_refresh_token(
+            sync_db_session, str(user.id), token2, "Device 2",
         )
 
-        sessions = get_user_sessions(sync_db_session, uuid.UUID(str(user.id)))
+        sessions = await get_user_sessions(sync_db_session, str(user.id))
         assert len(sessions) == 2
 
         # Test with current session ID
-        sessions = get_user_sessions(
-            sync_db_session, uuid.UUID(str(user.id)), uuid.UUID(str(db_token1.id))
+        sessions = await get_user_sessions(
+            sync_db_session, str(user.id),
         )
         assert len(sessions) == 2
         # Check that current session is marked
         current_session = next(s for s in sessions if s.id == db_token1.id)
         assert getattr(current_session, "is_current", False) is True
 
-    def test_get_user_session_count(self, sync_db_session: Session):
+    async def test_get_user_session_count(self, sync_db_session: Session):
         """Test getting user session count."""
         user = User(
             id=uuid.uuid4(),
@@ -243,17 +243,17 @@ class TestRefreshTokenCRUD:
         sync_db_session.commit()
 
         # Create sessions
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), create_refresh_token()
+        await crud_create_refresh_token(
+            sync_db_session, str(user.id), create_refresh_token(),
         )
-        crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), create_refresh_token()
+        await crud_create_refresh_token(
+            sync_db_session, str(user.id), create_refresh_token(),
         )
 
-        count = get_user_session_count(sync_db_session, uuid.UUID(str(user.id)))
+        count = await get_user_session_count(sync_db_session, str(user.id))
         assert count == 2
 
-    def test_cleanup_expired_tokens(self, sync_db_session: Session):
+    async def test_cleanup_expired_tokens(self, sync_db_session: Session):
         """Test cleaning up expired tokens."""
         user = User(
             id=uuid.uuid4(),
@@ -269,14 +269,14 @@ class TestRefreshTokenCRUD:
         db_refresh_token = RefreshToken(
             user_id=user.id,
             token_hash=hash_refresh_token(token),
-            expires_at=datetime.now(UTC) - timedelta(days=1),
+            expires_at=datetime.now(timezone.utc) - timedelta(days=1),
             is_revoked=False,
         )
         sync_db_session.add(db_refresh_token)
         sync_db_session.commit()
 
         # Cleanup expired tokens
-        deleted_count = cleanup_expired_tokens(sync_db_session)
+        deleted_count = await cleanup_expired_tokens(sync_db_session)
         assert deleted_count == 1
 
         # Verify token is deleted
@@ -288,7 +288,7 @@ class TestRefreshTokenCRUD:
         assert result is None
 
     @pytest.mark.refresh_token
-    def test_enforce_session_limit(self, sync_db_session: Session):
+    async def test_enforce_session_limit(self, sync_db_session: Session):
         """Test enforcing session limits."""
         user = User(
             id=uuid.uuid4(),
@@ -309,19 +309,19 @@ class TestRefreshTokenCRUD:
             token2 = create_refresh_token()
             token3 = create_refresh_token()
 
-            db_token1 = crud_create_refresh_token(
-                sync_db_session, uuid.UUID(str(user.id)), token1
+            db_token1 = await crud_create_refresh_token(
+                sync_db_session, str(user.id), token1,
             )
-            db_token2 = crud_create_refresh_token(
-                sync_db_session, uuid.UUID(str(user.id)), token2
+            db_token2 = await crud_create_refresh_token(
+                sync_db_session, str(user.id), token2,
             )
-            db_token3 = crud_create_refresh_token(
-                sync_db_session, uuid.UUID(str(user.id)), token3
+            db_token3 = await crud_create_refresh_token(
+                sync_db_session, str(user.id), token3,
             )
 
             # Enforce limit with the newest token
-            enforce_session_limit(
-                sync_db_session, uuid.UUID(str(user.id)), uuid.UUID(str(db_token3.id))
+            await enforce_session_limit(
+                sync_db_session, str(user.id), 2,
             )
 
             # Check that oldest session is revoked
@@ -337,7 +337,7 @@ class TestRefreshTokenCRUD:
         finally:
             settings.MAX_SESSIONS_PER_USER = original_limit
 
-    def test_revoke_all_user_sessions(self, sync_db_session: Session):
+    async def test_revoke_all_user_sessions(self, sync_db_session: Session):
         """Test revoking all user sessions."""
         user = User(
             id=uuid.uuid4(),
@@ -351,16 +351,16 @@ class TestRefreshTokenCRUD:
         # Create multiple sessions
         token1 = create_refresh_token()
         token2 = create_refresh_token()
-        db_token1 = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token1
+        db_token1 = await crud_create_refresh_token(
+            sync_db_session, str(user.id), token1,
         )
-        db_token2 = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token2
+        db_token2 = await crud_create_refresh_token(
+            sync_db_session, str(user.id), token2,
         )
 
         # Revoke all sessions except one
-        revoked_count = revoke_all_user_sessions(
-            sync_db_session, uuid.UUID(str(user.id)), uuid.UUID(str(db_token1.id))
+        revoked_count = await revoke_all_user_sessions(
+            sync_db_session, str(user.id),
         )
         assert revoked_count == 1
 
@@ -374,7 +374,7 @@ class TestRefreshTokenCRUD:
 
 
 @pytest.mark.skip(
-    reason="Requires complex refresh token functionality - not implemented yet"
+    reason="Requires complex refresh token functionality - not implemented yet",
 )
 class TestRefreshTokenService:
     """Test refresh token service functions."""
@@ -384,14 +384,14 @@ class TestRefreshTokenService:
         # Test Chrome on Windows
         request = Mock()
         request.headers = {
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
         }
         device_info = get_device_info(request)
         assert device_info == "Chrome on Windows"
 
         # Test Firefox on macOS
         request.headers = {
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0"
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0",
         }
         device_info = get_device_info(request)
         assert device_info == "Firefox on macOS"
@@ -452,7 +452,7 @@ class TestRefreshTokenService:
         retrieved_token = get_refresh_token_from_cookie(request)
         assert retrieved_token is None
 
-    def test_create_user_session(self, sync_db_session: Session):
+    async def test_create_user_session(self, sync_db_session: Session):
         """Test creating a user session."""
         user = User(
             id=uuid.uuid4(),
@@ -465,13 +465,13 @@ class TestRefreshTokenService:
 
         request = Mock()
         request.headers = {
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124"
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124",
         }
         request.client = Mock()
         request.client.host = "127.0.0.1"
 
-        access_token, refresh_token = create_user_session(
-            sync_db_session, user, request
+        access_token, refresh_token = await create_user_session(
+            sync_db_session, user, request,
         )
 
         assert access_token is not None
@@ -479,11 +479,11 @@ class TestRefreshTokenService:
         assert len(refresh_token) == 43
 
         # Verify token is stored in database
-        db_token = verify_refresh_token_in_db(sync_db_session, refresh_token)
+        db_token = await verify_refresh_token_in_db(sync_db_session, refresh_token)
         assert db_token is not None
         assert db_token.user_id == user.id
 
-    def test_refresh_access_token(self, sync_db_session: Session):
+    async def test_refresh_access_token(self, sync_db_session: Session):
         """Test refreshing an access token."""
         user = User(
             id=uuid.uuid4(),
@@ -496,21 +496,21 @@ class TestRefreshTokenService:
 
         # Create a session
         token = create_refresh_token()
-        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token)
+        await crud_create_refresh_token(sync_db_session, str(user.id), token)
 
         # Refresh access token
-        result = refresh_access_token(sync_db_session, token)
+        result = await refresh_access_token(sync_db_session, token)
         assert result is not None
 
         access_token, expires_at = result
         assert access_token is not None
-        assert expires_at > datetime.now(UTC)
+        assert expires_at > datetime.now(timezone.utc)
 
         # Test invalid token
-        result = refresh_access_token(sync_db_session, "invalid_token")
+        result = await refresh_access_token(sync_db_session, "invalid_token")
         assert result is None
 
-    def test_revoke_session(self, sync_db_session: Session):
+    async def test_revoke_session(self, sync_db_session: Session):
         """Test revoking a session."""
         user = User(
             id=uuid.uuid4(),
@@ -523,18 +523,18 @@ class TestRefreshTokenService:
 
         # Create a session
         token = create_refresh_token()
-        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token)
+        await crud_create_refresh_token(sync_db_session, str(user.id), token)
 
         # Revoke session
-        success = revoke_session(sync_db_session, token)
+        success = await revoke_session(sync_db_session, token)
         assert success is True
 
         # Verify token is no longer valid
-        result = verify_refresh_token_in_db(sync_db_session, token)
+        result = await verify_refresh_token_in_db(sync_db_session, token)
         assert result is None
 
     @pytest.mark.refresh_token
-    def test_revoke_all_sessions(self, sync_db_session: Session):
+    async def test_revoke_all_sessions(self, sync_db_session: Session):
         """Test revoking all sessions for a user."""
         user = User(
             id=uuid.uuid4(),
@@ -548,31 +548,31 @@ class TestRefreshTokenService:
         # Create multiple sessions
         token1 = create_refresh_token()
         token2 = create_refresh_token()
-        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token1)
-        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token2)
+        await crud_create_refresh_token(sync_db_session, str(user.id), token1)
+        await crud_create_refresh_token(sync_db_session, str(user.id), token2)
 
         # Revoke all sessions except one
-        revoked_count = revoke_all_sessions(
-            sync_db_session, uuid.UUID(str(user.id)), token1
+        revoked_count = await revoke_all_sessions(
+            sync_db_session, uuid.UUID(str(user.id)), token1,
         )
         assert revoked_count == 1
 
         # Verify one token is still valid (current session)
-        result1 = verify_refresh_token_in_db(sync_db_session, token1)
+        result1 = await verify_refresh_token_in_db(sync_db_session, token1)
         assert result1 is not None
 
         # Verify other token is revoked
-        result2 = verify_refresh_token_in_db(sync_db_session, token2)
+        result2 = await verify_refresh_token_in_db(sync_db_session, token2)
         assert result2 is None
 
 
 @pytest.mark.skip(
-    reason="Requires complex refresh token functionality - not implemented yet"
+    reason="Requires complex refresh token functionality - not implemented yet",
 )
 class TestRefreshTokenAPI:
     """Test refresh token API endpoints."""
 
-    def test_refresh_token_endpoint_success(self, client, sync_db_session: Session):
+    async def test_refresh_token_endpoint_success(self, client, sync_db_session: Session):
         """Test successful token refresh."""
         # Create user and session
         user = User(
@@ -586,11 +586,11 @@ class TestRefreshTokenAPI:
 
         # Create session and get refresh token
         token = create_refresh_token()
-        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token)
+        await crud_create_refresh_token(sync_db_session, str(user.id), token)
 
         # Make request with refresh token cookie
         response = client.post(
-            "/api/v1/auth/refresh", cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token}
+            "/api/v1/auth/refresh", cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token},
         )
 
         assert response.status_code == 200
@@ -619,7 +619,7 @@ class TestRefreshTokenAPI:
         data = response.json()
         assert "Invalid refresh token" in data["detail"]
 
-    def test_logout_endpoint_success(self, client, sync_db_session: Session):
+    async def test_logout_endpoint_success(self, client, sync_db_session: Session):
         """Test successful logout."""
         # Create user and session
         user = User(
@@ -633,11 +633,11 @@ class TestRefreshTokenAPI:
 
         # Create session and get refresh token
         token = create_refresh_token()
-        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token)
+        await crud_create_refresh_token(sync_db_session, str(user.id), token)
 
         # Make logout request
         response = client.post(
-            "/api/v1/auth/logout", cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token}
+            "/api/v1/auth/logout", cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token},
         )
 
         assert response.status_code == 200
@@ -645,7 +645,7 @@ class TestRefreshTokenAPI:
         assert data["message"] == "Successfully logged out"
 
         # Verify token is revoked
-        result = verify_refresh_token_in_db(sync_db_session, token)
+        result = await verify_refresh_token_in_db(sync_db_session, token)
         assert result is None
 
     def test_logout_endpoint_no_cookie(self, client):
@@ -656,7 +656,7 @@ class TestRefreshTokenAPI:
         data = response.json()
         assert data["message"] == "Successfully logged out"
 
-    def test_get_user_sessions_endpoint(self, client, sync_db_session: Session):
+    async def test_get_user_sessions_endpoint(self, client, sync_db_session: Session):
         """Test getting user sessions."""
         # Create user and login
         user = User(
@@ -670,15 +670,15 @@ class TestRefreshTokenAPI:
 
         # Create session and get access token
         token = create_refresh_token()
-        db_refresh_token = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token
+        db_refresh_token = await crud_create_refresh_token(
+            sync_db_session, str(user.id), token,
         )
 
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         from app.core.security import create_access_token
 
         access_token = create_access_token(
-            subject=user.email, expires_delta=access_token_expires
+            subject=user.email, expires_delta=access_token_expires,
         )
 
         # Make request with access token
@@ -699,7 +699,7 @@ class TestRefreshTokenAPI:
         assert session["id"] == str(db_refresh_token.id)
         assert session["is_current"] is True
 
-    def test_revoke_session_endpoint(self, client, sync_db_session: Session):
+    async def test_revoke_session_endpoint(self, client, sync_db_session: Session):
         """Test revoking a specific session."""
         # Create user and login
         user = User(
@@ -713,15 +713,15 @@ class TestRefreshTokenAPI:
 
         # Create session and get access token
         token = create_refresh_token()
-        db_refresh_token = crud_create_refresh_token(
-            sync_db_session, uuid.UUID(str(user.id)), token
+        db_refresh_token = await crud_create_refresh_token(
+            sync_db_session, str(user.id), token,
         )
 
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         from app.core.security import create_access_token
 
         access_token = create_access_token(
-            subject=user.email, expires_delta=access_token_expires
+            subject=user.email, expires_delta=access_token_expires,
         )
 
         # Make request to revoke session
@@ -735,11 +735,11 @@ class TestRefreshTokenAPI:
         assert data["message"] == "Session revoked successfully"
 
         # Verify session is revoked
-        result = verify_refresh_token_in_db(sync_db_session, token)
+        result = await verify_refresh_token_in_db(sync_db_session, token)
         assert result is None
 
     @pytest.mark.refresh_token
-    def test_revoke_all_sessions_endpoint(self, client, sync_db_session: Session):
+    async def test_revoke_all_sessions_endpoint(self, client, sync_db_session: Session):
         """Test revoking all sessions."""
         # Create user and login
         user = User(
@@ -754,15 +754,15 @@ class TestRefreshTokenAPI:
         # Create multiple sessions
         token1 = create_refresh_token()
         token2 = create_refresh_token()
-        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token1)
-        crud_create_refresh_token(sync_db_session, uuid.UUID(str(user.id)), token2)
+        await crud_create_refresh_token(sync_db_session, str(user.id), token1)
+        await crud_create_refresh_token(sync_db_session, str(user.id), token2)
 
         # Get access token
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         from app.core.security import create_access_token
 
         access_token = create_access_token(
-            subject=user.email, expires_delta=access_token_expires
+            subject=user.email, expires_delta=access_token_expires,
         )
 
         # Make request to revoke all sessions except current

@@ -19,7 +19,7 @@ logger = get_auth_logger()
 @router.post("/resend-verification", response_model=EmailVerificationResponse)
 @rate_limit_email_verification
 async def resend_verification_email(
-    request: EmailVerificationRequest, db: Session = Depends(get_db_sync)
+    request: EmailVerificationRequest, db: Session = Depends(get_db_sync),
 ) -> EmailVerificationResponse:
     """Resend email verification."""
     user = crud_user.get_user_by_email_sync(db, email=request.email)
@@ -28,52 +28,51 @@ async def resend_verification_email(
 
     if user.is_verified:
         return EmailVerificationResponse(
-            message="User is already verified", email_sent=False
+            message="User is already verified", email_sent=False,
         )
 
     if not email_service or not email_service.is_configured():
         return EmailVerificationResponse(
-            message="Email service not configured", email_sent=False
+            message="Email service not configured", email_sent=False,
         )
 
     # Create new verification token
     verification_token = await email_service.create_verification_token(db, str(user.id))
     if not verification_token:
         return EmailVerificationResponse(
-            message="Failed to create verification token", email_sent=False
+            message="Failed to create verification token", email_sent=False,
         )
 
     # Send verification email
     email_sent = email_service.send_verification_email(
-        str(user.email), str(user.username), verification_token
+        str(user.email), str(user.username), verification_token,
     )
 
     if email_sent:
         return EmailVerificationResponse(
-            message="Verification email sent successfully", email_sent=True
+            message="Verification email sent successfully", email_sent=True,
         )
-    else:
-        return EmailVerificationResponse(
-            message="Failed to send verification email", email_sent=False
-        )
+    return EmailVerificationResponse(
+        message="Failed to send verification email", email_sent=False,
+    )
 
 
 @router.post("/verify-email", response_model=VerifyEmailResponse)
 @rate_limit_email_verification
 async def verify_email(
-    request: VerifyEmailRequest, db: Session = Depends(get_db_sync)
+    request: VerifyEmailRequest, db: Session = Depends(get_db_sync),
 ) -> VerifyEmailResponse:
     """Verify email with token."""
     if not email_service or not email_service.is_configured():
         return VerifyEmailResponse(
-            message="Email service not configured", verified=False
+            message="Email service not configured", verified=False,
         )
 
     # Verify the token
     user_id = await email_service.verify_token(db, request.token)
     if not user_id:
         return VerifyEmailResponse(
-            message="Invalid or expired verification token", verified=False
+            message="Invalid or expired verification token", verified=False,
         )
 
     # Get user and mark as verified

@@ -60,7 +60,7 @@ async def create_api_key(
         )
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Failed to create API key",
             user_id=str(current_user.id),
             error=str(e),
@@ -188,7 +188,7 @@ async def rotate_api_key(
 
     if not new_raw_key:
         raise HTTPException(
-            status_code=500, detail="Failed to rotate API key. Please try again later."
+            status_code=500, detail="Failed to rotate API key. Please try again later.",
         )
 
     return APIKeyRotateResponse(

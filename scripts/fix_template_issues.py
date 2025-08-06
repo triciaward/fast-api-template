@@ -28,10 +28,8 @@ class TemplateFixer:
         alembic_ini = self.project_root / "alembic.ini"
 
         if alembic_ini.exists():
-            print("✅ alembic.ini already exists")
             return
 
-        print("🔧 Creating alembic.ini file...")
 
         alembic_content = """# A generic, single database configuration.
 
@@ -145,15 +143,12 @@ datefmt = %H:%M:%S
         with open(alembic_ini, "w") as f:
             f.write(alembic_content)
 
-        print("✅ Created alembic.ini file")
 
     def fix_env_example(self):
         """Fix .env.example file issues"""
         if not self.env_example.exists():
-            print("❌ .env.example file not found")
             return
 
-        print("🔧 Fixing .env.example file...")
 
         # Read the file
         with open(self.env_example) as f:
@@ -184,17 +179,14 @@ datefmt = %H:%M:%S
         with open(self.env_example, "w") as f:
             f.write(content)
 
-        print("✅ Fixed .env.example file")
 
     def fix_setup_script(self):
         """Fix setup_project.sh script issues"""
         setup_script = self.scripts_dir / "setup_project.sh"
 
         if not setup_script.exists():
-            print("❌ setup_project.sh not found")
             return
 
-        print("🔧 Fixing setup_project.sh script...")
 
         # Read the file
         with open(setup_script) as f:
@@ -343,7 +335,7 @@ fi"""
 
         # Insert alembic check before migrations
         content = content.replace(
-            "# Run database migrations", alembic_check + "\n\n# Run database migrations"
+            "# Run database migrations", alembic_check + "\n\n# Run database migrations",
         )
 
         # Fix superuser creation to be automatic
@@ -400,36 +392,14 @@ fi"""
         with open(setup_script, "w") as f:
             f.write(content)
 
-        print("✅ Fixed setup_project.sh script")
 
     def run_all_fixes(self):
         """Run all template fixes"""
-        print("🚀 FastAPI Template - Critical Issues Fix")
-        print("=========================================")
-        print("")
-        print("This script fixes all known template issues:")
-        print("1. ✅ Missing alembic.ini file")
-        print("2. ✅ Commented out superuser environment variables")
-        print("3. ✅ Setup script directory name checking")
-        print("4. ✅ Docker container naming conflicts")
-        print("5. ✅ Environment variable parsing issues")
-        print("")
 
         self.fix_alembic_ini()
         self.fix_env_example()
         self.fix_setup_script()
 
-        print("")
-        print("🎉 All template issues have been fixed!")
-        print("")
-        print("📋 What was fixed:")
-        print("  ✅ alembic.ini file created (if missing)")
-        print("  ✅ .env.example superuser variables uncommented")
-        print("  ✅ setup_project.sh made more flexible")
-        print("  ✅ Automatic superuser creation enabled")
-        print("  ✅ Docker container naming conflicts prevented")
-        print("")
-        print("🚀 The template is now ready for users!")
 
 
 def main():

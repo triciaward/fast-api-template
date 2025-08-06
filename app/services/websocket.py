@@ -36,7 +36,7 @@ class ConnectionManager:
 
         self.active_connections[room].add(websocket)
         logger.info(
-            f"WebSocket connected to room '{room}'. Total connections: {len(self.active_connections[room])}"
+            f"WebSocket connected to room '{room}'. Total connections: {len(self.active_connections[room])}",
         )
 
     def disconnect(self, websocket: WebSocket, room: str = "default") -> None:
@@ -66,8 +66,8 @@ class ConnectionManager:
         """
         try:
             await websocket.send_text(message)
-        except Exception as e:
-            logger.error(f"Error sending personal message: {e}")
+        except Exception:
+            logger.exception("Error sending personal message")
 
     async def broadcast(self, message: str, room: str = "default") -> None:
         """
@@ -85,8 +85,8 @@ class ConnectionManager:
         for connection in self.active_connections[room]:
             try:
                 await connection.send_text(message)
-            except Exception as e:
-                logger.error(f"Error broadcasting message: {e}")
+            except Exception:
+                logger.exception("Error broadcasting message")
                 disconnected_websockets.add(connection)
 
         # Remove disconnected websockets

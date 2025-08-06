@@ -1,5 +1,5 @@
 import time
-from typing import Any
+from typing import Any, NoReturn
 
 import httpx
 import jwt
@@ -37,19 +37,33 @@ class OAuthService:
             async with httpx.AsyncClient() as client:
                 headers = {"Authorization": f"Bearer {access_token}"}
                 response = await client.get(
-                    "https://www.googleapis.com/oauth2/v2/userinfo", headers=headers
+                    "https://www.googleapis.com/oauth2/v2/userinfo", headers=headers,
                 )
                 response.raise_for_status()
                 return response.json()  # type: ignore
         except Exception as e:
             raise HTTPException(
-                status_code=400, detail=f"Failed to get Google user info: {str(e)}"
+                status_code=400, detail=f"Failed to get Google user info: {e!s}",
             ) from e
 
     async def verify_google_token(self, id_token: str) -> dict[str, Any] | None:
         """Verify Google ID token."""
-        if not settings.GOOGLE_CLIENT_ID:
+        def _handle_google_not_configured() -> NoReturn:
+            """Handle Google OAuth not configured error."""
             raise HTTPException(status_code=400, detail="Google OAuth not configured")
+
+        def _handle_invalid_google_token() -> NoReturn:
+            """Handle invalid Google token error."""
+            raise HTTPException(status_code=400, detail="Invalid Google token")
+
+        def _handle_google_verification_error(exc: Exception) -> NoReturn:
+            """Handle Google verification error."""
+            raise HTTPException(
+                status_code=400, detail=f"Failed to verify Google token: {exc!s}",
+            ) from exc
+
+        if not settings.GOOGLE_CLIENT_ID:
+            _handle_google_not_configured()
 
         try:
             async with httpx.AsyncClient() as client:
@@ -62,27 +76,44 @@ class OAuthService:
 
                 # Verify the token is for our app
                 if data.get("aud") != settings.GOOGLE_CLIENT_ID:
-                    raise HTTPException(status_code=400, detail="Invalid Google token")
+                    _handle_invalid_google_token()
 
-                return data  # type: ignore
         except HTTPException:
             raise
         except Exception as e:
-            raise HTTPException(
-                status_code=400, detail=f"Failed to verify Google token: {str(e)}"
-            ) from e
+            _handle_google_verification_error(e)
+        else:
+            return data  # type: ignore
 
     async def verify_apple_token(self, id_token: str) -> dict[str, Any] | None:
         """Verify Apple ID token."""
+        def _handle_apple_not_configured() -> NoReturn:
+            """Handle Apple OAuth not configured error."""
+            raise HTTPException(status_code=400, detail="Apple OAuth not configured")
+
+        def _handle_invalid_apple_token() -> NoReturn:
+            """Handle invalid Apple token error."""
+            raise HTTPException(status_code=400, detail="Invalid Apple token")
+
+        def _handle_apple_token_expired() -> NoReturn:
+            """Handle Apple token expired error."""
+            raise HTTPException(status_code=400, detail="Apple token expired")
+
+        def _handle_apple_verification_error(exc: Exception) -> NoReturn:
+            """Handle Apple verification error."""
+            raise HTTPException(
+                status_code=400, detail=f"Failed to verify Apple token: {exc!s}",
+            ) from exc
+
         if not all(
             [
                 settings.APPLE_CLIENT_ID,
                 settings.APPLE_TEAM_ID,
                 settings.APPLE_KEY_ID,
                 settings.APPLE_PRIVATE_KEY,
-            ]
+            ],
         ):
-            raise HTTPException(status_code=400, detail="Apple OAuth not configured")
+            _handle_apple_not_configured()
 
         try:
             # This is a simplified verification - in production you'd want to verify the JWT signature
@@ -93,21 +124,26 @@ class OAuthService:
 
             # Basic validation
             if payload.get("aud") != settings.APPLE_CLIENT_ID:
-                raise HTTPException(status_code=400, detail="Invalid Apple token")
+                _handle_invalid_apple_token()
 
             if payload.get("exp", 0) < time.time():
-                raise HTTPException(status_code=400, detail="Apple token expired")
+                _handle_apple_token_expired()
 
-            return payload  # type: ignore
         except HTTPException:
             raise
         except Exception as e:
-            raise HTTPException(
-                status_code=400, detail=f"Failed to verify Apple token: {str(e)}"
-            ) from e
+            _handle_apple_verification_error(e)
+        else:
+            return payload  # type: ignore
 
     def get_oauth_provider_config(self, provider: str) -> dict[str, Any]:
         """Get OAuth provider configuration."""
+        def _handle_unsupported_provider() -> NoReturn:
+            """Handle unsupported provider error."""
+            raise HTTPException(
+                status_code=400, detail=f"Unsupported OAuth provider: {provider}",
+            )
+
         if provider == "google":
             return {
                 "client_id": settings.GOOGLE_CLIENT_ID,
@@ -116,28 +152,27 @@ class OAuthService:
                 "userinfo_url": "https://www.googleapis.com/oauth2/v2/userinfo",
                 "scope": "openid email profile",
             }
-        elif provider == "apple":
+        if provider == "apple":
             return {
                 "client_id": settings.APPLE_CLIENT_ID,
                 "authorization_url": "https://appleid.apple.com/auth/authorize",
                 "token_url": "https://appleid.apple.com/auth/token",
                 "scope": "name email",
             }
-        else:
-            raise HTTPException(
-                status_code=400, detail=f"Unsupported OAuth provider: {provider}"
-            )
+
+        _handle_unsupported_provider()
+        return {}  # This line will never be reached, but satisfies the linter
 
     def is_provider_configured(self, provider: str) -> bool:
         """Check if OAuth provider is configured."""
         if provider == "google":
             return bool(settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET)
-        elif provider == "apple":
+        if provider == "apple":
             return bool(
                 settings.APPLE_CLIENT_ID
                 and settings.APPLE_TEAM_ID
                 and settings.APPLE_KEY_ID
-                and settings.APPLE_PRIVATE_KEY
+                and settings.APPLE_PRIVATE_KEY,
             )
         return False
 

@@ -73,7 +73,7 @@ def setup_logging() -> None:
 
 
 def _add_extra_fields(
-    logger: Any, method_name: str, event_dict: MutableMapping[str, object]
+    logger: Any, method_name: str, event_dict: MutableMapping[str, object],
 ) -> MutableMapping[str, object]:
     """Add extra fields to log entries."""
     if settings.LOG_INCLUDE_PID:
@@ -92,17 +92,16 @@ def _add_extra_fields(
 
 
 def _format_log(
-    logger: Any, method_name: str, event_dict: MutableMapping[str, object]
+    logger: Any, method_name: str, event_dict: MutableMapping[str, object],
 ) -> str:
     """Format log entry based on configuration."""
     if settings.LOG_FORMAT.lower() == "json":
         rendered = structlog.processors.JSONRenderer()(logger, method_name, event_dict)
         return str(rendered)
-    else:
-        rendered = structlog.dev.ConsoleRenderer(colors=settings.ENABLE_COLORED_LOGS)(
-            logger, method_name, event_dict
-        )
-        return str(rendered)
+    rendered = structlog.dev.ConsoleRenderer(colors=settings.ENABLE_COLORED_LOGS)(
+        logger, method_name, event_dict,
+    )
+    return str(rendered)
 
 
 def _create_console_handler() -> logging.StreamHandler:

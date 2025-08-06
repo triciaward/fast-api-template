@@ -17,12 +17,12 @@ class SoftDeleteMixin:
     is_deleted = Column(Boolean, default=False, nullable=False, index=True)
     deleted_at = Column(TIMESTAMP(timezone=True), nullable=True, index=True)
     deleted_by = Column(
-        UUID(as_uuid=True), nullable=True, index=True
+        UUID(as_uuid=True), nullable=True, index=True,
     )  # User who deleted the record
     # Optional reason for deletion
     deletion_reason = Column(String(500), nullable=True)
 
-    def soft_delete(self, deleted_by: uuid.UUID = None, reason: str = None) -> None:
+    def soft_delete(self, deleted_by: uuid.UUID | None = None, reason: str | None = None) -> None:
         """Mark the record as deleted without actually removing it."""
         self.is_deleted = True  # type: ignore
         self.deleted_at = utc_now()  # type: ignore

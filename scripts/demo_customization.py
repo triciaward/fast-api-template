@@ -18,7 +18,7 @@ sys.path.insert(0, str(project_root))
 
 # Import the TemplateCustomizer class
 spec = importlib.util.spec_from_file_location(
-    "customize_template", project_root / "scripts" / "customize_template.py"
+    "customize_template", project_root / "scripts" / "customize_template.py",
 )
 if spec is not None:
     customize_module = importlib.util.module_from_spec(spec)
@@ -217,9 +217,6 @@ def health_check():
 
 def show_before_after_demo() -> None:
     """Show a before/after demo of the customization process."""
-    print("🎯 Template Customization Demo")
-    print("=" * 50)
-    print()
 
     # Create temporary directory for demo
     temp_dir = tempfile.mkdtemp()
@@ -231,20 +228,12 @@ def show_before_after_demo() -> None:
         create_demo_files(project_dir)
 
         # Show before state
-        print("📁 BEFORE Customization:")
-        print("-" * 30)
-        readme_before = (project_dir / "README.md").read_text()
-        print("README.md (first few lines):")
-        print(readme_before.split("\n")[0:3])
-        print("...")
-        print()
+        (project_dir / "README.md").read_text()
 
         config_before = (project_dir / "app/core/config.py").read_text()
-        print("app/core/config.py (key lines):")
         for line in config_before.split("\n"):
             if "FastAPI Template" in line or "fastapi_template" in line:
-                print(f"  {line}")
-        print()
+                pass
 
         # Create customizer with demo replacements
         customizer = TemplateCustomizer()
@@ -269,43 +258,20 @@ def show_before_after_demo() -> None:
                 processed_count += 1
 
         # Show after state
-        print("📁 AFTER Customization:")
-        print("-" * 30)
-        readme_after = (project_dir / "README.md").read_text()
-        print("README.md (first few lines):")
-        print(readme_after.split("\n")[0:3])
-        print("...")
-        print()
+        (project_dir / "README.md").read_text()
 
         # Show template README info
-        print("📚 Template Documentation:")
-        print("-" * 30)
-        print("Template documentation preserved in: docs/TEMPLATE_README.md")
-        print("Users can access all template features and documentation there.")
-        print()
 
         config_after = (project_dir / "app/core/config.py").read_text()
-        print("app/core/config.py (key lines):")
         for line in config_after.split("\n"):
             if "My Awesome Project" in line or "myawesomeproject_backend" in line:
-                print(f"  {line}")
-        print()
+                pass
 
         # Show summary
-        print("📊 Customization Summary:")
-        print("-" * 30)
-        print(f"Files processed: {len(files_to_process)}")
-        print(f"Files updated: {processed_count}")
-        print()
 
-        print("🔄 Key Replacements Made:")
-        print("-" * 30)
-        for old_text, new_text in customizer.replacements.items():
-            print(f"  '{old_text}' → '{new_text}'")
-        print()
+        for _old_text, _new_text in customizer.replacements.items():
+            pass
 
-        print("✅ Demo completed successfully!")
-        print("💡 To customize your own template, run: ./scripts/customize_template.sh")
 
     finally:
         # Cleanup

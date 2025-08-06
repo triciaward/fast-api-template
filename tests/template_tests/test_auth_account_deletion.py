@@ -11,7 +11,7 @@ This module tests the complete account deletion workflow including:
 - Background task processing
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -31,7 +31,7 @@ from app.schemas.user import UserCreate
 
 
 @pytest.mark.skip(
-    reason="Requires complex account deletion workflow - not implemented yet"
+    reason="Requires complex account deletion workflow - not implemented yet",
 )
 class TestAccountDeletionRequest:
     """Test account deletion request functionality."""
@@ -75,7 +75,7 @@ class TestAccountDeletionRequest:
             is_superuser=False,
         )
         user = sync_db_session.add(User(**user_create.dict()))
-        user.deletion_scheduled_for = datetime.now(UTC) + timedelta(days=30)
+        user.deletion_scheduled_for = datetime.now(timezone.utc) + timedelta(days=30)
         sync_db_session.commit()
 
         # Try to request deletion again
@@ -84,7 +84,7 @@ class TestAccountDeletionRequest:
 
 
 @pytest.mark.skip(
-    reason="Requires complex account deletion workflow - not implemented yet"
+    reason="Requires complex account deletion workflow - not implemented yet",
 )
 class TestAccountDeletionConfirmation:
     """Test account deletion confirmation functionality."""
@@ -100,11 +100,11 @@ class TestAccountDeletionConfirmation:
         )
         user = sync_db_session.add(User(**user_create.dict()))
         user.deletion_token = "test-token"
-        user.deletion_token_expires = datetime.now(UTC) + timedelta(hours=1)
+        user.deletion_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
         sync_db_session.commit()
 
         # Confirm deletion
-        scheduled_date = datetime.now(UTC) + timedelta(days=30)
+        scheduled_date = datetime.now(timezone.utc) + timedelta(days=30)
         # success = confirm_account_deletion_sync(
         #     sync_db_session, str(user.id), scheduled_date
         # )
@@ -149,7 +149,7 @@ class TestAccountDeletionConfirmation:
         )
         user = sync_db_session.add(User(**user_create.dict()))
         user.deletion_token = "test-token"
-        user.deletion_token_expires = datetime.now(UTC) - timedelta(hours=1)
+        user.deletion_token_expires = datetime.now(timezone.utc) - timedelta(hours=1)
         sync_db_session.commit()
 
         # Try to confirm deletion
@@ -164,7 +164,7 @@ class TestAccountDeletionConfirmation:
 
 
 @pytest.mark.skip(
-    reason="Requires complex account deletion workflow - not implemented yet"
+    reason="Requires complex account deletion workflow - not implemented yet",
 )
 class TestAccountDeletionCancellation:
     """Test account deletion cancellation functionality."""
@@ -179,7 +179,7 @@ class TestAccountDeletionCancellation:
             is_superuser=False,
         )
         user = sync_db_session.add(User(**user_create.dict()))
-        user.deletion_scheduled_for = datetime.now(UTC) + timedelta(days=30)
+        user.deletion_scheduled_for = datetime.now(timezone.utc) + timedelta(days=30)
         sync_db_session.commit()
 
         # Cancel deletion
@@ -211,13 +211,13 @@ class TestAccountDeletionCancellation:
 
 
 @pytest.mark.skip(
-    reason="Requires complex account deletion workflow - not implemented yet"
+    reason="Requires complex account deletion workflow - not implemented yet",
 )
 class TestAccountDeletionStatus:
     """Test account deletion status checking."""
 
     def test_deletion_status_not_requested(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ):
         """Test status for user who hasn't requested deletion."""
         user = User(
@@ -240,7 +240,7 @@ class TestAccountDeletionStatus:
         assert data["grace_period_days"] == settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS
 
     def test_deletion_status_requested(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ):
         """Test status for user who requested deletion."""
         user = User(
@@ -248,15 +248,15 @@ class TestAccountDeletionStatus:
             username="requested",
             hashed_password="hashed_password",
             is_verified=True,
-            deletion_requested_at=datetime.now(UTC),
+            deletion_requested_at=datetime.now(timezone.utc),
             deletion_token="status_token",
-            deletion_token_expires=datetime.now(UTC) + timedelta(hours=1),
+            deletion_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
 
         response = client.get(
-            "/api/v1/auth/deletion-status?email=requested@example.com"
+            "/api/v1/auth/deletion-status?email=requested@example.com",
         )
 
         assert response.status_code == 200
@@ -268,26 +268,26 @@ class TestAccountDeletionStatus:
         assert data["grace_period_days"] == settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS
 
     def test_deletion_status_confirmed(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ):
         """Test status for user who confirmed deletion."""
-        scheduled_time = datetime.now(UTC) + timedelta(
-            days=settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS
+        scheduled_time = datetime.now(timezone.utc) + timedelta(
+            days=settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS,
         )
         user = User(
             email="confirmed@example.com",
             username="confirmed",
             hashed_password="hashed_password",
             is_verified=True,
-            deletion_requested_at=datetime.now(UTC),
-            deletion_confirmed_at=datetime.now(UTC),
+            deletion_requested_at=datetime.now(timezone.utc),
+            deletion_confirmed_at=datetime.now(timezone.utc),
             deletion_scheduled_for=scheduled_time,
         )
         sync_db_session.add(user)
         sync_db_session.commit()
 
         response = client.get(
-            "/api/v1/auth/deletion-status?email=confirmed@example.com"
+            "/api/v1/auth/deletion-status?email=confirmed@example.com",
         )
 
         assert response.status_code == 200
@@ -299,11 +299,11 @@ class TestAccountDeletionStatus:
         assert data["grace_period_days"] == settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS
 
     def test_deletion_status_user_not_found(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ):
         """Test status for non-existent user."""
         response = client.get(
-            "/api/v1/auth/deletion-status?email=nonexistent@example.com"
+            "/api/v1/auth/deletion-status?email=nonexistent@example.com",
         )
 
         assert response.status_code == 200
@@ -316,13 +316,13 @@ class TestAccountDeletionStatus:
 
 
 @pytest.mark.skip(
-    reason="Requires complex account deletion workflow - not implemented yet"
+    reason="Requires complex account deletion workflow - not implemented yet",
 )
 class TestAccountDeletionRateLimiting:
     """Test rate limiting for account deletion endpoints."""
 
     def test_request_deletion_rate_limited(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ):
         """Test rate limiting for deletion requests."""
         # Skip test if rate limiting is disabled
@@ -343,7 +343,7 @@ class TestAccountDeletionRateLimiting:
         # Make multiple requests quickly
         for _ in range(4):
             response = client.post(
-                "/api/v1/auth/request-deletion", json={"email": "rate@example.com"}
+                "/api/v1/auth/request-deletion", json={"email": "rate@example.com"},
             )
 
         # The last request should be rate limited
@@ -352,7 +352,7 @@ class TestAccountDeletionRateLimiting:
         assert "Too many requests" in data["detail"]
 
     def test_confirm_deletion_rate_limited(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ):
         """Test rate limiting for deletion confirmation."""
         # Skip test if rate limiting is disabled
@@ -364,7 +364,7 @@ class TestAccountDeletionRateLimiting:
         # Make multiple requests quickly
         for _ in range(4):
             response = client.post(
-                "/api/v1/auth/confirm-deletion", json={"token": "some_token"}
+                "/api/v1/auth/confirm-deletion", json={"token": "some_token"},
             )
 
         # The last request should be rate limited
@@ -373,7 +373,7 @@ class TestAccountDeletionRateLimiting:
         assert "Too many requests" in data["detail"]
 
     def test_cancel_deletion_rate_limited(
-        self, client: TestClient, sync_db_session: Session
+        self, client: TestClient, sync_db_session: Session,
     ):
         """Test rate limiting for deletion cancellation."""
         # Skip test if rate limiting is disabled
@@ -385,7 +385,7 @@ class TestAccountDeletionRateLimiting:
         # Make multiple requests quickly
         for _ in range(4):
             response = client.post(
-                "/api/v1/auth/cancel-deletion", json={"email": "rate@example.com"}
+                "/api/v1/auth/cancel-deletion", json={"email": "rate@example.com"},
             )
 
         # The last request should be rate limited
@@ -395,7 +395,7 @@ class TestAccountDeletionRateLimiting:
 
 
 @pytest.mark.skip(
-    reason="Requires complex account deletion workflow - not implemented yet"
+    reason="Requires complex account deletion workflow - not implemented yet",
 )
 @pytest.mark.celery
 class TestAccountDeletionCeleryTask:
@@ -423,12 +423,12 @@ class TestAccountDeletionCeleryTask:
         )
         assert data["task_id"] == "task_123"
         mock_submit_task.assert_called_once_with(
-            "app.services.celery_tasks.permanently_delete_accounts_task"
+            "app.services.celery_tasks.permanently_delete_accounts_task",
         )
 
 
 @pytest.mark.skip(
-    reason="Requires complex account deletion workflow - not implemented yet"
+    reason="Requires complex account deletion workflow - not implemented yet",
 )
 class TestAccountDeletionCRUD:
     """Test account deletion CRUD operations."""
@@ -465,11 +465,11 @@ class TestAccountDeletionCRUD:
         )
         user = sync_db_session.add(User(**user_create.dict()))
         user.deletion_token = "test-token"
-        user.deletion_token_expires = datetime.now(UTC) + timedelta(hours=1)
+        user.deletion_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
         sync_db_session.commit()
 
         # Confirm deletion
-        scheduled_date = datetime.now(UTC) + timedelta(days=30)
+        scheduled_date = datetime.now(timezone.utc) + timedelta(days=30)
         # success = confirm_account_deletion_sync(
         #     sync_db_session, str(user.id), scheduled_date
         # )
@@ -489,7 +489,7 @@ class TestAccountDeletionCRUD:
             is_superuser=False,
         )
         user = sync_db_session.add(User(**user_create.dict()))
-        user.deletion_scheduled_for = datetime.now(UTC) + timedelta(days=30)
+        user.deletion_scheduled_for = datetime.now(timezone.utc) + timedelta(days=30)
         sync_db_session.commit()
 
         # Cancel deletion

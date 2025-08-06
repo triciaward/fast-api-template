@@ -64,7 +64,7 @@ def test_log_event_sync(sync_db_session: Session, client: TestClient):
                 (b"x-forwarded-for", b"192.168.1.1"),
             ],
             "client": ("127.0.0.1", 12345),
-        }
+        },
     )
 
     # Test logging an event
@@ -101,7 +101,7 @@ def test_log_login_attempt_sync(sync_db_session: Session, client: TestClient):
             "path": "/login",
             "headers": [(b"user-agent", b"test-agent")],
             "client": ("127.0.0.1", 12345),
-        }
+        },
     )
 
     # Test successful login

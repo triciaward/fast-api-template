@@ -10,7 +10,7 @@ This endpoint demonstrates WebSocket functionality including:
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -60,7 +60,7 @@ async def websocket_demo(websocket: WebSocket) -> None:
                 response = {
                     "type": "echo",
                     "message": message_content,
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
                 await manager.send_personal_message(json.dumps(response), websocket)
 
@@ -69,7 +69,7 @@ async def websocket_demo(websocket: WebSocket) -> None:
                 response = {
                     "type": "broadcast",
                     "message": message_content,
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "sender": "demo",
                 }
                 await manager.broadcast_json(response)
@@ -81,7 +81,7 @@ async def websocket_demo(websocket: WebSocket) -> None:
                 response = {
                     "type": "room_joined",
                     "room": room,
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
                 await manager.send_personal_message(json.dumps(response), websocket)
 
@@ -91,7 +91,7 @@ async def websocket_demo(websocket: WebSocket) -> None:
                     "type": "room_broadcast",
                     "message": message_content,
                     "room": room,
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "sender": "demo",
                 }
                 await manager.broadcast_json(response, room)
@@ -103,7 +103,7 @@ async def websocket_demo(websocket: WebSocket) -> None:
                     "total_connections": manager.get_total_connections(),
                     "room_connections": manager.get_connection_count(room),
                     "current_room": room,
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
                 await manager.send_personal_message(json.dumps(response), websocket)
 
@@ -112,15 +112,15 @@ async def websocket_demo(websocket: WebSocket) -> None:
                 response = {
                     "type": "error",
                     "message": f"Unknown message type: {message_type}",
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
                 await manager.send_personal_message(json.dumps(response), websocket)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         logger.info("WebSocket client disconnected")
-    except Exception as e:
-        logger.error(f"WebSocket error: {e}")
+    except Exception:
+        logger.exception("WebSocket error")
         manager.disconnect(websocket)
 
 
@@ -139,5 +139,5 @@ async def websocket_status() -> dict[str, Any]:
             room: len(connections)
             for room, connections in manager.active_connections.items()
         },
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }

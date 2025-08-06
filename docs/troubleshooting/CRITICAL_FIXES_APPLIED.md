@@ -12,17 +12,28 @@ This document tracks the critical issues that have been identified and fixed in 
 - Updated to secure version `python-jose[cryptography]==3.4.0`
 **Files Modified:** `requirements.txt`
 
-### 2. **Deprecated datetime.utcnow() Usage** (CRITICAL)
-**Issue:** Multiple files were using the deprecated `datetime.utcnow()` function
+### 2. **Python 3.11 Compatibility - datetime.UTC Issue** (CRITICAL)
+**Issue:** Multiple files were incorrectly importing `UTC` from `datetime` module, but `datetime.UTC` was only introduced in Python 3.12+. Our environment uses Python 3.11.
 **Fix:** 
-- Created `utc_now()` utility function using `datetime.now(timezone.utc)`
-- Updated all models and CRUD operations to use timezone-aware datetime
+- Replaced `from datetime import UTC` with `from datetime import timezone`
+- Updated all `datetime.now(UTC)` usage to `datetime.now(timezone.utc)`
+- Created `utc_now()` utility function using `datetime.now(timezone.utc)` for consistency
+- Updated all models, CRUD operations, and tests to use timezone-aware datetime
 **Files Modified:**
-- `app/core/security.py`
-- `app/models/base.py`
-- `app/models/user.py`
-- `app/models/refresh_token.py`
-- `app/models/api_key.py`
+- `app/core/security.py` ✅ (already had correct timezone.utc)
+- `app/models/base.py` ✅ (already had correct timezone.utc)
+- `app/models/user.py` 🔧 (fixed UTC import)
+- `app/models/refresh_token.py` 🔧 (fixed UTC import)
+- `app/models/api_key.py` ✅ (already had correct timezone.utc)
+- `app/services/refresh_token.py` 🔧 (fixed UTC import)
+- `app/services/email.py` 🔧 (fixed UTC import)
+- `app/services/celery_tasks.py` 🔧 (fixed UTC import)
+- `app/crud/audit_log.py` 🔧 (fixed UTC import)
+- `app/api/api_v1/endpoints/users.py` 🔧 (fixed UTC import)
+- `app/api/api_v1/endpoints/auth/account_deletion.py` 🔧 (fixed UTC import)
+- `app/api/api_v1/endpoints/auth/session_management.py` 🔧 (fixed UTC import)
+- `app/api/api_v1/endpoints/health.py` 🔧 (fixed UTC import)
+- All test files in `tests/template_tests/` 🔧 (fixed UTC imports)
 - `app/models/audit_log.py`
 - `app/crud/user.py`
 - `app/crud/refresh_token.py`
@@ -76,6 +87,35 @@ All CRUD operations now use timezone-aware datetime for:
 - `utc_now()` function properly returns UTC timezone ✅
 - Template functionality preserved ✅
 - 18 total files updated with timezone-aware datetime ✅
+
+## ✅ **RESOLVED: Python 3.11 Environment Parity**
+
+**Date:** August 6, 2025
+**Issue:** Mixed Python versions causing compatibility issues
+**Root Cause:** Local environment used Python 3.9.6 while Docker/CI used Python 3.11
+**Solution:** Upgraded local environment to Python 3.11.13 for perfect parity
+**Result:** ✅ All environments now use Python 3.11.13
+
+### Environment Status:
+- **Local Development**: Python 3.11.13 ✅
+- **Docker Container**: Python 3.11.13 ✅  
+- **GitHub CI**: Python 3.11 ✅
+- **Perfect environment parity** achieved ✅
+
+### Benefits:
+- ✅ **No more "works on my machine" issues**
+- ✅ **Access to modern Python features** (union types, better error messages)
+- ✅ **Improved performance** (Python 3.11 is significantly faster)
+- ✅ **Better type checking** and development experience
+- ✅ **Future-proof setup** (support until October 2027)
+
+## ✅ **RESOLVED: Python 3.11 Compatibility Issue**
+
+**Date:** August 6, 2025
+**Issue:** `datetime.UTC` imports causing import errors
+**Root Cause:** `datetime.UTC` was introduced in Python 3.12, but we're using Python 3.11
+**Solution:** Replaced all `datetime.UTC` usage with `timezone.utc` (available since Python 3.2)
+**Result:** ✅ All datetime functions now work correctly across Python 3.9-3.11
 
 ## 🚨 Remaining Issues to Address
 

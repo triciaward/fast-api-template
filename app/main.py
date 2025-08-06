@@ -34,17 +34,17 @@ if settings.ENVIRONMENT == "production":
     if settings.SECRET_KEY == "dev_secret_key_change_in_production":
         logger.warning(
             "⚠️  CRITICAL SECURITY WARNING: Using default secret key in production! "
-            "Please set a secure SECRET_KEY environment variable."
+            "Please set a secure SECRET_KEY environment variable.",
         )
     if not settings.REFRESH_TOKEN_COOKIE_SECURE:
         logger.warning(
             "⚠️  SECURITY WARNING: REFRESH_TOKEN_COOKIE_SECURE is False in production. "
-            "Set to True for HTTPS environments."
+            "Set to True for HTTPS environments.",
         )
     if not settings.ENABLE_HSTS:
         logger.warning(
             "⚠️  SECURITY WARNING: HSTS is disabled in production. "
-            "Enable ENABLE_HSTS=True for HTTPS environments."
+            "Enable ENABLE_HSTS=True for HTTPS environments.",
         )
 
 # Database tables will be created in the lifespan context manager

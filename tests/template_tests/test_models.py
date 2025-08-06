@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -101,7 +101,7 @@ class TestUserModel:
 
     @pytest.mark.asyncio
     async def test_user_model_auto_generated_fields(
-        self, db_session: AsyncSession
+        self, db_session: AsyncSession,
     ) -> None:
         """Test that ID and date_created are auto-generated."""
         user = User(
@@ -164,7 +164,7 @@ class TestUserSchemas:
     def test_user_response_schema(self) -> None:
         """Test UserResponse schema."""
         user_id = uuid.uuid4()
-        date_created = datetime.now(UTC)
+        date_created = datetime.now(timezone.utc)
 
         user_response = UserResponse(
             id=user_id,

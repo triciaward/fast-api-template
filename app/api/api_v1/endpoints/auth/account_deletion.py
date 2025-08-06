@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
@@ -24,7 +24,7 @@ router = APIRouter()
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated utc_now())."""
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 logger = get_auth_logger()
@@ -116,13 +116,13 @@ async def request_account_deletion(
 
         # Send deletion confirmation email
         email_sent = email_service.send_account_deletion_email(
-            str(user.email), str(user.username), deletion_token
+            str(user.email), str(user.username), deletion_token,
         )
 
         if email_sent:
             # Log account deletion request
             await log_account_deletion(
-                db, request, user, deletion_stage="deletion_requested"
+                db, request, user, deletion_stage="deletion_requested",
             )
 
             logger.info(
@@ -134,16 +134,15 @@ async def request_account_deletion(
                 message="If an account with that email exists, a deletion confirmation link has been sent.",
                 email_sent=True,
             )
-        else:
-            logger.error(
-                "Failed to send account deletion email",
-                user_id=str(user.id),
-                email=deletion_request.email,
-            )
-            return AccountDeletionResponse(
-                message="Failed to send deletion confirmation email. Please try again later.",
-                email_sent=False,
-            )
+        logger.error(
+            "Failed to send account deletion email",
+            user_id=str(user.id),
+            email=deletion_request.email,
+        )
+        return AccountDeletionResponse(
+            message="Failed to send deletion confirmation email. Please try again later.",
+            email_sent=False,
+        )
 
     except Exception as e:
         logger.error(
@@ -171,7 +170,7 @@ async def confirm_account_deletion(
     try:
         if not email_service or not email_service.is_configured():
             logger.warning(
-                "Email service not configured for account deletion confirmation"
+                "Email service not configured for account deletion confirmation",
             )
             return AccountDeletionConfirmResponse(
                 message="Account deletion service temporarily unavailable. Please try again later.",
@@ -213,7 +212,7 @@ async def confirm_account_deletion(
 
         # Calculate deletion date
         deletion_scheduled_for = utc_now() + timedelta(
-            days=settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS
+            days=settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS,
         )
 
         # Confirm deletion
@@ -228,7 +227,7 @@ async def confirm_account_deletion(
 
         # Log account deletion confirmation
         await log_account_deletion(
-            db, request, user, deletion_stage="deletion_confirmed"
+            db, request, user, deletion_stage="deletion_confirmed",
         )
 
         logger.info(
@@ -319,7 +318,7 @@ async def cancel_account_deletion(
 
         # Log account deletion cancellation
         await log_account_deletion(
-            db, request, user, deletion_stage="deletion_cancelled"
+            db, request, user, deletion_stage="deletion_cancelled",
         )
 
         logger.info(
@@ -347,7 +346,7 @@ async def cancel_account_deletion(
 
 @router.get("/deletion-status", response_model=AccountDeletionStatusResponse)
 async def get_account_deletion_status(
-    email: str, db: Session = Depends(get_db_sync)
+    email: str, db: Session = Depends(get_db_sync),
 ) -> AccountDeletionStatusResponse:
     """Get account deletion status."""
     logger.info("Account deletion status request", email=email)

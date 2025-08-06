@@ -46,19 +46,19 @@ def upgrade() -> None:
     op.create_index(op.f("ix_api_keys_user_id"), "api_keys", ["user_id"], unique=False)
     op.create_index(op.f("ix_api_keys_key_hash"), "api_keys", ["key_hash"], unique=True)
     op.create_index(
-        op.f("ix_api_keys_is_active"), "api_keys", ["is_active"], unique=False
+        op.f("ix_api_keys_is_active"), "api_keys", ["is_active"], unique=False,
     )
     op.create_index(
-        op.f("ix_api_keys_expires_at"), "api_keys", ["expires_at"], unique=False
+        op.f("ix_api_keys_expires_at"), "api_keys", ["expires_at"], unique=False,
     )
     op.create_index(
-        op.f("ix_api_keys_is_deleted"), "api_keys", ["is_deleted"], unique=False
+        op.f("ix_api_keys_is_deleted"), "api_keys", ["is_deleted"], unique=False,
     )
     op.create_index(
-        op.f("ix_api_keys_deleted_at"), "api_keys", ["deleted_at"], unique=False
+        op.f("ix_api_keys_deleted_at"), "api_keys", ["deleted_at"], unique=False,
     )
     op.create_index(
-        op.f("ix_api_keys_deleted_by"), "api_keys", ["deleted_by"], unique=False
+        op.f("ix_api_keys_deleted_by"), "api_keys", ["deleted_by"], unique=False,
     )
 
 

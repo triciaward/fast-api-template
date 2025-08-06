@@ -248,6 +248,28 @@ Learn best practices for development:
 - Development workflow best practices
 - Template-specific tests and isolation
 
+### 🏥 Production & Monitoring
+
+#### 🏥 [Health Monitoring](health-monitoring.md)
+Comprehensive health monitoring system:
+- **7 Health Check Endpoints**: Basic, simple, readiness, liveness, detailed, database, metrics
+- **Load Balancer Integration**: Simple health checks for load balancers
+- **Kubernetes Probes**: Readiness and liveness probes for container orchestration
+- **Database Monitoring**: Database-specific health and performance metrics
+- **System Metrics**: CPU, memory, disk usage monitoring
+- **External Service Checks**: Redis, email, OAuth provider status
+- **Production Ready**: Enterprise-grade monitoring for production deployments
+
+#### ⚡ [Performance Optimization](performance-optimization.md)
+Performance monitoring and optimization tools:
+- **Database Query Monitoring**: Automatic detection of slow queries
+- **Request Performance Tracking**: Monitor endpoint response times
+- **Caching System**: In-memory caching with TTL support
+- **Query Analysis**: SQL analysis with optimization suggestions
+- **Performance Utilities**: Decorators and utilities for optimization
+- **Performance Alerts**: Automatic alerts for performance issues
+- **Query Optimization**: Tools to optimize database queries
+
 ### 🚀 Production & Deployment
 
 #### 🌐 [Deployment and Production](deployment-and-production.md)
@@ -255,6 +277,16 @@ Take your app from development to production:
 - Docker deployment strategies
 - Cloud platform deployment (Coolify, VPS, AWS)
 - Production configuration and security
+
+#### 💰 [Cost Optimization](cost-optimization.md)
+Deploy your FastAPI app on a budget for solo developers:
+- **$10-15/month deployment** instead of $50-100/month with managed services
+- **Self-hosted solutions** - PostgreSQL, monitoring, and error tracking
+- **Coolify deployment** with resource optimization
+- **Budget configuration settings** for small VPS instances
+- **Free monitoring setup** with Grafana + Prometheus
+- **Cost comparison guides** and optimization strategies
+- **VPS provider recommendations** for budget-conscious developers
 - Monitoring and health checks
 - Performance optimization
 - Backup and recovery strategies
@@ -408,9 +440,11 @@ python scripts/verify_setup.py
 
 ### 🌐 **Production Ready Path** (6-8 hours)
 1. Complete the Full Feature Path
-2. [Deployment and Production](deployment-and-production.md)
-3. Set up monitoring and backups
-4. Configure CI/CD pipeline
+2. [Health Monitoring](health-monitoring.md) - Set up comprehensive monitoring
+3. [Performance Optimization](performance-optimization.md) - Optimize and monitor performance
+4. [Deployment and Production](deployment-and-production.md)
+5. Set up monitoring and backups
+6. Configure CI/CD pipeline
 
 ---
 
@@ -448,6 +482,10 @@ After completing these tutorials, you'll be able to:
 ✅ **Monitor and debug** production issues effectively  
 ✅ **Generate CRUD boilerplate** automatically  
 ✅ **Set up development environments** with one command  
+✅ **Monitor application health** with comprehensive health checks  
+✅ **Optimize performance** with advanced monitoring tools  
+✅ **Track database performance** with query analysis and optimization  
+✅ **Cache expensive operations** for better response times  
 
 ---
 

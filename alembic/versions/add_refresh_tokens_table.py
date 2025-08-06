@@ -27,7 +27,7 @@ def upgrade() -> None:
         sa.Column("token_hash", sa.String(length=255), nullable=False),
         sa.Column("expires_at", sa.DateTime(), nullable=False),
         sa.Column(
-            "created_at", sa.DateTime(), nullable=True, server_default=sa.text("now()")
+            "created_at", sa.DateTime(), nullable=True, server_default=sa.text("now()"),
         ),
         sa.Column("is_revoked", sa.Boolean(), nullable=True, server_default="false"),
         sa.Column("device_info", sa.Text(), nullable=True),

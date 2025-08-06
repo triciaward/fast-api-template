@@ -34,7 +34,7 @@ logger = get_app_logger()
 
 
 def create_error_response(
-    error_detail: ErrorDetail, status_code: int = 500
+    error_detail: ErrorDetail, status_code: int = 500,
 ) -> JSONResponse:
     """Create a standardized error response."""
     return JSONResponse(
@@ -53,7 +53,7 @@ def get_request_id(request: Request) -> str:
 
 
 async def validation_exception_handler(
-    request: Request, exc: RequestValidationError | ValidationError
+    request: Request, exc: RequestValidationError | ValidationError,
 ) -> JSONResponse:
     """Handle Pydantic validation errors."""
     request_id = get_request_id(request)
@@ -79,7 +79,7 @@ async def validation_exception_handler(
                     "value": value,
                     "message": message,
                     "type": error.get("type", "value_error"),
-                }
+                },
             )
 
     # Create error detail
@@ -207,7 +207,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
         }
 
         error_type = status_to_error_type.get(
-            exc.status_code, ErrorType.INTERNAL_SERVER_ERROR
+            exc.status_code, ErrorType.INTERNAL_SERVER_ERROR,
         )
 
         # Handle case where exc.detail is a dict (not hashable)
@@ -277,7 +277,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
 
 
 async def rate_limit_exception_handler(
-    request: Request, exc: RateLimitExceeded
+    request: Request, exc: RateLimitExceeded,
 ) -> JSONResponse:
     """Handle rate limit exceeded exceptions."""
     request_id = get_request_id(request)
@@ -301,7 +301,7 @@ async def rate_limit_exception_handler(
 
 
 async def integrity_error_handler(
-    request: Request, exc: IntegrityError
+    request: Request, exc: IntegrityError,
 ) -> JSONResponse:
     """Handle database integrity errors."""
     request_id = get_request_id(request)
@@ -341,7 +341,7 @@ async def integrity_error_handler(
 
 
 async def sqlalchemy_error_handler(
-    request: Request, exc: SQLAlchemyError
+    request: Request, exc: SQLAlchemyError,
 ) -> JSONResponse:
     """Handle general SQLAlchemy errors."""
     request_id = get_request_id(request)

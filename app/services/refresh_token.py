@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import Request, Response
 from sqlalchemy.orm import Session
@@ -18,7 +18,7 @@ from app.models import User
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 def get_device_info(request: Request) -> str:
@@ -172,7 +172,7 @@ async def revoke_session(
     # Revoke the token
     from app.crud import revoke_refresh_token
 
-    return await revoke_refresh_token(db, uuid.UUID(str(db_refresh_token.id)))
+    return await revoke_refresh_token(db, str(db_refresh_token.id))
 
 
 async def revoke_all_sessions(
@@ -184,13 +184,14 @@ async def revoke_all_sessions(
     from app.core.security import hash_refresh_token
     from app.crud import revoke_all_user_sessions
 
-    except_token_id = None
     if except_token_value:
         token_hash = hash_refresh_token(except_token_value)
         from app.crud import get_refresh_token_by_hash
 
         db_token = await get_refresh_token_by_hash(db, token_hash)
         if db_token:
-            except_token_id = uuid.UUID(str(db_token.id))
+            # Note: except_token_id is not currently used in the CRUD function
+            # but kept for future implementation
+            _except_token_id = uuid.UUID(str(db_token.id))
 
-    return await revoke_all_user_sessions(db, user_id, except_token_id)
+    return await revoke_all_user_sessions(db, str(user_id))
