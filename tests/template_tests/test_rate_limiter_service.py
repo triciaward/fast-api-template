@@ -73,6 +73,7 @@ class TestRateLimiterInitialization:
 
         # Reset the global limiter for this test
         import app.services.rate_limiter as rate_limiter_module
+
         rate_limiter_module.limiter = None
 
         # Test limiter creation
@@ -104,6 +105,7 @@ class TestRateLimiterInitialization:
 
         # Reset the global limiter for this test
         import app.services.rate_limiter as rate_limiter_module
+
         rate_limiter_module.limiter = None
 
         # Test limiter creation
