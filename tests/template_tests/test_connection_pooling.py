@@ -169,7 +169,7 @@ class TestConnectionPooling:
         except Exception as e:
             # If we get event loop errors, skip the test rather than fail
             if "Event loop is closed" in str(
-                e
+                e,
             ) or "attached to a different loop" in str(e):
                 pytest.skip(f"Skipping due to async event loop issue: {e}")
             raise

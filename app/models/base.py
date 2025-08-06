@@ -25,7 +25,7 @@ class SoftDeleteMixin:
     deletion_reason = Column(String(500), nullable=True)
 
     def soft_delete(
-        self, deleted_by: uuid.UUID | None = None, reason: str | None = None
+        self, deleted_by: uuid.UUID | None = None, reason: str | None = None,
     ) -> None:
         """Mark the record as deleted without actually removing it."""
         self.is_deleted = True  # type: ignore

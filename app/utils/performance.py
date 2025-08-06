@@ -33,7 +33,7 @@ def monitor_database_queries() -> None:
 
     @event.listens_for(Engine, "before_cursor_execute")
     def before_cursor_execute(
-        conn, cursor, statement, parameters, context, executemany
+        conn, cursor, statement, parameters, context, executemany,
     ):
         conn.info.setdefault("query_start_time", []).append(time.time())
         logger.debug(

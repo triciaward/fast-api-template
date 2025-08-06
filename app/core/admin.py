@@ -195,7 +195,7 @@ class BaseAdminCRUD(
         if isinstance(db, AsyncSession):
             # type: ignore
             result = await db.execute(
-                select(self.model).filter(self.model.id == record_id)
+                select(self.model).filter(self.model.id == record_id),
             )
         else:
             result = db.execute(

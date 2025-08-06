@@ -736,7 +736,7 @@ def test_admin_html_api_key_operations(
     from datetime import datetime, timedelta
 
     expires_at = (datetime.now(timezone.utc) + timedelta(days=30)).strftime(
-        "%Y-%m-%dT%H:%M"
+        "%Y-%m-%dT%H:%M",
     )
     form_data = {
         "label": "Test API Key with Expiration",

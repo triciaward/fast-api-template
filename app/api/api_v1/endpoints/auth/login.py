@@ -447,7 +447,7 @@ async def oauth_login(
         )
 
         access_token, refresh_token_value = await create_user_session(
-            db, new_user, request
+            db, new_user, request,
         )
 
         # Set refresh token as HttpOnly cookie

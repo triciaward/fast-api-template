@@ -200,7 +200,7 @@ async def get_celery_task_status(
     def _handle_status_error(exc: Exception) -> NoReturn:
         """Handle general status error."""
         raise HTTPException(
-            status_code=500, detail="Failed to get task status"
+            status_code=500, detail="Failed to get task status",
         ) from exc
 
     try:
@@ -288,7 +288,7 @@ async def get_active_celery_tasks(
     def _handle_active_tasks_error(exc: Exception) -> NoReturn:
         """Handle active tasks error."""
         raise HTTPException(
-            status_code=500, detail="Failed to get active tasks"
+            status_code=500, detail="Failed to get active tasks",
         ) from exc
 
     try:

@@ -227,7 +227,7 @@ class DatabaseBackup:
                     "size_mb": round(stat.st_size / (1024 * 1024), 2),
                     "created": datetime.fromtimestamp(stat.st_mtime),
                     "compressed": backup_file.suffix == ".gz",
-                }
+                },
             )
 
         # Sort by creation time (newest first)
@@ -289,7 +289,7 @@ class DatabaseBackup:
                 first_line = f.readline().strip()
                 if not first_line.startswith("--") and not first_line.startswith("SET"):
                     logger.error(
-                        f"Backup file doesn't appear to be valid SQL: {backup_path}"
+                        f"Backup file doesn't appear to be valid SQL: {backup_path}",
                     )
                     return False
         except Exception as e:
@@ -306,15 +306,15 @@ def main():
 
     parser = argparse.ArgumentParser(description="Database backup utility")
     parser.add_argument(
-        "action", choices=["backup", "restore", "list", "cleanup", "verify"]
+        "action", choices=["backup", "restore", "list", "cleanup", "verify"],
     )
     parser.add_argument("--backup-dir", default="backups", help="Backup directory")
     parser.add_argument("--file", help="Backup file for restore/verify operations")
     parser.add_argument(
-        "--days", type=int, default=30, help="Days to keep backups (for cleanup)"
+        "--days", type=int, default=30, help="Days to keep backups (for cleanup)",
     )
     parser.add_argument(
-        "--no-compress", action="store_true", help="Don't compress backup"
+        "--no-compress", action="store_true", help="Don't compress backup",
     )
 
     args = parser.parse_args()
