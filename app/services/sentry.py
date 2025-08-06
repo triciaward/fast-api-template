@@ -22,7 +22,10 @@ def init_sentry() -> None:
     try:
         # Configure integrations based on enabled features
         integrations: list[
-            FastApiIntegration | SqlalchemyIntegration | RedisIntegration | CeleryIntegration
+            FastApiIntegration
+            | SqlalchemyIntegration
+            | RedisIntegration
+            | CeleryIntegration
         ] = [FastApiIntegration()]
 
         # Add SQLAlchemy integration for database monitoring
@@ -109,9 +112,7 @@ def capture_message(
         pass
 
 
-def set_user_context(
-    user_id: int | None = None, email: str | None = None
-) -> None:
+def set_user_context(user_id: int | None = None, email: str | None = None) -> None:
     """Set user context for Sentry events."""
     if not settings.ENABLE_SENTRY:
         return

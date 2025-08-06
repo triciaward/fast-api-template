@@ -88,9 +88,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
             result = db.execute(select(User).filter(User.email == email))
         return result.scalar_one_or_none()
 
-    async def get_user_by_username(
-        self, db: DBSession, username: str
-    ) -> User | None:
+    async def get_user_by_username(self, db: DBSession, username: str) -> User | None:
         """
         Get user by username.
 

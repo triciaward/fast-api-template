@@ -283,9 +283,7 @@ class BaseAdminCRUD(
 
         return True
 
-    async def count(
-        self, db: DBSession, filters: dict[str, Any] | None = None
-    ) -> int:
+    async def count(self, db: DBSession, filters: dict[str, Any] | None = None) -> int:
         """
         Count records with optional filtering.
 

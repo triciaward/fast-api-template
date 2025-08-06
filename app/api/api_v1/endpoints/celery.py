@@ -76,9 +76,7 @@ class CeleryStatsResponse(BaseModel):
     broker_url: str | None = Field(None, description="Celery broker URL")
     result_backend: str | None = Field(None, description="Celery result backend")
     active_workers: int | None = Field(None, description="Number of active workers")
-    registered_tasks: int | None = Field(
-        None, description="Number of registered tasks"
-    )
+    registered_tasks: int | None = Field(None, description="Number of registered tasks")
     active_tasks: int | None = Field(None, description="Number of active tasks")
     error: str | None = Field(
         None, description="Error message if stats retrieval failed"

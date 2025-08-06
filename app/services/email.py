@@ -81,9 +81,7 @@ class EmailService:
         except Exception:
             return False
 
-    async def create_verification_token(
-        self, db: Session, user_id: str
-    ) -> str | None:
+    async def create_verification_token(self, db: Session, user_id: str) -> str | None:
         """Create and store verification token for a user."""
         token = self.generate_verification_token()
         expires = utc_now() + timedelta(hours=settings.VERIFICATION_TOKEN_EXPIRE_HOURS)
@@ -167,9 +165,7 @@ class EmailService:
 
         return token if success else None
 
-    async def verify_password_reset_token(
-        self, db: Session, token: str
-    ) -> str | None:
+    async def verify_password_reset_token(self, db: Session, token: str) -> str | None:
         """Verify a password reset token and return user ID if valid."""
         user = crud_user.get_user_by_password_reset_token_sync(db, token=token)
         if not user:

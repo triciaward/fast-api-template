@@ -28,9 +28,7 @@ class AdminUserUpdate(BaseModel):
     email: str | None = Field(None, description="User's email address")
     username: str | None = Field(None, description="User's username")
     password: str | None = Field(None, description="User's password")
-    is_superuser: bool | None = Field(
-        None, description="Whether user is a superuser"
-    )
+    is_superuser: bool | None = Field(None, description="Whether user is a superuser")
     is_verified: bool | None = Field(None, description="Whether user is verified")
 
 
@@ -44,9 +42,7 @@ class AdminUserResponse(BaseModel):
     is_verified: bool = Field(..., description="Whether user is verified")
     is_deleted: bool = Field(..., description="Whether user is deleted")
     date_created: datetime = Field(..., description="When user was created")
-    oauth_provider: str | None = Field(
-        None, description="OAuth provider if applicable"
-    )
+    oauth_provider: str | None = Field(None, description="OAuth provider if applicable")
     oauth_id: str | None = Field(None, description="OAuth provider's user ID")
     oauth_email: str | None = Field(None, description="Email from OAuth provider")
     deletion_requested_at: datetime | None = Field(
@@ -70,9 +66,7 @@ class AdminUserFilters(BaseModel):
     """Schema for filtering users in admin interface."""
 
     is_superuser: bool | None = Field(None, description="Filter by superuser status")
-    is_verified: bool | None = Field(
-        None, description="Filter by verification status"
-    )
+    is_verified: bool | None = Field(None, description="Filter by verification status")
     is_deleted: bool | None = Field(None, description="Filter by deletion status")
     oauth_provider: str | None = Field(None, description="Filter by OAuth provider")
 

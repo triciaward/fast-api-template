@@ -36,12 +36,8 @@ router = APIRouter()
 @router.get("/users", response_model=AdminUserListResponse)
 async def list_users(
     pagination: PaginationParams = Depends(),
-    is_superuser: bool | None = Query(
-        None, description="Filter by superuser status"
-    ),
-    is_verified: bool | None = Query(
-        None, description="Filter by verification status"
-    ),
+    is_superuser: bool | None = Query(None, description="Filter by superuser status"),
+    is_verified: bool | None = Query(None, description="Filter by verification status"),
     is_deleted: bool | None = Query(None, description="Filter by deletion status"),
     oauth_provider: str | None = Query(None, description="Filter by OAuth provider"),
     current_admin: UserResponse = Depends(require_superuser),

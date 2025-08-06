@@ -120,9 +120,7 @@ def get_user_by_id_sync(db: Session, user_id: str) -> User | None:
     return result.scalar_one_or_none()
 
 
-def get_user_by_oauth_id_sync(
-    db: Session, provider: str, oauth_id: str
-) -> User | None:
+def get_user_by_oauth_id_sync(db: Session, provider: str, oauth_id: str) -> User | None:
     result = db.execute(
         select(User).filter(
             User.oauth_provider == provider,

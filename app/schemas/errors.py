@@ -145,9 +145,7 @@ class ErrorDetail(BaseModel):
     type: ErrorType = Field(..., description="Error type for categorization")
     message: str = Field(..., description="Human-readable error message")
     code: ErrorCode = Field(..., description="Machine-readable error code")
-    details: dict[str, Any] | None = Field(
-        None, description="Additional error details"
-    )
+    details: dict[str, Any] | None = Field(None, description="Additional error details")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -265,9 +263,7 @@ class RateLimitErrorDetail(ErrorDetail):
     """Rate limit error details."""
 
     type: ErrorType = Field(default=ErrorType.RATE_LIMIT_EXCEEDED)
-    retry_after: int | None = Field(
-        None, description="Seconds to wait before retrying"
-    )
+    retry_after: int | None = Field(None, description="Seconds to wait before retrying")
     limit: int | None = Field(None, description="Rate limit threshold")
 
     model_config = ConfigDict(

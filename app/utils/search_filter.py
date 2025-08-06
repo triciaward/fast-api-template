@@ -420,15 +420,11 @@ def create_deleted_user_search_filters(
 class UserSearchParams(BaseModel):
     """Query parameters for user search endpoint."""
 
-    search: str | None = Field(
-        None, description="Search query for username and email"
-    )
+    search: str | None = Field(None, description="Search query for username and email")
     use_full_text_search: bool = Field(
         default=False, description="Use PostgreSQL full-text search (if available)"
     )
-    is_verified: bool | None = Field(
-        None, description="Filter by verification status"
-    )
+    is_verified: bool | None = Field(None, description="Filter by verification status")
     oauth_provider: str | None = Field(
         None, description="Filter by OAuth provider (google, apple, none)"
     )
