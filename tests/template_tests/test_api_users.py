@@ -1,3 +1,5 @@
+from datetime import UTC
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -150,11 +152,11 @@ class TestUserEndpoints:
         user_email = test_user_data["email"]
 
         # Create token with wrong secret (this simulates a tampered token)
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timedelta
 
         from jose import jwt
 
-        expire = datetime.now(timezone.utc) + timedelta(minutes=30)
+        expire = datetime.now(UTC) + timedelta(minutes=30)
         to_encode = {"exp": expire, "sub": str(user_email)}
         # Use wrong secret key
         malicious_token = jwt.encode(to_encode, "wrong_secret_key", algorithm="HS256")

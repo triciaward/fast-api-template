@@ -4,7 +4,7 @@ Tests for Core Security module.
 This module tests the security functionality including password hashing, JWT token creation, refresh tokens, and API key management.
 """
 
-from datetime import datetime, timedelta, timezone, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import jwt
@@ -119,7 +119,7 @@ class TestJWTAccessTokens:
 
         # Verify expiry is approximately 2 hours from now
         exp_timestamp = decoded["exp"]
-        now_timestamp = datetime.now(timezone.utc).timestamp()
+        now_timestamp = datetime.now(UTC).timestamp()
         time_diff = exp_timestamp - now_timestamp
 
         # Should be approximately 2 hours (7200 seconds) with some tolerance
@@ -185,7 +185,7 @@ class TestJWTAccessTokens:
 
         # Verify expiry is a valid timestamp
         exp_timestamp = decoded["exp"]
-        assert isinstance(exp_timestamp, (int, float))
+        assert isinstance(exp_timestamp, int | float)
         assert exp_timestamp > 0
 
 

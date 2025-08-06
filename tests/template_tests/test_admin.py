@@ -1,5 +1,7 @@
 """Tests for admin-only functionality."""
 
+from datetime import UTC
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -713,9 +715,9 @@ def test_admin_html_api_key_operations(
     assert "API%20key%20created%20successfully" in response.headers["location"]
 
     # Test creating an API key with expiration
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
 
-    expires_at = (datetime.now(timezone.utc) + timedelta(days=30)).strftime(
+    expires_at = (datetime.now(UTC) + timedelta(days=30)).strftime(
         "%Y-%m-%dT%H:%M"
     )
     form_data = {

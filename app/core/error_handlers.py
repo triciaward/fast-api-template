@@ -6,7 +6,7 @@ error responses for consistent API behavior.
 """
 
 import uuid
-from typing import Any, Optional, Union
+from typing import Any
 
 from fastapi import HTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -53,7 +53,7 @@ def get_request_id(request: Request) -> str:
 
 
 async def validation_exception_handler(
-    request: Request, exc: Union[RequestValidationError, ValidationError]
+    request: Request, exc: RequestValidationError | ValidationError
 ) -> JSONResponse:
     """Handle Pydantic validation errors."""
     request_id = get_request_id(request)
@@ -406,7 +406,7 @@ def create_standardized_error(
     message: str,
     code: ErrorCode,
     status_code: int = 500,
-    details: Optional[dict[str, Any]] = None,
+    details: dict[str, Any] | None = None,
 ) -> tuple[ErrorDetail, int]:
     """Helper function to create standardized errors."""
 
@@ -423,9 +423,9 @@ def create_standardized_error(
 def create_validation_error(
     message: str,
     code: ErrorCode,
-    field: Optional[str] = None,
-    value: Optional[Any] = None,
-    details: Optional[dict[str, Any]] = None,
+    field: str | None = None,
+    value: Any | None = None,
+    details: dict[str, Any] | None = None,
 ) -> tuple[ValidationErrorDetail, int]:
     """Helper function to create validation errors."""
 
@@ -443,7 +443,7 @@ def create_validation_error(
 def create_authentication_error(
     message: str,
     code: ErrorCode = ErrorCode.INVALID_CREDENTIALS,
-    details: Optional[dict[str, Any]] = None,
+    details: dict[str, Any] | None = None,
 ) -> tuple[AuthenticationErrorDetail, int]:
     """Helper function to create authentication errors."""
 
@@ -459,8 +459,8 @@ def create_authentication_error(
 def create_authorization_error(
     message: str,
     code: ErrorCode = ErrorCode.INSUFFICIENT_PERMISSIONS,
-    required_permissions: Optional[list[str]] = None,
-    details: Optional[dict[str, Any]] = None,
+    required_permissions: list[str] | None = None,
+    details: dict[str, Any] | None = None,
 ) -> tuple[AuthorizationErrorDetail, int]:
     """Helper function to create authorization errors."""
 
@@ -477,9 +477,9 @@ def create_authorization_error(
 def create_not_found_error(
     message: str,
     code: ErrorCode = ErrorCode.RESOURCE_NOT_FOUND,
-    resource_type: Optional[str] = None,
-    resource_id: Optional[str] = None,
-    details: Optional[dict[str, Any]] = None,
+    resource_type: str | None = None,
+    resource_id: str | None = None,
+    details: dict[str, Any] | None = None,
 ) -> tuple[ResourceErrorDetail, int]:
     """Helper function to create not found errors."""
 
@@ -497,9 +497,9 @@ def create_not_found_error(
 def create_conflict_error(
     message: str,
     code: ErrorCode = ErrorCode.CONFLICT,
-    conflicting_field: Optional[str] = None,
-    conflicting_value: Optional[str] = None,
-    details: Optional[dict[str, Any]] = None,
+    conflicting_field: str | None = None,
+    conflicting_value: str | None = None,
+    details: dict[str, Any] | None = None,
 ) -> tuple[ConflictErrorDetail, int]:
     """Helper function to create conflict errors."""
 

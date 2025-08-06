@@ -6,7 +6,7 @@ All endpoints require superuser privileges.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -36,14 +36,14 @@ router = APIRouter()
 @router.get("/users", response_model=AdminUserListResponse)
 async def list_users(
     pagination: PaginationParams = Depends(),
-    is_superuser: Optional[bool] = Query(
+    is_superuser: bool | None = Query(
         None, description="Filter by superuser status"
     ),
-    is_verified: Optional[bool] = Query(
+    is_verified: bool | None = Query(
         None, description="Filter by verification status"
     ),
-    is_deleted: Optional[bool] = Query(None, description="Filter by deletion status"),
-    oauth_provider: Optional[str] = Query(None, description="Filter by OAuth provider"),
+    is_deleted: bool | None = Query(None, description="Filter by deletion status"),
+    oauth_provider: str | None = Query(None, description="Filter by OAuth provider"),
     current_admin: UserResponse = Depends(require_superuser),
     db: Session = Depends(get_db),
 ) -> PaginatedResponse[AdminUserResponse]:

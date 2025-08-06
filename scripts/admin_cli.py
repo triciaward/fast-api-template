@@ -9,7 +9,6 @@ import argparse
 import asyncio
 import json
 import sys
-from typing import Optional
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,10 +27,10 @@ async def list_users(
     db: AsyncSession,
     skip: int = 0,
     limit: int = 100,
-    is_superuser: Optional[bool] = None,
-    is_verified: Optional[bool] = None,
-    is_deleted: Optional[bool] = None,
-    oauth_provider: Optional[str] = None,
+    is_superuser: bool | None = None,
+    is_verified: bool | None = None,
+    is_deleted: bool | None = None,
+    oauth_provider: str | None = None,
 ) -> None:
     """List users with optional filtering."""
     users = await admin_user_crud.get_users(
@@ -139,11 +138,11 @@ async def create_user(
 async def update_user(
     db: AsyncSession,
     user_id: str,
-    email: Optional[str] = None,
-    username: Optional[str] = None,
-    password: Optional[str] = None,
-    is_superuser: Optional[bool] = None,
-    is_verified: Optional[bool] = None,
+    email: str | None = None,
+    username: str | None = None,
+    password: str | None = None,
+    is_superuser: bool | None = None,
+    is_verified: bool | None = None,
 ) -> None:
     """Update a user."""
     try:

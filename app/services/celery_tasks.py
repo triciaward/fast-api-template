@@ -5,6 +5,7 @@ This module is only imported when Celery is enabled, and is not loaded by the ma
 """
 
 import time
+from datetime import UTC
 from typing import Any
 
 from app.services.celery_app import celery_app
@@ -45,7 +46,7 @@ def periodic_health_check() -> dict[str, Any]:
 @celery_app.task(name="app.services.celery_tasks.permanently_delete_accounts_task")
 def permanently_delete_accounts_task() -> dict[str, Any]:
     """Permanently delete accounts that have passed their grace period."""
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     from sqlalchemy import select
 
@@ -61,7 +62,7 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
 
     def utc_now() -> datetime:
         """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-        return datetime.now(timezone.utc)
+        return datetime.now(UTC)
 
     try:
         db = next(get_db_sync())

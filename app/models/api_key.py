@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -10,7 +10,7 @@ from app.models.base import SoftDeleteMixin
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class APIKey(Base, SoftDeleteMixin):

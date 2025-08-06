@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
@@ -24,7 +24,7 @@ router = APIRouter()
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated utc_now())."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 logger = get_auth_logger()

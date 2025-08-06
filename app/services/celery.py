@@ -7,7 +7,7 @@ like email sending, data processing, and cleanup jobs.
 This file should NOT define or register any Celery tasks. Tasks are defined in celery_tasks.py and only imported when Celery is enabled.
 """
 
-from typing import Any, Optional
+from typing import Any
 
 from celery import Celery
 from celery.result import AsyncResult
@@ -19,7 +19,7 @@ from app.core.logging_config import get_app_logger
 app_logger = get_app_logger()
 celery_logger = get_task_logger(__name__)
 
-_celery_app: Optional[Celery] = None
+_celery_app: Celery | None = None
 
 
 def create_celery_app() -> Celery:
@@ -60,7 +60,7 @@ def is_celery_enabled() -> bool:
     return settings.ENABLE_CELERY
 
 
-def submit_task(task_name: str, *args: Any, **kwargs: Any) -> Optional[AsyncResult]:
+def submit_task(task_name: str, *args: Any, **kwargs: Any) -> AsyncResult | None:
     if not is_celery_enabled():
         app_logger.warning(
             "Attempted to submit task but Celery is disabled", task_name=task_name
@@ -84,7 +84,7 @@ def submit_task(task_name: str, *args: Any, **kwargs: Any) -> Optional[AsyncResu
         return None
 
 
-def get_task_status(task_id: str) -> Optional[dict[str, Any]]:
+def get_task_status(task_id: str) -> dict[str, Any] | None:
     if not is_celery_enabled():
         return None
     try:

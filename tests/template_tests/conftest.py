@@ -168,7 +168,7 @@ async def setup_test_db() -> AsyncGenerator[None, None]:
                 print("CI DEBUG: Inside async engine.begin() (no timeout)")
                 await conn.run_sync(Base.metadata.create_all)
                 print("CI DEBUG: Async tables created")
-    except asyncio.TimeoutError:
+    except TimeoutError:
         print("CI DEBUG: Timeout creating async tables - falling back to sync only")
     except Exception as e:
         print(f"CI DEBUG: Error creating async tables: {e}")
@@ -199,7 +199,7 @@ async def setup_test_db() -> AsyncGenerator[None, None]:
                 await conn.run_sync(Base.metadata.drop_all)
             await test_engine.dispose()
             await test_session_engine.dispose()
-    except asyncio.TimeoutError:
+    except TimeoutError:
         print("CI DEBUG: Timeout dropping async tables")
     except Exception as e:
         print(f"CI DEBUG: Error dropping async tables: {e}")

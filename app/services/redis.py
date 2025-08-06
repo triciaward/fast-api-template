@@ -6,7 +6,6 @@ Redis connection is globally available for use in background tasks and other ser
 """
 
 import logging
-from typing import Optional
 
 import redis.asyncio as redis
 
@@ -15,10 +14,10 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 # Global Redis client instance
-redis_client: Optional[redis.Redis] = None
+redis_client: redis.Redis | None = None
 
 
-async def init_redis() -> Optional[redis.Redis]:
+async def init_redis() -> redis.Redis | None:
     """
     Initialize Redis connection if enabled.
 
@@ -67,7 +66,7 @@ async def close_redis() -> None:
             redis_client = None
 
 
-def get_redis_client() -> Optional[redis.Redis]:
+def get_redis_client() -> redis.Redis | None:
     """
     Get the global Redis client instance.
 

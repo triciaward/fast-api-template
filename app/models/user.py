@@ -1,9 +1,8 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, Column, DateTime, String
-from sqlalchemy.dialects.postgresql import TIMESTAMP
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Boolean, Column, String
+from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 
 from app.database.database import Base
 from app.models.base import SoftDeleteMixin
@@ -11,7 +10,7 @@ from app.models.base import SoftDeleteMixin
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class User(Base, SoftDeleteMixin):

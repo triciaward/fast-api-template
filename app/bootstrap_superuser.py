@@ -7,7 +7,6 @@ and creates a superuser account if they are set and no superuser exists.
 
 import asyncio
 import logging
-from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 async def create_superuser(
-    db: AsyncSession, email: str, password: str, username: Optional[str] = None
+    db: AsyncSession, email: str, password: str, username: str | None = None
 ) -> bool:
     """
     Create a superuser account.

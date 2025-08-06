@@ -1,7 +1,6 @@
 import secrets
 import string
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 import emails
 from sqlalchemy.orm import Session
@@ -12,7 +11,7 @@ from app.crud import user as crud_user
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated utc_now())."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class EmailService:
@@ -84,7 +83,7 @@ class EmailService:
 
     async def create_verification_token(
         self, db: Session, user_id: str
-    ) -> Optional[str]:
+    ) -> str | None:
         """Create and store verification token for a user."""
         token = self.generate_verification_token()
         expires = utc_now() + timedelta(hours=settings.VERIFICATION_TOKEN_EXPIRE_HOURS)
@@ -95,7 +94,7 @@ class EmailService:
 
         return token if success else None
 
-    async def verify_token(self, db: Session, token: str) -> Optional[str]:
+    async def verify_token(self, db: Session, token: str) -> str | None:
         """Verify a verification token and return user ID if valid."""
         user = crud_user.get_user_by_verification_token_sync(db, token=token)
         if not user:
@@ -155,7 +154,7 @@ class EmailService:
 
     async def create_password_reset_token(
         self, db: Session, user_id: str
-    ) -> Optional[str]:
+    ) -> str | None:
         """Create and store password reset token for a user."""
         token = self.generate_verification_token()
         expires = utc_now() + timedelta(
@@ -170,7 +169,7 @@ class EmailService:
 
     async def verify_password_reset_token(
         self, db: Session, token: str
-    ) -> Optional[str]:
+    ) -> str | None:
         """Verify a password reset token and return user ID if valid."""
         user = crud_user.get_user_by_password_reset_token_sync(db, token=token)
         if not user:
@@ -272,7 +271,7 @@ class EmailService:
         except Exception:
             return False
 
-    async def create_deletion_token(self, db: Session, user_id: str) -> Optional[str]:
+    async def create_deletion_token(self, db: Session, user_id: str) -> str | None:
         """Create and store deletion token for a user."""
         token = self.generate_verification_token()
         expires = utc_now() + timedelta(
@@ -285,7 +284,7 @@ class EmailService:
 
         return token if success else None
 
-    async def verify_deletion_token(self, db: Session, token: str) -> Optional[str]:
+    async def verify_deletion_token(self, db: Session, token: str) -> str | None:
         """Verify a deletion token and return user ID if valid."""
         user = crud_user.get_user_by_deletion_token_sync(db, token=token)
         if not user:

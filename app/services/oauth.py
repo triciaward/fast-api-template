@@ -1,5 +1,5 @@
 import time
-from typing import Any, Optional
+from typing import Any
 
 import httpx
 import jwt
@@ -28,7 +28,7 @@ class OAuthService:
                 client_kwargs={"scope": "openid email profile"},
             )
 
-    async def get_google_user_info(self, access_token: str) -> Optional[dict[str, Any]]:
+    async def get_google_user_info(self, access_token: str) -> dict[str, Any] | None:
         """Get user info from Google using access token."""
         if not settings.GOOGLE_CLIENT_ID:
             raise HTTPException(status_code=400, detail="Google OAuth not configured")
@@ -46,7 +46,7 @@ class OAuthService:
                 status_code=400, detail=f"Failed to get Google user info: {str(e)}"
             ) from e
 
-    async def verify_google_token(self, id_token: str) -> Optional[dict[str, Any]]:
+    async def verify_google_token(self, id_token: str) -> dict[str, Any] | None:
         """Verify Google ID token."""
         if not settings.GOOGLE_CLIENT_ID:
             raise HTTPException(status_code=400, detail="Google OAuth not configured")
@@ -72,7 +72,7 @@ class OAuthService:
                 status_code=400, detail=f"Failed to verify Google token: {str(e)}"
             ) from e
 
-    async def verify_apple_token(self, id_token: str) -> Optional[dict[str, Any]]:
+    async def verify_apple_token(self, id_token: str) -> dict[str, Any] | None:
         """Verify Apple ID token."""
         if not all(
             [

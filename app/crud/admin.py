@@ -5,7 +5,7 @@ This module provides admin-only CRUD operations for managing users and other res
 All operations require superuser privileges.
 """
 
-from typing import Any, Optional, Union
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
@@ -39,10 +39,10 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         db: DBSession,
         skip: int = 0,
         limit: int = 100,
-        is_superuser: Optional[bool] = None,
-        is_verified: Optional[bool] = None,
-        is_deleted: Optional[bool] = None,
-        oauth_provider: Optional[str] = None,
+        is_superuser: bool | None = None,
+        is_verified: bool | None = None,
+        is_deleted: bool | None = None,
+        oauth_provider: str | None = None,
     ) -> list[User]:
         """
         Get users with optional filtering.
@@ -71,7 +71,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
 
         return await self.get_multi(db, skip=skip, limit=limit, filters=filters)
 
-    async def get_user_by_email(self, db: DBSession, email: str) -> Optional[User]:
+    async def get_user_by_email(self, db: DBSession, email: str) -> User | None:
         """
         Get user by email address.
 
@@ -90,7 +90,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
 
     async def get_user_by_username(
         self, db: DBSession, username: str
-    ) -> Optional[User]:
+    ) -> User | None:
         """
         Get user by username.
 
@@ -138,8 +138,8 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         return db_user
 
     async def update_user(
-        self, db: DBSession, user_id: Union[str, UUID], user_data: AdminUserUpdate
-    ) -> Optional[User]:
+        self, db: DBSession, user_id: str | UUID, user_data: AdminUserUpdate
+    ) -> User | None:
         """
         Update user data (admin-only).
 
@@ -178,7 +178,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
 
         return user
 
-    async def delete_user(self, db: DBSession, user_id: Union[str, UUID]) -> bool:
+    async def delete_user(self, db: DBSession, user_id: str | UUID) -> bool:
         """
         Delete a user (admin-only).
 
@@ -192,8 +192,8 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         return await self.delete(db, user_id)
 
     async def toggle_superuser_status(
-        self, db: DBSession, user_id: Union[str, UUID]
-    ) -> Optional[User]:
+        self, db: DBSession, user_id: str | UUID
+    ) -> User | None:
         """
         Toggle superuser status for a user.
 
@@ -221,8 +221,8 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         return user
 
     async def toggle_verification_status(
-        self, db: DBSession, user_id: Union[str, UUID]
-    ) -> Optional[User]:
+        self, db: DBSession, user_id: str | UUID
+    ) -> User | None:
         """
         Toggle verification status for a user.
 
@@ -249,7 +249,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
 
         return user
 
-    async def force_delete_user(self, db: DBSession, user_id: Union[str, UUID]) -> bool:
+    async def force_delete_user(self, db: DBSession, user_id: str | UUID) -> bool:
         """
         Force delete a user (bypasses normal deletion flow).
 

@@ -1,5 +1,6 @@
 # Services package for optional features like Redis and WebSockets
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from fastapi import Request
 

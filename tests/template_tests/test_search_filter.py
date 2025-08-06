@@ -1,5 +1,5 @@
 # mypy: disable-error-code=assignment
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
@@ -168,7 +168,7 @@ class TestSearchFilterUtility:
         )
 
         # Manually set creation date for user1 to be old
-        old_date = datetime.now(timezone.utc) - timedelta(days=30)
+        old_date = datetime.now(UTC) - timedelta(days=30)
         _user1.date_created = old_date  # type: ignore
         sync_db_session.commit()
 
@@ -180,7 +180,7 @@ class TestSearchFilterUtility:
         )
 
         # Test date range filter
-        recent_date = datetime.now(timezone.utc) - timedelta(days=7)
+        recent_date = datetime.now(UTC) - timedelta(days=7)
 
         field_filter = FieldFilter(
             field="date_created",

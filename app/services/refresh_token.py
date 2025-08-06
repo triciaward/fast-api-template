@@ -1,6 +1,5 @@
 import uuid
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 from fastapi import Request, Response
 from sqlalchemy.orm import Session
@@ -19,7 +18,7 @@ from app.models import User
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def get_device_info(request: Request) -> str:
@@ -92,7 +91,7 @@ def clear_refresh_token_cookie(response: Response) -> None:
     )
 
 
-def get_refresh_token_from_cookie(request: Request) -> Optional[str]:
+def get_refresh_token_from_cookie(request: Request) -> str | None:
     """Get the refresh token from the request cookies."""
     return request.cookies.get(settings.REFRESH_TOKEN_COOKIE_NAME)
 
@@ -111,7 +110,7 @@ async def create_user_session(
     ip_address = get_client_ip(request)
 
     # Store refresh token in database
-    db_refresh_token = await crud_create_refresh_token(
+    await crud_create_refresh_token(
         db=db,
         user_id=user.id,  # type: ignore
         token=refresh_token_value,
@@ -135,7 +134,7 @@ async def create_user_session(
 async def refresh_access_token(
     db: Session,
     refresh_token_value: str,
-) -> Optional[tuple[str, datetime]]:
+) -> tuple[str, datetime] | None:
     """Refresh an access token using a valid refresh token."""
     # Verify refresh token
     db_refresh_token = await verify_refresh_token_in_db(db, refresh_token_value)
@@ -179,7 +178,7 @@ async def revoke_session(
 async def revoke_all_sessions(
     db: Session,
     user_id: uuid.UUID,
-    except_token_value: Optional[str] = None,
+    except_token_value: str | None = None,
 ) -> int:
     """Revoke all sessions for a user, optionally excepting one."""
     from app.core.security import hash_refresh_token

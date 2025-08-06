@@ -1,5 +1,5 @@
-from datetime import datetime, timezone, timedelta
-from typing import Any, Optional, Union
+from datetime import UTC, datetime, timedelta
+from typing import Any, Union
 
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,23 +8,23 @@ from sqlalchemy.orm import Session
 from app.models import AuditLog
 
 # Type alias for both sync and async sessions
-DBSession = Union[AsyncSession, Session]
+DBSession = AsyncSession | Session
 
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 async def create_audit_log(
     db: DBSession,
     event_type: str,
-    user_id: Optional[str] = None,
-    ip_address: Optional[str] = None,
-    user_agent: Optional[str] = None,
+    user_id: str | None = None,
+    ip_address: str | None = None,
+    user_agent: str | None = None,
     success: bool = True,
-    context: Optional[dict[str, Any]] = None,
-    session_id: Optional[str] = None,
+    context: dict[str, Any] | None = None,
+    session_id: str | None = None,
 ) -> AuditLog:
     """Create a new audit log entry."""
     audit_log = AuditLog(
@@ -55,12 +55,12 @@ async def create_audit_log(
 def create_audit_log_sync(
     db: Session,
     event_type: str,
-    user_id: Optional[str] = None,
-    ip_address: Optional[str] = None,
-    user_agent: Optional[str] = None,
+    user_id: str | None = None,
+    ip_address: str | None = None,
+    user_agent: str | None = None,
     success: bool = True,
-    context: Optional[dict[str, Any]] = None,
-    session_id: Optional[str] = None,
+    context: dict[str, Any] | None = None,
+    session_id: str | None = None,
 ) -> AuditLog:
     """Create a new audit log entry (sync version)."""
     audit_log = AuditLog(
@@ -83,7 +83,7 @@ def create_audit_log_sync(
 
 async def get_audit_logs_by_user(
     db: DBSession,
-    user_id: Optional[str],
+    user_id: str | None,
     limit: int = 100,
     offset: int = 0,
 ) -> list[AuditLog]:
@@ -110,7 +110,7 @@ async def get_audit_logs_by_user(
 
 def get_audit_logs_by_user_sync(
     db: Session,
-    user_id: Optional[str],
+    user_id: str | None,
     limit: int = 100,
     offset: int = 0,
 ) -> list[AuditLog]:

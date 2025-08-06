@@ -6,7 +6,7 @@ All errors follow the same structure for better frontend integration.
 """
 
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -145,7 +145,7 @@ class ErrorDetail(BaseModel):
     type: ErrorType = Field(..., description="Error type for categorization")
     message: str = Field(..., description="Human-readable error message")
     code: ErrorCode = Field(..., description="Machine-readable error code")
-    details: Optional[dict[str, Any]] = Field(
+    details: dict[str, Any] | None = Field(
         None, description="Additional error details"
     )
 
@@ -165,8 +165,8 @@ class ValidationErrorDetail(ErrorDetail):
     """Validation error with field-specific details."""
 
     type: ErrorType = Field(default=ErrorType.VALIDATION_ERROR)
-    field: Optional[str] = Field(None, description="Field that failed validation")
-    value: Optional[Any] = Field(None, description="Invalid value provided")
+    field: str | None = Field(None, description="Field that failed validation")
+    value: Any | None = Field(None, description="Invalid value provided")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -201,7 +201,7 @@ class AuthorizationErrorDetail(ErrorDetail):
     """Authorization error details."""
 
     type: ErrorType = Field(default=ErrorType.AUTHORIZATION_ERROR)
-    required_permissions: Optional[list[str]] = Field(
+    required_permissions: list[str] | None = Field(
         None, description="Required permissions for this operation"
     )
 
@@ -221,8 +221,8 @@ class ResourceErrorDetail(ErrorDetail):
     """Resource not found error details."""
 
     type: ErrorType = Field(default=ErrorType.NOT_FOUND)
-    resource_type: Optional[str] = Field(None, description="Type of resource not found")
-    resource_id: Optional[str] = Field(None, description="ID of resource not found")
+    resource_type: str | None = Field(None, description="Type of resource not found")
+    resource_id: str | None = Field(None, description="ID of resource not found")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -241,10 +241,10 @@ class ConflictErrorDetail(ErrorDetail):
     """Conflict error details."""
 
     type: ErrorType = Field(default=ErrorType.CONFLICT)
-    conflicting_field: Optional[str] = Field(
+    conflicting_field: str | None = Field(
         None, description="Field that caused the conflict"
     )
-    conflicting_value: Optional[str] = Field(
+    conflicting_value: str | None = Field(
         None, description="Value that caused the conflict"
     )
 
@@ -265,10 +265,10 @@ class RateLimitErrorDetail(ErrorDetail):
     """Rate limit error details."""
 
     type: ErrorType = Field(default=ErrorType.RATE_LIMIT_EXCEEDED)
-    retry_after: Optional[int] = Field(
+    retry_after: int | None = Field(
         None, description="Seconds to wait before retrying"
     )
-    limit: Optional[int] = Field(None, description="Rate limit threshold")
+    limit: int | None = Field(None, description="Rate limit threshold")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -287,7 +287,7 @@ class ServerErrorDetail(ErrorDetail):
     """Server error details."""
 
     type: ErrorType = Field(default=ErrorType.INTERNAL_SERVER_ERROR)
-    request_id: Optional[str] = Field(None, description="Request ID for tracking")
+    request_id: str | None = Field(None, description="Request ID for tracking")
 
     model_config = ConfigDict(
         json_schema_extra={

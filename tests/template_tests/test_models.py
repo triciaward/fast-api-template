@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
@@ -164,7 +164,7 @@ class TestUserSchemas:
     def test_user_response_schema(self) -> None:
         """Test UserResponse schema."""
         user_id = uuid.uuid4()
-        date_created = datetime.now(timezone.utc)
+        date_created = datetime.now(UTC)
 
         user_response = UserResponse(
             id=user_id,

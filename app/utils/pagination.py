@@ -6,7 +6,7 @@ pagination across all API endpoints.
 """
 
 import math
-from typing import Generic, Optional, TypeVar
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -39,8 +39,8 @@ class PaginationMetadata(BaseModel):
     pages: int = Field(..., description="Total number of pages")
     has_next: bool = Field(..., description="Whether there is a next page")
     has_prev: bool = Field(..., description="Whether there is a previous page")
-    next_page: Optional[int] = Field(None, description="Next page number")
-    prev_page: Optional[int] = Field(None, description="Previous page number")
+    next_page: int | None = Field(None, description="Next page number")
+    prev_page: int | None = Field(None, description="Previous page number")
 
     @classmethod
     def create(cls, page: int, size: int, total: int) -> "PaginationMetadata":
@@ -117,7 +117,7 @@ async def paginate(
 
 def create_pagination_links(
     base_url: str, page: int, pages: int, **query_params
-) -> dict[str, Optional[str]]:
+) -> dict[str, str | None]:
     """
     Create pagination links for HATEOAS support.
 
@@ -130,7 +130,7 @@ def create_pagination_links(
     Returns:
         Dictionary with pagination links
     """
-    links: dict[str, Optional[str]] = {}
+    links: dict[str, str | None] = {}
 
     # Build query string
     query_parts = []
@@ -168,7 +168,7 @@ def create_pagination_links(
 class PaginatedResponseWithLinks(PaginatedResponse[T]):
     """Paginated response with HATEOAS links."""
 
-    links: dict[str, Optional[str]] = Field(..., description="Pagination links")
+    links: dict[str, str | None] = Field(..., description="Pagination links")
 
     @classmethod
     def create_with_links(

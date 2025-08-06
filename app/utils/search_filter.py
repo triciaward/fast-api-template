@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -54,8 +54,8 @@ class FieldFilter(BaseModel):
 
     field: str = Field(..., description="Field name to filter on")
     operator: FilterOperator = Field(..., description="Filter operator")
-    value: Optional[Any] = Field(None, description="Value to filter by")
-    values: Optional[list[Any]] = Field(
+    value: Any | None = Field(None, description="Value to filter by")
+    values: list[Any] | None = Field(
         None, description="List of values for IN/NOT_IN operators"
     )
 
@@ -63,13 +63,13 @@ class FieldFilter(BaseModel):
 class SearchFilterConfig(BaseModel):
     """Complete search and filter configuration."""
 
-    text_search: Optional[TextSearchFilter] = Field(
+    text_search: TextSearchFilter | None = Field(
         None, description="Text search configuration"
     )
     filters: list[FieldFilter] = Field(
         default_factory=list, description="List of field filters to apply"
     )
-    sort_by: Optional[str] = Field(None, description="Field to sort by")
+    sort_by: str | None = Field(None, description="Field to sort by")
     sort_order: str = Field(default="asc", description="Sort order (asc or desc)")
 
 
@@ -256,8 +256,8 @@ def create_text_search(
 def create_field_filter(
     field: str,
     operator: FilterOperator,
-    value: Optional[Any] = None,
-    values: Optional[list[Any]] = None,
+    value: Any | None = None,
+    values: list[Any] | None = None,
 ) -> FieldFilter:
     """Create a field filter configuration."""
     return FieldFilter(field=field, operator=operator, value=value, values=values)
@@ -265,15 +265,15 @@ def create_field_filter(
 
 # Pre-built filter configurations for common use cases
 def create_user_search_filters(
-    search_query: Optional[str] = None,
+    search_query: str | None = None,
     use_full_text_search: bool = False,
-    is_verified: Optional[bool] = None,
-    oauth_provider: Optional[str] = None,
-    is_superuser: Optional[bool] = None,
-    is_deleted: Optional[bool] = None,
-    date_created_after: Optional[datetime] = None,
-    date_created_before: Optional[datetime] = None,
-    sort_by: Optional[str] = None,
+    is_verified: bool | None = None,
+    oauth_provider: str | None = None,
+    is_superuser: bool | None = None,
+    is_deleted: bool | None = None,
+    date_created_after: datetime | None = None,
+    date_created_before: datetime | None = None,
+    sort_by: str | None = None,
     sort_order: str = "asc",
 ) -> SearchFilterConfig:
     """
@@ -355,11 +355,11 @@ def create_user_search_filters(
 
 
 def create_deleted_user_search_filters(
-    deleted_by: Optional[UUID] = None,
-    deletion_reason: Optional[str] = None,
-    deleted_after: Optional[datetime] = None,
-    deleted_before: Optional[datetime] = None,
-    sort_by: Optional[str] = None,
+    deleted_by: UUID | None = None,
+    deletion_reason: str | None = None,
+    deleted_after: datetime | None = None,
+    deleted_before: datetime | None = None,
+    sort_by: str | None = None,
     sort_order: str = "desc",
 ) -> SearchFilterConfig:
     """
@@ -420,27 +420,27 @@ def create_deleted_user_search_filters(
 class UserSearchParams(BaseModel):
     """Query parameters for user search endpoint."""
 
-    search: Optional[str] = Field(
+    search: str | None = Field(
         None, description="Search query for username and email"
     )
     use_full_text_search: bool = Field(
         default=False, description="Use PostgreSQL full-text search (if available)"
     )
-    is_verified: Optional[bool] = Field(
+    is_verified: bool | None = Field(
         None, description="Filter by verification status"
     )
-    oauth_provider: Optional[str] = Field(
+    oauth_provider: str | None = Field(
         None, description="Filter by OAuth provider (google, apple, none)"
     )
-    is_superuser: Optional[bool] = Field(None, description="Filter by superuser status")
-    is_deleted: Optional[bool] = Field(None, description="Filter by deletion status")
-    date_created_after: Optional[datetime] = Field(
+    is_superuser: bool | None = Field(None, description="Filter by superuser status")
+    is_deleted: bool | None = Field(None, description="Filter by deletion status")
+    date_created_after: datetime | None = Field(
         None, description="Filter users created after this date"
     )
-    date_created_before: Optional[datetime] = Field(
+    date_created_before: datetime | None = Field(
         None, description="Filter users created before this date"
     )
-    sort_by: Optional[str] = Field(None, description="Field to sort by")
+    sort_by: str | None = Field(None, description="Field to sort by")
     sort_order: str = Field(default="asc", description="Sort order (asc or desc)")
 
     def to_search_config(self) -> SearchFilterConfig:
@@ -462,19 +462,19 @@ class UserSearchParams(BaseModel):
 class DeletedUserSearchParams(BaseModel):
     """Query parameters for deleted user search endpoint."""
 
-    deleted_by: Optional[UUID] = Field(
+    deleted_by: UUID | None = Field(
         None, description="Filter by user who performed the deletion"
     )
-    deletion_reason: Optional[str] = Field(
+    deletion_reason: str | None = Field(
         None, description="Search in deletion reason field"
     )
-    deleted_after: Optional[datetime] = Field(
+    deleted_after: datetime | None = Field(
         None, description="Filter users deleted after this date"
     )
-    deleted_before: Optional[datetime] = Field(
+    deleted_before: datetime | None = Field(
         None, description="Filter users deleted before this date"
     )
-    sort_by: Optional[str] = Field(None, description="Field to sort by")
+    sort_by: str | None = Field(None, description="Field to sort by")
     sort_order: str = Field(default="desc", description="Sort order (asc or desc)")
 
     def to_search_config(self) -> SearchFilterConfig:

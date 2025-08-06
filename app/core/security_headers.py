@@ -7,7 +7,7 @@ These headers help protect against various security vulnerabilities.
 # fmt: on
 
 import logging
-from typing import Callable
+from collections.abc import Callable
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware

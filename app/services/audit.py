@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,13 +9,13 @@ from app.crud.audit_log import create_audit_log, create_audit_log_sync
 from app.models import User
 
 # Type alias for both sync and async sessions
-DBSession = Union[AsyncSession, Session]
+DBSession = AsyncSession | Session
 
 # Get the auth logger for structlog integration
 auth_logger = get_auth_logger()
 
 
-def get_client_ip(request: Request) -> Optional[str]:
+def get_client_ip(request: Request) -> str | None:
     """Extract client IP address from request, handling proxies."""
     forwarded_for = request.headers.get("X-Forwarded-For")
     if forwarded_for:
@@ -26,7 +26,7 @@ def get_client_ip(request: Request) -> Optional[str]:
     return request.client.host if request.client else None
 
 
-def get_user_agent(request: Request) -> Optional[str]:
+def get_user_agent(request: Request) -> str | None:
     """Extract user agent from request."""
     return request.headers.get("User-Agent")
 
@@ -35,10 +35,10 @@ async def log_event(
     db: DBSession,
     event_type: str,
     request: Request,
-    user: Optional[User] = None,
+    user: User | None = None,
     success: bool = True,
-    context: Optional[dict[str, Any]] = None,
-    session_id: Optional[str] = None,
+    context: dict[str, Any] | None = None,
+    session_id: str | None = None,
 ) -> None:
     ip_address = get_client_ip(request)
     user_agent = get_user_agent(request)
@@ -71,10 +71,10 @@ def log_event_sync(
     db: Session,
     event_type: str,
     request: Request,
-    user: Optional[User] = None,
+    user: User | None = None,
     success: bool = True,
-    context: Optional[dict[str, Any]] = None,
-    session_id: Optional[str] = None,
+    context: dict[str, Any] | None = None,
+    session_id: str | None = None,
 ) -> None:
     ip_address = get_client_ip(request)
     user_agent = get_user_agent(request)
@@ -107,9 +107,9 @@ def log_event_sync(
 async def log_login_attempt(
     db: DBSession,
     request: Request,
-    user: Optional[User] = None,
+    user: User | None = None,
     success: bool = True,
-    oauth_provider: Optional[str] = None,
+    oauth_provider: str | None = None,
 ) -> None:
     context = {}
     if oauth_provider:
@@ -206,9 +206,9 @@ async def log_oauth_login(
 def log_login_attempt_sync(
     db: Session,
     request: Request,
-    user: Optional[User] = None,
+    user: User | None = None,
     success: bool = True,
-    oauth_provider: Optional[str] = None,
+    oauth_provider: str | None = None,
 ) -> None:
     context = {}
     if oauth_provider:
@@ -245,9 +245,9 @@ async def log_api_key_usage(
     request: Request,
     api_key_id: str,
     key_label: str,
-    user_id: Optional[str] = None,
-    endpoint_path: Optional[str] = None,
-    http_method: Optional[str] = None,
+    user_id: str | None = None,
+    endpoint_path: str | None = None,
+    http_method: str | None = None,
 ) -> None:
     """Log API key usage for audit purposes."""
     context = {
@@ -275,9 +275,9 @@ def log_api_key_usage_sync(
     request: Request,
     api_key_id: str,
     key_label: str,
-    user_id: Optional[str] = None,
-    endpoint_path: Optional[str] = None,
-    http_method: Optional[str] = None,
+    user_id: str | None = None,
+    endpoint_path: str | None = None,
+    http_method: str | None = None,
 ) -> None:
     """Log API key usage for audit purposes (sync version)."""
     context = {

@@ -5,7 +5,7 @@ This module provides API endpoints for submitting, monitoring, and managing
 Celery background tasks.
 """
 
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -48,10 +48,10 @@ class TaskStatusResponse(BaseModel):
     ready: bool = Field(..., description="Whether the task is complete")
     successful: bool = Field(..., description="Whether the task completed successfully")
     failed: bool = Field(..., description="Whether the task failed")
-    result: Optional[Any] = Field(
+    result: Any | None = Field(
         None, description="Task result if completed successfully"
     )
-    error: Optional[str] = Field(None, description="Error message if task failed")
+    error: str | None = Field(None, description="Error message if task failed")
 
 
 class TaskCancelResponse(BaseModel):
@@ -68,19 +68,19 @@ class ActiveTaskResponse(BaseModel):
     worker: str = Field(..., description="Worker processing the task")
     args: list[Any] = Field(..., description="Task arguments")
     kwargs: dict[str, Any] = Field(..., description="Task keyword arguments")
-    time_start: Optional[float] = Field(None, description="Task start time")
+    time_start: float | None = Field(None, description="Task start time")
 
 
 class CeleryStatsResponse(BaseModel):
     enabled: bool = Field(..., description="Whether Celery is enabled")
-    broker_url: Optional[str] = Field(None, description="Celery broker URL")
-    result_backend: Optional[str] = Field(None, description="Celery result backend")
-    active_workers: Optional[int] = Field(None, description="Number of active workers")
-    registered_tasks: Optional[int] = Field(
+    broker_url: str | None = Field(None, description="Celery broker URL")
+    result_backend: str | None = Field(None, description="Celery result backend")
+    active_workers: int | None = Field(None, description="Number of active workers")
+    registered_tasks: int | None = Field(
         None, description="Number of registered tasks"
     )
-    active_tasks: Optional[int] = Field(None, description="Number of active tasks")
-    error: Optional[str] = Field(
+    active_tasks: int | None = Field(None, description="Number of active tasks")
+    error: str | None = Field(
         None, description="Error message if stats retrieval failed"
     )
 

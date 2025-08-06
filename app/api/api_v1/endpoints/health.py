@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -25,7 +25,7 @@ router = APIRouter()
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated utc_now())."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 @router.get("/health")

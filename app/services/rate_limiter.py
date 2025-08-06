@@ -1,6 +1,7 @@
 """Rate limiting service using slowapi with support for both memory and Redis backends."""
 
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 from fastapi import Request
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -10,7 +11,7 @@ from slowapi.util import get_remote_address
 from app.core.config import settings
 
 # Global limiter instance
-limiter: Optional[Limiter] = None
+limiter: Limiter | None = None
 
 
 def get_limiter() -> Limiter:

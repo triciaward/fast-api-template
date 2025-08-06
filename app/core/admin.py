@@ -5,7 +5,8 @@ This module provides admin-only utilities, base classes, and dependencies for ad
 """
 
 import logging
-from typing import Any, Callable, Generic, Optional, Protocol, TypeVar, Union
+from collections.abc import Callable
+from typing import Any, Generic, Protocol, TypeVar, Union
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
@@ -37,7 +38,7 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 ResponseSchemaType = TypeVar("ResponseSchemaType", bound=BaseModel)
 
 # Type alias for database sessions
-DBSession = Union[Session, AsyncSession]
+DBSession = Session | AsyncSession
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
@@ -146,7 +147,7 @@ class BaseAdminCRUD(
         db: DBSession,
         skip: int = 0,
         limit: int = 100,
-        filters: Optional[dict[str, Any]] = None,
+        filters: dict[str, Any] | None = None,
     ) -> list[ModelType]:
         """
         Get multiple records with optional filtering and pagination.
@@ -177,7 +178,7 @@ class BaseAdminCRUD(
 
         return list(result.scalars().all())
 
-    async def get(self, db: DBSession, id: Union[str, UUID]) -> Optional[ModelType]:
+    async def get(self, db: DBSession, id: str | UUID) -> ModelType | None:
         """
         Get a single record by ID.
 
@@ -225,7 +226,7 @@ class BaseAdminCRUD(
         self,
         db: DBSession,
         db_obj: ModelType,
-        obj_in: Union[UpdateSchemaType, dict[str, Any]],
+        obj_in: UpdateSchemaType | dict[str, Any],
     ) -> ModelType:
         """
         Update an existing record.
@@ -258,7 +259,7 @@ class BaseAdminCRUD(
 
         return db_obj
 
-    async def delete(self, db: DBSession, id: Union[str, UUID]) -> bool:
+    async def delete(self, db: DBSession, id: str | UUID) -> bool:
         """
         Delete a record by ID.
 
@@ -283,7 +284,7 @@ class BaseAdminCRUD(
         return True
 
     async def count(
-        self, db: DBSession, filters: Optional[dict[str, Any]] = None
+        self, db: DBSession, filters: dict[str, Any] | None = None
     ) -> int:
         """
         Count records with optional filtering.

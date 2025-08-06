@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from pydantic import (
     BaseModel,
@@ -82,12 +81,12 @@ class UserResponse(UserBase):
     is_superuser: bool
     is_verified: bool
     date_created: datetime
-    oauth_provider: Optional[str] = None
+    oauth_provider: str | None = None
     # Soft delete fields
     is_deleted: bool = False
-    deleted_at: Optional[datetime] = None
-    deleted_by: Optional[uuid.UUID] = None
-    deletion_reason: Optional[str] = None
+    deleted_at: datetime | None = None
+    deleted_by: uuid.UUID | None = None
+    deletion_reason: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -106,8 +105,8 @@ class RefreshTokenResponse(BaseModel):
 class SessionInfo(BaseModel):
     id: uuid.UUID
     created_at: datetime
-    device_info: Optional[str] = None
-    ip_address: Optional[str] = None
+    device_info: str | None = None
+    ip_address: str | None = None
     is_current: bool = False
 
     model_config = ConfigDict(from_attributes=True)
@@ -119,7 +118,7 @@ class SessionListResponse(BaseModel):
 
 
 class TokenData(BaseModel):
-    email: Optional[str] = None
+    email: str | None = None
 
 
 # OAuth schemas
@@ -140,8 +139,8 @@ class OAuthUserInfo(BaseModel):
     provider: str
     oauth_id: str
     email: str
-    name: Optional[str] = None
-    picture: Optional[str] = None
+    name: str | None = None
+    picture: str | None = None
 
 
 # Email verification schemas
@@ -297,7 +296,7 @@ class PasswordChangeResponse(BaseModel):
 class AccountDeletionStatusResponse(BaseModel):
     deletion_requested: bool
     deletion_confirmed: bool
-    deletion_scheduled_for: Optional[datetime] = None
+    deletion_scheduled_for: datetime | None = None
     can_cancel: bool
     grace_period_days: int
 
@@ -320,7 +319,7 @@ class UserSearchResponse(BaseModel):
     has_prev: bool
     search_applied: bool = False
     filters_applied: list[str] = Field(default_factory=list)
-    sort_field: Optional[str] = None
+    sort_field: str | None = None
     sort_order: str = "asc"
 
 
@@ -331,12 +330,12 @@ class DeletedUserResponse(UserBase):
     is_superuser: bool
     is_verified: bool
     date_created: datetime
-    oauth_provider: Optional[str] = None
+    oauth_provider: str | None = None
     # Soft delete fields
     is_deleted: bool = True
     deleted_at: datetime
-    deleted_by: Optional[uuid.UUID] = None
-    deletion_reason: Optional[str] = None
+    deleted_by: uuid.UUID | None = None
+    deletion_reason: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -344,7 +343,7 @@ class DeletedUserResponse(UserBase):
 class SoftDeleteRequest(BaseModel):
     """Request model for soft deleting a user."""
 
-    reason: Optional[str] = Field(
+    reason: str | None = Field(
         None, max_length=500, description="Optional reason for deletion"
     )
 
@@ -355,8 +354,8 @@ class SoftDeleteResponse(BaseModel):
     message: str
     user_id: uuid.UUID
     deleted_at: datetime
-    deleted_by: Optional[uuid.UUID] = None
-    reason: Optional[str] = None
+    deleted_by: uuid.UUID | None = None
+    reason: str | None = None
 
 
 class RestoreUserResponse(BaseModel):
@@ -384,7 +383,7 @@ class DeletedUserSearchResponse(BaseModel):
     has_next: bool
     has_prev: bool
     filters_applied: list[str] = Field(default_factory=list)
-    sort_field: Optional[str] = None
+    sort_field: str | None = None
     sort_order: str = "desc"
 
 
@@ -399,7 +398,7 @@ class APIKeyBase(BaseModel):
     scopes: list[str] = Field(
         default_factory=list, description="List of scopes the key has access to"
     )
-    expires_at: Optional[datetime] = Field(
+    expires_at: datetime | None = Field(
         None, description="Optional expiration date for the key"
     )
 
@@ -434,7 +433,7 @@ class APIKeyCreate(BaseModel):
     scopes: list[str] = Field(
         default_factory=list, description="List of scopes for the API key"
     )
-    expires_at: Optional[datetime] = Field(None, description="Optional expiration date")
+    expires_at: datetime | None = Field(None, description="Optional expiration date")
 
 
 class APIKeyResponse(BaseModel):
@@ -448,7 +447,7 @@ class APIKeyResponse(BaseModel):
     user_id: uuid.UUID
     is_active: bool
     created_at: datetime
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
 
     @field_serializer("id", "user_id")
     def serialize_uuid(self, uuid_value: uuid.UUID, _info):
@@ -486,19 +485,19 @@ class APIKeyUser(BaseModel):
 
     id: uuid.UUID
     scopes: list[str]
-    user_id: Optional[uuid.UUID] = None
+    user_id: uuid.UUID | None = None
     key_id: uuid.UUID
 
     @field_serializer("id", "user_id", "key_id")
-    def serialize_uuid(self, uuid_value: Optional[uuid.UUID], _info):
+    def serialize_uuid(self, uuid_value: uuid.UUID | None, _info):
         return str(uuid_value) if uuid_value else None
 
 
 class UserUpdate(BaseModel):
-    email: Optional[EmailStr] = None
-    username: Optional[str] = Field(None, min_length=3, max_length=30)
-    password: Optional[str] = Field(None, min_length=8, max_length=128)
-    full_name: Optional[str] = None
-    is_active: Optional[bool] = None
-    is_superuser: Optional[bool] = None
+    email: EmailStr | None = None
+    username: str | None = Field(None, min_length=3, max_length=30)
+    password: str | None = Field(None, min_length=8, max_length=128)
+    full_name: str | None = None
+    is_active: bool | None = None
+    is_superuser: bool | None = None
     # Add any other fields relevant to your user model

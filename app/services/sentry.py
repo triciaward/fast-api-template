@@ -1,7 +1,6 @@
 """Sentry/GlitchTip error monitoring service."""
 
 import logging
-from typing import Optional, Union
 
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
@@ -23,12 +22,7 @@ def init_sentry() -> None:
     try:
         # Configure integrations based on enabled features
         integrations: list[
-            Union[
-                FastApiIntegration,
-                SqlalchemyIntegration,
-                RedisIntegration,
-                CeleryIntegration,
-            ]
+            FastApiIntegration | SqlalchemyIntegration | RedisIntegration | CeleryIntegration
         ] = [FastApiIntegration()]
 
         # Add SQLAlchemy integration for database monitoring
@@ -81,7 +75,7 @@ def is_sentry_working() -> bool:
         return False
 
 
-def capture_exception(exception: Exception, context: Optional[dict] = None) -> None:
+def capture_exception(exception: Exception, context: dict | None = None) -> None:
     """Capture an exception with optional context."""
     if not settings.ENABLE_SENTRY:
         return
@@ -98,7 +92,7 @@ def capture_exception(exception: Exception, context: Optional[dict] = None) -> N
 
 
 def capture_message(
-    message: str, level: str = "info", context: Optional[dict] = None
+    message: str, level: str = "info", context: dict | None = None
 ) -> None:
     """Capture a message with optional context."""
     if not settings.ENABLE_SENTRY:
@@ -116,7 +110,7 @@ def capture_message(
 
 
 def set_user_context(
-    user_id: Optional[int] = None, email: Optional[str] = None
+    user_id: int | None = None, email: str | None = None
 ) -> None:
     """Set user context for Sentry events."""
     if not settings.ENABLE_SENTRY:

@@ -5,7 +5,6 @@ This module provides admin-only schemas for user management and admin operations
 """
 
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -26,13 +25,13 @@ class AdminUserCreate(BaseModel):
 class AdminUserUpdate(BaseModel):
     """Schema for updating users via admin interface."""
 
-    email: Optional[str] = Field(None, description="User's email address")
-    username: Optional[str] = Field(None, description="User's username")
-    password: Optional[str] = Field(None, description="User's password")
-    is_superuser: Optional[bool] = Field(
+    email: str | None = Field(None, description="User's email address")
+    username: str | None = Field(None, description="User's username")
+    password: str | None = Field(None, description="User's password")
+    is_superuser: bool | None = Field(
         None, description="Whether user is a superuser"
     )
-    is_verified: Optional[bool] = Field(None, description="Whether user is verified")
+    is_verified: bool | None = Field(None, description="Whether user is verified")
 
 
 class AdminUserResponse(BaseModel):
@@ -45,18 +44,18 @@ class AdminUserResponse(BaseModel):
     is_verified: bool = Field(..., description="Whether user is verified")
     is_deleted: bool = Field(..., description="Whether user is deleted")
     date_created: datetime = Field(..., description="When user was created")
-    oauth_provider: Optional[str] = Field(
+    oauth_provider: str | None = Field(
         None, description="OAuth provider if applicable"
     )
-    oauth_id: Optional[str] = Field(None, description="OAuth provider's user ID")
-    oauth_email: Optional[str] = Field(None, description="Email from OAuth provider")
-    deletion_requested_at: Optional[datetime] = Field(
+    oauth_id: str | None = Field(None, description="OAuth provider's user ID")
+    oauth_email: str | None = Field(None, description="Email from OAuth provider")
+    deletion_requested_at: datetime | None = Field(
         None, description="When deletion was requested"
     )
-    deletion_confirmed_at: Optional[datetime] = Field(
+    deletion_confirmed_at: datetime | None = Field(
         None, description="When deletion was confirmed"
     )
-    deletion_scheduled_for: Optional[datetime] = Field(
+    deletion_scheduled_for: datetime | None = Field(
         None, description="When user will be deleted"
     )
 
@@ -70,12 +69,12 @@ class AdminUserListResponse(PaginatedResponse[AdminUserResponse]):
 class AdminUserFilters(BaseModel):
     """Schema for filtering users in admin interface."""
 
-    is_superuser: Optional[bool] = Field(None, description="Filter by superuser status")
-    is_verified: Optional[bool] = Field(
+    is_superuser: bool | None = Field(None, description="Filter by superuser status")
+    is_verified: bool | None = Field(
         None, description="Filter by verification status"
     )
-    is_deleted: Optional[bool] = Field(None, description="Filter by deletion status")
-    oauth_provider: Optional[str] = Field(None, description="Filter by OAuth provider")
+    is_deleted: bool | None = Field(None, description="Filter by deletion status")
+    oauth_provider: str | None = Field(None, description="Filter by OAuth provider")
 
 
 class AdminUserStatistics(BaseModel):
@@ -126,8 +125,8 @@ class AdminSessionInfo(BaseModel):
     user_email: str = Field(..., description="User email")
     created_at: datetime = Field(..., description="When session was created")
     expires_at: datetime = Field(..., description="When session expires")
-    device_info: Optional[str] = Field(None, description="Device information")
-    ip_address: Optional[str] = Field(None, description="IP address")
+    device_info: str | None = Field(None, description="Device information")
+    ip_address: str | None = Field(None, description="IP address")
 
 
 class AdminSessionListResponse(BaseModel):
@@ -143,5 +142,5 @@ class AdminSystemInfo(BaseModel):
     total_users: int = Field(..., description="Total number of users")
     active_sessions: int = Field(..., description="Number of active sessions")
     system_uptime: str = Field(..., description="System uptime")
-    database_size: Optional[str] = Field(None, description="Database size")
-    last_backup: Optional[datetime] = Field(None, description="Last backup time")
+    database_size: str | None = Field(None, description="Database size")
+    last_backup: datetime | None = Field(None, description="Last backup time")

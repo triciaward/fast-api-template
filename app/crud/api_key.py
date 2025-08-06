@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
-from typing import Optional, Union
+from datetime import UTC, datetime
+from typing import Union
 
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,18 +10,18 @@ from app.models import APIKey
 from app.schemas.user import APIKeyCreate
 
 # Type alias for both sync and async sessions
-DBSession = Union[AsyncSession, Session]
+DBSession = AsyncSession | Session
 
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 async def create_api_key(
     db: DBSession,
     api_key_data: APIKeyCreate,
-    user_id: Optional[str] = None,
+    user_id: str | None = None,
     raw_key: str = None,
 ) -> APIKey:
     """Create a new API key."""
@@ -55,7 +55,7 @@ async def create_api_key(
     return db_api_key
 
 
-async def get_api_key_by_hash(db: DBSession, key_hash: str) -> Optional[APIKey]:
+async def get_api_key_by_hash(db: DBSession, key_hash: str) -> APIKey | None:
     """Get API key by hash."""
     if isinstance(db, AsyncSession):
         result = await db.execute(
@@ -75,7 +75,7 @@ async def get_api_key_by_hash(db: DBSession, key_hash: str) -> Optional[APIKey]:
     return result.scalar_one_or_none()
 
 
-async def verify_api_key_in_db(db: DBSession, raw_key: str) -> Optional[APIKey]:
+async def verify_api_key_in_db(db: DBSession, raw_key: str) -> APIKey | None:
     """Verify an API key against the database."""
     # Get all non-deleted API keys (regardless of status)
     if isinstance(db, AsyncSession):
@@ -147,8 +147,8 @@ async def count_user_api_keys(db: DBSession, user_id: str) -> int:
 
 
 async def get_api_key_by_id(
-    db: DBSession, key_id: str, user_id: Optional[str] = None
-) -> Optional[APIKey]:
+    db: DBSession, key_id: str, user_id: str | None = None
+) -> APIKey | None:
     """Get API key by ID, optionally filtering by user."""
     query = select(APIKey).filter(
         and_(APIKey.id == key_id, APIKey.is_deleted.is_(False))
@@ -165,7 +165,7 @@ async def get_api_key_by_id(
 
 
 async def deactivate_api_key(
-    db: DBSession, key_id: str, user_id: Optional[str] = None
+    db: DBSession, key_id: str, user_id: str | None = None
 ) -> bool:
     """Deactivate an API key."""
     api_key = await get_api_key_by_id(db, key_id, user_id)
@@ -182,8 +182,8 @@ async def deactivate_api_key(
 
 
 async def rotate_api_key(
-    db: DBSession, key_id: str, user_id: Optional[str] = None
-) -> tuple[Optional[APIKey], Optional[str]]:
+    db: DBSession, key_id: str, user_id: str | None = None
+) -> tuple[APIKey | None, str | None]:
     """Rotate an API key by generating a new one and deactivating the old one."""
     api_key = await get_api_key_by_id(db, key_id, user_id)
     if not api_key:
@@ -217,7 +217,7 @@ async def rotate_api_key(
 def create_api_key_sync(
     db: Session,
     api_key_data: APIKeyCreate,
-    user_id: Optional[str] = None,
+    user_id: str | None = None,
     raw_key: str = None,
 ) -> APIKey:
     """Create a new API key (sync version)."""
@@ -244,7 +244,7 @@ def create_api_key_sync(
     return db_api_key
 
 
-def get_api_key_by_hash_sync(db: Session, key_hash: str) -> Optional[APIKey]:
+def get_api_key_by_hash_sync(db: Session, key_hash: str) -> APIKey | None:
     """Get API key by its hash (sync version)."""
     result = db.execute(
         select(APIKey).filter(
@@ -259,7 +259,7 @@ def get_api_key_by_hash_sync(db: Session, key_hash: str) -> Optional[APIKey]:
     return result.scalar_one_or_none()
 
 
-def verify_api_key_in_db_sync(db: Session, raw_key: str) -> Optional[APIKey]:
+def verify_api_key_in_db_sync(db: Session, raw_key: str) -> APIKey | None:
     """Verify an API key against the database (sync version)."""
     # Get all non-deleted API keys (regardless of status)
     result = db.execute(select(APIKey).filter(APIKey.is_deleted.is_(False)))
@@ -306,8 +306,8 @@ def count_user_api_keys_sync(db: Session, user_id: str) -> int:
 
 
 def get_api_key_by_id_sync(
-    db: Session, key_id: str, user_id: Optional[str] = None
-) -> Optional[APIKey]:
+    db: Session, key_id: str, user_id: str | None = None
+) -> APIKey | None:
     """Get API key by ID, optionally filtering by user (sync version)."""
     query = select(APIKey).filter(
         and_(APIKey.id == key_id, APIKey.is_deleted.is_(False))
@@ -321,7 +321,7 @@ def get_api_key_by_id_sync(
 
 
 def deactivate_api_key_sync(
-    db: Session, key_id: str, user_id: Optional[str] = None
+    db: Session, key_id: str, user_id: str | None = None
 ) -> bool:
     """Deactivate an API key (sync version)."""
     api_key = get_api_key_by_id_sync(db, key_id, user_id)
@@ -335,8 +335,8 @@ def deactivate_api_key_sync(
 
 
 def rotate_api_key_sync(
-    db: Session, key_id: str, user_id: Optional[str] = None
-) -> tuple[Optional[APIKey], Optional[str]]:
+    db: Session, key_id: str, user_id: str | None = None
+) -> tuple[APIKey | None, str | None]:
     """Rotate an API key by generating a new one and deactivating the old one (sync version)."""
     api_key = get_api_key_by_id_sync(db, key_id, user_id)
     if not api_key:

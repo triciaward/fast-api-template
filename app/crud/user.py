@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta, timezone
-from typing import Optional, Union
+from datetime import UTC, datetime, timedelta
+from typing import Union
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,15 +10,15 @@ from app.models import User
 from app.schemas.user import UserCreate
 
 # Type alias for both sync and async sessions
-DBSession = Union[AsyncSession, Session]
+DBSession = AsyncSession | Session
 
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
-async def get_user_by_email(db: DBSession, email: str) -> Optional[User]:
+async def get_user_by_email(db: DBSession, email: str) -> User | None:
     if isinstance(db, AsyncSession):
         result = await db.execute(
             select(User).filter(User.email == email, User.is_deleted.is_(False))
@@ -30,7 +30,7 @@ async def get_user_by_email(db: DBSession, email: str) -> Optional[User]:
     return result.scalar_one_or_none()
 
 
-async def get_user_by_username(db: DBSession, username: str) -> Optional[User]:
+async def get_user_by_username(db: DBSession, username: str) -> User | None:
     if isinstance(db, AsyncSession):
         result = await db.execute(
             select(User).filter(User.username == username, User.is_deleted.is_(False))
@@ -66,7 +66,7 @@ async def create_user(db: DBSession, user: UserCreate) -> User:
     return db_user
 
 
-async def authenticate_user(db: DBSession, email: str, password: str) -> Optional[User]:
+async def authenticate_user(db: DBSession, email: str, password: str) -> User | None:
     user = await get_user_by_email(db, email)
     if not user or not verify_password(password, str(user.hashed_password)):
         return None
@@ -74,14 +74,14 @@ async def authenticate_user(db: DBSession, email: str, password: str) -> Optiona
 
 
 # Sync versions for testing and compatibility
-def get_user_by_email_sync(db: Session, email: str) -> Optional[User]:
+def get_user_by_email_sync(db: Session, email: str) -> User | None:
     result = db.execute(
         select(User).filter(User.email == email, User.is_deleted.is_(False))
     )
     return result.scalar_one_or_none()
 
 
-def get_user_by_username_sync(db: Session, username: str) -> Optional[User]:
+def get_user_by_username_sync(db: Session, username: str) -> User | None:
     result = db.execute(
         select(User).filter(User.username == username, User.is_deleted.is_(False))
     )
@@ -105,7 +105,7 @@ def create_user_sync(db: Session, user: UserCreate) -> User:
     return db_user
 
 
-def authenticate_user_sync(db: Session, email: str, password: str) -> Optional[User]:
+def authenticate_user_sync(db: Session, email: str, password: str) -> User | None:
     user = get_user_by_email_sync(db, email)
     if not user or not verify_password(password, str(user.hashed_password)):
         return None
@@ -113,7 +113,7 @@ def authenticate_user_sync(db: Session, email: str, password: str) -> Optional[U
 
 
 # Additional user operations
-def get_user_by_id_sync(db: Session, user_id: str) -> Optional[User]:
+def get_user_by_id_sync(db: Session, user_id: str) -> User | None:
     result = db.execute(
         select(User).filter(User.id == user_id, User.is_deleted.is_(False))
     )
@@ -122,7 +122,7 @@ def get_user_by_id_sync(db: Session, user_id: str) -> Optional[User]:
 
 def get_user_by_oauth_id_sync(
     db: Session, provider: str, oauth_id: str
-) -> Optional[User]:
+) -> User | None:
     result = db.execute(
         select(User).filter(
             User.oauth_provider == provider,
@@ -185,7 +185,7 @@ def update_verification_token_sync(
     return True
 
 
-def get_user_by_verification_token_sync(db: Session, token: str) -> Optional[User]:
+def get_user_by_verification_token_sync(db: Session, token: str) -> User | None:
     result = db.execute(
         select(User).filter(
             User.verification_token == token,
@@ -210,7 +210,7 @@ def update_password_reset_token_sync(
     return True
 
 
-def get_user_by_password_reset_token_sync(db: Session, token: str) -> Optional[User]:
+def get_user_by_password_reset_token_sync(db: Session, token: str) -> User | None:
     result = db.execute(
         select(User).filter(
             User.password_reset_token == token,
@@ -259,7 +259,7 @@ def update_deletion_token_sync(
     return True
 
 
-def get_user_by_deletion_token_sync(db: Session, token: str) -> Optional[User]:
+def get_user_by_deletion_token_sync(db: Session, token: str) -> User | None:
     result = db.execute(
         select(User).filter(
             User.deletion_token == token,
@@ -339,7 +339,7 @@ def count_users_sync(db: Session) -> int:
 
 
 # Async versions of the new functions
-async def get_user_by_id(db: DBSession, user_id: str) -> Optional[User]:
+async def get_user_by_id(db: DBSession, user_id: str) -> User | None:
     if isinstance(db, AsyncSession):
         result = await db.execute(
             select(User).filter(User.id == user_id, User.is_deleted.is_(False))
@@ -433,7 +433,7 @@ def request_account_deletion_sync(db: Session, user_id: str) -> bool:
     return schedule_user_deletion_sync(db, user_id, scheduled_date)
 
 
-def get_user_by_id_any_status_sync(db: Session, user_id: str) -> Optional[User]:
+def get_user_by_id_any_status_sync(db: Session, user_id: str) -> User | None:
     """Get user by ID regardless of deletion status."""
     result = db.execute(select(User).filter(User.id == user_id))
     return result.scalar_one_or_none()
@@ -501,7 +501,7 @@ def get_users_sync(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
 # Async OAuth functions for compatibility
 async def get_user_by_oauth_id(
     db: DBSession, oauth_provider: str, oauth_id: str
-) -> Optional[User]:
+) -> User | None:
     """Get user by OAuth ID (async version)."""
     if isinstance(db, AsyncSession):
         result = await db.execute(

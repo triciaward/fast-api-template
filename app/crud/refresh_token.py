@@ -1,30 +1,28 @@
-import uuid
-from datetime import datetime, timedelta, timezone
-from typing import Optional, Union
+from datetime import UTC, datetime, timedelta
+from typing import Union
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.security import hash_refresh_token, verify_refresh_token
 from app.models import RefreshToken
 
 # Type alias for both sync and async sessions
-DBSession = Union[AsyncSession, Session]
+DBSession = AsyncSession | Session
 
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 async def create_refresh_token(
     db: DBSession,
     user_id: str,
     token_hash: str,
-    device_info: Optional[str] = None,
-    ip_address: Optional[str] = None,
+    device_info: str | None = None,
+    ip_address: str | None = None,
 ) -> RefreshToken:
     """Create a new refresh token."""
     expires_at = utc_now() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
@@ -88,7 +86,7 @@ async def cleanup_expired_tokens(db: DBSession) -> int:
 
 async def get_refresh_token_by_hash(
     db: DBSession, token_hash: str
-) -> Optional[RefreshToken]:
+) -> RefreshToken | None:
     """Get refresh token by hash."""
     if isinstance(db, AsyncSession):
         result = await db.execute(
@@ -178,7 +176,7 @@ async def revoke_all_user_sessions(db: DBSession, user_id: str) -> int:
 
 async def verify_refresh_token_in_db(
     db: DBSession, token_hash: str
-) -> Optional[RefreshToken]:
+) -> RefreshToken | None:
     """Verify a refresh token in the database."""
     return await get_refresh_token_by_hash(db, token_hash)
 

@@ -5,7 +5,7 @@ This module provides custom exception classes that integrate with the
 standardized error handling system.
 """
 
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import HTTPException
 
@@ -24,8 +24,8 @@ class StandardizedHTTPException(HTTPException):
         error_type: ErrorType,
         message: str,
         code: ErrorCode,
-        details: Optional[dict[str, Any]] = None,
-        headers: Optional[dict[str, str]] = None,
+        details: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         self.error_type = error_type
         self.error_code = code
@@ -41,9 +41,9 @@ class ValidationException(StandardizedHTTPException):
         self,
         message: str,
         code: ErrorCode = ErrorCode.INVALID_REQUEST,
-        field: Optional[str] = None,
-        value: Optional[Any] = None,
-        details: Optional[dict[str, Any]] = None,
+        field: str | None = None,
+        value: Any | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         if field:
             details = details or {}
@@ -68,8 +68,8 @@ class AuthenticationException(StandardizedHTTPException):
         self,
         message: str,
         code: ErrorCode = ErrorCode.INVALID_CREDENTIALS,
-        details: Optional[dict[str, Any]] = None,
-        headers: Optional[dict[str, str]] = None,
+        details: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         super().__init__(
             status_code=401,
@@ -88,8 +88,8 @@ class AuthorizationException(StandardizedHTTPException):
         self,
         message: str,
         code: ErrorCode = ErrorCode.INSUFFICIENT_PERMISSIONS,
-        required_permissions: Optional[list[str]] = None,
-        details: Optional[dict[str, Any]] = None,
+        required_permissions: list[str] | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         if required_permissions:
             details = details or {}
@@ -111,9 +111,9 @@ class NotFoundException(StandardizedHTTPException):
         self,
         message: str,
         code: ErrorCode = ErrorCode.RESOURCE_NOT_FOUND,
-        resource_type: Optional[str] = None,
-        resource_id: Optional[str] = None,
-        details: Optional[dict[str, Any]] = None,
+        resource_type: str | None = None,
+        resource_id: str | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         if resource_type:
             details = details or {}
@@ -138,9 +138,9 @@ class ConflictException(StandardizedHTTPException):
         self,
         message: str,
         code: ErrorCode = ErrorCode.CONFLICT,
-        conflicting_field: Optional[str] = None,
-        conflicting_value: Optional[str] = None,
-        details: Optional[dict[str, Any]] = None,
+        conflicting_field: str | None = None,
+        conflicting_value: str | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         if conflicting_field:
             details = details or {}
@@ -164,9 +164,9 @@ class RateLimitException(StandardizedHTTPException):
     def __init__(
         self,
         message: str = "Too many requests. Please try again later.",
-        retry_after: Optional[int] = None,
-        limit: Optional[int] = None,
-        details: Optional[dict[str, Any]] = None,
+        retry_after: int | None = None,
+        limit: int | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         if retry_after:
             details = details or {}
@@ -196,8 +196,8 @@ class ServerException(StandardizedHTTPException):
         self,
         message: str = "An unexpected error occurred",
         code: ErrorCode = ErrorCode.INTERNAL_ERROR,
-        request_id: Optional[str] = None,
-        details: Optional[dict[str, Any]] = None,
+        request_id: str | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         if request_id:
             details = details or {}
@@ -219,7 +219,7 @@ class ServiceUnavailableException(StandardizedHTTPException):
         self,
         message: str = "Service temporarily unavailable",
         code: ErrorCode = ErrorCode.SERVICE_UNAVAILABLE,
-        details: Optional[dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         super().__init__(
             status_code=503,
@@ -234,9 +234,9 @@ class ServiceUnavailableException(StandardizedHTTPException):
 def raise_validation_error(
     message: str,
     code: ErrorCode = ErrorCode.INVALID_REQUEST,
-    field: Optional[str] = None,
-    value: Optional[Any] = None,
-    details: Optional[dict[str, Any]] = None,
+    field: str | None = None,
+    value: Any | None = None,
+    details: dict[str, Any] | None = None,
 ) -> None:
     """Raise a validation error."""
     raise ValidationException(
@@ -251,8 +251,8 @@ def raise_validation_error(
 def raise_authentication_error(
     message: str,
     code: ErrorCode = ErrorCode.INVALID_CREDENTIALS,
-    details: Optional[dict[str, Any]] = None,
-    headers: Optional[dict[str, str]] = None,
+    details: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
 ) -> None:
     """Raise an authentication error."""
     raise AuthenticationException(
@@ -266,8 +266,8 @@ def raise_authentication_error(
 def raise_authorization_error(
     message: str,
     code: ErrorCode = ErrorCode.INSUFFICIENT_PERMISSIONS,
-    required_permissions: Optional[list[str]] = None,
-    details: Optional[dict[str, Any]] = None,
+    required_permissions: list[str] | None = None,
+    details: dict[str, Any] | None = None,
 ) -> None:
     """Raise an authorization error."""
     raise AuthorizationException(
@@ -281,9 +281,9 @@ def raise_authorization_error(
 def raise_not_found_error(
     message: str,
     code: ErrorCode = ErrorCode.RESOURCE_NOT_FOUND,
-    resource_type: Optional[str] = None,
-    resource_id: Optional[str] = None,
-    details: Optional[dict[str, Any]] = None,
+    resource_type: str | None = None,
+    resource_id: str | None = None,
+    details: dict[str, Any] | None = None,
 ) -> None:
     """Raise a not found error."""
     raise NotFoundException(
@@ -298,9 +298,9 @@ def raise_not_found_error(
 def raise_conflict_error(
     message: str,
     code: ErrorCode = ErrorCode.CONFLICT,
-    conflicting_field: Optional[str] = None,
-    conflicting_value: Optional[str] = None,
-    details: Optional[dict[str, Any]] = None,
+    conflicting_field: str | None = None,
+    conflicting_value: str | None = None,
+    details: dict[str, Any] | None = None,
 ) -> None:
     """Raise a conflict error."""
     raise ConflictException(
@@ -314,9 +314,9 @@ def raise_conflict_error(
 
 def raise_rate_limit_error(
     message: str = "Too many requests. Please try again later.",
-    retry_after: Optional[int] = None,
-    limit: Optional[int] = None,
-    details: Optional[dict[str, Any]] = None,
+    retry_after: int | None = None,
+    limit: int | None = None,
+    details: dict[str, Any] | None = None,
 ) -> None:
     """Raise a rate limit error."""
     raise RateLimitException(
@@ -330,8 +330,8 @@ def raise_rate_limit_error(
 def raise_server_error(
     message: str = "An unexpected error occurred",
     code: ErrorCode = ErrorCode.INTERNAL_ERROR,
-    request_id: Optional[str] = None,
-    details: Optional[dict[str, Any]] = None,
+    request_id: str | None = None,
+    details: dict[str, Any] | None = None,
 ) -> None:
     """Raise a server error."""
     raise ServerException(
@@ -345,7 +345,7 @@ def raise_server_error(
 def raise_service_unavailable_error(
     message: str = "Service temporarily unavailable",
     code: ErrorCode = ErrorCode.SERVICE_UNAVAILABLE,
-    details: Optional[dict[str, Any]] = None,
+    details: dict[str, Any] | None = None,
 ) -> None:
     """Raise a service unavailable error."""
     raise ServiceUnavailableException(
