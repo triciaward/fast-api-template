@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import Request, Response
@@ -15,6 +15,11 @@ from app.crud import (
     verify_refresh_token_in_db,
 )
 from app.models import User
+
+
+def utc_now() -> datetime:
+    """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
+    return datetime.now(timezone.utc)
 
 
 def get_device_info(request: Request) -> str:
@@ -92,7 +97,7 @@ def get_refresh_token_from_cookie(request: Request) -> Optional[str]:
     return request.cookies.get(settings.REFRESH_TOKEN_COOKIE_NAME)
 
 
-def create_user_session(
+async def create_user_session(
     db: Session,
     user: User,
     request: Request,
@@ -106,7 +111,7 @@ def create_user_session(
     ip_address = get_client_ip(request)
 
     # Store refresh token in database
-    db_refresh_token = crud_create_refresh_token(
+    db_refresh_token = await crud_create_refresh_token(
         db=db,
         user_id=user.id,  # type: ignore
         token=refresh_token_value,
@@ -115,7 +120,7 @@ def create_user_session(
     )
 
     # Enforce session limit
-    enforce_session_limit(db, user.id, db_refresh_token.id)  # type: ignore
+    await enforce_session_limit(db, user.id, 5)  # type: ignore
 
     # Create access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -127,13 +132,13 @@ def create_user_session(
     return access_token, refresh_token_value
 
 
-def refresh_access_token(
+async def refresh_access_token(
     db: Session,
     refresh_token_value: str,
 ) -> Optional[tuple[str, datetime]]:
     """Refresh an access token using a valid refresh token."""
     # Verify refresh token
-    db_refresh_token = verify_refresh_token_in_db(db, refresh_token_value)
+    db_refresh_token = await verify_refresh_token_in_db(db, refresh_token_value)
     if not db_refresh_token:
         return None
 
@@ -150,28 +155,28 @@ def refresh_access_token(
     )
 
     # Calculate expiration time
-    expires_at = datetime.utcnow() + access_token_expires
+    expires_at = utc_now() + access_token_expires
 
     return access_token, expires_at
 
 
-def revoke_session(
+async def revoke_session(
     db: Session,
     refresh_token_value: str,
 ) -> bool:
     """Revoke a specific session by refresh token."""
     # Find the token using verification
-    db_refresh_token = verify_refresh_token_in_db(db, refresh_token_value)
+    db_refresh_token = await verify_refresh_token_in_db(db, refresh_token_value)
     if not db_refresh_token:
         return False
 
     # Revoke the token
     from app.crud import revoke_refresh_token
 
-    return revoke_refresh_token(db, uuid.UUID(str(db_refresh_token.id)))
+    return await revoke_refresh_token(db, uuid.UUID(str(db_refresh_token.id)))
 
 
-def revoke_all_sessions(
+async def revoke_all_sessions(
     db: Session,
     user_id: uuid.UUID,
     except_token_value: Optional[str] = None,
@@ -185,8 +190,8 @@ def revoke_all_sessions(
         token_hash = hash_refresh_token(except_token_value)
         from app.crud import get_refresh_token_by_hash
 
-        db_token = get_refresh_token_by_hash(db, token_hash)
+        db_token = await get_refresh_token_by_hash(db, token_hash)
         if db_token:
             except_token_id = uuid.UUID(str(db_token.id))
 
-    return revoke_all_user_sessions(db, user_id, except_token_id)
+    return await revoke_all_user_sessions(db, user_id, except_token_id)

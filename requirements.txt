@@ -1,4 +1,4 @@
-fastapi==0.104.1
+fastapi==0.109.2
 uvicorn[standard]==0.24.0
 sqlalchemy==2.0.23
 alembic==1.12.1
@@ -6,7 +6,7 @@ psycopg2-binary==2.9.9
 asyncpg==0.29.0
 greenlet==3.0.1
 python-multipart==0.0.6
-python-jose[cryptography]==3.3.0
+python-jose[cryptography]==3.4.0
 passlib[bcrypt]==1.7.4
 bcrypt==4.1.2
 python-decouple==3.8
@@ -30,7 +30,6 @@ slowapi==0.1.9
 # OAuth and Email dependencies
 authlib==1.2.1
 httpx==0.25.2
-python-jose[cryptography]==3.3.0
 cryptography==41.0.7
 emails==0.6.0
 jinja2==3.1.2

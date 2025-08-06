@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -23,6 +23,11 @@ def safe_pool_stat(pool, name: str, default: int = 0) -> int:
 router = APIRouter()
 
 
+def utc_now() -> datetime:
+    """Get current UTC datetime (replaces deprecated utc_now())."""
+    return datetime.now(timezone.utc)
+
+
 @router.get("/health")
 async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """
@@ -33,7 +38,7 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """
     health_status: dict[str, Any] = {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": utc_now().isoformat(),
         "version": settings.VERSION,
         "environment": settings.ENVIRONMENT,
         "checks": {"database": "healthy", "application": "healthy"},
@@ -162,7 +167,7 @@ async def simple_health_check() -> dict[str, str]:
     Returns:
         dict: Basic health status
     """
-    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+    return {"status": "healthy", "timestamp": utc_now().isoformat()}
 
 
 @router.get("/health/ready")
@@ -175,7 +180,7 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """
     readiness_status: dict[str, Any] = {
         "ready": True,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": utc_now().isoformat(),
         "components": {
             "database": {"ready": True, "message": "Database connection successful"},
             "application": {"ready": True, "message": "Application is running"},
@@ -289,7 +294,7 @@ async def liveness_check() -> dict[str, str]:
     Returns:
         dict: Liveness status
     """
-    return {"alive": "true", "timestamp": datetime.utcnow().isoformat()}
+    return {"alive": "true", "timestamp": utc_now().isoformat()}
 
 
 @router.get("/health/rate-limit")

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
@@ -20,6 +20,11 @@ from app.services import email_service, rate_limit_account_deletion
 from app.services.audit import log_account_deletion
 
 router = APIRouter()
+
+
+def utc_now() -> datetime:
+    """Get current UTC datetime (replaces deprecated utc_now())."""
+    return datetime.now(timezone.utc)
 logger = get_auth_logger()
 
 
@@ -169,7 +174,7 @@ async def confirm_account_deletion(
             return AccountDeletionConfirmResponse(
                 message="Account deletion service temporarily unavailable. Please try again later.",
                 deletion_confirmed=False,
-                deletion_scheduled_for=datetime.utcnow(),
+                deletion_scheduled_for=utc_now(),
             )
 
         # Verify the deletion token
@@ -179,7 +184,7 @@ async def confirm_account_deletion(
             return AccountDeletionConfirmResponse(
                 message="Invalid or expired deletion token. Please request a new one.",
                 deletion_confirmed=False,
-                deletion_scheduled_for=datetime.utcnow(),
+                deletion_scheduled_for=utc_now(),
             )
 
         # Get user
@@ -189,7 +194,7 @@ async def confirm_account_deletion(
             return AccountDeletionConfirmResponse(
                 message="User not found.",
                 deletion_confirmed=False,
-                deletion_scheduled_for=datetime.utcnow(),
+                deletion_scheduled_for=utc_now(),
             )
 
         # Check if user is already deleted
@@ -201,11 +206,11 @@ async def confirm_account_deletion(
             return AccountDeletionConfirmResponse(
                 message="Account has already been deleted.",
                 deletion_confirmed=False,
-                deletion_scheduled_for=datetime.utcnow(),
+                deletion_scheduled_for=utc_now(),
             )
 
         # Calculate deletion date
-        deletion_scheduled_for = datetime.utcnow() + timedelta(
+        deletion_scheduled_for = utc_now() + timedelta(
             days=settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS
         )
 
@@ -216,7 +221,7 @@ async def confirm_account_deletion(
             return AccountDeletionConfirmResponse(
                 message="Failed to confirm account deletion. Please try again later.",
                 deletion_confirmed=False,
-                deletion_scheduled_for=datetime.utcnow(),
+                deletion_scheduled_for=utc_now(),
             )
 
         # Log account deletion confirmation
@@ -245,7 +250,7 @@ async def confirm_account_deletion(
         return AccountDeletionConfirmResponse(
             message="Account deletion confirmation failed. Please try again later.",
             deletion_confirmed=False,
-            deletion_scheduled_for=datetime.utcnow(),
+            deletion_scheduled_for=utc_now(),
         )
 
 

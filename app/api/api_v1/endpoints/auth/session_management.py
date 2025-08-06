@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
@@ -19,6 +19,11 @@ from app.services.audit import log_logout
 
 router = APIRouter()
 logger = get_auth_logger()
+
+
+def utc_now() -> datetime:
+    """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
+    return datetime.now(timezone.utc)
 
 
 @router.post("/refresh", response_model=RefreshTokenResponse)
@@ -56,7 +61,7 @@ async def refresh_token(
             )
 
         access_token, expires_at = result
-        expires_in = int((expires_at - datetime.utcnow()).total_seconds())
+        expires_in = int((expires_at - utc_now()).total_seconds())
 
         logger.info("Token refresh successful")
         return RefreshTokenResponse(

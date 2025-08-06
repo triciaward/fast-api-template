@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import pytest
@@ -209,7 +209,7 @@ class TestEmailVerificationEndpoints:
             username="testuser",
             hashed_password="hashed_password",
             verification_token="test_token",
-            verification_token_expires=datetime.utcnow() + timedelta(hours=1),
+            verification_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
             is_verified=False,
         )
         sync_db_session.add(user)
@@ -247,6 +247,7 @@ class TestEmailVerificationCRUDOperations:
             username="testuser",
             hashed_password="hashed_password",
             verification_token="test_token",
+            verification_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -270,7 +271,7 @@ class TestEmailVerificationCRUDOperations:
         sync_db_session.add(user)
         sync_db_session.commit()
 
-        expires = datetime.utcnow() + timedelta(hours=1)
+        expires = datetime.now(timezone.utc) + timedelta(hours=1)
         success = crud_user.update_verification_token_sync(
             sync_db_session, str(user.id), "new_token", expires
         )
@@ -289,7 +290,7 @@ class TestEmailVerificationCRUDOperations:
         from app.crud import user as crud_user
 
         non_existent_uuid = str(uuid.uuid4())
-        expires = datetime.utcnow() + timedelta(hours=1)
+        expires = datetime.now(timezone.utc) + timedelta(hours=1)
         success = crud_user.update_verification_token_sync(
             sync_db_session, non_existent_uuid, "new_token", expires
         )
@@ -380,7 +381,7 @@ class TestEmailVerificationIntegration:
 
             # Set verification token manually
             user.verification_token = "test_verification_token"  # type: ignore
-            user.verification_token_expires = datetime.utcnow() + timedelta(hours=1)  # type: ignore
+            user.verification_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)  # type: ignore
             sync_db_session.commit()
 
         # Step 4: Verify email

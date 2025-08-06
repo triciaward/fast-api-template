@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import Any, Optional, Union
 
 from sqlalchemy import desc, select
@@ -9,6 +9,11 @@ from app.models import AuditLog
 
 # Type alias for both sync and async sessions
 DBSession = Union[AsyncSession, Session]
+
+
+def utc_now() -> datetime:
+    """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
+    return datetime.now(timezone.utc)
 
 
 async def create_audit_log(
@@ -47,141 +52,6 @@ async def create_audit_log(
     return audit_log
 
 
-async def get_audit_logs_by_user(
-    db: DBSession,
-    user_id: Optional[str],
-    limit: int = 100,
-    offset: int = 0,
-) -> list[AuditLog]:
-    """Get audit logs for a specific user, ordered by timestamp descending."""
-    if isinstance(db, AsyncSession):
-        if user_id:
-            result = await db.execute(
-                select(AuditLog)
-                .filter(AuditLog.user_id == user_id)
-                .order_by(desc(AuditLog.timestamp))
-                .limit(limit)
-                .offset(offset)
-            )
-        else:
-            # Handle anonymous logs (user_id is None or empty)
-            result = await db.execute(
-                select(AuditLog)
-                .filter(AuditLog.user_id.is_(None))
-                .order_by(desc(AuditLog.timestamp))
-                .limit(limit)
-                .offset(offset)
-            )
-    else:
-        if user_id:
-            result = db.execute(
-                select(AuditLog)
-                .filter(AuditLog.user_id == user_id)
-                .order_by(desc(AuditLog.timestamp))
-                .limit(limit)
-                .offset(offset)
-            )
-        else:
-            # Handle anonymous logs (user_id is None or empty)
-            result = db.execute(
-                select(AuditLog)
-                .filter(AuditLog.user_id.is_(None))
-                .order_by(desc(AuditLog.timestamp))
-                .limit(limit)
-                .offset(offset)
-            )
-    return list(result.scalars().all())
-
-
-async def get_audit_logs_by_event_type(
-    db: DBSession,
-    event_type: str,
-    limit: int = 100,
-    offset: int = 0,
-) -> list[AuditLog]:
-    """Get audit logs for a specific event type, ordered by timestamp descending."""
-    if isinstance(db, AsyncSession):
-        result = await db.execute(
-            select(AuditLog)
-            .filter(AuditLog.event_type == event_type)
-            .order_by(desc(AuditLog.timestamp))
-            .limit(limit)
-            .offset(offset)
-        )
-    else:
-        result = db.execute(
-            select(AuditLog)
-            .filter(AuditLog.event_type == event_type)
-            .order_by(desc(AuditLog.timestamp))
-            .limit(limit)
-            .offset(offset)
-        )
-    return list(result.scalars().all())
-
-
-async def get_audit_logs_by_date_range(
-    db: DBSession,
-    start_date: datetime,
-    end_date: datetime,
-    limit: int = 100,
-    offset: int = 0,
-) -> list[AuditLog]:
-    """Get audit logs within a date range, ordered by timestamp descending."""
-    if isinstance(db, AsyncSession):
-        result = await db.execute(
-            select(AuditLog)
-            .filter(AuditLog.timestamp >= start_date)
-            .filter(AuditLog.timestamp <= end_date)
-            .order_by(desc(AuditLog.timestamp))
-            .limit(limit)
-            .offset(offset)
-        )
-    else:
-        result = db.execute(
-            select(AuditLog)
-            .filter(AuditLog.timestamp >= start_date)
-            .filter(AuditLog.timestamp <= end_date)
-            .order_by(desc(AuditLog.timestamp))
-            .limit(limit)
-            .offset(offset)
-        )
-    return list(result.scalars().all())
-
-
-async def get_failed_login_attempts(
-    db: DBSession,
-    user_id: Optional[str] = None,
-    ip_address: Optional[str] = None,
-    since: Optional[datetime] = None,
-) -> list[AuditLog]:
-    """Get failed login attempts, optionally filtered by user, IP, or time."""
-    query = select(AuditLog).filter(
-        AuditLog.event_type == "login_failed", ~AuditLog.success
-    )
-    if user_id:
-        query = query.filter(AuditLog.user_id == user_id)
-    if ip_address:
-        query = query.filter(AuditLog.ip_address == ip_address)
-    if since:
-        query = query.filter(AuditLog.timestamp >= since)
-    query = query.order_by(desc(AuditLog.timestamp))
-    if isinstance(db, AsyncSession):
-        result = await db.execute(query)
-    else:
-        result = db.execute(query)
-    return list(result.scalars().all())
-
-
-async def get_audit_log_by_id(db: DBSession, log_id: str) -> Optional[AuditLog]:
-    """Get a specific audit log by ID."""
-    if isinstance(db, AsyncSession):
-        result = await db.execute(select(AuditLog).filter(AuditLog.id == log_id))
-    else:
-        result = db.execute(select(AuditLog).filter(AuditLog.id == log_id))
-    return result.scalar_one_or_none()
-
-
-# Sync versions for TestClient compatibility
 def create_audit_log_sync(
     db: Session,
     event_type: str,
@@ -211,6 +81,33 @@ def create_audit_log_sync(
     return audit_log
 
 
+async def get_audit_logs_by_user(
+    db: DBSession,
+    user_id: Optional[str],
+    limit: int = 100,
+    offset: int = 0,
+) -> list[AuditLog]:
+    """Get audit logs for a specific user."""
+    if isinstance(db, AsyncSession):
+        result = await db.execute(
+            select(AuditLog)
+            .filter(AuditLog.user_id == user_id)
+            .order_by(desc(AuditLog.timestamp))
+            .offset(offset)
+            .limit(limit)
+        )
+    else:
+        result = db.execute(
+            select(AuditLog)
+            .filter(AuditLog.user_id == user_id)
+            .order_by(desc(AuditLog.timestamp))
+            .offset(offset)
+            .limit(limit)
+        )
+
+    return result.scalars().all()
+
+
 def get_audit_logs_by_user_sync(
     db: Session,
     user_id: Optional[str],
@@ -218,59 +115,158 @@ def get_audit_logs_by_user_sync(
     offset: int = 0,
 ) -> list[AuditLog]:
     """Get audit logs for a specific user (sync version)."""
-    if user_id:
-        result = db.execute(
-            select(AuditLog)
-            .filter(AuditLog.user_id == user_id)
-            .order_by(desc(AuditLog.timestamp))
-            .limit(limit)
-            .offset(offset)
-        )
-    else:
-        # Handle anonymous logs (user_id is None or empty)
+    # Handle empty string case for anonymous users
+    if user_id == "":
         result = db.execute(
             select(AuditLog)
             .filter(AuditLog.user_id.is_(None))
             .order_by(desc(AuditLog.timestamp))
-            .limit(limit)
             .offset(offset)
+            .limit(limit)
         )
-    return list(result.scalars().all())
+    else:
+        result = db.execute(
+            select(AuditLog)
+            .filter(AuditLog.user_id == user_id)
+            .order_by(desc(AuditLog.timestamp))
+            .offset(offset)
+            .limit(limit)
+        )
+    return result.scalars().all()
 
 
-def get_audit_logs_by_event_type_sync(
-    db: Session,
+async def get_audit_logs_by_event_type(
+    db: DBSession,
     event_type: str,
     limit: int = 100,
     offset: int = 0,
 ) -> list[AuditLog]:
-    """Get audit logs for a specific event type (sync version)."""
-    result = db.execute(
-        select(AuditLog)
-        .filter(AuditLog.event_type == event_type)
-        .order_by(desc(AuditLog.timestamp))
-        .limit(limit)
-        .offset(offset)
-    )
-    return list(result.scalars().all())
+    """Get audit logs by event type."""
+    if isinstance(db, AsyncSession):
+        result = await db.execute(
+            select(AuditLog)
+            .filter(AuditLog.event_type == event_type)
+            .order_by(desc(AuditLog.timestamp))
+            .offset(offset)
+            .limit(limit)
+        )
+    else:
+        result = db.execute(
+            select(AuditLog)
+            .filter(AuditLog.event_type == event_type)
+            .order_by(desc(AuditLog.timestamp))
+            .offset(offset)
+            .limit(limit)
+        )
+
+    return result.scalars().all()
 
 
-def get_failed_login_attempts_sync(
-    db: Session,
-    user_id: Optional[str] = None,
-    ip_address: Optional[str] = None,
-    since: Optional[datetime] = None,
+async def get_audit_logs_by_session(
+    db: DBSession,
+    session_id: str,
+    limit: int = 100,
+    offset: int = 0,
 ) -> list[AuditLog]:
-    """Get failed login attempts (sync version)."""
-    query = select(AuditLog).filter(
-        AuditLog.event_type == "login_failed", ~AuditLog.success
-    )
-    if user_id:
-        query = query.filter(AuditLog.user_id == user_id)
-    if ip_address:
-        query = query.filter(AuditLog.ip_address == ip_address)
-    if since:
-        query = query.filter(AuditLog.timestamp >= since)
-    query = query.order_by(desc(AuditLog.timestamp))
-    result = db.execute(query)
-    return list(result.scalars().all())
+    """Get audit logs for a specific session."""
+    if isinstance(db, AsyncSession):
+        result = await db.execute(
+            select(AuditLog)
+            .filter(AuditLog.session_id == session_id)
+            .order_by(desc(AuditLog.timestamp))
+            .offset(offset)
+            .limit(limit)
+        )
+    else:
+        result = db.execute(
+            select(AuditLog)
+            .filter(AuditLog.session_id == session_id)
+            .order_by(desc(AuditLog.timestamp))
+            .offset(offset)
+            .limit(limit)
+        )
+
+    return result.scalars().all()
+
+
+async def get_recent_audit_logs(
+    db: DBSession,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[AuditLog]:
+    """Get recent audit logs."""
+    if isinstance(db, AsyncSession):
+        result = await db.execute(
+            select(AuditLog)
+            .order_by(desc(AuditLog.timestamp))
+            .offset(offset)
+            .limit(limit)
+        )
+    else:
+        result = db.execute(
+            select(AuditLog)
+            .order_by(desc(AuditLog.timestamp))
+            .offset(offset)
+            .limit(limit)
+        )
+
+    return result.scalars().all()
+
+
+async def get_failed_audit_logs(
+    db: DBSession,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[AuditLog]:
+    """Get failed audit logs."""
+    if isinstance(db, AsyncSession):
+        result = await db.execute(
+            select(AuditLog)
+            .filter(AuditLog.success.is_(False))
+            .order_by(desc(AuditLog.timestamp))
+            .offset(offset)
+            .limit(limit)
+        )
+    else:
+        result = db.execute(
+            select(AuditLog)
+            .filter(AuditLog.success.is_(False))
+            .order_by(desc(AuditLog.timestamp))
+            .offset(offset)
+            .limit(limit)
+        )
+
+    return result.scalars().all()
+
+
+async def cleanup_old_audit_logs(
+    db: DBSession, days_to_keep: int = 90
+) -> int:
+    """Clean up old audit logs."""
+    cutoff_date = utc_now() - timedelta(days=days_to_keep)
+    
+    if isinstance(db, AsyncSession):
+        result = await db.execute(
+            select(AuditLog).filter(AuditLog.timestamp < cutoff_date)
+        )
+        old_logs = result.scalars().all()
+    else:
+        result = db.execute(
+            select(AuditLog).filter(AuditLog.timestamp < cutoff_date)
+        )
+        old_logs = result.scalars().all()
+
+    count = 0
+    for log in old_logs:
+        if isinstance(db, AsyncSession):
+            await db.delete(log)
+        else:
+            db.delete(log)
+        count += 1
+
+    if isinstance(db, AsyncSession):
+        await db.commit()
+    else:
+        db.commit()
+
+    return count

@@ -45,7 +45,7 @@ def periodic_health_check() -> dict[str, Any]:
 @celery_app.task(name="app.services.celery_tasks.permanently_delete_accounts_task")
 def permanently_delete_accounts_task() -> dict[str, Any]:
     """Permanently delete accounts that have passed their grace period."""
-    from datetime import datetime
+    from datetime import datetime, timezone
 
     from sqlalchemy import select
 
@@ -59,6 +59,10 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
     logger = get_app_logger()
     logger.info("Starting permanent account deletion task")
 
+    def utc_now() -> datetime:
+        """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
+        return datetime.now(timezone.utc)
+
     try:
         db = next(get_db_sync())
         deleted_count = 0
@@ -68,7 +72,7 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
         accounts_to_delete = (
             db.execute(
                 select(User).filter(
-                    User.deletion_scheduled_for <= datetime.utcnow(),
+                    User.deletion_scheduled_for <= utc_now(),
                     User.is_deleted == False,  # noqa: E712
                     User.deletion_confirmed_at.isnot(None),
                 )
@@ -108,13 +112,13 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
         from datetime import timedelta
 
         for reminder_days in settings.ACCOUNT_DELETION_REMINDER_DAYS:
-            reminder_date = datetime.utcnow() + timedelta(days=reminder_days)
+            reminder_date = utc_now() + timedelta(days=reminder_days)
 
             accounts_for_reminder = (
                 db.execute(
                     select(User).filter(
                         User.deletion_scheduled_for <= reminder_date,
-                        User.deletion_scheduled_for > datetime.utcnow(),
+                        User.deletion_scheduled_for > utc_now(),
                         User.is_deleted == False,  # noqa: E712
                         User.deletion_confirmed_at.isnot(None),
                     )
@@ -127,7 +131,7 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
                 try:
                     # Calculate days remaining
                     days_remaining = (
-                        user.deletion_scheduled_for - datetime.utcnow()
+                        user.deletion_scheduled_for - utc_now()
                     ).days
 
                     # Send reminder email

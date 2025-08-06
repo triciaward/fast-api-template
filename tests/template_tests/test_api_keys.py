@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone, timezone
 
 import pytest
 from fastapi.testclient import TestClient
@@ -74,7 +74,7 @@ class TestAPIKeyCRUD:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events", "write_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         api_key = crud_api_key.create_api_key_sync(
@@ -96,7 +96,7 @@ class TestAPIKeyCRUD:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         api_key = crud_api_key.create_api_key_sync(
@@ -124,7 +124,7 @@ class TestAPIKeyCRUD:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         api_key = crud_api_key.create_api_key_sync(
@@ -156,7 +156,7 @@ class TestAPIKeyCRUD:
             api_key_data = APIKeyCreate(
                 label=f"Test Key {i}",
                 scopes=[f"scope_{i}"],
-                expires_at=datetime.utcnow() + timedelta(days=30),
+                expires_at=datetime.now(timezone.utc) + timedelta(days=30),
             )
             crud_api_key.create_api_key_sync(sync_db_session, api_key_data, user_id)
 
@@ -173,7 +173,7 @@ class TestAPIKeyCRUD:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         api_key = crud_api_key.create_api_key_sync(
@@ -200,7 +200,7 @@ class TestAPIKeyCRUD:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         api_key = crud_api_key.create_api_key_sync(
@@ -238,7 +238,7 @@ class TestAPIKeyCRUD:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() - timedelta(days=1),  # Expired
+            expires_at=datetime.now(timezone.utc) - timedelta(days=1),  # Expired
         )
 
         api_key = crud_api_key.create_api_key_sync(
@@ -252,7 +252,7 @@ class TestAPIKeyCRUD:
         verified_key = crud_api_key.verify_api_key_in_db_sync(sync_db_session, raw_key)
         assert verified_key is not None
         assert verified_key.id == api_key.id
-        assert verified_key.expires_at < datetime.utcnow()  # Should be expired
+        assert verified_key.expires_at < datetime.now(timezone.utc)  # Should be expired
 
     def test_inactive_api_key_found_but_invalid(
         self, sync_db_session: Session, test_user: User
@@ -263,7 +263,7 @@ class TestAPIKeyCRUD:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         api_key = crud_api_key.create_api_key_sync(
@@ -299,7 +299,7 @@ class TestAPIKeyAuthentication:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         crud_api_key.create_api_key_sync(
@@ -359,7 +359,7 @@ class TestAPIKeyAuthentication:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() - timedelta(days=1),
+            expires_at=datetime.now(timezone.utc) - timedelta(days=1),
         )
 
         crud_api_key.create_api_key_sync(
@@ -385,7 +385,7 @@ class TestAPIKeyAuthentication:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         api_key = crud_api_key.create_api_key_sync(
@@ -424,7 +424,7 @@ class TestAPIKeyEndpoints:
         api_key_data = {
             "label": "Test API Key",
             "scopes": ["read_events", "write_events"],
-            "expires_at": (datetime.utcnow() + timedelta(days=30)).isoformat(),
+            "expires_at": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
         }
 
         response = client.post(
@@ -459,7 +459,7 @@ class TestAPIKeyEndpoints:
             api_key_data = APIKeyCreate(
                 label=f"Test Key {i}",
                 scopes=[f"scope_{i}"],
-                expires_at=datetime.utcnow() + timedelta(days=30),
+                expires_at=datetime.now(timezone.utc) + timedelta(days=30),
             )
             await crud_api_key.create_api_key(
                 db_session, api_key_data, str(test_user.id)
@@ -490,7 +490,7 @@ class TestAPIKeyEndpoints:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
         api_key = await crud_api_key.create_api_key(
             db_session, api_key_data, str(test_user.id)
@@ -522,7 +522,7 @@ class TestAPIKeyEndpoints:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
         api_key = await crud_api_key.create_api_key(
             db_session, api_key_data, str(test_user.id)
@@ -544,7 +544,7 @@ class TestAPIKeyEndpoints:
         api_key_data = {
             "label": "Test Key",
             "scopes": ["read_events"],
-            "expires_at": (datetime.utcnow() + timedelta(days=30)).isoformat(),
+            "expires_at": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
         }
 
         response = client.post("/api/v1/auth/api-keys", json=api_key_data)
@@ -572,7 +572,7 @@ class TestAPIKeyEndpoints:
         api_key_data = APIKeyCreate(
             label="Other User Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
         api_key = crud_api_key.create_api_key_sync(
             sync_db_session, api_key_data, str(other_user.id)
@@ -610,7 +610,7 @@ class TestAPIKeyEndpoints:
         api_key_data = APIKeyCreate(
             label="Other User Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
         api_key = crud_api_key.create_api_key_sync(
             sync_db_session, api_key_data, str(other_user.id)
@@ -640,7 +640,7 @@ class TestAPIKeyScopes:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events", "write_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         crud_api_key.create_api_key_sync(
@@ -668,7 +668,7 @@ class TestAPIKeyScopes:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_events"],  # Missing write_events
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         crud_api_key.create_api_key_sync(
@@ -703,7 +703,7 @@ class TestAPIKeyIntegration:
         api_key_data = APIKeyCreate(
             label="Test Key",
             scopes=["read_users"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         crud_api_key.create_api_key_sync(
@@ -731,7 +731,7 @@ class TestAPIKeyIntegration:
         api_key_data = APIKeyCreate(
             label="Limited Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         crud_api_key.create_api_key_sync(
@@ -759,7 +759,7 @@ class TestAPIKeyIntegration:
         api_key_data = APIKeyCreate(
             label="Integration Test Key",
             scopes=["read_events", "write_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         api_key = crud_api_key.create_api_key_sync(
@@ -804,7 +804,7 @@ class TestAPIKeyIntegration:
         api_key_data = APIKeyCreate(
             label="Limited Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         crud_api_key.create_api_key_sync(
@@ -834,7 +834,7 @@ class TestAPIKeyIntegration:
         api_key_data = APIKeyCreate(
             label="Expired Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() - timedelta(days=1),
+            expires_at=datetime.now(timezone.utc) - timedelta(days=1),
         )
 
         crud_api_key.create_api_key_sync(
@@ -861,7 +861,7 @@ class TestAPIKeyIntegration:
         api_key_data = APIKeyCreate(
             label="Inactive Key",
             scopes=["read_events"],
-            expires_at=datetime.utcnow() + timedelta(days=30),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
 
         api_key = crud_api_key.create_api_key_sync(
@@ -930,7 +930,7 @@ def test_api_key_usage_audit_logging(
     api_key_data = APIKeyCreate(
         label="Audit Test Key",
         scopes=["read_events"],
-        expires_at=datetime.utcnow() + timedelta(days=30),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=30),
     )
 
     api_key = crud_api_key.create_api_key_sync(
@@ -988,7 +988,7 @@ def test_api_key_usage_audit_logging_system_key(
     api_key_data = APIKeyCreate(
         label="System Integration Key",
         scopes=["read_events", "write_events"],
-        expires_at=datetime.utcnow() + timedelta(days=30),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=30),
     )
 
     api_key = crud_api_key.create_api_key_sync(

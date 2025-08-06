@@ -1,6 +1,6 @@
 import secrets
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import emails
@@ -8,6 +8,11 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.crud import user as crud_user
+
+
+def utc_now() -> datetime:
+    """Get current UTC datetime (replaces deprecated utc_now())."""
+    return datetime.now(timezone.utc)
 
 
 class EmailService:
@@ -82,7 +87,7 @@ class EmailService:
     ) -> Optional[str]:
         """Create and store verification token for a user."""
         token = self.generate_verification_token()
-        expires = datetime.utcnow() + timedelta(
+        expires = utc_now() + timedelta(
             hours=settings.VERIFICATION_TOKEN_EXPIRE_HOURS
         )
 
@@ -101,7 +106,7 @@ class EmailService:
         # Check if token is expired
         if (
             user.verification_token_expires
-            and user.verification_token_expires < datetime.utcnow()
+            and user.verification_token_expires < utc_now()
         ):
             return None
 
@@ -155,7 +160,7 @@ class EmailService:
     ) -> Optional[str]:
         """Create and store password reset token for a user."""
         token = self.generate_verification_token()
-        expires = datetime.utcnow() + timedelta(
+        expires = utc_now() + timedelta(
             hours=settings.PASSWORD_RESET_TOKEN_EXPIRE_HOURS
         )
 
@@ -176,7 +181,7 @@ class EmailService:
         # Check if token is expired
         if (
             user.password_reset_token_expires
-            and user.password_reset_token_expires < datetime.utcnow()
+            and user.password_reset_token_expires < utc_now()
         ):
             return None
 
@@ -272,7 +277,7 @@ class EmailService:
     async def create_deletion_token(self, db: Session, user_id: str) -> Optional[str]:
         """Create and store deletion token for a user."""
         token = self.generate_verification_token()
-        expires = datetime.utcnow() + timedelta(
+        expires = utc_now() + timedelta(
             hours=settings.ACCOUNT_DELETION_TOKEN_EXPIRE_HOURS
         )
 
@@ -291,7 +296,7 @@ class EmailService:
         # Check if token is expired
         if (
             user.deletion_token_expires
-            and user.deletion_token_expires < datetime.utcnow()
+            and user.deletion_token_expires < utc_now()
         ):
             return None
 

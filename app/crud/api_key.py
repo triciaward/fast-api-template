@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Union
 
 from sqlalchemy import and_, select
@@ -11,6 +11,11 @@ from app.schemas.user import APIKeyCreate
 
 # Type alias for both sync and async sessions
 DBSession = Union[AsyncSession, Session]
+
+
+def utc_now() -> datetime:
+    """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
+    return datetime.now(timezone.utc)
 
 
 async def create_api_key(
@@ -51,35 +56,22 @@ async def create_api_key(
 
 
 async def get_api_key_by_hash(db: DBSession, key_hash: str) -> Optional[APIKey]:
-    """Get API key by its hash."""
+    """Get API key by hash."""
     if isinstance(db, AsyncSession):
         result = await db.execute(
             select(APIKey).filter(
-                and_(
-                    APIKey.key_hash == key_hash,
-                    APIKey.is_active.is_(True),
-                    APIKey.is_deleted.is_(False),
-                    (
-                        APIKey.expires_at.is_(None)
-                        | (APIKey.expires_at > datetime.utcnow())
-                    ),
-                )
+                APIKey.key_hash == key_hash,
+                APIKey.is_deleted.is_(False),
             )
         )
     else:
         result = db.execute(
             select(APIKey).filter(
-                and_(
-                    APIKey.key_hash == key_hash,
-                    APIKey.is_active.is_(True),
-                    APIKey.is_deleted.is_(False),
-                    (
-                        APIKey.expires_at.is_(None)
-                        | (APIKey.expires_at > datetime.utcnow())
-                    ),
-                )
+                APIKey.key_hash == key_hash,
+                APIKey.is_deleted.is_(False),
             )
         )
+
     return result.scalar_one_or_none()
 
 
@@ -100,7 +92,7 @@ async def verify_api_key_in_db(db: DBSession, raw_key: str) -> Optional[APIKey]:
             if not api_key.is_active:
                 # Return the key so the caller can check is_active and raise appropriate error
                 return api_key
-            if api_key.expires_at and api_key.expires_at <= datetime.utcnow():
+            if api_key.expires_at and api_key.expires_at <= utc_now():
                 # Return the key so the caller can check expires_at and raise appropriate error
                 return api_key
             # Key is valid
@@ -116,18 +108,25 @@ async def get_user_api_keys(
     if isinstance(db, AsyncSession):
         result = await db.execute(
             select(APIKey)
-            .filter(and_(APIKey.user_id == user_id, APIKey.is_deleted.is_(False)))
+            .filter(
+                APIKey.user_id == user_id,
+                APIKey.is_deleted.is_(False),
+            )
             .offset(skip)
             .limit(limit)
         )
     else:
         result = db.execute(
             select(APIKey)
-            .filter(and_(APIKey.user_id == user_id, APIKey.is_deleted.is_(False)))
+            .filter(
+                APIKey.user_id == user_id,
+                APIKey.is_deleted.is_(False),
+            )
             .offset(skip)
             .limit(limit)
         )
-    return list(result.scalars().all())
+
+    return result.scalars().all()
 
 
 async def count_user_api_keys(db: DBSession, user_id: str) -> int:
@@ -253,7 +252,7 @@ def get_api_key_by_hash_sync(db: Session, key_hash: str) -> Optional[APIKey]:
                 APIKey.key_hash == key_hash,
                 APIKey.is_active.is_(True),
                 APIKey.is_deleted.is_(False),
-                (APIKey.expires_at.is_(None) | (APIKey.expires_at > datetime.utcnow())),
+                (APIKey.expires_at.is_(None) | (APIKey.expires_at > utc_now())),
             )
         )
     )
@@ -274,7 +273,7 @@ def verify_api_key_in_db_sync(db: Session, raw_key: str) -> Optional[APIKey]:
             if not api_key.is_active:
                 # Return the key so the caller can check is_active and raise appropriate error
                 return api_key
-            if api_key.expires_at and api_key.expires_at <= datetime.utcnow():
+            if api_key.expires_at and api_key.expires_at <= utc_now():
                 # Return the key so the caller can check expires_at and raise appropriate error
                 return api_key
             # Key is valid

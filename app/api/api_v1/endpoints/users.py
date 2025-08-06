@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
@@ -27,6 +27,11 @@ from app.utils.pagination import PaginatedResponse, PaginationParams
 from app.utils.search_filter import DeletedUserSearchParams, UserSearchParams
 
 router = APIRouter()
+
+
+def utc_now() -> datetime:
+    """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
+    return datetime.now(timezone.utc)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
@@ -100,7 +105,7 @@ async def get_api_key_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    if db_api_key.expires_at and db_api_key.expires_at < datetime.utcnow():
+    if db_api_key.expires_at and db_api_key.expires_at < utc_now():
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="API key has expired",
@@ -411,7 +416,7 @@ async def restore_user(
     return RestoreUserResponse(
         message="User restored successfully",
         user_id=user.id,  # type: ignore
-        restored_at=datetime.utcnow(),
+        restored_at=utc_now(),
     )
 
 

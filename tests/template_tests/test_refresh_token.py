@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock
 
 import pytest
@@ -96,7 +96,7 @@ class TestRefreshTokenCRUD:
         assert db_refresh_token.device_info == "Test Device"
         assert db_refresh_token.ip_address == "127.0.0.1"
         assert db_refresh_token.is_revoked is False
-        assert db_refresh_token.expires_at > datetime.utcnow()
+        assert db_refresh_token.expires_at > datetime.now(timezone.utc)
 
     def test_get_refresh_token_by_hash(self, sync_db_session: Session):
         """Test retrieving a refresh token by hash."""
@@ -269,7 +269,7 @@ class TestRefreshTokenCRUD:
         db_refresh_token = RefreshToken(
             user_id=user.id,
             token_hash=hash_refresh_token(token),
-            expires_at=datetime.utcnow() - timedelta(days=1),
+            expires_at=datetime.now(timezone.utc) - timedelta(days=1),
             is_revoked=False,
         )
         sync_db_session.add(db_refresh_token)
@@ -504,7 +504,7 @@ class TestRefreshTokenService:
 
         access_token, expires_at = result
         assert access_token is not None
-        assert expires_at > datetime.utcnow()
+        assert expires_at > datetime.now(timezone.utc)
 
         # Test invalid token
         result = refresh_access_token(sync_db_session, "invalid_token")

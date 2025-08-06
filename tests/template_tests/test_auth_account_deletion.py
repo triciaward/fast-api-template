@@ -11,7 +11,7 @@ This module tests the complete account deletion workflow including:
 - Background task processing
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -75,7 +75,7 @@ class TestAccountDeletionRequest:
             is_superuser=False,
         )
         user = sync_db_session.add(User(**user_create.dict()))
-        user.deletion_scheduled_for = datetime.utcnow() + timedelta(days=30)
+        user.deletion_scheduled_for = datetime.now(timezone.utc) + timedelta(days=30)
         sync_db_session.commit()
 
         # Try to request deletion again
@@ -100,11 +100,11 @@ class TestAccountDeletionConfirmation:
         )
         user = sync_db_session.add(User(**user_create.dict()))
         user.deletion_token = "test-token"
-        user.deletion_token_expires = datetime.utcnow() + timedelta(hours=1)
+        user.deletion_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
         sync_db_session.commit()
 
         # Confirm deletion
-        scheduled_date = datetime.utcnow() + timedelta(days=30)
+        scheduled_date = datetime.now(timezone.utc) + timedelta(days=30)
         # success = confirm_account_deletion_sync(
         #     sync_db_session, str(user.id), scheduled_date
         # )
@@ -129,7 +129,7 @@ class TestAccountDeletionConfirmation:
         sync_db_session.commit()
 
         # Try to confirm deletion
-        # scheduled_date = datetime.utcnow() + timedelta(days=30)
+        # scheduled_date = datetime.now(timezone.utc) + timedelta(days=30)
         # # success = confirm_account_deletion_sync(
         #     sync_db_session, str(user.id), scheduled_date
         # )
@@ -149,11 +149,11 @@ class TestAccountDeletionConfirmation:
         )
         user = sync_db_session.add(User(**user_create.dict()))
         user.deletion_token = "test-token"
-        user.deletion_token_expires = datetime.utcnow() - timedelta(hours=1)
+        user.deletion_token_expires = datetime.now(timezone.utc) - timedelta(hours=1)
         sync_db_session.commit()
 
         # Try to confirm deletion
-        # scheduled_date = datetime.utcnow() + timedelta(days=30)
+        # scheduled_date = datetime.now(timezone.utc) + timedelta(days=30)
         # success = confirm_account_deletion_sync(
         #     sync_db_session, str(user.id), scheduled_date
         # )
@@ -179,7 +179,7 @@ class TestAccountDeletionCancellation:
             is_superuser=False,
         )
         user = sync_db_session.add(User(**user_create.dict()))
-        user.deletion_scheduled_for = datetime.utcnow() + timedelta(days=30)
+        user.deletion_scheduled_for = datetime.now(timezone.utc) + timedelta(days=30)
         sync_db_session.commit()
 
         # Cancel deletion
@@ -248,9 +248,9 @@ class TestAccountDeletionStatus:
             username="requested",
             hashed_password="hashed_password",
             is_verified=True,
-            deletion_requested_at=datetime.utcnow(),
+            deletion_requested_at=datetime.now(timezone.utc),
             deletion_token="status_token",
-            deletion_token_expires=datetime.utcnow() + timedelta(hours=1),
+            deletion_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -271,7 +271,7 @@ class TestAccountDeletionStatus:
         self, client: TestClient, sync_db_session: Session
     ):
         """Test status for user who confirmed deletion."""
-        scheduled_time = datetime.utcnow() + timedelta(
+        scheduled_time = datetime.now(timezone.utc) + timedelta(
             days=settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS
         )
         user = User(
@@ -279,8 +279,8 @@ class TestAccountDeletionStatus:
             username="confirmed",
             hashed_password="hashed_password",
             is_verified=True,
-            deletion_requested_at=datetime.utcnow(),
-            deletion_confirmed_at=datetime.utcnow(),
+            deletion_requested_at=datetime.now(timezone.utc),
+            deletion_confirmed_at=datetime.now(timezone.utc),
             deletion_scheduled_for=scheduled_time,
         )
         sync_db_session.add(user)
@@ -465,11 +465,11 @@ class TestAccountDeletionCRUD:
         )
         user = sync_db_session.add(User(**user_create.dict()))
         user.deletion_token = "test-token"
-        user.deletion_token_expires = datetime.utcnow() + timedelta(hours=1)
+        user.deletion_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
         sync_db_session.commit()
 
         # Confirm deletion
-        scheduled_date = datetime.utcnow() + timedelta(days=30)
+        scheduled_date = datetime.now(timezone.utc) + timedelta(days=30)
         # success = confirm_account_deletion_sync(
         #     sync_db_session, str(user.id), scheduled_date
         # )
@@ -489,7 +489,7 @@ class TestAccountDeletionCRUD:
             is_superuser=False,
         )
         user = sync_db_session.add(User(**user_create.dict()))
-        user.deletion_scheduled_for = datetime.utcnow() + timedelta(days=30)
+        user.deletion_scheduled_for = datetime.now(timezone.utc) + timedelta(days=30)
         sync_db_session.commit()
 
         # Cancel deletion

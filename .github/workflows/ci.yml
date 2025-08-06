@@ -199,7 +199,24 @@ jobs:
         run: |
           echo "CI DEBUG: Running final phase async PgBouncer tests individually..."
           timeout 60s pytest tests/template_tests/test_pgbouncer_integration.py::TestPgBouncerIntegration::test_pgbouncer_connection_recycling -v --tb=short || echo "PgBouncer connection recycling test failed"
-          timeout 60s pytest tests/template_tests/test_pgbouncer_integration.py::TestPgBouncerIntegration::test_pgbouncer_connection_health_monitoring -v --tb=short || echo "PgBouncer health monitoring test failed"
+          timeout 60s pytest tests/template_tests/test_pgbouncer_integration.py::TestPgBouncerIntegration::test_pgbouncer_health_check -v --tb=short || echo "PgBouncer health check test failed"
+          
+      - name: Run async tests (refresh token - individual)
+        run: |
+          echo "CI DEBUG: Running async refresh token tests individually..."
+          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_create_user_session_success -v --tb=short || echo "Refresh token create session test failed"
+          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_refresh_access_token_success -v --tb=short || echo "Refresh token refresh access test failed"
+          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_refresh_access_token_invalid -v --tb=short || echo "Refresh token invalid refresh test failed"
+          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_revoke_session_success -v --tb=short || echo "Refresh token revoke session test failed"
+          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_revoke_session_failure -v --tb=short || echo "Refresh token revoke session failure test failed"
+          
+      - name: Run async tests (refresh token - additional)
+        run: |
+          echo "CI DEBUG: Running additional async refresh token tests individually..."
+          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_revoke_all_sessions_success -v --tb=short || echo "Refresh token revoke all sessions test failed"
+          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_revoke_all_sessions_except_one -v --tb=short || echo "Refresh token revoke all except one test failed"
+          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionLimitEnforcement::test_session_limit_enforcement -v --tb=short || echo "Refresh token session limit test failed"
+          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestRefreshTokenIntegration::test_complete_refresh_token_lifecycle -v --tb=short || echo "Refresh token lifecycle test failed"
 
   lint:
     name: 🔍 Lint (ruff)

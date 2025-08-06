@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from sqlalchemy.orm import Session
@@ -69,7 +69,7 @@ class TestSoftDeleteMixin:
         assert user.deletion_reason == reason
 
         # Verify deleted_at is recent
-        assert datetime.utcnow() - user.deleted_at < timedelta(seconds=5)
+        assert datetime.now(timezone.utc) - user.deleted_at < timedelta(seconds=5)
 
     def test_restore_method(self, sync_db_session: Session, test_user_data: dict):
         """Test that the restore method works correctly."""

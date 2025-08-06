@@ -1,11 +1,17 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.database.database import Base
 from app.models.base import SoftDeleteMixin
+
+
+def utc_now() -> datetime:
+    """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
+    return datetime.now(timezone.utc)
 
 
 class User(Base, SoftDeleteMixin):
@@ -17,7 +23,7 @@ class User(Base, SoftDeleteMixin):
     hashed_password = Column(String, nullable=True)  # Nullable for OAuth users
     is_superuser = Column(Boolean, default=False, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
-    date_created = Column(DateTime, default=datetime.utcnow, nullable=False)
+    date_created = Column(TIMESTAMP(timezone=True), default=utc_now, nullable=False)
 
     # OAuth fields
     # 'google', 'apple', or None
@@ -27,18 +33,18 @@ class User(Base, SoftDeleteMixin):
 
     # Email verification
     verification_token = Column(String, nullable=True)
-    verification_token_expires = Column(DateTime, nullable=True)
+    verification_token_expires = Column(TIMESTAMP(timezone=True), nullable=True)
 
     # Password reset
     password_reset_token = Column(String, nullable=True)
-    password_reset_token_expires = Column(DateTime, nullable=True)
+    password_reset_token_expires = Column(TIMESTAMP(timezone=True), nullable=True)
 
     # Account deletion (GDPR compliance) - keeping these for backward compatibility
-    deletion_requested_at = Column(DateTime, nullable=True)
-    deletion_confirmed_at = Column(DateTime, nullable=True)
-    deletion_scheduled_for = Column(DateTime, nullable=True)
+    deletion_requested_at = Column(TIMESTAMP(timezone=True), nullable=True)
+    deletion_confirmed_at = Column(TIMESTAMP(timezone=True), nullable=True)
+    deletion_scheduled_for = Column(TIMESTAMP(timezone=True), nullable=True)
     deletion_token = Column(String, nullable=True)
-    deletion_token_expires = Column(DateTime, nullable=True)
+    deletion_token_expires = Column(TIMESTAMP(timezone=True), nullable=True)
     # Note: is_deleted is now inherited from SoftDeleteMixin
 
     def __repr__(self) -> str:

@@ -1,11 +1,16 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.database.database import Base
 from app.models.base import SoftDeleteMixin
+
+
+def utc_now() -> datetime:
+    """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
+    return datetime.now(timezone.utc)
 
 
 class RefreshToken(Base, SoftDeleteMixin):
@@ -15,7 +20,7 @@ class RefreshToken(Base, SoftDeleteMixin):
     user_id = Column(UUID(as_uuid=True), nullable=False, index=True)
     token_hash = Column(String(255), nullable=False, index=True)
     expires_at = Column(DateTime, nullable=False, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
     is_revoked = Column(Boolean, default=False, nullable=False, index=True)
     device_info = Column(Text, nullable=True)
     ip_address = Column(String(45), nullable=True)

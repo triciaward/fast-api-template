@@ -1,8 +1,13 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
+
+
+def utc_now() -> datetime:
+    """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
+    return datetime.now(timezone.utc)
 
 
 class SoftDeleteMixin:
@@ -10,7 +15,7 @@ class SoftDeleteMixin:
 
     # Soft delete fields
     is_deleted = Column(Boolean, default=False, nullable=False, index=True)
-    deleted_at = Column(DateTime, nullable=True, index=True)
+    deleted_at = Column(TIMESTAMP(timezone=True), nullable=True, index=True)
     deleted_by = Column(
         UUID(as_uuid=True), nullable=True, index=True
     )  # User who deleted the record
@@ -20,7 +25,7 @@ class SoftDeleteMixin:
     def soft_delete(self, deleted_by: uuid.UUID = None, reason: str = None) -> None:
         """Mark the record as deleted without actually removing it."""
         self.is_deleted = True  # type: ignore
-        self.deleted_at = datetime.utcnow()  # type: ignore
+        self.deleted_at = utc_now()  # type: ignore
         self.deleted_by = deleted_by  # type: ignore
         self.deletion_reason = reason  # type: ignore
 

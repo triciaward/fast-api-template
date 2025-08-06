@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import pytest
@@ -201,7 +201,7 @@ class TestPasswordResetEndpoints:
             hashed_password=get_password_hash("OldPassword123!"),
             is_verified=True,
             password_reset_token="valid_reset_token",
-            password_reset_token_expires=datetime.utcnow() + timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -281,7 +281,7 @@ class TestPasswordResetEndpoints:
             hashed_password=get_password_hash("OldPassword123!"),
             is_verified=True,
             password_reset_token="expired_reset_token",
-            password_reset_token_expires=datetime.utcnow() - timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc) - timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -316,7 +316,7 @@ class TestPasswordResetEndpoints:
             oauth_provider="google",
             oauth_id="google_123",
             password_reset_token="valid_reset_token",
-            password_reset_token_expires=datetime.utcnow() + timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -370,7 +370,7 @@ class TestPasswordResetEndpoints:
             hashed_password=get_password_hash("OldPassword123!"),
             is_verified=True,
             password_reset_token="valid_reset_token",
-            password_reset_token_expires=datetime.utcnow() + timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -437,7 +437,7 @@ class TestPasswordResetCRUDOperations:
             hashed_password=get_password_hash("TestPassword123!"),
             is_verified=True,
             password_reset_token="test_reset_token",
-            password_reset_token_expires=datetime.utcnow() + timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -474,7 +474,7 @@ class TestPasswordResetCRUDOperations:
 
         user_id = str(user.id)
         token = "new_reset_token"
-        expires = datetime.utcnow() + timedelta(hours=1)
+        expires = datetime.now(timezone.utc) + timedelta(hours=1)
 
         # Update password reset token
         success = update_password_reset_token_sync(
@@ -494,7 +494,7 @@ class TestPasswordResetCRUDOperations:
         from app.crud.user import update_password_reset_token_sync
 
         token = "new_reset_token"
-        expires = datetime.utcnow() + timedelta(hours=1)
+        expires = datetime.now(timezone.utc) + timedelta(hours=1)
 
         # Try to update token for non-existent user with valid UUID format
         fake_uuid = str(uuid.uuid4())
@@ -516,7 +516,7 @@ class TestPasswordResetCRUDOperations:
             hashed_password=get_password_hash("OldPassword123!"),
             is_verified=True,
             password_reset_token="test_reset_token",
-            password_reset_token_expires=datetime.utcnow() + timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -627,7 +627,7 @@ class TestPasswordResetEmailService:
         sync_db_session.refresh(user)
         assert user.password_reset_token == token
         assert user.password_reset_token_expires is not None
-        assert user.password_reset_token_expires > datetime.utcnow()
+        assert user.password_reset_token_expires > datetime.now(timezone.utc)
 
     @pytest.mark.asyncio
     async def test_verify_password_reset_token_success(
@@ -645,7 +645,7 @@ class TestPasswordResetEmailService:
             hashed_password=get_password_hash("TestPassword123!"),
             is_verified=True,
             password_reset_token="valid_reset_token",
-            password_reset_token_expires=datetime.utcnow() + timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -672,7 +672,7 @@ class TestPasswordResetEmailService:
             hashed_password=get_password_hash("TestPassword123!"),
             is_verified=True,
             password_reset_token="expired_reset_token",
-            password_reset_token_expires=datetime.utcnow() - timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc) - timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()

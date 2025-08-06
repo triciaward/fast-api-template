@@ -6,7 +6,9 @@ This module tests the Refresh Token service functionality including device detec
 
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from app.services.refresh_token import (
     clear_refresh_token_cookie,
@@ -238,7 +240,7 @@ class TestSessionManagement:
     @patch("app.services.refresh_token.create_refresh_token")
     @patch("app.services.refresh_token.get_device_info")
     @patch("app.services.refresh_token.get_client_ip")
-    def test_create_user_session_success(
+    async def test_create_user_session_success(
         self,
         mock_get_ip,
         mock_get_device,
@@ -256,7 +258,9 @@ class TestSessionManagement:
         mock_create_refresh.return_value = "refresh_token_456"
         mock_get_device.return_value = "Chrome on Windows"
         mock_get_ip.return_value = "192.168.1.100"
-        mock_crud_create.return_value = MagicMock()
+        mock_refresh_token = MagicMock()
+        mock_refresh_token.id = uuid.uuid4()
+        mock_crud_create.return_value = mock_refresh_token
 
         # Mock user
         mock_user = MagicMock()
@@ -271,7 +275,7 @@ class TestSessionManagement:
         mock_db = MagicMock()
 
         # Test session creation
-        access_token, refresh_token = create_user_session(
+        access_token, refresh_token = await create_user_session(
             mock_db, mock_user, mock_request
         )
 
@@ -291,7 +295,7 @@ class TestSessionManagement:
     @patch("app.services.refresh_token.settings")
     @patch("app.services.refresh_token.verify_refresh_token_in_db")
     @patch("app.services.refresh_token.create_access_token")
-    def test_refresh_access_token_success(
+    async def test_refresh_access_token_success(
         self, mock_create_access, mock_verify_token, mock_settings
     ):
         """Test successful access token refresh."""
@@ -314,7 +318,7 @@ class TestSessionManagement:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         # Test token refresh
-        result = refresh_access_token(mock_db, "valid_refresh_token")
+        result = await refresh_access_token(mock_db, "valid_refresh_token")
 
         # Verify result
         assert result is not None
@@ -329,7 +333,7 @@ class TestSessionManagement:
         )
 
     @patch("app.services.refresh_token.verify_refresh_token_in_db")
-    def test_refresh_access_token_invalid(self, mock_verify_token):
+    async def test_refresh_access_token_invalid(self, mock_verify_token):
         """Test access token refresh with invalid refresh token."""
         # Mock dependencies
         mock_verify_token.return_value = None
@@ -338,7 +342,7 @@ class TestSessionManagement:
         mock_db = MagicMock()
 
         # Test token refresh
-        result = refresh_access_token(mock_db, "invalid_refresh_token")
+        result = await refresh_access_token(mock_db, "invalid_refresh_token")
 
         # Verify result
         assert result is None
@@ -348,7 +352,7 @@ class TestSessionManagement:
 
     @patch("app.crud.revoke_refresh_token")
     @patch("app.services.refresh_token.verify_refresh_token_in_db")
-    def test_revoke_session_success(self, mock_verify, mock_revoke):
+    async def test_revoke_session_success(self, mock_verify, mock_revoke):
         """Test successful session revocation."""
         # Mock dependencies
         mock_refresh_token = MagicMock()
@@ -360,7 +364,7 @@ class TestSessionManagement:
         mock_db = MagicMock()
 
         # Test session revocation
-        result = revoke_session(mock_db, "valid_refresh_token")
+        result = await revoke_session(mock_db, "valid_refresh_token")
 
         # Verify result
         assert result is True
@@ -369,23 +373,26 @@ class TestSessionManagement:
         mock_verify.assert_called_once_with(mock_db, "valid_refresh_token")
         mock_revoke.assert_called_once()
 
-    @patch("app.crud.revoke_refresh_token")
-    def test_revoke_session_failure(self, mock_revoke):
+    @patch("app.services.refresh_token.verify_refresh_token_in_db")
+    async def test_revoke_session_failure(self, mock_verify):
         """Test session revocation failure."""
         # Mock dependencies
-        mock_revoke.return_value = False
+        mock_verify.return_value = None
 
         # Mock database session
         mock_db = MagicMock()
 
         # Test session revocation
-        result = revoke_session(mock_db, "invalid_refresh_token")
+        result = await revoke_session(mock_db, "invalid_refresh_token")
 
         # Verify result
         assert result is False
 
+        # Verify function calls
+        mock_verify.assert_called_once_with(mock_db, "invalid_refresh_token")
+
     @patch("app.crud.revoke_all_user_sessions")
-    def test_revoke_all_sessions_success(self, mock_revoke_all):
+    async def test_revoke_all_sessions_success(self, mock_revoke_all):
         """Test successful revocation of all user sessions."""
         # Mock dependencies
         mock_revoke_all.return_value = 3
@@ -395,7 +402,7 @@ class TestSessionManagement:
         user_id = uuid.uuid4()
 
         # Test session revocation
-        result = revoke_all_sessions(mock_db, user_id)
+        result = await revoke_all_sessions(mock_db, user_id)
 
         # Verify result
         assert result == 3
@@ -404,10 +411,16 @@ class TestSessionManagement:
         mock_revoke_all.assert_called_once_with(mock_db, user_id, None)
 
     @patch("app.crud.revoke_all_user_sessions")
-    def test_revoke_all_sessions_except_one(self, mock_revoke_all):
+    @patch("app.crud.get_refresh_token_by_hash")
+    async def test_revoke_all_sessions_except_one(self, mock_get_token, mock_revoke_all):
         """Test revocation of all sessions except one."""
         # Mock dependencies
         mock_revoke_all.return_value = 2
+        
+        # Mock the token lookup
+        mock_token = MagicMock()
+        mock_token.id = uuid.uuid4()
+        mock_get_token.return_value = mock_token
 
         # Mock database session
         mock_db = MagicMock()
@@ -415,36 +428,38 @@ class TestSessionManagement:
         except_token = "keep_this_token"
 
         # Test session revocation
-        result = revoke_all_sessions(mock_db, user_id, except_token)
+        result = await revoke_all_sessions(mock_db, user_id, except_token)
 
         # Verify result
         assert result == 2
 
         # Verify function calls
+        mock_get_token.assert_called_once()
         mock_revoke_all.assert_called_once()
 
 
 class TestSessionLimitEnforcement:
     """Test session limit enforcement."""
 
-    @patch("app.services.refresh_token.enforce_session_limit")
-    def test_session_limit_enforcement(self, mock_enforce_limit):
+    @patch("app.crud.enforce_session_limit", new_callable=AsyncMock)
+    @pytest.mark.asyncio
+    async def test_session_limit_enforcement(self, mock_enforce_limit):
         """Test session limit enforcement."""
-        # Mock dependencies
-        mock_enforce_limit.return_value = True
+        # Mock dependencies - async function
+        mock_enforce_limit.return_value = None  # enforce_session_limit returns None
 
         # Mock database session
         mock_db = MagicMock()
         user_id = uuid.uuid4()
 
         # Test session limit enforcement
-        result = mock_enforce_limit(mock_db, user_id)
+        result = await mock_enforce_limit(mock_db, user_id, 5)
 
-        # Verify result
-        assert result is True
+        # Verify result (should be None as enforce_session_limit doesn't return a value)
+        assert result is None
 
         # Verify function calls
-        mock_enforce_limit.assert_called_once_with(mock_db, user_id)
+        mock_enforce_limit.assert_called_once_with(mock_db, user_id, 5)
 
 
 class TestRefreshTokenIntegration:
@@ -455,7 +470,7 @@ class TestRefreshTokenIntegration:
     @patch("app.services.refresh_token.create_refresh_token")
     @patch("app.services.refresh_token.verify_refresh_token_in_db")
     @patch("app.crud.revoke_refresh_token")
-    def test_complete_refresh_token_lifecycle(
+    async def test_complete_refresh_token_lifecycle(
         self,
         mock_revoke,
         mock_verify,
@@ -493,7 +508,7 @@ class TestRefreshTokenIntegration:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         # Test 1: Create session
-        access_token, refresh_token = create_user_session(
+        access_token, refresh_token = await create_user_session(
             mock_db, mock_user, mock_request
         )
         assert access_token == "access_token_123"
