@@ -88,9 +88,26 @@ sync_test_engine = create_engine(
     connect_args={"application_name": "fastapi_template_test"},
 )
 
+# Create a separate async engine for session tests to avoid connection conflicts
+test_session_engine = create_async_engine(
+    TEST_DATABASE_URL,
+    echo=False,
+    pool_pre_ping=False,
+    pool_size=2,  # Smaller pool for session tests
+    max_overflow=5,
+    pool_recycle=300,
+    # Ensure proper isolation with different application name
+    connect_args={
+        "server_settings": {
+            "application_name": "fastapi_template_test_sessions",
+            "jit": "off",
+        }
+    },
+)
+
 # Create session makers
 TestingAsyncSessionLocal = async_sessionmaker(
-    test_engine,
+    test_session_engine,  # Use separate engine for sessions
     class_=AsyncSession,
     expire_on_commit=False,
     autocommit=False,
@@ -175,15 +192,21 @@ async def setup_test_db() -> AsyncGenerator[None, None]:
                 async with test_engine.begin() as conn:
                     await conn.run_sync(Base.metadata.drop_all)
                 await test_engine.dispose()
+                await test_session_engine.dispose()
         else:
             # Fallback for Python < 3.11
             async with test_engine.begin() as conn:
                 await conn.run_sync(Base.metadata.drop_all)
             await test_engine.dispose()
+            await test_session_engine.dispose()
     except asyncio.TimeoutError:
         print("CI DEBUG: Timeout dropping async tables")
     except Exception as e:
         print(f"CI DEBUG: Error dropping async tables: {e}")
+        try:
+            await test_session_engine.dispose()
+        except Exception:
+            pass
 
     # Drop tables for sync engine
     Base.metadata.drop_all(bind=sync_test_engine)
@@ -194,34 +217,39 @@ async def setup_test_db() -> AsyncGenerator[None, None]:
 @pytest_asyncio.fixture
 async def db_session(setup_test_db: None) -> AsyncGenerator[AsyncSession, None]:
     """Create a fresh database session for each test with proper isolation."""
-    async with TestingAsyncSessionLocal() as session:
-        # Clean the database before each test - more robust cleanup
-        # Note: audit_logs table only exists in sync database, not async
+    # Create a new session using the dedicated session engine
+    session = TestingAsyncSessionLocal()
+    
+    try:
+        # Clean the database before each test
         try:
-            await session.execute(text("DELETE FROM users"))
+            await session.execute(text("DELETE FROM users WHERE id IS NOT NULL"))
             await session.commit()
         except Exception as e:
             # If async database doesn't have tables, that's okay
             print(f"CI DEBUG: Async cleanup failed (expected if no tables): {e}")
             await session.rollback()
 
+        # Yield the session for the test
+        yield session
+    finally:
+        # Clean up after the test
         try:
-            yield session
-        finally:
-            # Clean up after the test, handling session state - more robust cleanup
-            try:
-                if session.is_active:
-                    await session.execute(text("DELETE FROM users"))
-                    await session.commit()
-            except Exception:
-                # If cleanup fails, rollback and try again
+            # If we're in a transaction, roll it back
+            if session.in_transaction():
                 await session.rollback()
-                try:
-                    await session.execute(text("DELETE FROM users"))
-                    await session.commit()
-                except Exception:
-                    # Final fallback - just rollback
-                    await session.rollback()
+            
+            # Clean up any test data in a fresh transaction
+            try:
+                await session.execute(text("DELETE FROM users WHERE id IS NOT NULL"))
+                await session.commit()
+            except Exception:
+                await session.rollback()
+        except Exception as e:
+            print(f"CI DEBUG: Session cleanup failed: {e}")
+        finally:
+            # Always close the session
+            await session.close()
 
 
 @pytest.fixture(scope="session")
