@@ -18,6 +18,7 @@ from app.main import app
 # Load test environment variables FIRST
 try:
     import dotenv
+
     dotenv.load_dotenv(".env.test", override=True)
     print("CI DEBUG: .env.test loaded successfully")
 except ImportError:
