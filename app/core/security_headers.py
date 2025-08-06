@@ -159,7 +159,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                         f"Negative content-length header: {content_length}",
                         request,
                     )
-                    raise HTTPException(status_code=400, detail="Invalid content length")
+                    raise HTTPException(
+                        status_code=400, detail="Invalid content length"
+                    )
 
                 if size > settings.MAX_REQUEST_SIZE:
                     self._log_security_event(
@@ -174,7 +176,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                     f"Invalid content-length header: {content_length}",
                     request,
                 )
-                raise HTTPException(status_code=400, detail="Invalid content length") from None
+                raise HTTPException(
+                    status_code=400, detail="Invalid content length"
+                ) from None
 
     async def _validate_content_type(self, request: Request) -> None:
         """Validate content type to prevent MIME confusion attacks."""

@@ -87,9 +87,7 @@ class EmailService:
     ) -> Optional[str]:
         """Create and store verification token for a user."""
         token = self.generate_verification_token()
-        expires = utc_now() + timedelta(
-            hours=settings.VERIFICATION_TOKEN_EXPIRE_HOURS
-        )
+        expires = utc_now() + timedelta(hours=settings.VERIFICATION_TOKEN_EXPIRE_HOURS)
 
         success = crud_user.update_verification_token_sync(
             db, user_id=user_id, token=token, expires=expires
@@ -294,10 +292,7 @@ class EmailService:
             return None
 
         # Check if token is expired
-        if (
-            user.deletion_token_expires
-            and user.deletion_token_expires < utc_now()
-        ):
+        if user.deletion_token_expires and user.deletion_token_expires < utc_now():
             return None
 
         # Return user ID for deletion confirmation

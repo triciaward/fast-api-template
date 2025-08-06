@@ -224,7 +224,9 @@ class TestEmailService:
         # Mock user found with proper datetime
         mock_user = MagicMock()
         mock_user.id = "user-123"
-        mock_user.verification_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
+        mock_user.verification_token_expires = datetime.now(timezone.utc) + timedelta(
+            hours=1
+        )
         mock_get_user.return_value = mock_user
 
         email_service = EmailService()
@@ -314,7 +316,9 @@ class TestEmailService:
         # Mock user found with proper datetime
         mock_user = MagicMock()
         mock_user.id = "user-123"
-        mock_user.password_reset_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
+        mock_user.password_reset_token_expires = datetime.now(timezone.utc) + timedelta(
+            hours=1
+        )
         mock_get_user.return_value = mock_user
 
         email_service = EmailService()
@@ -426,7 +430,9 @@ class TestEmailService:
         # Mock user found with proper datetime
         mock_user = MagicMock()
         mock_user.id = "user-123"
-        mock_user.deletion_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
+        mock_user.deletion_token_expires = datetime.now(timezone.utc) + timedelta(
+            hours=1
+        )
         mock_get_user.return_value = mock_user
 
         email_service = EmailService()
@@ -469,7 +475,9 @@ class TestEmailServiceIntegration:
         mock_update_token.return_value = True
         mock_user = MagicMock()
         mock_user.id = "user-123"
-        mock_user.verification_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
+        mock_user.verification_token_expires = datetime.now(timezone.utc) + timedelta(
+            hours=1
+        )
         mock_get_user.return_value = mock_user
 
         email_service = EmailService()

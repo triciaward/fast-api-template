@@ -33,6 +33,7 @@ def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
     return datetime.now(timezone.utc)
 
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
 

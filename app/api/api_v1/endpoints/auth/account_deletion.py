@@ -25,6 +25,8 @@ router = APIRouter()
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated utc_now())."""
     return datetime.now(timezone.utc)
+
+
 logger = get_auth_logger()
 
 

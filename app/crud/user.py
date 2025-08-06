@@ -120,12 +120,14 @@ def get_user_by_id_sync(db: Session, user_id: str) -> Optional[User]:
     return result.scalar_one_or_none()
 
 
-def get_user_by_oauth_id_sync(db: Session, provider: str, oauth_id: str) -> Optional[User]:
+def get_user_by_oauth_id_sync(
+    db: Session, provider: str, oauth_id: str
+) -> Optional[User]:
     result = db.execute(
         select(User).filter(
             User.oauth_provider == provider,
             User.oauth_id == oauth_id,
-            User.is_deleted.is_(False)
+            User.is_deleted.is_(False),
         )
     )
     return result.scalar_one_or_none()
@@ -160,11 +162,11 @@ def verify_user_sync(db: Session, user_id: str) -> bool:
     user = get_user_by_id_sync(db, user_id)
     if not user:
         return False
-    
+
     user.is_verified = True  # type: ignore
     user.verification_token = None  # type: ignore
     user.verification_token_expires = None  # type: ignore
-    
+
     db.commit()
     return True
 
@@ -175,10 +177,10 @@ def update_verification_token_sync(
     user = get_user_by_id_sync(db, user_id)
     if not user:
         return False
-    
+
     user.verification_token = token  # type: ignore
     user.verification_token_expires = expires  # type: ignore
-    
+
     db.commit()
     return True
 
@@ -188,7 +190,7 @@ def get_user_by_verification_token_sync(db: Session, token: str) -> Optional[Use
         select(User).filter(
             User.verification_token == token,
             User.verification_token_expires > utc_now(),
-            User.is_deleted.is_(False)
+            User.is_deleted.is_(False),
         )
     )
     return result.scalar_one_or_none()
@@ -200,10 +202,10 @@ def update_password_reset_token_sync(
     user = get_user_by_id_sync(db, user_id)
     if not user:
         return False
-    
+
     user.password_reset_token = token  # type: ignore
     user.password_reset_token_expires = expires  # type: ignore
-    
+
     db.commit()
     return True
 
@@ -213,7 +215,7 @@ def get_user_by_password_reset_token_sync(db: Session, token: str) -> Optional[U
         select(User).filter(
             User.password_reset_token == token,
             User.password_reset_token_expires > utc_now(),
-            User.is_deleted.is_(False)
+            User.is_deleted.is_(False),
         )
     )
     return result.scalar_one_or_none()
@@ -223,11 +225,11 @@ def reset_user_password_sync(db: Session, user_id: str, new_password: str) -> bo
     user = get_user_by_id_sync(db, user_id)
     if not user:
         return False
-    
+
     user.hashed_password = get_password_hash(new_password)  # type: ignore
     user.password_reset_token = None  # type: ignore
     user.password_reset_token_expires = None  # type: ignore
-    
+
     db.commit()
     return True
 
@@ -236,9 +238,9 @@ def update_user_password_sync(db: Session, user_id: str, new_password: str) -> b
     user = get_user_by_id_sync(db, user_id)
     if not user:
         return False
-    
+
     user.hashed_password = get_password_hash(new_password)  # type: ignore
-    
+
     db.commit()
     return True
 
@@ -249,10 +251,10 @@ def update_deletion_token_sync(
     user = get_user_by_id_sync(db, user_id)
     if not user:
         return False
-    
+
     user.deletion_token = token  # type: ignore
     user.deletion_token_expires = expires  # type: ignore
-    
+
     db.commit()
     return True
 
@@ -262,20 +264,22 @@ def get_user_by_deletion_token_sync(db: Session, token: str) -> Optional[User]:
         select(User).filter(
             User.deletion_token == token,
             User.deletion_token_expires > utc_now(),
-            User.is_deleted.is_(False)
+            User.is_deleted.is_(False),
         )
     )
     return result.scalar_one_or_none()
 
 
-def schedule_user_deletion_sync(db: Session, user_id: str, scheduled_date: datetime) -> bool:
+def schedule_user_deletion_sync(
+    db: Session, user_id: str, scheduled_date: datetime
+) -> bool:
     user = get_user_by_id_sync(db, user_id)
     if not user:
         return False
-    
+
     user.deletion_scheduled_for = scheduled_date  # type: ignore
     user.deletion_requested_at = utc_now()  # type: ignore
-    
+
     db.commit()
     return True
 
@@ -284,9 +288,9 @@ def confirm_user_deletion_sync(db: Session, user_id: str) -> bool:
     user = get_user_by_id_sync(db, user_id)
     if not user:
         return False
-    
+
     user.deletion_confirmed_at = utc_now()  # type: ignore
-    
+
     db.commit()
     return True
 
@@ -295,13 +299,13 @@ def cancel_user_deletion_sync(db: Session, user_id: str) -> bool:
     user = get_user_by_id_sync(db, user_id)
     if not user:
         return False
-    
+
     user.deletion_scheduled_for = None  # type: ignore
     user.deletion_requested_at = None  # type: ignore
     user.deletion_confirmed_at = None  # type: ignore
     user.deletion_token = None  # type: ignore
     user.deletion_token_expires = None  # type: ignore
-    
+
     db.commit()
     return True
 
@@ -313,7 +317,7 @@ def get_users_for_deletion_reminder_sync(db: Session) -> list[User]:
         select(User).filter(
             User.deletion_scheduled_for <= reminder_date,
             User.deletion_scheduled_for > utc_now(),
-            User.is_deleted.is_(False)
+            User.is_deleted.is_(False),
         )
     )
     return result.scalars().all()
@@ -323,8 +327,7 @@ def get_users_for_permanent_deletion_sync(db: Session) -> list[User]:
     """Get users who should be permanently deleted."""
     result = db.execute(
         select(User).filter(
-            User.deletion_scheduled_for <= utc_now(),
-            User.is_deleted.is_(False)
+            User.deletion_scheduled_for <= utc_now(), User.is_deleted.is_(False)
         )
     )
     return result.scalars().all()
@@ -441,10 +444,10 @@ def soft_delete_user_sync(db: Session, user_id: str) -> bool:
     user = get_user_by_id_sync(db, user_id)
     if not user:
         return False
-    
+
     user.is_deleted = True  # type: ignore
     user.deleted_at = utc_now()  # type: ignore
-    
+
     db.commit()
     return True
 
@@ -454,10 +457,10 @@ def restore_user_sync(db: Session, user_id: str) -> bool:
     user = get_user_by_id_any_status_sync(db, user_id)
     if not user:
         return False
-    
+
     user.is_deleted = False  # type: ignore
     user.deleted_at = None  # type: ignore
-    
+
     db.commit()
     return True
 
@@ -467,7 +470,7 @@ def permanently_delete_user_sync(db: Session, user_id: str) -> bool:
     user = get_user_by_id_any_status_sync(db, user_id)
     if not user:
         return False
-    
+
     db.delete(user)
     db.commit()
     return True

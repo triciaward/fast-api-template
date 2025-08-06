@@ -209,12 +209,12 @@ class TestCORS:
         )
 
         # Verify the middleware options - handle different FastAPI versions
-        if hasattr(cors_middleware, 'options'):
+        if hasattr(cors_middleware, "options"):
             # Older FastAPI versions
             assert cors_middleware.options["allow_credentials"] is True
             assert cors_middleware.options["allow_methods"] == ["*"]
             assert cors_middleware.options["allow_headers"] == ["*"]
-            
+
             # Check that origins are properly configured
             expected_origins = settings.cors_origins_list
             assert cors_middleware.options["allow_origins"] == expected_origins

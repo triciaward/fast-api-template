@@ -412,11 +412,13 @@ class TestSessionManagement:
 
     @patch("app.crud.revoke_all_user_sessions")
     @patch("app.crud.get_refresh_token_by_hash")
-    async def test_revoke_all_sessions_except_one(self, mock_get_token, mock_revoke_all):
+    async def test_revoke_all_sessions_except_one(
+        self, mock_get_token, mock_revoke_all
+    ):
         """Test revocation of all sessions except one."""
         # Mock dependencies
         mock_revoke_all.return_value = 2
-        
+
         # Mock the token lookup
         mock_token = MagicMock()
         mock_token.id = uuid.uuid4()

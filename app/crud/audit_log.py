@@ -239,21 +239,17 @@ async def get_failed_audit_logs(
     return result.scalars().all()
 
 
-async def cleanup_old_audit_logs(
-    db: DBSession, days_to_keep: int = 90
-) -> int:
+async def cleanup_old_audit_logs(db: DBSession, days_to_keep: int = 90) -> int:
     """Clean up old audit logs."""
     cutoff_date = utc_now() - timedelta(days=days_to_keep)
-    
+
     if isinstance(db, AsyncSession):
         result = await db.execute(
             select(AuditLog).filter(AuditLog.timestamp < cutoff_date)
         )
         old_logs = result.scalars().all()
     else:
-        result = db.execute(
-            select(AuditLog).filter(AuditLog.timestamp < cutoff_date)
-        )
+        result = db.execute(select(AuditLog).filter(AuditLog.timestamp < cutoff_date))
         old_logs = result.scalars().all()
 
     count = 0
