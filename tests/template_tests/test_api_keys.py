@@ -104,7 +104,8 @@ class TestAPIKeyCRUD:
 
         # Get by hash - use the hash that was actually stored
         found_key = crud_api_key.get_api_key_by_hash_sync(
-            sync_db_session, api_key.key_hash  # type: ignore
+            sync_db_session,
+            api_key.key_hash,  # type: ignore
         )
 
         assert found_key is not None

@@ -380,9 +380,7 @@ class TestEmailVerificationIntegration:
 
             # Set verification token manually
             user.verification_token = "test_verification_token"  # type: ignore
-            user.verification_token_expires = datetime.utcnow() + timedelta(
-                hours=1
-            )  # type: ignore
+            user.verification_token_expires = datetime.utcnow() + timedelta(hours=1)  # type: ignore
             sync_db_session.commit()
 
         # Step 4: Verify email

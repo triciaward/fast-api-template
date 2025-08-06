@@ -44,7 +44,7 @@ class OAuthService:
         except Exception as e:
             raise HTTPException(
                 status_code=400, detail=f"Failed to get Google user info: {str(e)}"
-            )
+            ) from e
 
     async def verify_google_token(self, id_token: str) -> Optional[dict[str, Any]]:
         """Verify Google ID token."""
@@ -70,7 +70,7 @@ class OAuthService:
         except Exception as e:
             raise HTTPException(
                 status_code=400, detail=f"Failed to verify Google token: {str(e)}"
-            )
+            ) from e
 
     async def verify_apple_token(self, id_token: str) -> Optional[dict[str, Any]]:
         """Verify Apple ID token."""
@@ -104,7 +104,7 @@ class OAuthService:
         except Exception as e:
             raise HTTPException(
                 status_code=400, detail=f"Failed to verify Apple token: {str(e)}"
-            )
+            ) from e
 
     def get_oauth_provider_config(self, provider: str) -> dict[str, Any]:
         """Get OAuth provider configuration."""

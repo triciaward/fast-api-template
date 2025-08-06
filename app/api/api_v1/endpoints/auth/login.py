@@ -96,7 +96,7 @@ async def register_user(
             raise HTTPException(
                 status_code=400,
                 detail="Email already registered. Please use a different email or try logging in.",
-            )
+            ) from e
         elif (
             "ix_users_username" in error_message.lower()
             or "username" in error_message.lower()
@@ -108,7 +108,7 @@ async def register_user(
             raise HTTPException(
                 status_code=400,
                 detail="Username already taken. Please choose a different username.",
-            )
+            ) from e
         else:
             logger.error(
                 "Registration failed with integrity error",
@@ -120,7 +120,7 @@ async def register_user(
             raise HTTPException(
                 status_code=400,
                 detail="Registration failed due to a database constraint violation.",
-            )
+            ) from e
     except HTTPException:
         raise
     except Exception as e:
@@ -133,7 +133,7 @@ async def register_user(
         )
         raise HTTPException(
             status_code=500, detail="Registration failed. Please try again later."
-        )
+        ) from e
 
 
 @router.post("/login", response_model=Token)
@@ -219,7 +219,7 @@ async def login_user(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Login failed. Please try again later.",
-        )
+        ) from e
 
 
 @router.post("/oauth/login", response_model=Token)
@@ -379,7 +379,7 @@ async def oauth_login(
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(status_code=400, detail=f"OAuth login failed: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"OAuth login failed: {str(e)}") from e
 
 
 @router.get("/oauth/providers")

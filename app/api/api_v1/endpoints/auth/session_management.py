@@ -76,7 +76,7 @@ async def refresh_token(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Token refresh failed. Please try again later.",
-        )
+        ) from e
 
 
 @router.post("/logout")
@@ -160,7 +160,9 @@ async def get_user_sessions(
 
                 # Get all user sessions
         sessions = crud_get_user_sessions(
-            db, current_user.id, current_session_id  # type: ignore[arg-type]
+            db,
+            current_user.id,
+            current_session_id,  # type: ignore[arg-type]
         )
 
         # Convert to response format
@@ -196,7 +198,7 @@ async def get_user_sessions(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve sessions. Please try again later.",
-        )
+        ) from e
 
 
 @router.delete("/sessions/{session_id}")
@@ -218,12 +220,12 @@ async def revoke_session(
         # Validate session ID format
         try:
             session_uuid = uuid.UUID(session_id)
-        except ValueError:
+        except ValueError as e:
             logger.warning("Invalid session ID format", session_id=session_id)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid session ID format",
-            )
+            ) from e
 
         # Revoke the session
         success = revoke_refresh_token(db, session_uuid)
@@ -259,7 +261,7 @@ async def revoke_session(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to revoke session. Please try again later.",
-        )
+        ) from e
 
 
 @router.delete("/sessions")

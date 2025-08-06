@@ -107,7 +107,7 @@ async def get_celery_status() -> CeleryStatsResponse:
         return CeleryStatsResponse(**stats)
     except Exception as e:
         app_logger.error("Failed to get Celery status", error=str(e), exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to get Celery status")
+        raise HTTPException(status_code=500, detail="Failed to get Celery status") from e
 
 
 @router.post("/tasks/submit", response_model=TaskSubmitResponse)
@@ -160,7 +160,7 @@ async def submit_celery_task(
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(status_code=500, detail="Failed to submit task")
+        raise HTTPException(status_code=500, detail="Failed to submit task") from e
 
 
 @router.get("/tasks/{task_id}/status", response_model=TaskStatusResponse)
@@ -190,7 +190,7 @@ async def get_celery_task_status(
         app_logger.error(
             "Failed to get task status", task_id=task_id, error=str(e), exc_info=True
         )
-        raise HTTPException(status_code=500, detail="Failed to get task status")
+        raise HTTPException(status_code=500, detail="Failed to get task status") from e
 
 
 @router.delete("/tasks/{task_id}/cancel", response_model=TaskCancelResponse)
@@ -230,7 +230,7 @@ async def cancel_celery_task(
         app_logger.error(
             "Failed to cancel task", task_id=task_id, error=str(e), exc_info=True
         )
-        raise HTTPException(status_code=500, detail="Failed to cancel task")
+        raise HTTPException(status_code=500, detail="Failed to cancel task") from e
 
 
 @router.get("/tasks/active", response_model=list[ActiveTaskResponse])
@@ -250,7 +250,7 @@ async def get_active_celery_tasks(
 
     except Exception as e:
         app_logger.error("Failed to get active tasks", error=str(e), exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to get active tasks")
+        raise HTTPException(status_code=500, detail="Failed to get active tasks") from e
 
 
 # Convenience endpoints for common tasks
@@ -293,7 +293,7 @@ async def submit_email_task(
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(status_code=500, detail="Failed to submit email task")
+        raise HTTPException(status_code=500, detail="Failed to submit email task") from e
 
 
 @router.post("/tasks/process-data", response_model=TaskSubmitResponse)
@@ -335,7 +335,7 @@ async def submit_data_processing_task(
         )
         raise HTTPException(
             status_code=500, detail="Failed to submit data processing task"
-        )
+        ) from e
 
 
 @router.post("/tasks/cleanup", response_model=TaskSubmitResponse)
@@ -365,7 +365,7 @@ async def submit_cleanup_task(
         raise
     except Exception as e:
         app_logger.error("Failed to submit cleanup task", error=str(e), exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to submit cleanup task")
+        raise HTTPException(status_code=500, detail="Failed to submit cleanup task") from e
 
 
 @router.post("/tasks/long-running", response_model=TaskSubmitResponse)
@@ -407,7 +407,7 @@ async def submit_long_running_task(
         )
         raise HTTPException(
             status_code=500, detail="Failed to submit long-running task"
-        )
+        ) from e
 
 
 @router.post("/tasks/permanently-delete-accounts", response_model=TaskSubmitResponse)
@@ -452,4 +452,4 @@ async def submit_permanently_delete_accounts_task(
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(status_code=500, detail="Failed to submit task")
+        raise HTTPException(status_code=500, detail="Failed to submit task") from e

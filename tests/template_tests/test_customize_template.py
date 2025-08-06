@@ -188,7 +188,6 @@ class TestTemplateCustomization:
                 patch.object(customizer, "create_customization_log") as mock_create_log,
                 patch.object(customizer, "update_git_remote") as mock_update_git,
             ):
-
                 mock_get_files.return_value = [custom_project_root / "README.md"]
 
                 # Run the customization
@@ -211,7 +210,6 @@ class TestTemplateCustomization:
                 patch("builtins.print") as mock_print,
                 patch("builtins.input", return_value="y"),
             ):
-
                 # The script should exit when it detects template directory
                 with pytest.raises(SystemExit) as exc_info:
                     customizer.verify_directory_name()

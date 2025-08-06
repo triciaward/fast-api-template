@@ -590,7 +590,6 @@ class TestCRUDGenerator:
                     patch.object(generator, "update_api_router") as mock_update_router,
                     patch.object(generator, "_update_models_init") as mock_update_init,
                 ):
-
                     generator.create_files()
 
                     # Check that files were created

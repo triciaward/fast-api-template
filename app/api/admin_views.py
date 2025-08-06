@@ -117,11 +117,11 @@ async def admin_create_api_key(
                 expires_datetime = datetime.fromisoformat(
                     expires_at.replace("Z", "+00:00")
                 )
-            except ValueError:
+            except ValueError as e:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Invalid expiration date format",
-                )
+                ) from e
 
         # Create API key data
         api_key_data = APIKeyCreate(
@@ -154,7 +154,10 @@ async def admin_create_api_key(
 
         # Redirect with success message
         response = RedirectResponse(
-            url="/admin/api-keys?message=API key created successfully&message_type=success",
+            url=(
+                "/admin/api-keys?message=API key created successfully"
+                "&message_type=success"
+            ),
             status_code=status.HTTP_303_SEE_OTHER,
         )
         return response
@@ -170,7 +173,10 @@ async def admin_create_api_key(
 
         # Redirect with error message
         response = RedirectResponse(
-            url=f"/admin/api-keys?message=Failed to create API key: {str(e)}&message_type=danger",
+            url=(
+                f"/admin/api-keys?message=Failed to create API key: {str(e)}"
+                "&message_type=danger"
+            ),
             status_code=status.HTTP_303_SEE_OTHER,
         )
         return response
@@ -219,7 +225,11 @@ async def admin_rotate_api_key(
 
         # Redirect with success message
         response = RedirectResponse(
-            url=f"/admin/api-keys?message=API key '{api_key.label if api_key else 'Unknown'}' rotated successfully. New key: {new_raw_key}&message_type=success",
+            url=(
+                f"/admin/api-keys?message=API key "
+                f"'{api_key.label if api_key else 'Unknown'}' "
+                f"rotated successfully. New key: {new_raw_key}&message_type=success"
+            ),
             status_code=status.HTTP_303_SEE_OTHER,
         )
         return response
@@ -236,7 +246,10 @@ async def admin_rotate_api_key(
 
         # Redirect with error message
         response = RedirectResponse(
-            url=f"/admin/api-keys?message=Failed to rotate API key: {str(e)}&message_type=danger",
+            url=(
+                f"/admin/api-keys?message=Failed to rotate API key: {str(e)}"
+                "&message_type=danger"
+            ),
             status_code=status.HTTP_303_SEE_OTHER,
         )
         return response

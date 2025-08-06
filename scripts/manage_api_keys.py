@@ -27,18 +27,18 @@ def validate_uuid(uuid_string: str) -> str:
     try:
         UUID(uuid_string)
         return uuid_string
-    except ValueError:
-        raise argparse.ArgumentTypeError(f"'{uuid_string}' is not a valid UUID")
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(f"'{uuid_string}' is not a valid UUID") from e
 
 
 def validate_datetime(datetime_string: str) -> datetime:
     """Validate and parse a datetime string."""
     try:
         return datetime.fromisoformat(datetime_string.replace("Z", "+00:00"))
-    except ValueError:
+    except ValueError as e:
         raise argparse.ArgumentTypeError(
             f"'{datetime_string}' is not a valid datetime (use ISO format: YYYY-MM-DDTHH:MM:SS)"
-        )
+        ) from e
 
 
 def create_api_key(args: argparse.Namespace) -> None:

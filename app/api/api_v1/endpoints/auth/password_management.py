@@ -265,4 +265,4 @@ async def change_password(
         )
         raise HTTPException(
             status_code=500, detail="Password change failed. Please try again later."
-        )
+        ) from e
