@@ -1,7 +1,7 @@
 import base64
 import secrets
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Optional, Union
 
 from jose import jwt
 from passlib.context import CryptContext
@@ -17,7 +17,7 @@ def utc_now() -> datetime:
 
 
 def create_access_token(
-    subject: str | Any, expires_delta: timedelta | None = None
+    subject: Union[str, Any], expires_delta: Optional[timedelta] = None
 ) -> str:
     if expires_delta:
         expire = utc_now() + expires_delta
