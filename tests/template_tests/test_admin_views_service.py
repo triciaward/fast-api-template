@@ -6,7 +6,6 @@ Note: These tests are skipped due to complex mocking requirements.
 """
 
 
-
 class TestAdminViews:
     """Test admin views functionality."""
 
