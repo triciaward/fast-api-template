@@ -135,6 +135,12 @@ app.include_router(admin_html_router, prefix="/admin", tags=["admin-html"])
 
 @app.get("/")
 async def root() -> dict[str, str]:
+    """
+    Root endpoint for the FastAPI application.
+    
+    Returns:
+        dict: Welcome message with application information
+    """
     logger.info("Root endpoint accessed")
     return {"message": "Welcome to FastAPI Template"}
 
@@ -142,7 +148,12 @@ async def root() -> dict[str, str]:
 # Add feature status endpoint
 @app.get("/features")
 async def get_features() -> dict[str, bool]:
-    """Get the status of optional features."""
+    """
+    Get the status of optional features.
+    
+    Returns:
+        dict: Dictionary mapping feature names to their enabled status
+    """
     logger.info("Features endpoint accessed")
     return {
         "redis": settings.ENABLE_REDIS,

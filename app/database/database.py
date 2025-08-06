@@ -37,9 +37,13 @@ AsyncSessionLocal = async_sessionmaker(
 # Create sync engine for testing
 # Use test database URL if TESTING environment variable is set
 if os.getenv("TESTING") == "1":
-    sync_database_url = settings.DATABASE_URL.replace(
-        "fastapi_template", "fastapi_template_test"
-    )
+    # Check if the URL already contains the test database name
+    if "fastapi_template_test" in settings.DATABASE_URL:
+        sync_database_url = settings.DATABASE_URL
+    else:
+        sync_database_url = settings.DATABASE_URL.replace(
+            "fastapi_template", "fastapi_template_test"
+        )
 else:
     sync_database_url = settings.DATABASE_URL
 

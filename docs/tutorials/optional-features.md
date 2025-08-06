@@ -608,6 +608,9 @@ flowchart TD
 - **Referrer Policy**: Controls how much referrer information is sent with requests
 - **Permissions Policy**: Restricts browser features like camera, microphone, geolocation
 - **Strict Transport Security (HSTS)**: Forces HTTPS connections (production only)
+- **X-Download-Options**: Prevents automatic file downloads
+- **X-Permitted-Cross-Domain-Policies**: Controls cross-domain policy files
+- **X-DNS-Prefetch-Control**: Controls DNS prefetching behavior
 
 > **Security Headers Explained:**
 > - **CSP**: Tells the browser "only load scripts from trusted sources" to prevent malicious code injection
@@ -630,6 +633,9 @@ curl -I http://localhost:8000/
 # X-XSS-Protection: 1; mode=block
 # Referrer-Policy: strict-origin-when-cross-origin
 # Permissions-Policy: accelerometer=(), camera=(), microphone=()...
+# X-Download-Options: noopen
+# X-Permitted-Cross-Domain-Policies: none
+# X-DNS-Prefetch-Control: off
 ```
 
 ### Security Headers Configuration
@@ -715,13 +721,15 @@ HSTS_PRELOAD=false
 ### Security Headers Features
 
 - **Automatic Protection**: All responses get security headers automatically
-- **Request Size Validation**: Prevents large payload attacks (configurable limit)
-- **Content-Type Validation**: Ensures proper content types for each endpoint
-- **Security Event Logging**: Logs security violations for monitoring
+- **Request Size Validation**: Prevents large payload attacks with improved error handling (configurable limit)
+- **Content-Type Validation**: Ensures proper content types for each endpoint with detailed error messages
+- **Security Event Logging**: Logs security violations for monitoring with comprehensive event data
 - **Test Client Detection**: Automatically bypasses validation for testing scenarios
 - **Configurable CSP**: Customize content security policy for your needs
 - **HSTS Support**: Force HTTPS in production environments
 - **Cache Control**: Sensitive endpoints (auth) get no-cache headers
+- **Enhanced Error Handling**: Better validation with negative content-length detection and improved error messages
+- **Additional Security Headers**: X-Download-Options, X-Permitted-Cross-Domain-Policies, X-DNS-Prefetch-Control
 - **Comprehensive Coverage**: Protects against XSS, clickjacking, MIME sniffing, and more
 
 ### Security Headers Lifecycle

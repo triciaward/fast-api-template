@@ -49,6 +49,11 @@ This directory contains detailed troubleshooting guides for common issues you mi
   - Black formatter vs mypy type checker issues
   - IDE auto-formatting problems
   - Type ignore comment placement issues
+- **[Recent Template Improvements](./recent-improvements.md)** - Latest security and type safety enhancements
+  - Enhanced security headers with additional protection
+  - Improved type annotations and error handling
+  - Dependency updates and backward compatibility
+  - Performance impact and migration guide
 
 ## 🚀 Quick Solutions
 

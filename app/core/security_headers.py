@@ -7,10 +7,11 @@ These headers help protect against various security vulnerabilities.
 # fmt: on
 
 import logging
-from typing import Any
+from typing import Callable
 
-from fastapi import HTTPException, Request, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.types import ASGIApp
 
 from app.core.config import settings
 
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Middleware to add security headers to HTTP responses."""
 
-    def __init__(self, app: Any) -> None:
+    def __init__(self, app: ASGIApp) -> None:
         super().__init__(app)
         # Define allowed content types for different endpoints
         self.allowed_content_types = {
@@ -40,7 +41,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "/openapi.json": ["application/json"],
         }
 
-    async def dispatch(self, request: Request, call_next: Any) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Add security headers to the response and validate requests."""
 
         # Request Size Validation
@@ -64,7 +65,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "connect-src 'self' ws: wss:; "
             "frame-ancestors 'none'; "
             "base-uri 'self'; "
-            "form-action 'self'"
+            "form-action 'self'; "
+            "object-src 'none'; "
+            "media-src 'self'; "
+            "worker-src 'self'"
         )
         response.headers["Content-Security-Policy"] = csp_policy
 
@@ -83,6 +87,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # Referrer Policy
         # Controls how much referrer information is included with requests
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+        # Additional Security Headers
+        response.headers["X-Download-Options"] = "noopen"
+        response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
+        response.headers["X-DNS-Prefetch-Control"] = "off"
 
         # Permissions Policy (formerly Feature Policy)
         # Controls which browser features can be used
@@ -144,6 +153,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         if content_length:
             try:
                 size = int(content_length)
+                if size < 0:
+                    self._log_security_event(
+                        "invalid_content_length",
+                        f"Negative content-length header: {content_length}",
+                        request,
+                    )
+                    raise HTTPException(status_code=400, detail="Invalid content length")
+                
                 if size > settings.MAX_REQUEST_SIZE:
                     self._log_security_event(
                         "request_size_violation",
@@ -157,6 +174,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                     f"Invalid content-length header: {content_length}",
                     request,
                 )
+                raise HTTPException(status_code=400, detail="Invalid content length")
 
     async def _validate_content_type(self, request: Request) -> None:
         """Validate content type to prevent MIME confusion attacks."""
@@ -234,6 +252,6 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         logger.warning(f"Security event: {event_type} - {message}", extra=extra_data)
 
 
-def configure_security_headers(app: Any) -> None:
+def configure_security_headers(app: FastAPI) -> None:
     """Configure security headers middleware for the FastAPI app."""
     app.add_middleware(SecurityHeadersMiddleware)

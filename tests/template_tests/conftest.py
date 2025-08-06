@@ -11,6 +11,28 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
+# Load test environment variables FIRST
+try:
+    import dotenv
+    dotenv.load_dotenv(".env.test", override=True)
+    print("CI DEBUG: .env.test loaded successfully")
+except ImportError:
+    print("CI DEBUG: python-dotenv not available, using default test environment")
+except Exception as e:
+    print(f"CI DEBUG: Error loading .env.test: {e}")
+
+# Set environment variables for testing
+os.environ["ENABLE_CELERY"] = "true"
+os.environ["CELERY_TASK_ALWAYS_EAGER"] = "true"
+os.environ["CELERY_TASK_EAGER_PROPAGATES"] = "true"
+os.environ["TESTING"] = "1"
+
+# Clear config cache to force reload with new environment variables
+sys.modules.pop("app.core.config", None)
+sys.modules.pop("app.main", None)
+sys.modules.pop("app.api.api_v1.api", None)
+
+# Now import app AFTER environment variables are set
 from app.database.database import Base, get_db
 from app.main import app
 
@@ -21,28 +43,6 @@ if RUNNING_IN_CI:
     print("CI DEBUG: conftest.py module loaded")
     print("CI DEBUG: RUNNING_IN_CI =", RUNNING_IN_CI)
 
-
-# Set environment variables for testing
-os.environ["ENABLE_CELERY"] = "true"
-os.environ["CELERY_TASK_ALWAYS_EAGER"] = "true"
-os.environ["CELERY_TASK_EAGER_PROPAGATES"] = "true"
-
-# Clear config cache to force reload with new environment variables
-sys.modules.pop("app.core.config", None)
-sys.modules.pop("app.main", None)
-sys.modules.pop("app.api.api_v1.api", None)
-
-# Now import app AFTER environment variables are set
-
-
-# Try to load .env.test if it exists
-try:
-    import dotenv
-
-    dotenv.load_dotenv(dotenv_path=".env.test", override=True)
-except ImportError:
-    # Fallback if python-dotenv is not installed
-    pass
 
 # Verify environment variables are set
 print(f"ENABLE_CELERY: {os.getenv('ENABLE_CELERY')}")
@@ -60,7 +60,7 @@ SYNC_TEST_DATABASE_URL = os.getenv(
     "postgresql://postgres:dev_password_123@localhost:5432/fastapi_template_test",
 )
 
-# Create async engine for direct database tests
+# Create async engine for direct database tests with proper isolation
 test_engine = create_async_engine(
     TEST_DATABASE_URL,
     echo=False,
@@ -68,15 +68,26 @@ test_engine = create_async_engine(
     pool_size=5,
     max_overflow=10,
     pool_recycle=300,
+    # Ensure proper isolation
+    connect_args={
+        "server_settings": {
+            "application_name": "fastapi_template_test",
+            "jit": "off",
+        }
+    },
 )
 
-# Create sync engine for TestClient tests
+# Create sync engine for TestClient tests with proper isolation
 sync_test_engine = create_engine(
     SYNC_TEST_DATABASE_URL,
     echo=False,
     pool_pre_ping=False,
     pool_size=5,
     max_overflow=10,
+    # Ensure proper isolation
+    connect_args={
+        "application_name": "fastapi_template_test"
+    },
 )
 
 # Create session makers
@@ -210,11 +221,8 @@ async def db_session(setup_test_db: None) -> AsyncGenerator[AsyncSession, None]:
                 try:
                     await session.execute(text("DELETE FROM users"))
                     await session.commit()
-                except Exception as e:
-                    # If async database doesn't have tables, that's okay
-                    print(
-                        f"CI DEBUG: Async cleanup failed (expected if no tables): {e}"
-                    )
+                except Exception:
+                    # Final fallback - just rollback
                     await session.rollback()
 
 
