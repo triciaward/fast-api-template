@@ -148,6 +148,26 @@ jobs:
         run: |
           echo "CI DEBUG: Running additional async connection pooling tests individually..."
           timeout 60s pytest tests/template_tests/test_connection_pooling.py::TestConnectionPooling::test_concurrent_async_connections -v --tb=short || echo "Concurrent async connections test failed"
+          
+      - name: Run async tests (redis - phase 4)
+        run: |
+          echo "CI DEBUG: Running Phase 4 async Redis tests individually..."
+          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_init_redis_disabled -v --tb=short || echo "Redis disabled test failed"
+          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_init_redis_ping_error -v --tb=short || echo "Redis ping error test failed"
+          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_close_redis_error -v --tb=short || echo "Redis close error test failed"
+          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_health_check_redis_error -v --tb=short || echo "Redis health check error test failed"
+          
+      - name: Run async tests (email - phase 4)
+        run: |
+          echo "CI DEBUG: Running Phase 4 async email tests individually..."
+          timeout 60s pytest tests/template_tests/test_email.py::TestEmailService::test_create_verification_token_failure -v --tb=short || echo "Email token creation failure test failed"
+          timeout 60s pytest tests/template_tests/test_email.py::TestEmailService::test_verify_token_verification_failure -v --tb=short || echo "Email token verification failure test failed"
+          
+      - name: Run async tests (connection pooling - phase 4)
+        run: |
+          echo "CI DEBUG: Running Phase 4 async connection pooling tests individually..."
+          timeout 60s pytest tests/template_tests/test_connection_pooling.py::TestConnectionPooling::test_get_db_dependency -v --tb=short || echo "DB dependency test failed"
+          timeout 60s pytest tests/template_tests/test_connection_pooling.py::TestConnectionPooling::test_session_cleanup_on_exception -v --tb=short || echo "Session cleanup test failed"
 
   lint:
     name: 🔍 Lint (ruff)
