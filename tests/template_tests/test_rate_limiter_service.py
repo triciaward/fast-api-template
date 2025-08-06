@@ -71,6 +71,10 @@ class TestRateLimiterInitialization:
         mock_limiter_instance = MagicMock()
         mock_limiter.return_value = mock_limiter_instance
 
+        # Reset the global limiter for this test
+        import app.services.rate_limiter as rate_limiter_module
+        rate_limiter_module.limiter = None
+
         # Test limiter creation
         result = get_limiter()
 
@@ -97,6 +101,10 @@ class TestRateLimiterInitialization:
         # Mock Limiter
         mock_limiter_instance = MagicMock()
         mock_limiter.return_value = mock_limiter_instance
+
+        # Reset the global limiter for this test
+        import app.services.rate_limiter as rate_limiter_module
+        rate_limiter_module.limiter = None
 
         # Test limiter creation
         result = get_limiter()
