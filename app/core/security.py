@@ -1,6 +1,6 @@
 import base64
 import secrets
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from jose import jwt
@@ -13,7 +13,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 def create_access_token(
