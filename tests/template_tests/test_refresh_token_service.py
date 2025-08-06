@@ -250,7 +250,7 @@ class TestSessionManagement:
         """Test successful user session creation."""
         # Mock settings
         mock_settings.ACCESS_TOKEN_EXPIRE_MINUTES = 15
-        
+
         # Mock dependencies
         mock_create_access.return_value = "access_token_123"
         mock_create_refresh.return_value = "refresh_token_456"
@@ -291,11 +291,13 @@ class TestSessionManagement:
     @patch("app.services.refresh_token.settings")
     @patch("app.services.refresh_token.verify_refresh_token_in_db")
     @patch("app.services.refresh_token.create_access_token")
-    def test_refresh_access_token_success(self, mock_create_access, mock_verify_token, mock_settings):
+    def test_refresh_access_token_success(
+        self, mock_create_access, mock_verify_token, mock_settings
+    ):
         """Test successful access token refresh."""
         # Mock settings
         mock_settings.ACCESS_TOKEN_EXPIRE_MINUTES = 15
-        
+
         # Mock dependencies
         mock_create_access.return_value = "new_access_token_123"
         mock_refresh_token = MagicMock()
