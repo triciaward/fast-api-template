@@ -114,6 +114,23 @@ jobs:
           echo "CI DEBUG: Running async model tests individually..."
           timeout 60s pytest tests/template_tests/test_models.py::TestUserModel::test_user_model_unique_username -v --tb=short || echo "Model unique username test failed"
           timeout 60s pytest tests/template_tests/test_models.py::TestUserModel::test_user_model_auto_generated_fields -v --tb=short || echo "Model auto generated test failed"
+          
+      - name: Run async tests (redis - individual)
+        run: |
+          echo "CI DEBUG: Running async Redis tests individually..."
+          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_init_redis_success -v --tb=short || echo "Redis init test failed"
+          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_health_check_redis_success -v --tb=short || echo "Redis health check test failed"
+          
+      - name: Run async tests (email - individual)
+        run: |
+          echo "CI DEBUG: Running async email tests individually..."
+          timeout 60s pytest tests/template_tests/test_email.py::TestEmailService::test_create_verification_token_success -v --tb=short || echo "Email verification token test failed"
+          timeout 60s pytest tests/template_tests/test_email.py::TestEmailService::test_verify_token_success -v --tb=short || echo "Email token verification test failed"
+          
+      - name: Run async tests (rate limiting - individual)
+        run: |
+          echo "CI DEBUG: Running async rate limiting tests individually..."
+          timeout 60s pytest tests/template_tests/test_rate_limiting.py::TestRateLimitingIntegration::test_init_rate_limiter -v --tb=short || echo "Rate limiter init test failed"
 
   lint:
     name: 🔍 Lint (ruff)
