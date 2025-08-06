@@ -98,9 +98,7 @@ class TestDeviceInfoExtraction:
     def test_get_device_info_non_mozilla(self):
         """Test non-Mozilla user agent."""
         mock_request = MagicMock()
-        mock_request.headers = {
-            "user-agent": "curl/7.68.0"
-        }
+        mock_request.headers = {"user-agent": "curl/7.68.0"}
 
         result = get_device_info(mock_request)
         assert result == "Unknown Device"
@@ -123,9 +121,7 @@ class TestClientIPExtraction:
     def test_get_client_ip_x_real_ip(self):
         """Test IP extraction from X-Real-IP header."""
         mock_request = MagicMock()
-        mock_request.headers = {
-            "x-real-ip": "203.0.113.1"
-        }
+        mock_request.headers = {"x-real-ip": "203.0.113.1"}
         mock_request.client = None
 
         result = get_client_ip(mock_request)
@@ -156,7 +152,7 @@ class TestClientIPExtraction:
         mock_request = MagicMock()
         mock_request.headers = {
             "x-forwarded-for": "192.168.1.100",
-            "x-real-ip": "203.0.113.1"
+            "x-real-ip": "203.0.113.1",
         }
         mock_request.client = None
 
@@ -245,7 +241,12 @@ class TestSessionManagement:
     @patch("app.services.refresh_token.get_device_info")
     @patch("app.services.refresh_token.get_client_ip")
     def test_create_user_session_success(
-        self, mock_get_ip, mock_get_device, mock_create_refresh, mock_create_access, mock_crud_create
+        self,
+        mock_get_ip,
+        mock_get_device,
+        mock_create_refresh,
+        mock_create_access,
+        mock_crud_create,
     ):
         """Test successful user session creation."""
         # Mock dependencies
@@ -268,14 +269,18 @@ class TestSessionManagement:
         mock_db = MagicMock()
 
         # Test session creation
-        access_token, refresh_token = create_user_session(mock_db, mock_user, mock_request)
+        access_token, refresh_token = create_user_session(
+            mock_db, mock_user, mock_request
+        )
 
         # Verify results
         assert access_token == "access_token_123"
         assert refresh_token == "refresh_token_456"
 
         # Verify function calls
-        mock_create_access.assert_called_once_with(subject="test@example.com", expires_delta=timedelta(minutes=15))
+        mock_create_access.assert_called_once_with(
+            subject="test@example.com", expires_delta=timedelta(minutes=15)
+        )
         mock_create_refresh.assert_called_once_with()
         mock_get_device.assert_called_once_with(mock_request)
         mock_get_ip.assert_called_once_with(mock_request)
@@ -311,7 +316,9 @@ class TestSessionManagement:
 
         # Verify function calls
         mock_verify_token.assert_called_once_with(mock_db, "valid_refresh_token")
-        mock_create_access.assert_called_once_with(subject="test@example.com", expires_delta=timedelta(minutes=15))
+        mock_create_access.assert_called_once_with(
+            subject="test@example.com", expires_delta=timedelta(minutes=15)
+        )
 
     @patch("app.services.refresh_token.verify_refresh_token_in_db")
     def test_refresh_access_token_invalid(self, mock_verify_token):
@@ -441,7 +448,12 @@ class TestRefreshTokenIntegration:
     @patch("app.services.refresh_token.verify_refresh_token_in_db")
     @patch("app.crud.revoke_refresh_token")
     def test_complete_refresh_token_lifecycle(
-        self, mock_revoke, mock_verify, mock_create_refresh, mock_create_access, mock_crud_create
+        self,
+        mock_revoke,
+        mock_verify,
+        mock_create_refresh,
+        mock_create_access,
+        mock_crud_create,
     ):
         """Test complete refresh token lifecycle."""
         # Mock dependencies for session creation
@@ -473,7 +485,9 @@ class TestRefreshTokenIntegration:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         # Test 1: Create session
-        access_token, refresh_token = create_user_session(mock_db, mock_user, mock_request)
+        access_token, refresh_token = create_user_session(
+            mock_db, mock_user, mock_request
+        )
         assert access_token == "access_token_123"
         assert refresh_token == "refresh_token_456"
 
@@ -489,5 +503,7 @@ class TestRefreshTokenIntegration:
         # Verify all function calls
         mock_create_access.assert_called()
         mock_create_refresh.assert_called()
-        assert mock_verify.call_count == 2  # Called in refresh_access_token and revoke_session
-        mock_revoke.assert_called_once() 
+        assert (
+            mock_verify.call_count == 2
+        )  # Called in refresh_access_token and revoke_session
+        mock_revoke.assert_called_once()

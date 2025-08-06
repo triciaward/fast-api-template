@@ -25,4 +25,4 @@ class TestAdminViews:
 
     def test_admin_revoke_api_key_placeholder(self):
         """Placeholder test for admin revoke API key."""
-        assert True  # Admin views tests need complex mocking setup 
+        assert True  # Admin views tests need complex mocking setup

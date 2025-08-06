@@ -152,9 +152,7 @@ class TestCeleryTasks:
 
     @patch("app.database.database.get_db_sync")
     @patch("app.core.logging_config.get_app_logger")
-    def test_permanently_delete_accounts_task_exception(
-        self, mock_logger, mock_get_db
-    ):
+    def test_permanently_delete_accounts_task_exception(self, mock_logger, mock_get_db):
         """Test permanently_delete_accounts_task with database exception."""
         # Mock database to raise exception
         mock_get_db.side_effect = Exception("Database error")
@@ -185,7 +183,10 @@ class TestCeleryTaskRegistration:
         assert "app.services.celery_tasks.cleanup_task" in celery_app.tasks
         assert "app.services.celery_tasks.long_running_task" in celery_app.tasks
         assert "app.services.celery_tasks.periodic_health_check" in celery_app.tasks
-        assert "app.services.celery_tasks.permanently_delete_accounts_task" in celery_app.tasks
+        assert (
+            "app.services.celery_tasks.permanently_delete_accounts_task"
+            in celery_app.tasks
+        )
 
     def test_task_names_match_registration(self):
         """Test that task names match their registration names."""
@@ -193,5 +194,11 @@ class TestCeleryTaskRegistration:
         assert process_data_task.name == "app.services.celery_tasks.process_data_task"
         assert cleanup_task.name == "app.services.celery_tasks.cleanup_task"
         assert long_running_task.name == "app.services.celery_tasks.long_running_task"
-        assert periodic_health_check.name == "app.services.celery_tasks.periodic_health_check"
-        assert permanently_delete_accounts_task.name == "app.services.celery_tasks.permanently_delete_accounts_task" 
+        assert (
+            periodic_health_check.name
+            == "app.services.celery_tasks.periodic_health_check"
+        )
+        assert (
+            permanently_delete_accounts_task.name
+            == "app.services.celery_tasks.permanently_delete_accounts_task"
+        )

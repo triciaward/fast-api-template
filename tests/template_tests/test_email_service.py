@@ -17,7 +17,7 @@ class TestEmailService:
     def test_email_service_initialization(self):
         """Test Email service initialization."""
         email_service = EmailService()
-        
+
         # Verify SMTP config is set
         assert "host" in email_service.smtp_config
         assert "port" in email_service.smtp_config
@@ -146,7 +146,9 @@ class TestEmailService:
 
     @patch("app.services.email.settings")
     @patch("app.services.email.emails.Message")
-    def test_send_verification_email_send_error(self, mock_message_class, mock_settings):
+    def test_send_verification_email_send_error(
+        self, mock_message_class, mock_settings
+    ):
         """Test verification email sending with send error."""
         # Mock settings
         mock_settings.SMTP_USERNAME = "test@example.com"
@@ -173,7 +175,9 @@ class TestEmailService:
 
     @patch("app.services.email.settings")
     @patch("app.services.email.crud_user.update_verification_token_sync")
-    async def test_create_verification_token_success(self, mock_update_token, mock_settings):
+    async def test_create_verification_token_success(
+        self, mock_update_token, mock_settings
+    ):
         """Test successful verification token creation."""
         # Mock settings
         mock_settings.VERIFICATION_TOKEN_EXPIRE_HOURS = 24
@@ -198,7 +202,9 @@ class TestEmailService:
 
     @patch("app.services.email.settings")
     @patch("app.services.email.crud_user.update_verification_token_sync")
-    async def test_create_verification_token_db_error(self, mock_update_token, mock_settings):
+    async def test_create_verification_token_db_error(
+        self, mock_update_token, mock_settings
+    ):
         """Test verification token creation with database error."""
         # Mock settings
         mock_settings.VERIFICATION_TOKEN_EXPIRE_HOURS = 24
@@ -282,7 +288,9 @@ class TestEmailService:
 
     @patch("app.services.email.settings")
     @patch("app.services.email.crud_user.update_password_reset_token_sync")
-    async def test_create_password_reset_token_success(self, mock_update_token, mock_settings):
+    async def test_create_password_reset_token_success(
+        self, mock_update_token, mock_settings
+    ):
         """Test successful password reset token creation."""
         # Mock settings
         mock_settings.PASSWORD_RESET_TOKEN_EXPIRE_HOURS = 1
@@ -319,7 +327,9 @@ class TestEmailService:
 
     @patch("app.services.email.settings")
     @patch("app.services.email.emails.Message")
-    def test_send_account_deletion_email_success(self, mock_message_class, mock_settings):
+    def test_send_account_deletion_email_success(
+        self, mock_message_class, mock_settings
+    ):
         """Test successful account deletion email sending."""
         # Mock settings
         mock_settings.SMTP_USERNAME = "test@example.com"
@@ -354,7 +364,9 @@ class TestEmailService:
 
     @patch("app.services.email.settings")
     @patch("app.services.email.emails.Message")
-    def test_send_account_deletion_reminder_email_success(self, mock_message_class, mock_settings):
+    def test_send_account_deletion_reminder_email_success(
+        self, mock_message_class, mock_settings
+    ):
         """Test successful account deletion reminder email sending."""
         # Mock settings
         mock_settings.SMTP_USERNAME = "test@example.com"
@@ -388,7 +400,9 @@ class TestEmailService:
 
     @patch("app.services.email.settings")
     @patch("app.services.email.crud_user.update_deletion_token_sync")
-    async def test_create_deletion_token_success(self, mock_update_token, mock_settings):
+    async def test_create_deletion_token_success(
+        self, mock_update_token, mock_settings
+    ):
         """Test successful deletion token creation."""
         # Mock settings
         mock_settings.ACCOUNT_DELETION_TOKEN_EXPIRE_HOURS = 24
@@ -474,4 +488,4 @@ class TestEmailServiceIntegration:
 
         # Test token verification
         user_id = await email_service.verify_token(mock_db, token)
-        assert user_id == "user-123" 
+        assert user_id == "user-123"

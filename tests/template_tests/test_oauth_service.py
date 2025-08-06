@@ -7,6 +7,7 @@ This module tests the OAuth service functionality including Google and Apple tok
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 import time
+
 # Import jwt only when needed to avoid import issues
 # import jwt
 
@@ -44,7 +45,9 @@ class TestOAuthServiceInitialization:
     @patch("app.services.oauth.settings")
     @patch("app.services.oauth.OAuth")
     @patch("app.services.oauth.Config")
-    def test_oauth_service_initialization_no_google_config(self, mock_config, mock_oauth, mock_settings):
+    def test_oauth_service_initialization_no_google_config(
+        self, mock_config, mock_oauth, mock_settings
+    ):
         """Test OAuth service initialization without Google configuration."""
         # Mock settings - no Google config
         mock_settings.GOOGLE_CLIENT_ID = None
@@ -82,7 +85,7 @@ class TestGoogleOAuth:
             "id": "google_user_id",
             "email": "user@gmail.com",
             "name": "Test User",
-            "picture": "https://example.com/avatar.jpg"
+            "picture": "https://example.com/avatar.jpg",
         }
         mock_response.raise_for_status.return_value = None
         mock_client_instance.get.return_value = mock_response
@@ -101,7 +104,7 @@ class TestGoogleOAuth:
         # Verify HTTP call
         mock_client_instance.get.assert_called_once_with(
             "https://www.googleapis.com/oauth2/v2/userinfo",
-            headers={"Authorization": "Bearer valid_access_token"}
+            headers={"Authorization": "Bearer valid_access_token"},
         )
 
     @patch("app.services.oauth.settings")
@@ -156,7 +159,7 @@ class TestGoogleOAuth:
             "aud": "google_client_id",
             "sub": "google_user_id",
             "email": "user@gmail.com",
-            "exp": int(time.time()) + 3600  # Valid expiration
+            "exp": int(time.time()) + 3600,  # Valid expiration
         }
         mock_response.raise_for_status.return_value = None
         mock_client_instance.get.return_value = mock_response
@@ -174,7 +177,7 @@ class TestGoogleOAuth:
         # Verify HTTP call
         mock_client_instance.get.assert_called_once_with(
             "https://oauth2.googleapis.com/tokeninfo",
-            params={"id_token": "valid_id_token"}
+            params={"id_token": "valid_id_token"},
         )
 
     @patch("app.services.oauth.settings")
@@ -194,7 +197,9 @@ class TestGoogleOAuth:
 
     @patch("app.services.oauth.settings")
     @patch("app.services.oauth.httpx.AsyncClient")
-    async def test_verify_google_token_invalid_audience(self, mock_client, mock_settings):
+    async def test_verify_google_token_invalid_audience(
+        self, mock_client, mock_settings
+    ):
         """Test Google token verification with invalid audience."""
         # Mock settings
         mock_settings.GOOGLE_CLIENT_ID = "google_client_id"
@@ -205,7 +210,7 @@ class TestGoogleOAuth:
         mock_response.json.return_value = {
             "aud": "different_client_id",  # Wrong audience
             "sub": "google_user_id",
-            "email": "user@gmail.com"
+            "email": "user@gmail.com",
         }
         mock_response.raise_for_status.return_value = None
         mock_client_instance.get.return_value = mock_response
@@ -262,7 +267,7 @@ class TestAppleOAuth:
             "aud": "apple_client_id",
             "sub": "apple_user_id",
             "email": "user@example.com",
-            "exp": int(time.time()) + 3600  # Valid expiration
+            "exp": int(time.time()) + 3600,  # Valid expiration
         }
 
         # Test token verification
@@ -276,8 +281,7 @@ class TestAppleOAuth:
 
         # Verify JWT decode call
         mock_jwt_decode.assert_called_once_with(
-            "valid_id_token", 
-            options={"verify_signature": False}
+            "valid_id_token", options={"verify_signature": False}
         )
 
     @patch("app.services.oauth.settings")
@@ -300,7 +304,9 @@ class TestAppleOAuth:
 
     @patch("app.services.oauth.settings")
     @patch("app.services.oauth.jwt.decode")
-    async def test_verify_apple_token_invalid_audience(self, mock_jwt_decode, mock_settings):
+    async def test_verify_apple_token_invalid_audience(
+        self, mock_jwt_decode, mock_settings
+    ):
         """Test Apple token verification with invalid audience."""
         # Mock settings
         mock_settings.APPLE_CLIENT_ID = "apple_client_id"
@@ -313,7 +319,7 @@ class TestAppleOAuth:
             "aud": "different_client_id",  # Wrong audience
             "sub": "apple_user_id",
             "email": "user@example.com",
-            "exp": int(time.time()) + 3600
+            "exp": int(time.time()) + 3600,
         }
 
         # Test token verification
@@ -340,7 +346,7 @@ class TestAppleOAuth:
             "aud": "apple_client_id",
             "sub": "apple_user_id",
             "email": "user@example.com",
-            "exp": int(time.time()) - 3600  # Expired
+            "exp": int(time.time()) - 3600,  # Expired
         }
 
         # Test token verification
@@ -391,7 +397,10 @@ class TestOAuthProviderConfiguration:
 
         # Verify config
         assert config["client_id"] == "google_client_id"
-        assert config["authorization_url"] == "https://accounts.google.com/o/oauth2/v2/auth"
+        assert (
+            config["authorization_url"]
+            == "https://accounts.google.com/o/oauth2/v2/auth"
+        )
         assert config["token_url"] == "https://oauth2.googleapis.com/token"
         assert config["userinfo_url"] == "https://www.googleapis.com/oauth2/v2/userinfo"
         assert config["scope"] == "openid email profile"
@@ -504,7 +513,9 @@ class TestOAuthIntegration:
     @patch("app.services.oauth.settings")
     @patch("app.services.oauth.httpx.AsyncClient")
     @patch("app.services.oauth.jwt.decode")
-    async def test_oauth_lifecycle_google(self, mock_jwt_decode, mock_client, mock_settings):
+    async def test_oauth_lifecycle_google(
+        self, mock_jwt_decode, mock_client, mock_settings
+    ):
         """Test complete Google OAuth lifecycle."""
         # Mock settings
         mock_settings.GOOGLE_CLIENT_ID = "google_client_id"
@@ -512,26 +523,26 @@ class TestOAuthIntegration:
 
         # Mock HTTP client with different responses for different calls
         mock_client_instance = AsyncMock()
-        
+
         # First call: token verification response
         token_response = MagicMock()
         token_response.json.return_value = {
             "aud": "google_client_id",
             "sub": "google_user_id",
             "email": "user@gmail.com",
-            "exp": int(time.time()) + 3600
+            "exp": int(time.time()) + 3600,
         }
         token_response.raise_for_status.return_value = None
-        
+
         # Second call: user info response
         user_info_response = MagicMock()
         user_info_response.json.return_value = {
             "id": "google_user_id",
             "email": "user@gmail.com",
-            "name": "Test User"
+            "name": "Test User",
         }
         user_info_response.raise_for_status.return_value = None
-        
+
         # Set up the mock to return different responses for different calls
         mock_client_instance.get.side_effect = [token_response, user_info_response]
         mock_client.return_value.__aenter__.return_value = mock_client_instance
@@ -558,7 +569,9 @@ class TestOAuthIntegration:
         assert user_info["email"] == "user@gmail.com"
 
         # Verify all calls were made
-        assert mock_client_instance.get.call_count == 2  # Once for token verification, once for user info
+        assert (
+            mock_client_instance.get.call_count == 2
+        )  # Once for token verification, once for user info
 
     @patch("app.services.oauth.settings")
     @patch("app.services.oauth.jwt.decode")
@@ -575,7 +588,7 @@ class TestOAuthIntegration:
             "aud": "apple_client_id",
             "sub": "apple_user_id",
             "email": "user@example.com",
-            "exp": int(time.time()) + 3600
+            "exp": int(time.time()) + 3600,
         }
 
         # Test OAuth service
@@ -595,4 +608,4 @@ class TestOAuthIntegration:
         assert token_data["sub"] == "apple_user_id"
 
         # Verify JWT decode was called
-        mock_jwt_decode.assert_called_once() 
+        mock_jwt_decode.assert_called_once()

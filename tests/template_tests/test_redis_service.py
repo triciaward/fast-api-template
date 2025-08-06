@@ -66,7 +66,9 @@ class TestRedisService:
 
     @patch("app.services.redis.settings")
     @patch("app.services.redis.redis.from_url")
-    async def test_init_redis_connection_error(self, mock_redis_from_url, mock_settings):
+    async def test_init_redis_connection_error(
+        self, mock_redis_from_url, mock_settings
+    ):
         """Test Redis initialization with connection error."""
         # Mock settings
         mock_settings.ENABLE_REDIS = True
@@ -105,9 +107,10 @@ class TestRedisService:
         # Mock Redis client
         mock_client = AsyncMock()
         mock_client.close = AsyncMock()
-        
+
         # Temporarily set the global client
         import app.services.redis as redis_module
+
         original_client = redis_module.redis_client
         redis_module.redis_client = mock_client
 
@@ -126,9 +129,10 @@ class TestRedisService:
         # Mock Redis client
         mock_client = AsyncMock()
         mock_client.close = AsyncMock(side_effect=Exception("Close failed"))
-        
+
         # Temporarily set the global client
         import app.services.redis as redis_module
+
         original_client = redis_module.redis_client
         redis_module.redis_client = mock_client
 
@@ -155,9 +159,10 @@ class TestRedisService:
         """Test getting Redis client when available."""
         # Mock Redis client
         mock_client = MagicMock()
-        
+
         # Temporarily set the global client
         import app.services.redis as redis_module
+
         original_client = redis_module.redis_client
         redis_module.redis_client = mock_client
 
@@ -175,6 +180,7 @@ class TestRedisService:
         """Test getting Redis client when not available."""
         # Mock no Redis client
         import app.services.redis as redis_module
+
         original_client = redis_module.redis_client
         redis_module.redis_client = None
 
@@ -193,9 +199,10 @@ class TestRedisService:
         # Mock Redis client
         mock_client = AsyncMock()
         mock_client.ping = AsyncMock()
-        
+
         # Temporarily set the global client
         import app.services.redis as redis_module
+
         original_client = redis_module.redis_client
         redis_module.redis_client = mock_client
 
@@ -229,9 +236,10 @@ class TestRedisService:
         # Mock Redis client
         mock_client = AsyncMock()
         mock_client.ping = AsyncMock(side_effect=Exception("Health check failed"))
-        
+
         # Temporarily set the global client
         import app.services.redis as redis_module
+
         original_client = redis_module.redis_client
         redis_module.redis_client = mock_client
 
@@ -297,4 +305,4 @@ class TestRedisServiceIntegration:
 
         # Test getting client
         client_result = get_redis_client()
-        assert client_result is None 
+        assert client_result is None
