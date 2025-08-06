@@ -14,6 +14,7 @@ from sqlalchemy.orm import sessionmaker
 # Load test environment variables FIRST
 try:
     import dotenv
+
     dotenv.load_dotenv(".env.test", override=True)
     print("CI DEBUG: .env.test loaded successfully")
 except ImportError:
@@ -85,9 +86,7 @@ sync_test_engine = create_engine(
     pool_size=5,
     max_overflow=10,
     # Ensure proper isolation
-    connect_args={
-        "application_name": "fastapi_template_test"
-    },
+    connect_args={"application_name": "fastapi_template_test"},
 )
 
 # Create session makers

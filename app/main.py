@@ -137,7 +137,7 @@ app.include_router(admin_html_router, prefix="/admin", tags=["admin-html"])
 async def root() -> dict[str, str]:
     """
     Root endpoint for the FastAPI application.
-    
+
     Returns:
         dict: Welcome message with application information
     """
@@ -150,7 +150,7 @@ async def root() -> dict[str, str]:
 async def get_features() -> dict[str, bool]:
     """
     Get the status of optional features.
-    
+
     Returns:
         dict: Dictionary mapping feature names to their enabled status
     """
