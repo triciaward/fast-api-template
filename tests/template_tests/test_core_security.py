@@ -4,22 +4,21 @@ Tests for Core Security module.
 This module tests the security functionality including password hashing, JWT token creation, refresh tokens, and API key management.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
+from unittest.mock import patch
+
 import jwt
-from jose import jwt as jose_jwt
 
 from app.core.security import (
     create_access_token,
-    verify_password,
-    get_password_hash,
     create_refresh_token,
-    hash_refresh_token,
-    verify_refresh_token,
     generate_api_key,
+    get_password_hash,
     hash_api_key,
+    hash_refresh_token,
     verify_api_key,
+    verify_password,
+    verify_refresh_token,
 )
 
 

@@ -4,9 +4,8 @@ Tests for Email service.
 This module tests the Email service functionality including email sending, token generation, and verification.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 from datetime import datetime, timedelta
+from unittest.mock import MagicMock, patch
 
 from app.services.email import EmailService
 

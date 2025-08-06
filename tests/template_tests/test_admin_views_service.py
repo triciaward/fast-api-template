@@ -5,7 +5,6 @@ This module tests the admin HTML views functionality including API key managemen
 Note: These tests are skipped due to complex mocking requirements.
 """
 
-import pytest
 
 
 class TestAdminViews:

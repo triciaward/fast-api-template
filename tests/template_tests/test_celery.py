@@ -4,17 +4,16 @@ Tests for Celery services.
 This module tests the Celery app configuration and task definitions.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from app.services.celery_app import celery_app
 from app.services.celery_tasks import (
-    send_email_task,
-    process_data_task,
     cleanup_task,
     long_running_task,
     periodic_health_check,
     permanently_delete_accounts_task,
+    process_data_task,
+    send_email_task,
 )
 
 

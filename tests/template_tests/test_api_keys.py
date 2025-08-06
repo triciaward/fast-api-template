@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from app.core.security import generate_api_key, hash_api_key, verify_api_key
 from app.crud import api_key as crud_api_key

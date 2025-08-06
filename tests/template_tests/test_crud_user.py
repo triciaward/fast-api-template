@@ -4,50 +4,47 @@ Tests for CRUD User operations.
 This module tests the user CRUD functionality including user creation, authentication, OAuth operations, and user management.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 from datetime import datetime, timedelta
-import uuid
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from app.crud.user import (
-    get_user_by_email,
-    get_user_by_username,
-    create_user,
     authenticate_user,
-    get_user_by_oauth_id,
-    create_oauth_user,
-    get_user_by_email_sync,
-    get_user_by_username_sync,
-    create_user_sync,
     authenticate_user_sync,
-    get_user_by_oauth_id_sync,
+    cancel_account_deletion_sync,
+    confirm_account_deletion_sync,
+    count_deleted_users_sync,
+    count_users_sync,
+    create_oauth_user,
     create_oauth_user_sync,
+    create_user,
+    create_user_sync,
+    get_deleted_users_sync,
+    get_user_by_deletion_token_sync,
+    get_user_by_email,
+    get_user_by_email_sync,
+    get_user_by_id_any_status_sync,
+    get_user_by_id_sync,
+    get_user_by_oauth_id,
+    get_user_by_oauth_id_sync,
+    get_user_by_password_reset_token_sync,
+    get_user_by_username,
+    get_user_by_username_sync,
     get_user_by_verification_token_sync,
+    get_users_sync,
+    permanently_delete_user_sync,
+    request_account_deletion_sync,
+    reset_user_password_sync,
+    restore_user_sync,
+    soft_delete_user_sync,
+    update_deletion_token_sync,
+    update_password_reset_token_sync,
+    update_user_password_sync,
     update_verification_token_sync,
     verify_user_sync,
-    get_user_by_password_reset_token_sync,
-    update_password_reset_token_sync,
-    reset_user_password_sync,
-    update_user_password_sync,
-    get_user_by_deletion_token_sync,
-    update_deletion_token_sync,
-    request_account_deletion_sync,
-    confirm_account_deletion_sync,
-    cancel_account_deletion_sync,
-    get_user_by_id_sync,
-    get_user_by_id_any_status_sync,
-    soft_delete_user_sync,
-    restore_user_sync,
-    permanently_delete_user_sync,
-    get_deleted_users_sync,
-    count_deleted_users_sync,
-    get_users_sync,
-    count_users_sync,
 )
-from app.core.security import get_password_hash, verify_password
 from app.schemas.user import UserCreate
 
 
@@ -756,8 +753,8 @@ class TestUserCRUDIntegration:
         # Test that all CRUD functions can be called without errors
         # This is a simplified integration test that verifies the functions exist and are callable
 
-        # Step 1: Create user
-        user_data = UserCreate(
+        # Step 1: Create user (data structure for testing)
+        _ = UserCreate(
             email="test@example.com",
             username="testuser",
             password="TestPassword123!",
@@ -786,8 +783,8 @@ class TestUserCRUDIntegration:
         # Test that all async CRUD functions can be called without errors
         # This is a simplified integration test that verifies the functions exist and are callable
 
-        # Step 1: Create user
-        user_data = UserCreate(
+        # Step 1: Create user (data structure for testing)
+        _ = UserCreate(
             email="test@example.com",
             username="testuser",
             password="TestPassword123!",

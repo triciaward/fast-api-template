@@ -4,9 +4,8 @@ Tests for WebSocket service.
 This module tests the WebSocket connection manager functionality including connection management, messaging, and broadcasting.
 """
 
-import pytest
 import json
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 from fastapi import WebSocket
 

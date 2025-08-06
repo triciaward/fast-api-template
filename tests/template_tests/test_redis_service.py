@@ -4,16 +4,13 @@ Tests for Redis service.
 This module tests the Redis service functionality including connection, health checks, and error handling.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
-import redis.asyncio as redis
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.services.redis import (
-    init_redis,
     close_redis,
     get_redis_client,
     health_check_redis,
-    redis_client,
+    init_redis,
 )
 
 
@@ -150,7 +147,7 @@ class TestRedisService:
     async def test_close_redis_no_client(self, mock_redis_client):
         """Test Redis connection closure when no client exists."""
         # Mock no Redis client
-        mock_redis_client = None
+        _ = None
 
         # Test closure (should not raise exception)
         await close_redis()
@@ -223,7 +220,7 @@ class TestRedisService:
     async def test_health_check_redis_no_client(self, mock_redis_client):
         """Test Redis health check when no client exists."""
         # Mock no Redis client
-        mock_redis_client = None
+        _ = None
 
         # Test health check
         result = await health_check_redis()

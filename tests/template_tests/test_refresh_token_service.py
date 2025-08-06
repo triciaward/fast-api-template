@@ -4,23 +4,20 @@ Tests for Refresh Token service.
 This module tests the Refresh Token service functionality including device detection, IP extraction, cookie management, and session operations.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock
-from datetime import datetime, timedelta
 import uuid
-
-from fastapi import Request, Response
+from datetime import datetime, timedelta
+from unittest.mock import MagicMock, patch
 
 from app.services.refresh_token import (
-    get_device_info,
-    get_client_ip,
-    set_refresh_token_cookie,
     clear_refresh_token_cookie,
-    get_refresh_token_from_cookie,
     create_user_session,
+    get_client_ip,
+    get_device_info,
+    get_refresh_token_from_cookie,
     refresh_access_token,
-    revoke_session,
     revoke_all_sessions,
+    revoke_session,
+    set_refresh_token_cookie,
 )
 
 

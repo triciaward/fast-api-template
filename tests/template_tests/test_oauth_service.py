@@ -4,13 +4,13 @@ Tests for OAuth service.
 This module tests the OAuth service functionality including Google and Apple token verification, user info retrieval, and provider configuration.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 import time
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 # Import jwt only when needed to avoid import issues
 # import jwt
-
 from fastapi import HTTPException
 
 from app.services.oauth import OAuthService

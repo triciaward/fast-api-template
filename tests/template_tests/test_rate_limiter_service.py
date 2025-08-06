@@ -4,28 +4,26 @@ Tests for Rate Limiter service.
 This module tests the rate limiting functionality including limiter initialization, client IP detection, decorators, and rate limit information.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
-from typing import Any
+from unittest.mock import MagicMock, patch
 
-from fastapi import Request, FastAPI
-from slowapi import Limiter
+import pytest
+from fastapi import FastAPI, Request
 from slowapi.errors import RateLimitExceeded
 
 from app.services.rate_limiter import (
-    get_limiter,
-    get_client_ip,
     _no_op_decorator,
-    rate_limit_login,
-    rate_limit_register,
-    rate_limit_email_verification,
-    rate_limit_password_reset,
-    rate_limit_oauth,
+    get_client_ip,
+    get_limiter,
+    get_rate_limit_info,
+    init_rate_limiter,
     rate_limit_account_deletion,
     rate_limit_custom,
-    init_rate_limiter,
+    rate_limit_email_verification,
+    rate_limit_login,
+    rate_limit_oauth,
+    rate_limit_password_reset,
+    rate_limit_register,
     setup_rate_limiting,
-    get_rate_limit_info,
 )
 
 
@@ -384,8 +382,8 @@ class TestNoOpDecorator:
         assert decorated() == "test"
 
 
-class TestRateLimiterInitialization:
-    """Test rate limiter initialization functions."""
+class TestRateLimiterSetup:
+    """Test rate limiter setup functions."""
 
     @patch("app.services.rate_limiter.settings")
     @patch("app.services.rate_limiter.get_limiter")
