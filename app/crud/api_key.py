@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Union
 
 from sqlalchemy import and_, select
@@ -15,7 +15,7 @@ DBSession = Union[AsyncSession, Session]
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 async def create_api_key(
