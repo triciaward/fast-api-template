@@ -6,7 +6,7 @@ This module provides admin-only utilities, base classes, and dependencies for ad
 
 import logging
 from collections.abc import Callable
-from typing import Any, Generic, Protocol, TypeVar
+from typing import Any, Generic, Protocol, TypeVar, Union
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
@@ -38,7 +38,7 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 ResponseSchemaType = TypeVar("ResponseSchemaType", bound=BaseModel)
 
 # Type alias for database sessions
-DBSession = Session | AsyncSession
+DBSession = Union[Session, AsyncSession]
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 

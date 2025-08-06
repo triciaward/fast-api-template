@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from typing import Union
 
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +10,7 @@ from app.models import APIKey
 from app.schemas.user import APIKeyCreate
 
 # Type alias for both sync and async sessions
-DBSession = AsyncSession | Session
+DBSession = Union[AsyncSession, Session]
 
 
 def utc_now() -> datetime:

@@ -1,4 +1,5 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from typing import Union
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,12 +10,12 @@ from app.models import User
 from app.schemas.user import UserCreate
 
 # Type alias for both sync and async sessions
-DBSession = AsyncSession | Session
+DBSession = Union[AsyncSession, Session]
 
 
 def utc_now() -> datetime:
     """Get current UTC datetime (replaces deprecated datetime.utcnow())."""
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 async def get_user_by_email(db: DBSession, email: str) -> User | None:
