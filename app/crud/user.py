@@ -1,5 +1,4 @@
 from datetime import UTC, datetime, timedelta
-from typing import Union
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

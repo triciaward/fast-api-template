@@ -6,7 +6,7 @@ This module provides admin-only utilities, base classes, and dependencies for ad
 
 import logging
 from collections.abc import Callable
-from typing import Any, Generic, Protocol, TypeVar, Union
+from typing import Any, Generic, Protocol, TypeVar
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
