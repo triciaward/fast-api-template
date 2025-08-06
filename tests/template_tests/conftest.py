@@ -11,10 +11,13 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
+# Import app modules early
+from app.database.database import Base, get_db
+from app.main import app
+
 # Load test environment variables FIRST
 try:
     import dotenv
-
     dotenv.load_dotenv(".env.test", override=True)
     print("CI DEBUG: .env.test loaded successfully")
 except ImportError:
@@ -23,19 +26,14 @@ except Exception as e:
     print(f"CI DEBUG: Error loading .env.test: {e}")
 
 # Set environment variables for testing
-os.environ["ENABLE_CELERY"] = "true"
-os.environ["CELERY_TASK_ALWAYS_EAGER"] = "true"
-os.environ["CELERY_TASK_EAGER_PROPAGATES"] = "true"
-os.environ["TESTING"] = "1"
+os.environ.setdefault("TESTING", "1")
+os.environ.setdefault("ENABLE_CELERY", "true")
+os.environ.setdefault("CELERY_TASK_ALWAYS_EAGER", "true")
 
 # Clear config cache to force reload with new environment variables
 sys.modules.pop("app.core.config", None)
 sys.modules.pop("app.main", None)
 sys.modules.pop("app.api.api_v1.api", None)
-
-# Now import app AFTER environment variables are set
-from app.database.database import Base, get_db
-from app.main import app
 
 # Check if running in CI environment
 RUNNING_IN_CI = os.getenv("RUNNING_IN_CI", "false").lower() == "true"
