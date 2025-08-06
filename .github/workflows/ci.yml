@@ -168,6 +168,22 @@ jobs:
           echo "CI DEBUG: Running Phase 4 async connection pooling tests individually..."
           timeout 60s pytest tests/template_tests/test_connection_pooling.py::TestConnectionPooling::test_get_db_dependency -v --tb=short || echo "DB dependency test failed"
           timeout 60s pytest tests/template_tests/test_connection_pooling.py::TestConnectionPooling::test_session_cleanup_on_exception -v --tb=short || echo "Session cleanup test failed"
+          
+      - name: Run async tests (oauth - final phase)
+        run: |
+          echo "CI DEBUG: Running final phase async OAuth tests individually..."
+          timeout 60s pytest tests/template_tests/test_oauth.py::TestOAuthService::test_verify_google_token_success -v --tb=short || echo "Google OAuth success test failed"
+          timeout 60s pytest tests/template_tests/test_oauth.py::TestOAuthService::test_verify_apple_token_success -v --tb=short || echo "Apple OAuth success test failed"
+          timeout 60s pytest tests/template_tests/test_oauth.py::TestOAuthService::test_verify_google_token_invalid_audience -v --tb=short || echo "Google OAuth invalid audience test failed"
+          timeout 60s pytest tests/template_tests/test_oauth.py::TestOAuthService::test_verify_apple_token_expired -v --tb=short || echo "Apple OAuth expired test failed"
+          
+      - name: Run async tests (websocket - final phase)
+        run: |
+          echo "CI DEBUG: Running final phase async WebSocket tests individually..."
+          timeout 60s pytest tests/template_tests/test_websocket.py::TestConnectionManager::test_connect_new_room -v --tb=short || echo "WebSocket connect new room test failed"
+          timeout 60s pytest tests/template_tests/test_websocket.py::TestConnectionManager::test_send_personal_message_success -v --tb=short || echo "WebSocket personal message test failed"
+          timeout 60s pytest tests/template_tests/test_websocket.py::TestConnectionManager::test_broadcast_success -v --tb=short || echo "WebSocket broadcast test failed"
+          timeout 60s pytest tests/template_tests/test_websocket.py::TestConnectionManager::test_broadcast_json -v --tb=short || echo "WebSocket broadcast JSON test failed"
 
   lint:
     name: 🔍 Lint (ruff)
