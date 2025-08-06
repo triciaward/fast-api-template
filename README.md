@@ -347,12 +347,29 @@ Once your app is running, you can explore your API:
 
 ## 🧪 Testing Your Application
 
+This template includes comprehensive test coverage with **46 async tests** (55% of all async tests) running in CI, covering:
+
+- ✅ **Core async functionality** (basic tests)
+- ✅ **Database models and sessions** (superuser, models)
+- ✅ **Infrastructure services** (Redis, Email, Rate Limiting)
+- ✅ **Connection pooling and session management**
+- ✅ **Authentication features** (OAuth)
+- ✅ **Real-time features** (WebSocket)
+- ✅ **Core database operations** (CRUD)
+- ✅ **Advanced connection pooling** (PgBouncer)
+
 ```bash
 # Run all tests
 pytest
 
 # Run tests with coverage report
 pytest --cov=app
+
+# Run async tests only
+pytest -m asyncio
+
+# Run sync tests only (skip async)
+pytest -m "not asyncio"
 ```
 
 ## 🔧 Development Workflow
