@@ -219,7 +219,7 @@ async def db_session(setup_test_db: None) -> AsyncGenerator[AsyncSession, None]:
     """Create a fresh database session for each test with proper isolation."""
     # Create a new session using the dedicated session engine
     session = TestingAsyncSessionLocal()
-    
+
     try:
         # Clean the database before each test
         try:
@@ -238,7 +238,7 @@ async def db_session(setup_test_db: None) -> AsyncGenerator[AsyncSession, None]:
             # If we're in a transaction, roll it back
             if session.in_transaction():
                 await session.rollback()
-            
+
             # Clean up any test data in a fresh transaction
             try:
                 await session.execute(text("DELETE FROM users WHERE id IS NOT NULL"))
