@@ -131,11 +131,12 @@ class DatabaseBackup:
                 ["gzip", "-f", str(backup_path)],
                 check=True,
             )
+        except subprocess.CalledProcessError:
+            logger.exception("Compression failed")
+            return backup_path
+        else:
             logger.info(f"Backup compressed: {compressed_path}")
             return compressed_path
-        except subprocess.CalledProcessError as e:
-            logger.exception(f"Compression failed: {e}")
-            return backup_path
 
     def restore_backup(self, backup_path: str) -> bool:
         """
@@ -189,15 +190,15 @@ class DatabaseBackup:
                 check=True,
             )
 
-            logger.info("Database restore completed successfully")
-            return True
-
         except subprocess.CalledProcessError as e:
             logger.exception(f"Restore failed: {e.stderr}")
             return False
-        except Exception as e:
-            logger.exception(f"Restore failed with unexpected error: {e}")
+        except Exception:
+            logger.exception("Restore failed with unexpected error")
             return False
+        else:
+            logger.info("Database restore completed successfully")
+            return True
 
     def _decompress_backup(self, backup_path: Path) -> Path:
         """Decompress a backup file."""
@@ -208,11 +209,12 @@ class DatabaseBackup:
                 ["gunzip", "-f", str(backup_path)],
                 check=True,
             )
+        except subprocess.CalledProcessError:
+            logger.exception("Decompression failed")
+            return backup_path
+        else:
             logger.info(f"Backup decompressed: {decompressed_path}")
             return decompressed_path
-        except subprocess.CalledProcessError as e:
-            logger.exception(f"Decompression failed: {e}")
-            return backup_path
 
     def list_backups(self) -> list[dict]:
         """List all available backups with metadata."""
@@ -225,7 +227,7 @@ class DatabaseBackup:
                     "filename": backup_file.name,
                     "path": str(backup_file),
                     "size_mb": round(stat.st_size / (1024 * 1024), 2),
-                    "created": datetime.fromtimestamp(stat.st_mtime),
+                    "created": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc),
                     "compressed": backup_file.suffix == ".gz",
                 },
             )
@@ -244,20 +246,20 @@ class DatabaseBackup:
         Returns:
             Number of backups removed
         """
-        cutoff_date = datetime.now() - timedelta(days=days_to_keep)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_to_keep)
         removed_count = 0
 
         for backup_file in self.backup_dir.glob("backup_*.sql*"):
             stat = backup_file.stat()
-            created_date = datetime.fromtimestamp(stat.st_mtime)
+            created_date = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
 
             if created_date < cutoff_date:
                 try:
                     backup_file.unlink()
                     logger.info(f"Removed old backup: {backup_file.name}")
                     removed_count += 1
-                except Exception as e:
-                    logger.exception(f"Failed to remove backup {backup_file.name}: {e}")
+                except Exception:
+                    logger.exception(f"Failed to remove backup {backup_file.name}")
 
         logger.info(f"Cleanup completed: {removed_count} old backups removed")
         return removed_count
@@ -285,15 +287,15 @@ class DatabaseBackup:
 
         # Check file header for SQL content
         try:
-            with open(backup_file) as f:
+            with backup_file.open() as f:
                 first_line = f.readline().strip()
                 if not first_line.startswith("--") and not first_line.startswith("SET"):
                     logger.error(
                         f"Backup file doesn't appear to be valid SQL: {backup_path}",
                     )
                     return False
-        except Exception as e:
-            logger.exception(f"Failed to read backup file: {e}")
+        except Exception:
+            logger.exception("Failed to read backup file")
             return False
 
         logger.info(f"Backup verification passed: {backup_path}")

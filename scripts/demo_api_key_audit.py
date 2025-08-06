@@ -5,7 +5,7 @@ Demonstration script for API key audit logging.
 This script shows how API key usage is automatically logged to the audit system.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import httpx
 from sqlalchemy.orm import Session
@@ -37,7 +37,7 @@ def create_api_key_for_user(db: Session, user: User, label: str) -> tuple[str, s
     api_key_data = APIKeyCreate(
         label=label,
         scopes=["read_events", "write_events"],
-        expires_at=datetime.utcnow() + timedelta(days=30),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=30),
     )
 
     api_key = crud_api_key.create_api_key_sync(
@@ -56,7 +56,7 @@ def create_system_api_key(db: Session, label: str) -> tuple[str, str]:
     api_key_data = APIKeyCreate(
         label=label,
         scopes=["read_events", "write_events", "admin"],
-        expires_at=datetime.utcnow() + timedelta(days=30),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=30),
     )
 
     api_key = crud_api_key.create_api_key_sync(
@@ -136,7 +136,7 @@ def main():
                 key_id = log.context["api_key_id"]
                 key_usage[key_id] = key_usage.get(key_id, 0) + 1
 
-        for key_id in key_usage:
+        for _key_id in key_usage:
             pass
 
     finally:

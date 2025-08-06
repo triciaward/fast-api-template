@@ -168,7 +168,7 @@ class TemplateCustomizer:
                     file_path.is_file() and file_path.stat().st_size < 1024 * 1024
                 ):  # 1MB limit
                     try:
-                        with open(file_path, encoding="utf-8") as f:
+                        with file_path.open(encoding="utf-8") as f:
                             content = f.read()
                             # Check if file contains template references
                             if any(old in content for old in self.replacements):
@@ -182,7 +182,7 @@ class TemplateCustomizer:
     def process_file(self, file_path: Path) -> bool:
         """Process a single file, replacing template references."""
         try:
-            with open(file_path, encoding="utf-8") as f:
+            with file_path.open(encoding="utf-8") as f:
                 content = f.read()
 
             original_content = content
@@ -209,13 +209,13 @@ class TemplateCustomizer:
 
             # Write back if content changed
             if content != original_content:
-                with open(file_path, "w", encoding="utf-8") as f:
+                with file_path.open("w", encoding="utf-8") as f:
                     f.write(content)
                 return True
 
-            return False
-
         except Exception:
+            return False
+        else:
             return False
 
     def customize_readme(self, content: str) -> str:
@@ -240,7 +240,7 @@ class TemplateCustomizer:
 
         if alembic_file.exists():
             try:
-                with open(alembic_file, encoding="utf-8") as f:
+                with alembic_file.open(encoding="utf-8") as f:
                     content = f.read()
 
                 # Update the database URL with the new database name
@@ -255,7 +255,7 @@ class TemplateCustomizer:
                 )
 
                 # Write back the updated content
-                with open(alembic_file, "w", encoding="utf-8") as f:
+                with alembic_file.open("w", encoding="utf-8") as f:
                     f.write(content)
 
             except Exception:
@@ -277,7 +277,7 @@ class TemplateCustomizer:
 
         if source_file.exists():
             try:
-                with open(source_file, encoding="utf-8") as f:
+                with source_file.open(encoding="utf-8") as f:
                     content = f.read()
 
                 # Update COMPOSE_PROJECT_NAME
@@ -292,7 +292,7 @@ class TemplateCustomizer:
                     content += f"\n# Docker Compose project name\nCOMPOSE_PROJECT_NAME={self.docker_project_name}\n"
 
                 # Write to .env file
-                with open(env_file, "w", encoding="utf-8") as f:
+                with env_file.open("w", encoding="utf-8") as f:
                     f.write(content)
 
             except Exception:
@@ -337,7 +337,7 @@ Original template: https://github.com/your-username/fast-api-template
         troubleshooting_dir.mkdir(parents=True, exist_ok=True)
 
         log_file = troubleshooting_dir / "TEMPLATE_CUSTOMIZATION.md"
-        with open(log_file, "w", encoding="utf-8") as f:
+        with log_file.open("w", encoding="utf-8") as f:
             f.write(log_content)
 
     def run(self) -> None:

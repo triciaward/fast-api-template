@@ -71,8 +71,8 @@ async def main() -> None:
                     if not args.force:
                         sys.exit(1)
 
-            except Exception as e:
-                logger.exception(f"Error creating superuser: {e}")
+            except Exception:
+                logger.exception("Error creating superuser")
                 sys.exit(1)
             break
     else:
