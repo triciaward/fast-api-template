@@ -102,6 +102,18 @@ jobs:
         run: |
           echo "CI DEBUG: Running critical connection pooling tests..."
           timeout 60s pytest tests/template_tests/test_connection_pooling.py::TestConnectionPooling::test_async_session_pool_usage -v --tb=short || echo "Connection pooling test failed"
+          
+      - name: Run async tests (superuser - individual)
+        run: |
+          echo "CI DEBUG: Running async superuser tests individually..."
+          timeout 60s pytest tests/template_tests/test_superuser.py::test_create_regular_user -v --tb=short || echo "Superuser test failed"
+          timeout 60s pytest tests/template_tests/test_superuser.py::test_superuser_default_value -v --tb=short || echo "Superuser default test failed"
+          
+      - name: Run async tests (models - individual)
+        run: |
+          echo "CI DEBUG: Running async model tests individually..."
+          timeout 60s pytest tests/template_tests/test_models.py::TestUserModel::test_user_model_unique_username -v --tb=short || echo "Model unique username test failed"
+          timeout 60s pytest tests/template_tests/test_models.py::TestUserModel::test_user_model_auto_generated_fields -v --tb=short || echo "Model auto generated test failed"
 
   lint:
     name: 🔍 Lint (ruff)
