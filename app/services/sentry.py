@@ -95,7 +95,9 @@ def capture_exception(exception: Exception, context: dict | None = None) -> None
 
 
 def capture_message(
-    message: str, level: str = "info", context: dict | None = None,
+    message: str,
+    level: str = "info",
+    context: dict | None = None,
 ) -> None:
     """Capture a message with optional context."""
     if not settings.ENABLE_SENTRY:

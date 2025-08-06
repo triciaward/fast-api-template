@@ -262,20 +262,32 @@ def main() -> None:
     # List users command
     list_parser = subparsers.add_parser("list", help="List users")
     list_parser.add_argument(
-        "--skip", type=int, default=0, help="Number of users to skip",
+        "--skip",
+        type=int,
+        default=0,
+        help="Number of users to skip",
     )
     list_parser.add_argument(
-        "--limit", type=int, default=100, help="Maximum number of users to return",
+        "--limit",
+        type=int,
+        default=100,
+        help="Maximum number of users to return",
     )
     list_parser.add_argument(
-        "--superuser", type=bool, help="Filter by superuser status",
+        "--superuser",
+        type=bool,
+        help="Filter by superuser status",
     )
     list_parser.add_argument(
-        "--verified", type=bool, help="Filter by verification status",
+        "--verified",
+        type=bool,
+        help="Filter by verification status",
     )
     list_parser.add_argument("--deleted", type=bool, help="Filter by deletion status")
     list_parser.add_argument(
-        "--oauth-provider", type=str, help="Filter by OAuth provider",
+        "--oauth-provider",
+        type=str,
+        help="Filter by OAuth provider",
     )
 
     # Get user command
@@ -288,10 +300,14 @@ def main() -> None:
     create_parser.add_argument("username", help="Username")
     create_parser.add_argument("password", help="Password")
     create_parser.add_argument(
-        "--superuser", action="store_true", help="Make user a superuser",
+        "--superuser",
+        action="store_true",
+        help="Make user a superuser",
     )
     create_parser.add_argument(
-        "--verified", action="store_true", help="Mark user as verified",
+        "--verified",
+        action="store_true",
+        help="Mark user as verified",
     )
 
     # Update user command
@@ -309,13 +325,15 @@ def main() -> None:
 
     # Toggle superuser command
     toggle_superuser_parser = subparsers.add_parser(
-        "toggle-superuser", help="Toggle superuser status",
+        "toggle-superuser",
+        help="Toggle superuser status",
     )
     toggle_superuser_parser.add_argument("user_id", help="User ID")
 
     # Toggle verification command
     toggle_verification_parser = subparsers.add_parser(
-        "toggle-verification", help="Toggle verification status",
+        "toggle-verification",
+        help="Toggle verification status",
     )
     toggle_verification_parser.add_argument("user_id", help="User ID")
 

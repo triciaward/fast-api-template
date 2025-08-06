@@ -141,6 +141,7 @@ class TestConnectionPooling:
     @pytest.mark.asyncio
     async def test_concurrent_async_connections(self) -> None:
         """Test handling of concurrent async connections."""
+
         # Use a more robust approach for async testing
         async def execute_query() -> None:
             session = None
@@ -167,7 +168,9 @@ class TestConnectionPooling:
             await asyncio.gather(*tasks, return_exceptions=True)
         except Exception as e:
             # If we get event loop errors, skip the test rather than fail
-            if "Event loop is closed" in str(e) or "attached to a different loop" in str(e):
+            if "Event loop is closed" in str(
+                e
+            ) or "attached to a different loop" in str(e):
                 pytest.skip(f"Skipping due to async event loop issue: {e}")
             raise
 
@@ -195,7 +198,8 @@ class TestConnectionPooling:
 
         # Check that connections were properly managed
         if hasattr(sync_engine.pool, "checkedout") and hasattr(
-            sync_engine.pool, "checkedin",
+            sync_engine.pool,
+            "checkedin",
         ):
             assert sync_engine.pool.checkedout() >= 0
             assert sync_engine.pool.checkedin() >= 0
@@ -468,6 +472,7 @@ class TestConnectionPoolingIntegration:
 
         # Test that async URL is properly formatted
         async_url = settings.DATABASE_URL.replace(
-            "postgresql://", "postgresql+asyncpg://",
+            "postgresql://",
+            "postgresql+asyncpg://",
         )
         assert "postgresql+asyncpg://" in async_url

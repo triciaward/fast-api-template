@@ -78,7 +78,9 @@ class TestAPIKeyCRUD:
         )
 
         api_key = crud_api_key.create_api_key_sync(
-            db=sync_db_session, api_key_data=api_key_data, user_id=user_id,
+            db=sync_db_session,
+            api_key_data=api_key_data,
+            user_id=user_id,
         )
 
         assert str(api_key.user_id) == user_id
@@ -143,7 +145,8 @@ class TestAPIKeyCRUD:
         # Test with wrong key
         wrong_key = generate_api_key()
         wrong_verified = crud_api_key.verify_api_key_in_db_sync(
-            sync_db_session, wrong_key,
+            sync_db_session,
+            wrong_key,
         )
         assert wrong_verified is None
 
@@ -177,19 +180,25 @@ class TestAPIKeyCRUD:
         )
 
         api_key = crud_api_key.create_api_key_sync(
-            sync_db_session, api_key_data, user_id,
+            sync_db_session,
+            api_key_data,
+            user_id,
         )
 
         # Deactivate the key
         success = crud_api_key.deactivate_api_key_sync(
-            sync_db_session, str(api_key.id), user_id,
+            sync_db_session,
+            str(api_key.id),
+            user_id,
         )
 
         assert success is True
 
         # Verify the key is deactivated
         deactivated_key = crud_api_key.get_api_key_by_id_sync(
-            sync_db_session, str(api_key.id), user_id,
+            sync_db_session,
+            str(api_key.id),
+            user_id,
         )
         assert deactivated_key is not None
         assert deactivated_key.is_active is False
@@ -204,13 +213,17 @@ class TestAPIKeyCRUD:
         )
 
         api_key = crud_api_key.create_api_key_sync(
-            sync_db_session, api_key_data, user_id,
+            sync_db_session,
+            api_key_data,
+            user_id,
         )
         original_hash = api_key.key_hash
 
         # Rotate the key
         result = crud_api_key.rotate_api_key_sync(
-            sync_db_session, str(api_key.id), user_id,
+            sync_db_session,
+            str(api_key.id),
+            user_id,
         )
 
         assert result is not None
@@ -224,13 +237,16 @@ class TestAPIKeyCRUD:
         # Check that new key works
         assert new_raw_key is not None
         new_verified = crud_api_key.verify_api_key_in_db_sync(
-            sync_db_session, new_raw_key,
+            sync_db_session,
+            new_raw_key,
         )
         assert new_verified is not None
         assert new_verified.id == api_key.id
 
     def test_expired_api_key_found_but_invalid(
-        self, sync_db_session: Session, test_user: User,
+        self,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test that expired API keys are found but marked as invalid."""
         user_id = str(test_user.id)
@@ -255,7 +271,9 @@ class TestAPIKeyCRUD:
         assert verified_key.expires_at < datetime.now(timezone.utc)  # Should be expired
 
     def test_inactive_api_key_found_but_invalid(
-        self, sync_db_session: Session, test_user: User,
+        self,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test that inactive API keys are found but marked as invalid."""
         user_id = str(test_user.id)
@@ -291,7 +309,10 @@ class TestAPIKeyAuthentication:
     """Test API key authentication dependencies."""
 
     def test_get_api_key_user_valid(
-        self, client: TestClient, sync_db_session: Session, test_user: User,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test valid API key authentication."""
         # Create an API key for the user
@@ -311,7 +332,8 @@ class TestAPIKeyAuthentication:
 
         # Test authentication
         response = client.get(
-            "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {raw_key}"},
+            "/api/v1/users/me/api-key",
+            headers={"Authorization": f"Bearer {raw_key}"},
         )
 
         # Should work with API key
@@ -323,7 +345,8 @@ class TestAPIKeyAuthentication:
     def test_get_api_key_user_invalid_format(self, client: TestClient):
         """Test API key authentication with invalid format."""
         response = client.get(
-            "/api/v1/users/me/api-key", headers={"Authorization": "InvalidFormat"},
+            "/api/v1/users/me/api-key",
+            headers={"Authorization": "InvalidFormat"},
         )
 
         assert response.status_code == 401
@@ -351,7 +374,10 @@ class TestAPIKeyAuthentication:
         assert "Invalid API key" in response.json()["error"]["message"]
 
     def test_get_api_key_user_expired(
-        self, client: TestClient, sync_db_session: Session, test_user: User,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test API key authentication with expired key."""
         # Create an expired API key
@@ -370,14 +396,18 @@ class TestAPIKeyAuthentication:
         )
 
         response = client.get(
-            "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {raw_key}"},
+            "/api/v1/users/me/api-key",
+            headers={"Authorization": f"Bearer {raw_key}"},
         )
 
         assert response.status_code == 401
         assert "API key has expired" in response.json()["error"]["message"]
 
     def test_get_api_key_user_inactive(
-        self, client: TestClient, sync_db_session: Session, test_user: User,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test API key authentication with inactive key."""
         # Create an API key
@@ -400,7 +430,8 @@ class TestAPIKeyAuthentication:
         sync_db_session.commit()
 
         response = client.get(
-            "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {raw_key}"},
+            "/api/v1/users/me/api-key",
+            headers={"Authorization": f"Bearer {raw_key}"},
         )
 
         assert response.status_code == 401
@@ -462,7 +493,9 @@ class TestAPIKeyEndpoints:
                 expires_at=datetime.now(timezone.utc) + timedelta(days=30),
             )
             await crud_api_key.create_api_key(
-                db_session, api_key_data, str(test_user.id),
+                db_session,
+                api_key_data,
+                str(test_user.id),
             )
 
         response = client.get(
@@ -493,7 +526,9 @@ class TestAPIKeyEndpoints:
             expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
         api_key = await crud_api_key.create_api_key(
-            db_session, api_key_data, str(test_user.id),
+            db_session,
+            api_key_data,
+            str(test_user.id),
         )
 
         response = client.delete(
@@ -525,7 +560,9 @@ class TestAPIKeyEndpoints:
             expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
         api_key = await crud_api_key.create_api_key(
-            db_session, api_key_data, str(test_user.id),
+            db_session,
+            api_key_data,
+            str(test_user.id),
         )
 
         response = client.post(
@@ -575,7 +612,9 @@ class TestAPIKeyEndpoints:
             expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
         api_key = crud_api_key.create_api_key_sync(
-            sync_db_session, api_key_data, str(other_user.id),
+            sync_db_session,
+            api_key_data,
+            str(other_user.id),
         )
 
         # Try to deactivate it with current user's token
@@ -613,7 +652,9 @@ class TestAPIKeyEndpoints:
             expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
         api_key = crud_api_key.create_api_key_sync(
-            sync_db_session, api_key_data, str(other_user.id),
+            sync_db_session,
+            api_key_data,
+            str(other_user.id),
         )
 
         # Try to rotate it with current user's token
@@ -632,7 +673,10 @@ class TestAPIKeyScopes:
     """Test API key scope functionality."""
 
     def test_require_api_scope_success(
-        self, client: TestClient, sync_db_session: Session, test_user: User,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test successful scope requirement."""
         # Create an API key with the required scope
@@ -660,7 +704,10 @@ class TestAPIKeyScopes:
         assert callable(scope_checker)
 
     def test_require_api_scope_failure(
-        self, client: TestClient, sync_db_session: Session, test_user: User,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test failed scope requirement."""
         # Create an API key without the required scope
@@ -695,7 +742,10 @@ class TestAPIKeyIntegration:
     """Test API key authentication integration with other endpoints."""
 
     def test_api_key_works_with_user_endpoints(
-        self, client: TestClient, sync_db_session: Session, test_user: User,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test that API keys can be used to access user endpoints."""
         # Create an API key for the user
@@ -723,7 +773,10 @@ class TestAPIKeyIntegration:
         assert callable(get_api_key_user)
 
     def test_api_key_scope_enforcement(
-        self, client: TestClient, sync_db_session: Session, test_user: User,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test that API key scopes are properly enforced."""
         # Create API key with limited scope
@@ -751,7 +804,10 @@ class TestAPIKeyIntegration:
         assert callable(scope_checker)
 
     def test_api_key_authentication_flow(
-        self, client: TestClient, sync_db_session: Session, test_user: User,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test the complete API key authentication flow."""
         # 1. Create an API key
@@ -777,7 +833,8 @@ class TestAPIKeyIntegration:
 
         # 3. Test authentication with the key
         response = client.get(
-            "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {raw_key}"},
+            "/api/v1/users/me/api-key",
+            headers={"Authorization": f"Bearer {raw_key}"},
         )
 
         assert response.status_code == 200
@@ -788,7 +845,8 @@ class TestAPIKeyIntegration:
 
         # 4. Test that the key can be used for multiple requests
         response2 = client.get(
-            "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {raw_key}"},
+            "/api/v1/users/me/api-key",
+            headers={"Authorization": f"Bearer {raw_key}"},
         )
 
         assert response2.status_code == 200
@@ -796,7 +854,10 @@ class TestAPIKeyIntegration:
         assert data2["user_id"] == str(test_user.id)
 
     def test_api_key_authentication_with_invalid_scopes(
-        self, client: TestClient, sync_db_session: Session, test_user: User,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test API key authentication when key has insufficient scopes."""
         # Create API key with limited scopes
@@ -816,7 +877,8 @@ class TestAPIKeyIntegration:
 
         # Test authentication still works (scopes are checked at endpoint level)
         response = client.get(
-            "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {raw_key}"},
+            "/api/v1/users/me/api-key",
+            headers={"Authorization": f"Bearer {raw_key}"},
         )
 
         assert response.status_code == 200
@@ -826,7 +888,10 @@ class TestAPIKeyIntegration:
         assert "write_events" not in data["scopes"]
 
     def test_api_key_authentication_with_expired_key(
-        self, client: TestClient, sync_db_session: Session, test_user: User,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test API key authentication with expired key."""
         # Create an expired API key
@@ -846,14 +911,18 @@ class TestAPIKeyIntegration:
 
         # Test that expired key is rejected
         response = client.get(
-            "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {raw_key}"},
+            "/api/v1/users/me/api-key",
+            headers={"Authorization": f"Bearer {raw_key}"},
         )
 
         assert response.status_code == 401
         assert "API key has expired" in response.json()["error"]["message"]
 
     def test_api_key_authentication_with_inactive_key(
-        self, client: TestClient, sync_db_session: Session, test_user: User,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
+        test_user: User,
     ):
         """Test API key authentication with inactive key."""
         # Create an API key
@@ -877,7 +946,8 @@ class TestAPIKeyIntegration:
 
         # Test that inactive key is rejected
         response = client.get(
-            "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {raw_key}"},
+            "/api/v1/users/me/api-key",
+            headers={"Authorization": f"Bearer {raw_key}"},
         )
 
         assert response.status_code == 401
@@ -889,7 +959,8 @@ class TestAPIKeyIntegration:
         fake_key = generate_api_key()
 
         response = client.get(
-            "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {fake_key}"},
+            "/api/v1/users/me/api-key",
+            headers={"Authorization": f"Bearer {fake_key}"},
         )
 
         assert response.status_code == 401
@@ -899,7 +970,8 @@ class TestAPIKeyIntegration:
         """Test API key authentication with malformed authorization header."""
         # Test without Bearer prefix
         response = client.get(
-            "/api/v1/users/me/api-key", headers={"Authorization": "sk_invalid_key"},
+            "/api/v1/users/me/api-key",
+            headers={"Authorization": "sk_invalid_key"},
         )
 
         assert response.status_code == 401
@@ -909,7 +981,8 @@ class TestAPIKeyIntegration:
 
         # Test with empty Bearer token
         response2 = client.get(
-            "/api/v1/users/me/api-key", headers={"Authorization": "Bearer "},
+            "/api/v1/users/me/api-key",
+            headers={"Authorization": "Bearer "},
         )
 
         assert response2.status_code == 401
@@ -920,7 +993,9 @@ class TestAPIKeyIntegration:
     reason="Database session mismatch - API endpoints use different session than test fixtures",
 )
 def test_api_key_usage_audit_logging(
-    client: TestClient, sync_db_session: Session, test_user: User,
+    client: TestClient,
+    sync_db_session: Session,
+    test_user: User,
 ):
     """Test that API key usage is logged to audit logs."""
     from app.crud.audit_log import get_audit_logs_by_event_type_sync
@@ -942,14 +1017,17 @@ def test_api_key_usage_audit_logging(
 
     # Make a request using the API key
     response = client.get(
-        "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {raw_key}"},
+        "/api/v1/users/me/api-key",
+        headers={"Authorization": f"Bearer {raw_key}"},
     )
 
     assert response.status_code == 200
 
     # Check that the API key usage was logged
     audit_logs = get_audit_logs_by_event_type_sync(
-        sync_db_session, "api_key_usage", limit=10,
+        sync_db_session,
+        "api_key_usage",
+        limit=10,
     )
 
     # Find the log entry for this API key
@@ -978,7 +1056,8 @@ def test_api_key_usage_audit_logging(
     reason="Database session mismatch - API endpoints use different session than test fixtures",
 )
 def test_api_key_usage_audit_logging_system_key(
-    client: TestClient, sync_db_session: Session,
+    client: TestClient,
+    sync_db_session: Session,
 ):
     """Test that system-level API key usage is logged correctly."""
     from app.crud.audit_log import get_audit_logs_by_event_type_sync
@@ -1000,14 +1079,17 @@ def test_api_key_usage_audit_logging_system_key(
 
     # Make a request using the API key
     response = client.get(
-        "/api/v1/users/me/api-key", headers={"Authorization": f"Bearer {raw_key}"},
+        "/api/v1/users/me/api-key",
+        headers={"Authorization": f"Bearer {raw_key}"},
     )
 
     assert response.status_code == 200
 
     # Check that the API key usage was logged
     audit_logs = get_audit_logs_by_event_type_sync(
-        sync_db_session, "api_key_usage", limit=10,
+        sync_db_session,
+        "api_key_usage",
+        limit=10,
     )
 
     # Find the log entry for this API key

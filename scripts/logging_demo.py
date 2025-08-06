@@ -41,7 +41,9 @@ def demo_auth_logging() -> None:
     auth_logger = get_auth_logger()
     auth_logger.info("Login attempt", email="user@example.com", ip="192.168.1.100")
     auth_logger.warning(
-        "Failed login attempt", email="user@example.com", reason="invalid_password",
+        "Failed login attempt",
+        email="user@example.com",
+        reason="invalid_password",
     )
     auth_logger.info(
         "Successful login",
@@ -67,7 +69,10 @@ def demo_database_logging() -> None:
         database="fastapi_template",
     )
     db_logger.info(
-        "Query executed", query_type="SELECT", table="users", execution_time_ms=15.5,
+        "Query executed",
+        query_type="SELECT",
+        table="users",
+        execution_time_ms=15.5,
     )
     db_logger.warning(
         "Slow query detected",
@@ -77,7 +82,9 @@ def demo_database_logging() -> None:
         threshold_ms=1000.0,
     )
     db_logger.error(
-        "Database connection failed", error="connection_timeout", retry_count=3,
+        "Database connection failed",
+        error="connection_timeout",
+        retry_count=3,
     )
 
 
@@ -98,7 +105,10 @@ def demo_error_logging() -> None:
         raise ValueError("Invalid input provided")
     except ValueError as e:
         logger.error(
-            "Validation error", error_type="value_error", message=str(e), exc_info=True,
+            "Validation error",
+            error_type="value_error",
+            message=str(e),
+            exc_info=True,
         )
 
 

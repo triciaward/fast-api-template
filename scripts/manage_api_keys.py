@@ -72,7 +72,6 @@ def create_api_key(args: argparse.Namespace) -> None:
             if api_key.expires_at:
                 pass
 
-
         except Exception:
             sys.exit(1)
 
@@ -108,7 +107,6 @@ def list_api_keys(args: argparse.Namespace) -> None:
             if not api_keys:
                 return
 
-
             for _i, api_key in enumerate(api_keys, 1):
                 (
                     " (Expired)"
@@ -140,8 +138,6 @@ def rotate_api_key(args: argparse.Namespace) -> None:
 
             # api_key is guaranteed to be not None here due to the check above
             assert api_key is not None
-
-
 
         except Exception:
             sys.exit(1)
@@ -199,7 +195,8 @@ Examples:
 
     # Deactivate command
     deactivate_parser = subparsers.add_parser(
-        "deactivate", help="Deactivate an API key",
+        "deactivate",
+        help="Deactivate an API key",
     )
     deactivate_parser.add_argument(
         "--key-id",

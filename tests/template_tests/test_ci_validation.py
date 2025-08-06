@@ -23,7 +23,8 @@ def test_git_hooks_script_exists() -> None:
     script_path = Path("scripts/setup-git-hooks.sh")
     assert script_path.exists(), "Git hooks setup script should exist"
     assert os.access(
-        script_path, os.X_OK,
+        script_path,
+        os.X_OK,
     ), "Git hooks setup script should be executable"
 
 
@@ -98,7 +99,6 @@ if __name__ == "__main__":
             passed += 1
         except Exception:
             failed += 1
-
 
     if failed > 0:
         sys.exit(1)

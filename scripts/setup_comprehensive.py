@@ -107,7 +107,10 @@ def check_python_version() -> bool:
     try:
         python_cmd = get_python_command()
         result = subprocess.run(
-            [python_cmd, "--version"], capture_output=True, text=True, check=True,
+            [python_cmd, "--version"],
+            capture_output=True,
+            text=True,
+            check=True,
         )
         version = result.stdout.strip()
 
@@ -124,7 +127,10 @@ def check_docker_services() -> bool:
     """Check if Docker services are available."""
     try:
         subprocess.run(
-            ["docker", "--version"], capture_output=True, text=True, check=True,
+            ["docker", "--version"],
+            capture_output=True,
+            text=True,
+            check=True,
         )
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
@@ -297,14 +303,20 @@ def run_migrations() -> bool:
     try:
         # Try to run migrations
         subprocess.run(
-            ["alembic", "upgrade", "head"], capture_output=True, text=True, check=True,
+            ["alembic", "upgrade", "head"],
+            capture_output=True,
+            text=True,
+            check=True,
         )
         return True
     except subprocess.CalledProcessError:
         # If migration fails, try to stamp head
         try:
             subprocess.run(
-                ["alembic", "stamp", "head"], capture_output=True, text=True, check=True,
+                ["alembic", "stamp", "head"],
+                capture_output=True,
+                text=True,
+                check=True,
             )
             return True
         except subprocess.CalledProcessError:

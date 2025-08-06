@@ -64,7 +64,9 @@ class TestRedisService:
     @patch("app.services.redis.settings")
     @patch("app.services.redis.redis.from_url")
     async def test_init_redis_connection_error(
-        self, mock_redis_from_url, mock_settings,
+        self,
+        mock_redis_from_url,
+        mock_settings,
     ):
         """Test Redis initialization with connection error."""
         # Mock settings

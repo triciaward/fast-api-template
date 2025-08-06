@@ -96,7 +96,6 @@ def show_audit_logs(db: Session, api_key_id: str, key_label: str):
     if not key_logs:
         return
 
-
     for _i, _log in enumerate(key_logs, 1):
         pass
 

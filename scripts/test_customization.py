@@ -65,7 +65,6 @@ def test_directory_rename_simulation():
         (test_project / "scripts" / "customize_template.py").parent.mkdir(parents=True)
         (test_project / "scripts" / "customize_template.py").write_text("# Test script")
 
-
         # Simulate rename
         new_name = "myproject_backend"
         new_path = test_project.parent / new_name

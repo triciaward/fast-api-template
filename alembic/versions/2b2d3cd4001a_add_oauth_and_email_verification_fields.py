@@ -28,7 +28,8 @@ def upgrade() -> None:
     op.add_column("users", sa.Column("oauth_email", sa.String(), nullable=True))
     op.add_column("users", sa.Column("verification_token", sa.String(), nullable=True))
     op.add_column(
-        "users", sa.Column("verification_token_expires", sa.DateTime(), nullable=True),
+        "users",
+        sa.Column("verification_token_expires", sa.DateTime(), nullable=True),
     )
     # ### end Alembic commands ###
 

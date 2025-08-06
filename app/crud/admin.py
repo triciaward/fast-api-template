@@ -136,7 +136,10 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         return db_user
 
     async def update_user(
-        self, db: DBSession, user_id: str | UUID, user_data: AdminUserUpdate,
+        self,
+        db: DBSession,
+        user_id: str | UUID,
+        user_data: AdminUserUpdate,
     ) -> User | None:
         """
         Update user data (admin-only).
@@ -190,7 +193,9 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         return await self.delete(db, user_id)
 
     async def toggle_superuser_status(
-        self, db: DBSession, user_id: str | UUID,
+        self,
+        db: DBSession,
+        user_id: str | UUID,
     ) -> User | None:
         """
         Toggle superuser status for a user.
@@ -219,7 +224,9 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         return user
 
     async def toggle_verification_status(
-        self, db: DBSession, user_id: str | UUID,
+        self,
+        db: DBSession,
+        user_id: str | UUID,
     ) -> User | None:
         """
         Toggle verification status for a user.

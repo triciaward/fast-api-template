@@ -261,7 +261,6 @@ class SetupVerifier:
                     pass
 
 
-
 def main():
     """Main entry point."""
     verifier = SetupVerifier()

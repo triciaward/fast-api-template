@@ -111,7 +111,10 @@ TestingAsyncSessionLocal = async_sessionmaker(
 )
 
 TestingSyncSessionLocal = sessionmaker(
-    bind=sync_test_engine, expire_on_commit=False, autocommit=False, autoflush=False,
+    bind=sync_test_engine,
+    expire_on_commit=False,
+    autocommit=False,
+    autoflush=False,
 )
 
 

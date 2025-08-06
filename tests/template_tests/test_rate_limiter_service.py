@@ -54,7 +54,10 @@ class TestRateLimiterInitialization:
     @patch("app.services.redis.get_redis_client")
     @patch("app.services.rate_limiter.Limiter")
     def test_get_limiter_redis_backend_available(
-        self, mock_limiter, mock_get_redis, mock_settings,
+        self,
+        mock_limiter,
+        mock_get_redis,
+        mock_settings,
     ):
         """Test getting limiter with Redis backend when available."""
         # Mock settings
@@ -87,7 +90,10 @@ class TestRateLimiterInitialization:
     @patch("app.services.redis.get_redis_client")
     @patch("app.services.rate_limiter.Limiter")
     def test_get_limiter_redis_backend_unavailable(
-        self, mock_limiter, mock_get_redis, mock_settings,
+        self,
+        mock_limiter,
+        mock_get_redis,
+        mock_settings,
     ):
         """Test getting limiter with Redis backend when unavailable."""
         # Mock settings
@@ -262,7 +268,9 @@ class TestRateLimitDecorators:
     @patch("app.services.rate_limiter.settings")
     @patch("app.services.rate_limiter.get_limiter")
     def test_rate_limit_email_verification_enabled(
-        self, mock_get_limiter, mock_settings,
+        self,
+        mock_get_limiter,
+        mock_settings,
     ):
         """Test rate limit email verification decorator when enabled."""
         # Mock settings
@@ -434,7 +442,10 @@ class TestRateLimiterSetup:
     @patch("app.services.rate_limiter.get_limiter")
     @patch("app.services.rate_limiter._rate_limit_exceeded_handler")
     def test_setup_rate_limiting_enabled(
-        self, mock_handler, mock_get_limiter, mock_settings,
+        self,
+        mock_handler,
+        mock_get_limiter,
+        mock_settings,
     ):
         """Test rate limiting setup when enabled."""
         # Mock settings
@@ -453,7 +464,8 @@ class TestRateLimiterSetup:
 
         # Verify exception handler was added
         mock_app.add_exception_handler.assert_called_once_with(
-            RateLimitExceeded, mock_handler,
+            RateLimitExceeded,
+            mock_handler,
         )
 
         # Verify limiter was added to app state
@@ -516,7 +528,9 @@ class TestRateLimitInfo:
     @patch("app.services.rate_limiter.settings")
     @patch("app.services.rate_limiter.get_remote_address")
     def test_get_rate_limit_info_enabled_error(
-        self, mock_get_remote_address, mock_settings,
+        self,
+        mock_get_remote_address,
+        mock_settings,
     ):
         """Test getting rate limit info when enabled but with error."""
         pytest.skip("Error handling test needs investigation")

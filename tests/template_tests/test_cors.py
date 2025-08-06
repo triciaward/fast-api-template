@@ -85,7 +85,8 @@ class TestCORS:
         """Test CORS works on API endpoints."""
         # Test health endpoint
         response = client.get(
-            "/api/v1/health", headers={"Origin": "http://localhost:3000"},
+            "/api/v1/health",
+            headers={"Origin": "http://localhost:3000"},
         )
         assert response.status_code == 200
         assert (

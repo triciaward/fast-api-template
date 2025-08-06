@@ -178,7 +178,9 @@ class TestUserCRUDAsync:
 
                 # Test
                 result = await authenticate_user(
-                    mock_db, "test@example.com", "password123",
+                    mock_db,
+                    "test@example.com",
+                    "password123",
                 )
 
                 # Verify
@@ -203,7 +205,9 @@ class TestUserCRUDAsync:
 
                 # Test
                 result = await authenticate_user(
-                    mock_db, "test@example.com", "wrongpassword",
+                    mock_db,
+                    "test@example.com",
+                    "wrongpassword",
                 )
 
                 # Verify
@@ -220,7 +224,9 @@ class TestUserCRUDAsync:
 
             # Test
             result = await authenticate_user(
-                mock_db, "nonexistent@example.com", "password123",
+                mock_db,
+                "nonexistent@example.com",
+                "password123",
             )
 
             # Verify
@@ -343,7 +349,9 @@ class TestUserCRUDSync:
 
                 # Test
                 result = authenticate_user_sync(
-                    mock_db, "test@example.com", "password123",
+                    mock_db,
+                    "test@example.com",
+                    "password123",
                 )
 
                 # Verify
@@ -422,7 +430,10 @@ class TestUserTokenOperations:
         # Test
         expires = datetime.now(timezone.utc) + timedelta(hours=24)
         result = update_verification_token_sync(
-            mock_db, "user_id", "new_token", expires,
+            mock_db,
+            "user_id",
+            "new_token",
+            expires,
         )
 
         # Verify
@@ -472,7 +483,10 @@ class TestUserTokenOperations:
         # Test
         expires = datetime.now(timezone.utc) + timedelta(hours=1)
         result = update_password_reset_token_sync(
-            mock_db, "user_id", "new_reset_token", expires,
+            mock_db,
+            "user_id",
+            "new_reset_token",
+            expires,
         )
 
         # Verify
@@ -541,7 +555,10 @@ class TestUserDeletionOperations:
         # Test
         expires = datetime.now(timezone.utc) + timedelta(days=7)
         result = update_deletion_token_sync(
-            mock_db, "user_id", "new_deletion_token", expires,
+            mock_db,
+            "user_id",
+            "new_deletion_token",
+            expires,
         )
 
         # Verify

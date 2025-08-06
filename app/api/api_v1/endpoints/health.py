@@ -212,7 +212,9 @@ async def detailed_health_check(db: Session = Depends(get_db_sync)) -> dict[str,
 
     # Overall status determination
     if health_status["status"] == "degraded":
-        logger.warning("Health check indicates degraded service", health_status=health_status)
+        logger.warning(
+            "Health check indicates degraded service", health_status=health_status
+        )
 
     return health_status
 

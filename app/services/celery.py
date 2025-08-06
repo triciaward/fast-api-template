@@ -63,7 +63,8 @@ def is_celery_enabled() -> bool:
 def submit_task(task_name: str, *args: Any, **kwargs: Any) -> AsyncResult | None:
     if not is_celery_enabled():
         app_logger.warning(
-            "Attempted to submit task but Celery is disabled", task_name=task_name,
+            "Attempted to submit task but Celery is disabled",
+            task_name=task_name,
         )
         return None
     try:
@@ -78,7 +79,10 @@ def submit_task(task_name: str, *args: Any, **kwargs: Any) -> AsyncResult | None
         )
     except Exception as e:
         app_logger.error(
-            "Failed to submit task", task_name=task_name, error=str(e), exc_info=True,
+            "Failed to submit task",
+            task_name=task_name,
+            error=str(e),
+            exc_info=True,
         )
         return None
     else:
@@ -106,7 +110,10 @@ def get_task_status(task_id: str) -> dict[str, Any] | None:
                 status_info["error"] = str(result.info)
     except Exception as e:
         app_logger.error(
-            "Failed to get task status", task_id=task_id, error=str(e), exc_info=True,
+            "Failed to get task status",
+            task_id=task_id,
+            error=str(e),
+            exc_info=True,
         )
         return None
     else:
@@ -123,7 +130,10 @@ def cancel_task(task_id: str) -> bool:
         app_logger.info("Task cancelled successfully", task_id=task_id)
     except Exception as e:
         app_logger.error(
-            "Failed to cancel task", task_id=task_id, error=str(e), exc_info=True,
+            "Failed to cancel task",
+            task_id=task_id,
+            error=str(e),
+            exc_info=True,
         )
         return False
     else:

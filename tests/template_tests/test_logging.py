@@ -26,7 +26,8 @@ class TestLoggingConfiguration:
                     setup_logging()
                     logger = get_app_logger()
                     assert hasattr(logger, "_logger") or hasattr(
-                        logger, "logger_factory_args",
+                        logger,
+                        "logger_factory_args",
                     )
                     logger.info("Test message", test_field="test_value")
 
@@ -38,7 +39,8 @@ class TestLoggingConfiguration:
                     setup_logging()
                     logger = get_app_logger()
                     assert hasattr(logger, "_logger") or hasattr(
-                        logger, "logger_factory_args",
+                        logger,
+                        "logger_factory_args",
                     )
                     logger.info("Test message", test_field="test_value")
 
@@ -107,9 +109,13 @@ class TestLoggingConfiguration:
                 with patch.object(settings, "LOG_FORMAT", "json"):
                     setup_logging()
                     logger = get_app_logger()
-                    with tempfile.NamedTemporaryFile(
-                        mode="w+", delete=False,
-                    ) as temp_file, patch("sys.stdout", temp_file):
+                    with (
+                        tempfile.NamedTemporaryFile(
+                            mode="w+",
+                            delete=False,
+                        ) as temp_file,
+                        patch("sys.stdout", temp_file),
+                    ):
                         logger.info("Test message")
                         temp_file.seek(0)
                         log_output = temp_file.read()

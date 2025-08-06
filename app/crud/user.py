@@ -169,7 +169,10 @@ def verify_user_sync(db: Session, user_id: str) -> bool:
 
 
 def update_verification_token_sync(
-    db: Session, user_id: str, token: str, expires: datetime,
+    db: Session,
+    user_id: str,
+    token: str,
+    expires: datetime,
 ) -> bool:
     user = get_user_by_id_sync(db, user_id)
     if not user:
@@ -194,7 +197,10 @@ def get_user_by_verification_token_sync(db: Session, token: str) -> User | None:
 
 
 def update_password_reset_token_sync(
-    db: Session, user_id: str, token: str, expires: datetime,
+    db: Session,
+    user_id: str,
+    token: str,
+    expires: datetime,
 ) -> bool:
     user = get_user_by_id_sync(db, user_id)
     if not user:
@@ -243,7 +249,10 @@ def update_user_password_sync(db: Session, user_id: str, new_password: str) -> b
 
 
 def update_deletion_token_sync(
-    db: Session, user_id: str, token: str, expires: datetime,
+    db: Session,
+    user_id: str,
+    token: str,
+    expires: datetime,
 ) -> bool:
     user = get_user_by_id_sync(db, user_id)
     if not user:
@@ -268,7 +277,9 @@ def get_user_by_deletion_token_sync(db: Session, token: str) -> User | None:
 
 
 def schedule_user_deletion_sync(
-    db: Session, user_id: str, scheduled_date: datetime,
+    db: Session,
+    user_id: str,
+    scheduled_date: datetime,
 ) -> bool:
     user = get_user_by_id_sync(db, user_id)
     if not user:
@@ -324,7 +335,8 @@ def get_users_for_permanent_deletion_sync(db: Session) -> list[User]:
     """Get users who should be permanently deleted."""
     result = db.execute(
         select(User).filter(
-            User.deletion_scheduled_for <= utc_now(), User.is_deleted.is_(False),
+            User.deletion_scheduled_for <= utc_now(),
+            User.is_deleted.is_(False),
         ),
     )
     return list(result.scalars().all())
@@ -497,7 +509,9 @@ def get_users_sync(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
 
 # Async OAuth functions for compatibility
 async def get_user_by_oauth_id(
-    db: DBSession, oauth_provider: str, oauth_id: str,
+    db: DBSession,
+    oauth_provider: str,
+    oauth_id: str,
 ) -> User | None:
     """Get user by OAuth ID (async version)."""
     if isinstance(db, AsyncSession):

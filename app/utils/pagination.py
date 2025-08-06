@@ -71,7 +71,11 @@ class PaginatedResponse(BaseModel, Generic[T]):
 
     @classmethod
     def create(
-        cls, items: list[T], page: int, size: int, total: int,
+        cls,
+        items: list[T],
+        page: int,
+        size: int,
+        total: int,
     ) -> "PaginatedResponse[T]":
         """Create a paginated response from items and pagination parameters."""
         metadata = PaginationMetadata.create(page=page, size=size, total=total)
@@ -116,7 +120,10 @@ async def paginate(
 
 
 def create_pagination_links(
-    base_url: str, page: int, pages: int, **query_params,
+    base_url: str,
+    page: int,
+    pages: int,
+    **query_params,
 ) -> dict[str, str | None]:
     """
     Create pagination links for HATEOAS support.

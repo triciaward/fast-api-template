@@ -38,10 +38,12 @@ class TextSearchFilter(BaseModel):
     query: str = Field(..., description="Search query string")
     fields: list[str] = Field(..., description="Fields to search in")
     operator: SearchOperator = Field(
-        default=SearchOperator.CONTAINS, description="Search operator to use",
+        default=SearchOperator.CONTAINS,
+        description="Search operator to use",
     )
     case_sensitive: bool = Field(
-        default=False, description="Whether search should be case sensitive",
+        default=False,
+        description="Whether search should be case sensitive",
     )
     use_full_text_search: bool = Field(
         default=False,
@@ -56,7 +58,8 @@ class FieldFilter(BaseModel):
     operator: FilterOperator = Field(..., description="Filter operator")
     value: Any | None = Field(None, description="Value to filter by")
     values: list[Any] | None = Field(
-        None, description="List of values for IN/NOT_IN operators",
+        None,
+        description="List of values for IN/NOT_IN operators",
     )
 
 
@@ -64,10 +67,12 @@ class SearchFilterConfig(BaseModel):
     """Complete search and filter configuration."""
 
     text_search: TextSearchFilter | None = Field(
-        None, description="Text search configuration",
+        None,
+        description="Text search configuration",
     )
     filters: list[FieldFilter] = Field(
-        default_factory=list, description="List of field filters to apply",
+        default_factory=list,
+        description="List of field filters to apply",
     )
     sort_by: str | None = Field(None, description="Field to sort by")
     sort_order: str = Field(default="asc", description="Sort order (asc or desc)")
@@ -119,7 +124,8 @@ class SearchFilterBuilder:
                 ]
                 # Use string concatenation with spaces for full-text search
                 search_vector = func.to_tsvector(
-                    "english", func.concat_ws(" ", *field_expressions),
+                    "english",
+                    func.concat_ws(" ", *field_expressions),
                 )
                 search_query = func.plainto_tsquery("english", query)
                 return search_vector.op("@@")(search_query)
@@ -332,7 +338,9 @@ def create_user_search_filters(
         else:
             filters.append(
                 create_field_filter(
-                    "oauth_provider", FilterOperator.EQUALS, oauth_provider,
+                    "oauth_provider",
+                    FilterOperator.EQUALS,
+                    oauth_provider,
                 ),
             )
 
@@ -340,19 +348,26 @@ def create_user_search_filters(
     if date_created_after:
         filters.append(
             create_field_filter(
-                "date_created", FilterOperator.GREATER_THAN_EQUAL, date_created_after,
+                "date_created",
+                FilterOperator.GREATER_THAN_EQUAL,
+                date_created_after,
             ),
         )
 
     if date_created_before:
         filters.append(
             create_field_filter(
-                "date_created", FilterOperator.LESS_THAN_EQUAL, date_created_before,
+                "date_created",
+                FilterOperator.LESS_THAN_EQUAL,
+                date_created_before,
             ),
         )
 
     return SearchFilterConfig(
-        text_search=text_search, filters=filters, sort_by=sort_by, sort_order=sort_order,
+        text_search=text_search,
+        filters=filters,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
 
 
@@ -402,19 +417,26 @@ def create_deleted_user_search_filters(
     if deleted_after:
         filters.append(
             create_field_filter(
-                "deleted_at", FilterOperator.GREATER_THAN_EQUAL, deleted_after,
+                "deleted_at",
+                FilterOperator.GREATER_THAN_EQUAL,
+                deleted_after,
             ),
         )
 
     if deleted_before:
         filters.append(
             create_field_filter(
-                "deleted_at", FilterOperator.LESS_THAN_EQUAL, deleted_before,
+                "deleted_at",
+                FilterOperator.LESS_THAN_EQUAL,
+                deleted_before,
             ),
         )
 
     return SearchFilterConfig(
-        text_search=text_search, filters=filters, sort_by=sort_by, sort_order=sort_order,
+        text_search=text_search,
+        filters=filters,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
 
 
@@ -424,19 +446,23 @@ class UserSearchParams(BaseModel):
 
     search: str | None = Field(None, description="Search query for username and email")
     use_full_text_search: bool = Field(
-        default=False, description="Use PostgreSQL full-text search (if available)",
+        default=False,
+        description="Use PostgreSQL full-text search (if available)",
     )
     is_verified: bool | None = Field(None, description="Filter by verification status")
     oauth_provider: str | None = Field(
-        None, description="Filter by OAuth provider (google, apple, none)",
+        None,
+        description="Filter by OAuth provider (google, apple, none)",
     )
     is_superuser: bool | None = Field(None, description="Filter by superuser status")
     is_deleted: bool | None = Field(None, description="Filter by deletion status")
     date_created_after: datetime | None = Field(
-        None, description="Filter users created after this date",
+        None,
+        description="Filter users created after this date",
     )
     date_created_before: datetime | None = Field(
-        None, description="Filter users created before this date",
+        None,
+        description="Filter users created before this date",
     )
     sort_by: str | None = Field(None, description="Field to sort by")
     sort_order: str = Field(default="asc", description="Sort order (asc or desc)")
@@ -461,16 +487,20 @@ class DeletedUserSearchParams(BaseModel):
     """Query parameters for deleted user search endpoint."""
 
     deleted_by: UUID | None = Field(
-        None, description="Filter by user who performed the deletion",
+        None,
+        description="Filter by user who performed the deletion",
     )
     deletion_reason: str | None = Field(
-        None, description="Search in deletion reason field",
+        None,
+        description="Search in deletion reason field",
     )
     deleted_after: datetime | None = Field(
-        None, description="Filter users deleted after this date",
+        None,
+        description="Filter users deleted after this date",
     )
     deleted_before: datetime | None = Field(
-        None, description="Filter users deleted before this date",
+        None,
+        description="Filter users deleted before this date",
     )
     sort_by: str | None = Field(None, description="Field to sort by")
     sort_order: str = Field(default="desc", description="Sort order (asc or desc)")

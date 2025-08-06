@@ -171,7 +171,8 @@ class TestSoftDeleteCRUD:
 
         # Verify user is soft deleted
         updated_user = crud_user.get_user_by_id_any_status_sync(
-            sync_db_session, str(user.id),
+            sync_db_session,
+            str(user.id),
         )
         assert updated_user is not None
         assert updated_user.is_deleted is True
@@ -198,12 +199,16 @@ class TestSoftDeleteCRUD:
         assert updated_user.deleted_at is None
 
     def test_get_deleted_users(
-        self, sync_db_session: Session, test_user_data: dict, test_user_data_2: dict,
+        self,
+        sync_db_session: Session,
+        test_user_data: dict,
+        test_user_data_2: dict,
     ):
         """Test getting deleted users."""
         # Create two users
         user1 = crud_user.create_user_sync(
-            sync_db_session, UserCreate(**test_user_data),
+            sync_db_session,
+            UserCreate(**test_user_data),
         )
         crud_user.create_user_sync(sync_db_session, UserCreate(**test_user_data_2))
 
@@ -218,12 +223,16 @@ class TestSoftDeleteCRUD:
         assert deleted_users[0].is_deleted is True
 
     def test_count_deleted_users(
-        self, sync_db_session: Session, test_user_data: dict, test_user_data_2: dict,
+        self,
+        sync_db_session: Session,
+        test_user_data: dict,
+        test_user_data_2: dict,
     ):
         """Test counting deleted users."""
         # Create two users
         user1 = crud_user.create_user_sync(
-            sync_db_session, UserCreate(**test_user_data),
+            sync_db_session,
+            UserCreate(**test_user_data),
         )
         crud_user.create_user_sync(sync_db_session, UserCreate(**test_user_data_2))
 
@@ -239,7 +248,9 @@ class TestSoftDeleteCRUD:
         assert count == 1
 
     def test_permanently_delete_user(
-        self, sync_db_session: Session, test_user_data: dict,
+        self,
+        sync_db_session: Session,
+        test_user_data: dict,
     ):
         """Test permanently deleting a user."""
         # Create a user
@@ -269,7 +280,9 @@ class TestSoftDeleteCRUD:
         assert success is False
 
     def test_restore_already_active_user(
-        self, sync_db_session: Session, test_user_data: dict,
+        self,
+        sync_db_session: Session,
+        test_user_data: dict,
     ):
         """Test restoring a user that is already active."""
         # Create a user (already active)
@@ -281,7 +294,9 @@ class TestSoftDeleteCRUD:
         assert success is False
 
     def test_soft_delete_already_deleted_user(
-        self, sync_db_session: Session, test_user_data: dict,
+        self,
+        sync_db_session: Session,
+        test_user_data: dict,
     ):
         """Test soft deleting a user that is already deleted."""
         # Create a user
@@ -303,7 +318,9 @@ class TestSoftDeleteIntegration:
     """Test soft delete integration with existing functionality."""
 
     def test_deleted_users_not_in_normal_queries(
-        self, sync_db_session: Session, test_user_data: dict,
+        self,
+        sync_db_session: Session,
+        test_user_data: dict,
     ):
         """Test that deleted users don't appear in normal queries."""
         # Create a user
@@ -322,7 +339,9 @@ class TestSoftDeleteIntegration:
         assert user not in users
 
     def test_deleted_users_not_authenticatable(
-        self, sync_db_session: Session, test_user_data: dict,
+        self,
+        sync_db_session: Session,
+        test_user_data: dict,
     ):
         """Test that deleted users cannot authenticate."""
         # Create a user
@@ -331,7 +350,9 @@ class TestSoftDeleteIntegration:
 
         # Verify user can authenticate
         auth_user = crud_user.authenticate_user_sync(
-            sync_db_session, test_user_data["email"], test_user_data["password"],
+            sync_db_session,
+            test_user_data["email"],
+            test_user_data["password"],
         )
         assert auth_user is not None
         assert auth_user.id == user.id
@@ -341,12 +362,16 @@ class TestSoftDeleteIntegration:
 
         # Verify user cannot authenticate
         auth_user = crud_user.authenticate_user_sync(
-            sync_db_session, test_user_data["email"], test_user_data["password"],
+            sync_db_session,
+            test_user_data["email"],
+            test_user_data["password"],
         )
         assert auth_user is None
 
     def test_deleted_users_not_findable_by_email(
-        self, sync_db_session: Session, test_user_data: dict,
+        self,
+        sync_db_session: Session,
+        test_user_data: dict,
     ):
         """Test that deleted users cannot be found by email."""
         # Create a user
@@ -355,7 +380,8 @@ class TestSoftDeleteIntegration:
 
         # Verify user can be found by email
         found_user = crud_user.get_user_by_email_sync(
-            sync_db_session, test_user_data["email"],
+            sync_db_session,
+            test_user_data["email"],
         )
         assert found_user is not None
         assert found_user.id == user.id
@@ -365,12 +391,15 @@ class TestSoftDeleteIntegration:
 
         # Verify user cannot be found by email
         found_user = crud_user.get_user_by_email_sync(
-            sync_db_session, test_user_data["email"],
+            sync_db_session,
+            test_user_data["email"],
         )
         assert found_user is None
 
     def test_deleted_users_not_findable_by_username(
-        self, sync_db_session: Session, test_user_data: dict,
+        self,
+        sync_db_session: Session,
+        test_user_data: dict,
     ):
         """Test that deleted users cannot be found by username."""
         # Create a user
@@ -379,7 +408,8 @@ class TestSoftDeleteIntegration:
 
         # Verify user can be found by username
         found_user = crud_user.get_user_by_username_sync(
-            sync_db_session, test_user_data["username"],
+            sync_db_session,
+            test_user_data["username"],
         )
         assert found_user is not None
         assert found_user.id == user.id
@@ -389,6 +419,7 @@ class TestSoftDeleteIntegration:
 
         # Verify user cannot be found by username
         found_user = crud_user.get_user_by_username_sync(
-            sync_db_session, test_user_data["username"],
+            sync_db_session,
+            test_user_data["username"],
         )
         assert found_user is None

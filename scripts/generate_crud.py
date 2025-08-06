@@ -32,7 +32,10 @@ class CRUDGenerator:
     """Generates CRUD boilerplate for FastAPI resources."""
 
     def __init__(
-        self, model_name: str, fields: list[tuple[str, str]], options: dict[str, bool],
+        self,
+        model_name: str,
+        fields: list[tuple[str, str]],
+        options: dict[str, bool],
     ):
         self.model_name = model_name
         self.model_name_lower = model_name.lower()
@@ -54,9 +57,7 @@ class CRUDGenerator:
         if word.endswith("y"):
             return word[:-1] + "ies"
         # Handle words ending in 's', 'sh', 'ch', 'x', 'z' (add 'es')
-        elif (
-            word.endswith(("s", "sh", "ch", "x", "z"))
-        ):
+        elif word.endswith(("s", "sh", "ch", "x", "z")):
             return word + "es"
         # Handle words ending in 'f' or 'fe' (change to 'ves')
         elif word.endswith("f"):
@@ -239,7 +240,14 @@ class CRUDGenerator:
     pass"""
 
         return "\n\n".join(
-            [*imports, base_schema, create_schema, update_schema, response_schema, list_schema],
+            [
+                *imports,
+                base_schema,
+                create_schema,
+                update_schema,
+                response_schema,
+                list_schema,
+            ],
         )
 
     def generate_crud(self) -> str:
@@ -515,7 +523,15 @@ async def delete_{self.model_name_lower}(
         )"""
 
         return "\n\n".join(
-            [*imports, router, list_endpoint, get_endpoint, create_endpoint, update_endpoint, delete_endpoint],
+            [
+                *imports,
+                router,
+                list_endpoint,
+                get_endpoint,
+                create_endpoint,
+                update_endpoint,
+                delete_endpoint,
+            ],
         )
 
     def generate_tests(self) -> str:
@@ -665,7 +681,8 @@ test_{self.model_name_lower}_data = {{
             # Add after the last include_router call
             new_include = f'    api_router.include_router({self.model_name_lower}.router, prefix="/{self.model_name_plural}", tags=["{self.model_name_lower}"])'
             content = content.replace(
-                match.group(0), match.group(0) + "\n" + new_include,
+                match.group(0),
+                match.group(0) + "\n" + new_include,
             )
 
         with open(api_file, "w") as f:
@@ -722,7 +739,6 @@ test_{self.model_name_lower}_data = {{
                     )
 
 
-
 def parse_field_spec(field_spec: str) -> tuple[str, str]:
     """Parse field specification like 'name:str' into (name, type)."""
     if ":" not in field_spec:
@@ -754,13 +770,19 @@ def main():
         help="Field specifications (e.g., title:str content:str is_published:bool)",
     )
     parser.add_argument(
-        "--soft-delete", action="store_true", help="Include soft delete functionality",
+        "--soft-delete",
+        action="store_true",
+        help="Include soft delete functionality",
     )
     parser.add_argument(
-        "--searchable", action="store_true", help="Include search functionality",
+        "--searchable",
+        action="store_true",
+        help="Include search functionality",
     )
     parser.add_argument(
-        "--admin", action="store_true", help="Include admin functionality",
+        "--admin",
+        action="store_true",
+        help="Include admin functionality",
     )
     parser.add_argument("--slug", action="store_true", help="Include slug field")
 
@@ -785,7 +807,6 @@ def main():
 
     # Generate CRUD
     generator = CRUDGenerator(args.model_name, fields, options)
-
 
     try:
         generator.create_files()

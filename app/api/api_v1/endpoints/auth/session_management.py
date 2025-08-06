@@ -314,7 +314,8 @@ async def revoke_all_sessions(
     def _handle_user_not_found() -> NoReturn:
         """Handle user not found error."""
         raise HTTPException(
-            status_code=500, detail="User not found. Please try again later.",
+            status_code=500,
+            detail="User not found. Please try again later.",
         )
 
     # Get the actual user object from database
@@ -324,7 +325,9 @@ async def revoke_all_sessions(
         _handle_user_not_found()
 
     # Revoke all sessions for the user
-    revoked_count = await crud_refresh_token.revoke_all_user_sessions(db, str(current_user.id))
+    revoked_count = await crud_refresh_token.revoke_all_user_sessions(
+        db, str(current_user.id)
+    )
 
     # Log the action
     await log_logout(

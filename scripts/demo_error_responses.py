@@ -118,20 +118,17 @@ def demo_not_found_errors() -> None:
 def demo_rate_limit_errors() -> None:
     """Demonstrate rate limit errors."""
 
-
     # For demonstration, we'll show what the error format would look like
 
 
 def demo_server_errors() -> None:
     """Demonstrate server errors."""
 
-
     # For demonstration, we'll show what the error format would look like
 
 
 def demo_custom_exceptions() -> None:
     """Demonstrate custom exception usage."""
-
 
 
 def main() -> None:
@@ -151,7 +148,6 @@ def main() -> None:
         demo_rate_limit_errors()
         demo_server_errors()
         demo_custom_exceptions()
-
 
     except requests.exceptions.ConnectionError:
         sys.exit(1)

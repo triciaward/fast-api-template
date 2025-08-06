@@ -101,7 +101,8 @@ class TestUserModel:
 
     @pytest.mark.asyncio
     async def test_user_model_auto_generated_fields(
-        self, db_session: AsyncSession,
+        self,
+        db_session: AsyncSession,
     ) -> None:
         """Test that ID and date_created are auto-generated."""
         user = User(

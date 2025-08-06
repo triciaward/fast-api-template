@@ -33,17 +33,29 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(
-        op.f("ix_audit_logs_event_type"), "audit_logs", ["event_type"], unique=False,
+        op.f("ix_audit_logs_event_type"),
+        "audit_logs",
+        ["event_type"],
+        unique=False,
     )
     op.create_index(op.f("ix_audit_logs_id"), "audit_logs", ["id"], unique=False)
     op.create_index(
-        op.f("ix_audit_logs_session_id"), "audit_logs", ["session_id"], unique=False,
+        op.f("ix_audit_logs_session_id"),
+        "audit_logs",
+        ["session_id"],
+        unique=False,
     )
     op.create_index(
-        op.f("ix_audit_logs_timestamp"), "audit_logs", ["timestamp"], unique=False,
+        op.f("ix_audit_logs_timestamp"),
+        "audit_logs",
+        ["timestamp"],
+        unique=False,
     )
     op.create_index(
-        op.f("ix_audit_logs_user_id"), "audit_logs", ["user_id"], unique=False,
+        op.f("ix_audit_logs_user_id"),
+        "audit_logs",
+        ["user_id"],
+        unique=False,
     )
     op.create_table(
         "refresh_tokens",
@@ -80,7 +92,10 @@ def upgrade() -> None:
         unique=False,
     )
     op.create_index(
-        op.f("ix_refresh_tokens_id"), "refresh_tokens", ["id"], unique=False,
+        op.f("ix_refresh_tokens_id"),
+        "refresh_tokens",
+        ["id"],
+        unique=False,
     )
     op.create_index(
         op.f("ix_refresh_tokens_is_deleted"),
@@ -101,7 +116,10 @@ def upgrade() -> None:
         unique=False,
     )
     op.create_index(
-        op.f("ix_refresh_tokens_user_id"), "refresh_tokens", ["user_id"], unique=False,
+        op.f("ix_refresh_tokens_user_id"),
+        "refresh_tokens",
+        ["user_id"],
+        unique=False,
     )
     op.create_table(
         "users",
@@ -157,20 +175,35 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(
-        op.f("ix_api_keys_deleted_at"), "api_keys", ["deleted_at"], unique=False,
+        op.f("ix_api_keys_deleted_at"),
+        "api_keys",
+        ["deleted_at"],
+        unique=False,
     )
     op.create_index(
-        op.f("ix_api_keys_deleted_by"), "api_keys", ["deleted_by"], unique=False,
+        op.f("ix_api_keys_deleted_by"),
+        "api_keys",
+        ["deleted_by"],
+        unique=False,
     )
     op.create_index(
-        op.f("ix_api_keys_expires_at"), "api_keys", ["expires_at"], unique=False,
+        op.f("ix_api_keys_expires_at"),
+        "api_keys",
+        ["expires_at"],
+        unique=False,
     )
     op.create_index(op.f("ix_api_keys_id"), "api_keys", ["id"], unique=False)
     op.create_index(
-        op.f("ix_api_keys_is_active"), "api_keys", ["is_active"], unique=False,
+        op.f("ix_api_keys_is_active"),
+        "api_keys",
+        ["is_active"],
+        unique=False,
     )
     op.create_index(
-        op.f("ix_api_keys_is_deleted"), "api_keys", ["is_deleted"], unique=False,
+        op.f("ix_api_keys_is_deleted"),
+        "api_keys",
+        ["is_deleted"],
+        unique=False,
     )
     op.create_index(op.f("ix_api_keys_key_hash"), "api_keys", ["key_hash"], unique=True)
     op.create_index(op.f("ix_api_keys_user_id"), "api_keys", ["user_id"], unique=False)

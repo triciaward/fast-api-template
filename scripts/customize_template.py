@@ -234,7 +234,6 @@ class TemplateCustomizer:
             content,
         )
 
-
     def customize_alembic_ini(self) -> None:
         """Customize the alembic.ini file with the new database name."""
         alembic_file = self.project_root / "alembic.ini"
@@ -258,7 +257,6 @@ class TemplateCustomizer:
                 # Write back the updated content
                 with open(alembic_file, "w", encoding="utf-8") as f:
                     f.write(content)
-
 
             except Exception:
                 pass
@@ -296,7 +294,6 @@ class TemplateCustomizer:
                 # Write to .env file
                 with open(env_file, "w", encoding="utf-8") as f:
                     f.write(content)
-
 
             except Exception:
                 pass
@@ -360,7 +357,6 @@ Original template: https://github.com/your-username/fast-api-template
             if self.process_file(file_path):
                 processed_count += 1
 
-
         # Update .env file with Docker project name
         self.update_env_file()
 
@@ -372,7 +368,6 @@ Original template: https://github.com/your-username/fast-api-template
 
         # Update git remote info
         self.update_git_remote()
-
 
 
 def main():

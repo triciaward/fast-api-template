@@ -84,7 +84,8 @@ async def cleanup_expired_tokens(db: DBSession) -> int:
 
 
 async def get_refresh_token_by_hash(
-    db: DBSession, token_hash: str,
+    db: DBSession,
+    token_hash: str,
 ) -> RefreshToken | None:
     """Get refresh token by hash."""
     if isinstance(db, AsyncSession):
@@ -174,14 +175,17 @@ async def revoke_all_user_sessions(db: DBSession, user_id: str) -> int:
 
 
 async def verify_refresh_token_in_db(
-    db: DBSession, token_hash: str,
+    db: DBSession,
+    token_hash: str,
 ) -> RefreshToken | None:
     """Verify a refresh token in the database."""
     return await get_refresh_token_by_hash(db, token_hash)
 
 
 async def enforce_session_limit(
-    db: DBSession, user_id: str, max_sessions: int = 5,
+    db: DBSession,
+    user_id: str,
+    max_sessions: int = 5,
 ) -> None:
     """Enforce session limit by revoking oldest sessions if needed."""
     sessions = await get_user_sessions(db, user_id)
@@ -190,6 +194,7 @@ async def enforce_session_limit(
         # Sort by creation date (oldest first)
         def get_sort_key(s: RefreshToken) -> datetime:
             return s.created_at if s.created_at is not None else utc_now()  # type: ignore
+
         sessions.sort(key=get_sort_key)
 
         # Revoke oldest sessions to stay under limit

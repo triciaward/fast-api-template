@@ -30,7 +30,9 @@ class TestUserEndpoints:
         """,
     )
     async def test_get_current_user_success(
-        self, client: TestClient, test_user_data: dict[str, str],
+        self,
+        client: TestClient,
+        test_user_data: dict[str, str],
     ) -> None:
         """Test successfully getting current user information."""
         # Create user via API instead of direct database access
@@ -99,7 +101,9 @@ class TestUserEndpoints:
         """,
     )
     async def test_get_current_user_expired_token(
-        self, client: TestClient, test_user_data: dict[str, str],
+        self,
+        client: TestClient,
+        test_user_data: dict[str, str],
     ) -> None:
         """Test getting current user with expired token."""
         # Create user via API
@@ -112,7 +116,8 @@ class TestUserEndpoints:
         from datetime import timedelta
 
         access_token = create_access_token(
-            subject=user_email, expires_delta=timedelta(seconds=-1),
+            subject=user_email,
+            expires_delta=timedelta(seconds=-1),
         )
         headers = {"Authorization": f"Bearer {access_token}"}
 
@@ -142,7 +147,9 @@ class TestUserEndpoints:
         """,
     )
     async def test_get_current_user_wrong_secret_key(
-        self, client: TestClient, test_user_data: dict[str, str],
+        self,
+        client: TestClient,
+        test_user_data: dict[str, str],
     ) -> None:
         """Test getting current user with token signed by wrong secret key."""
         # Create user via API
@@ -208,7 +215,9 @@ class TestUserEndpoints:
         """,
     )
     async def test_get_current_user_wrong_auth_scheme(
-        self, client: TestClient, test_user_data: dict[str, str],
+        self,
+        client: TestClient,
+        test_user_data: dict[str, str],
     ) -> None:
         """Test getting current user with wrong authentication scheme."""
         # Create user via API

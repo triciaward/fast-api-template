@@ -30,7 +30,6 @@ class TemplateFixer:
         if alembic_ini.exists():
             return
 
-
         alembic_content = """# A generic, single database configuration.
 
 [alembic]
@@ -143,12 +142,10 @@ datefmt = %H:%M:%S
         with open(alembic_ini, "w") as f:
             f.write(alembic_content)
 
-
     def fix_env_example(self):
         """Fix .env.example file issues"""
         if not self.env_example.exists():
             return
-
 
         # Read the file
         with open(self.env_example) as f:
@@ -179,14 +176,12 @@ datefmt = %H:%M:%S
         with open(self.env_example, "w") as f:
             f.write(content)
 
-
     def fix_setup_script(self):
         """Fix setup_project.sh script issues"""
         setup_script = self.scripts_dir / "setup_project.sh"
 
         if not setup_script.exists():
             return
-
 
         # Read the file
         with open(setup_script) as f:
@@ -335,7 +330,8 @@ fi"""
 
         # Insert alembic check before migrations
         content = content.replace(
-            "# Run database migrations", alembic_check + "\n\n# Run database migrations",
+            "# Run database migrations",
+            alembic_check + "\n\n# Run database migrations",
         )
 
         # Fix superuser creation to be automatic
@@ -392,14 +388,12 @@ fi"""
         with open(setup_script, "w") as f:
             f.write(content)
 
-
     def run_all_fixes(self):
         """Run all template fixes"""
 
         self.fix_alembic_ini()
         self.fix_env_example()
         self.fix_setup_script()
-
 
 
 def main():

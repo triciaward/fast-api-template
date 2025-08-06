@@ -44,7 +44,8 @@ class TestPreventTemplatePush:
         )
 
         mock_run.return_value = MagicMock(
-            stdout="https://github.com/user/repo.git\n", returncode=0,
+            stdout="https://github.com/user/repo.git\n",
+            returncode=0,
         )
 
         result = get_remote_url()
@@ -64,7 +65,8 @@ class TestPreventTemplatePush:
         )
 
         mock_run.side_effect = subprocess.CalledProcessError(
-            1, "git remote get-url origin",
+            1,
+            "git remote get-url origin",
         )
 
         result = get_remote_url()
@@ -115,7 +117,11 @@ class TestPreventTemplatePush:
     @patch("prevent_template_push.is_template_repository")
     @patch("builtins.input")
     def test_main_not_in_git_repo(
-        self, mock_input, mock_is_template, mock_get_remote, mock_exists,
+        self,
+        mock_input,
+        mock_is_template,
+        mock_get_remote,
+        mock_exists,
     ):
         """Test main function when not in a git repository."""
         from prevent_template_push import main  # type: ignore[import-not-found]
@@ -133,7 +139,11 @@ class TestPreventTemplatePush:
     @patch("prevent_template_push.is_template_repository")
     @patch("builtins.input")
     def test_main_non_template_repo(
-        self, mock_input, mock_is_template, mock_get_remote, mock_exists,
+        self,
+        mock_input,
+        mock_is_template,
+        mock_get_remote,
+        mock_exists,
     ):
         """Test main function with non-template repository."""
         from prevent_template_push import main  # type: ignore[import-not-found]
@@ -151,7 +161,11 @@ class TestPreventTemplatePush:
     @patch("prevent_template_push.is_template_repository")
     @patch("builtins.input")
     def test_main_template_repo_user_continues(
-        self, mock_input, mock_is_template, mock_get_remote, mock_exists,
+        self,
+        mock_input,
+        mock_is_template,
+        mock_get_remote,
+        mock_exists,
     ):
         """Test main function with template repository when user chooses to continue."""
         from prevent_template_push import main  # type: ignore[import-not-found]
@@ -172,7 +186,11 @@ class TestPreventTemplatePush:
     @patch("prevent_template_push.is_template_repository")
     @patch("builtins.input")
     def test_main_template_repo_user_cancels(
-        self, mock_input, mock_is_template, mock_get_remote, mock_exists,
+        self,
+        mock_input,
+        mock_is_template,
+        mock_get_remote,
+        mock_exists,
     ):
         """Test main function with template repository when user cancels."""
         from prevent_template_push import main  # type: ignore[import-not-found]
@@ -260,11 +278,13 @@ class TestPreCommitConfiguration:
                     if hook.get("id") == "prevent-template-push":
                         template_hook_found = True
                         assert "commit" in hook.get(
-                            "stages", [],
+                            "stages",
+                            [],
                         ), "Should run on commit"
                         assert "push" in hook.get("stages", []), "Should run on push"
                         assert "prevent_template_push.py" in hook.get(
-                            "entry", "",
+                            "entry",
+                            "",
                         ), "Should use our script"
                         break
 

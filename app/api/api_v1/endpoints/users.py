@@ -41,7 +41,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db),
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
 ) -> UserResponse:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -50,7 +51,9 @@ async def get_current_user(
     )
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM],
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
         )
         email = payload.get("sub")
         if email is None:
@@ -348,12 +351,14 @@ async def soft_delete_user(
     user = crud_user.get_user_by_id_sync(db, user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
 
     if user.is_deleted:  # type: ignore
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="User is already deleted",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is already deleted",
         )
 
     # Perform soft delete
@@ -400,12 +405,14 @@ async def restore_user(
     user = crud_user.get_user_by_id_sync(db, user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
 
     if not user.is_deleted:  # type: ignore
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="User is not deleted",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is not deleted",
         )
 
     # Perform restore
@@ -589,7 +596,8 @@ async def permanently_delete_user(
     user = crud_user.get_user_by_id_sync(db, user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
 
     # Perform permanent delete

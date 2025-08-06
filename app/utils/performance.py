@@ -32,7 +32,9 @@ def monitor_database_queries() -> None:
     """Enable database query monitoring for performance analysis."""
 
     @event.listens_for(Engine, "before_cursor_execute")
-    def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+    def before_cursor_execute(
+        conn, cursor, statement, parameters, context, executemany
+    ):
         conn.info.setdefault("query_start_time", []).append(time.time())
         logger.debug(
             "Database query starting",
@@ -47,7 +49,9 @@ def monitor_database_queries() -> None:
             logger.warning(
                 "Slow database query detected",
                 execution_time=total,
-                statement=statement[:100] + "..." if len(statement) > 100 else statement,
+                statement=(
+                    statement[:100] + "..." if len(statement) > 100 else statement
+                ),
             )
 
 
@@ -78,11 +82,14 @@ def cache_result(ttl: int = 300) -> Callable[[F], F]:
     Returns:
         Decorated function with caching
     """
+
     def decorator(func: F) -> Any:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Simple in-memory cache (in production, use Redis)
-            cache_key = f"{func.__name__}:{hash(str(args) + str(sorted(kwargs.items())))}"
+            cache_key = (
+                f"{func.__name__}:{hash(str(args) + str(sorted(kwargs.items())))}"
+            )
 
             # Check if result is cached
             if cache_key in _performance_cache:
@@ -100,6 +107,7 @@ def cache_result(ttl: int = 300) -> Callable[[F], F]:
             return result
 
         return wrapper
+
     return decorator
 
 
@@ -110,6 +118,7 @@ def monitor_request_performance() -> Callable[[F], F]:
     Returns:
         Decorated function with performance monitoring
     """
+
     def decorator(func: F) -> Any:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -147,6 +156,7 @@ def monitor_request_performance() -> Callable[[F], F]:
                 return result
 
         return wrapper
+
     return decorator
 
 

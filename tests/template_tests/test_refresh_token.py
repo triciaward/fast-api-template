@@ -87,7 +87,11 @@ class TestRefreshTokenCRUD:
 
         token = create_refresh_token()
         db_refresh_token = await crud_create_refresh_token(
-            sync_db_session, str(user.id), token, "Test Device", "127.0.0.1",
+            sync_db_session,
+            str(user.id),
+            token,
+            "Test Device",
+            "127.0.0.1",
         )
 
         assert db_refresh_token.user_id == user.id
@@ -111,7 +115,9 @@ class TestRefreshTokenCRUD:
 
         token = create_refresh_token()
         db_refresh_token = await crud_create_refresh_token(
-            sync_db_session, str(user.id), token,
+            sync_db_session,
+            str(user.id),
+            token,
         )
 
         # Test valid token - use verify_refresh_token_in_db instead
@@ -159,12 +165,15 @@ class TestRefreshTokenCRUD:
 
         token = create_refresh_token()
         db_refresh_token = await crud_create_refresh_token(
-            sync_db_session, str(user.id), token,
+            sync_db_session,
+            str(user.id),
+            token,
         )
 
         # Revoke token
         success = await revoke_refresh_token(
-            sync_db_session, str(db_refresh_token.id),
+            sync_db_session,
+            str(db_refresh_token.id),
         )
         assert success is True
 
@@ -213,10 +222,16 @@ class TestRefreshTokenCRUD:
         token1 = create_refresh_token()
         token2 = create_refresh_token()
         db_token1 = await crud_create_refresh_token(
-            sync_db_session, str(user.id), token1, "Device 1",
+            sync_db_session,
+            str(user.id),
+            token1,
+            "Device 1",
         )
         await crud_create_refresh_token(
-            sync_db_session, str(user.id), token2, "Device 2",
+            sync_db_session,
+            str(user.id),
+            token2,
+            "Device 2",
         )
 
         sessions = await get_user_sessions(sync_db_session, str(user.id))
@@ -224,7 +239,8 @@ class TestRefreshTokenCRUD:
 
         # Test with current session ID
         sessions = await get_user_sessions(
-            sync_db_session, str(user.id),
+            sync_db_session,
+            str(user.id),
         )
         assert len(sessions) == 2
         # Check that current session is marked
@@ -244,10 +260,14 @@ class TestRefreshTokenCRUD:
 
         # Create sessions
         await crud_create_refresh_token(
-            sync_db_session, str(user.id), create_refresh_token(),
+            sync_db_session,
+            str(user.id),
+            create_refresh_token(),
         )
         await crud_create_refresh_token(
-            sync_db_session, str(user.id), create_refresh_token(),
+            sync_db_session,
+            str(user.id),
+            create_refresh_token(),
         )
 
         count = await get_user_session_count(sync_db_session, str(user.id))
@@ -310,18 +330,26 @@ class TestRefreshTokenCRUD:
             token3 = create_refresh_token()
 
             db_token1 = await crud_create_refresh_token(
-                sync_db_session, str(user.id), token1,
+                sync_db_session,
+                str(user.id),
+                token1,
             )
             db_token2 = await crud_create_refresh_token(
-                sync_db_session, str(user.id), token2,
+                sync_db_session,
+                str(user.id),
+                token2,
             )
             db_token3 = await crud_create_refresh_token(
-                sync_db_session, str(user.id), token3,
+                sync_db_session,
+                str(user.id),
+                token3,
             )
 
             # Enforce limit with the newest token
             await enforce_session_limit(
-                sync_db_session, str(user.id), 2,
+                sync_db_session,
+                str(user.id),
+                2,
             )
 
             # Check that oldest session is revoked
@@ -352,15 +380,20 @@ class TestRefreshTokenCRUD:
         token1 = create_refresh_token()
         token2 = create_refresh_token()
         db_token1 = await crud_create_refresh_token(
-            sync_db_session, str(user.id), token1,
+            sync_db_session,
+            str(user.id),
+            token1,
         )
         db_token2 = await crud_create_refresh_token(
-            sync_db_session, str(user.id), token2,
+            sync_db_session,
+            str(user.id),
+            token2,
         )
 
         # Revoke all sessions except one
         revoked_count = await revoke_all_user_sessions(
-            sync_db_session, str(user.id),
+            sync_db_session,
+            str(user.id),
         )
         assert revoked_count == 1
 
@@ -471,7 +504,9 @@ class TestRefreshTokenService:
         request.client.host = "127.0.0.1"
 
         access_token, refresh_token = await create_user_session(
-            sync_db_session, user, request,
+            sync_db_session,
+            user,
+            request,
         )
 
         assert access_token is not None
@@ -553,7 +588,9 @@ class TestRefreshTokenService:
 
         # Revoke all sessions except one
         revoked_count = await revoke_all_sessions(
-            sync_db_session, uuid.UUID(str(user.id)), token1,
+            sync_db_session,
+            uuid.UUID(str(user.id)),
+            token1,
         )
         assert revoked_count == 1
 
@@ -572,7 +609,9 @@ class TestRefreshTokenService:
 class TestRefreshTokenAPI:
     """Test refresh token API endpoints."""
 
-    async def test_refresh_token_endpoint_success(self, client, sync_db_session: Session):
+    async def test_refresh_token_endpoint_success(
+        self, client, sync_db_session: Session
+    ):
         """Test successful token refresh."""
         # Create user and session
         user = User(
@@ -590,7 +629,8 @@ class TestRefreshTokenAPI:
 
         # Make request with refresh token cookie
         response = client.post(
-            "/api/v1/auth/refresh", cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token},
+            "/api/v1/auth/refresh",
+            cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token},
         )
 
         assert response.status_code == 200
@@ -637,7 +677,8 @@ class TestRefreshTokenAPI:
 
         # Make logout request
         response = client.post(
-            "/api/v1/auth/logout", cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token},
+            "/api/v1/auth/logout",
+            cookies={settings.REFRESH_TOKEN_COOKIE_NAME: token},
         )
 
         assert response.status_code == 200
@@ -671,14 +712,17 @@ class TestRefreshTokenAPI:
         # Create session and get access token
         token = create_refresh_token()
         db_refresh_token = await crud_create_refresh_token(
-            sync_db_session, str(user.id), token,
+            sync_db_session,
+            str(user.id),
+            token,
         )
 
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         from app.core.security import create_access_token
 
         access_token = create_access_token(
-            subject=user.email, expires_delta=access_token_expires,
+            subject=user.email,
+            expires_delta=access_token_expires,
         )
 
         # Make request with access token
@@ -714,14 +758,17 @@ class TestRefreshTokenAPI:
         # Create session and get access token
         token = create_refresh_token()
         db_refresh_token = await crud_create_refresh_token(
-            sync_db_session, str(user.id), token,
+            sync_db_session,
+            str(user.id),
+            token,
         )
 
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         from app.core.security import create_access_token
 
         access_token = create_access_token(
-            subject=user.email, expires_delta=access_token_expires,
+            subject=user.email,
+            expires_delta=access_token_expires,
         )
 
         # Make request to revoke session
@@ -762,7 +809,8 @@ class TestRefreshTokenAPI:
         from app.core.security import create_access_token
 
         access_token = create_access_token(
-            subject=user.email, expires_delta=access_token_expires,
+            subject=user.email,
+            expires_delta=access_token_expires,
         )
 
         # Make request to revoke all sessions except current

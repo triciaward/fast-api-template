@@ -92,7 +92,10 @@ class TestCeleryTasks:
     @patch("app.crud.user.permanently_delete_user_sync")
     @patch("app.core.logging_config.get_app_logger")
     def test_permanently_delete_accounts_task_success(
-        self, mock_logger, mock_delete_user, mock_get_db,
+        self,
+        mock_logger,
+        mock_delete_user,
+        mock_get_db,
     ):
         """Test permanently_delete_accounts_task with successful deletion."""
         # Mock database and user
@@ -129,7 +132,10 @@ class TestCeleryTasks:
     @patch("app.crud.user.permanently_delete_user_sync")
     @patch("app.core.logging_config.get_app_logger")
     def test_permanently_delete_accounts_task_no_accounts(
-        self, mock_logger, mock_delete_user, mock_get_db,
+        self,
+        mock_logger,
+        mock_delete_user,
+        mock_get_db,
     ):
         """Test permanently_delete_accounts_task with no accounts to delete."""
         # Mock database with no users

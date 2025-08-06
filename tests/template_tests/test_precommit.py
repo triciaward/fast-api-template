@@ -48,7 +48,8 @@ class TestPreCommitConfiguration:
         script_path = Path("scripts/install_precommit.sh")
         assert script_path.exists(), "scripts/install_precommit.sh should exist"
         assert os.access(
-            script_path, os.X_OK,
+            script_path,
+            os.X_OK,
         ), "scripts/install_precommit.sh should be executable"
 
     def test_install_script_content(self):
@@ -127,7 +128,9 @@ class TestPreCommitConfiguration:
         # Verify script syntax is valid
         try:
             result = subprocess.run(
-                ["bash", "-n", str(script_path)], capture_output=True, text=True,
+                ["bash", "-n", str(script_path)],
+                capture_output=True,
+                text=True,
             )
             assert result.returncode == 0, f"Script syntax error: {result.stderr}"
         except FileNotFoundError:

@@ -17,7 +17,8 @@ def utc_now() -> datetime:
 
 
 def create_access_token(
-    subject: str | Any, expires_delta: timedelta | None = None,
+    subject: str | Any,
+    expires_delta: timedelta | None = None,
 ) -> str:
     if expires_delta:
         expire = utc_now() + expires_delta
@@ -25,7 +26,9 @@ def create_access_token(
         expire = utc_now() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode = {"exp": expire, "sub": str(subject)}
     return jwt.encode(
-        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM,
+        to_encode,
+        settings.SECRET_KEY,
+        algorithm=settings.ALGORITHM,
     )
 
 

@@ -313,7 +313,6 @@ class UserListResponse(PaginatedResponse[UserResponse]):
     """Paginated response for user list."""
 
 
-
 class UserSearchResponse(BaseModel):
     """Enhanced response for user search with metadata."""
 
@@ -351,7 +350,9 @@ class SoftDeleteRequest(BaseModel):
     """Request model for soft deleting a user."""
 
     reason: str | None = Field(
-        None, max_length=500, description="Optional reason for deletion",
+        None,
+        max_length=500,
+        description="Optional reason for deletion",
     )
 
 
@@ -375,7 +376,6 @@ class RestoreUserResponse(BaseModel):
 
 class DeletedUserListResponse(PaginatedResponse[DeletedUserResponse]):
     """Paginated response for deleted user list."""
-
 
 
 class DeletedUserSearchResponse(BaseModel):
@@ -402,10 +402,12 @@ class APIKeyBase(BaseModel):
         description="Human-readable label for the API key",
     )
     scopes: list[str] = Field(
-        default_factory=list, description="List of scopes the key has access to",
+        default_factory=list,
+        description="List of scopes the key has access to",
     )
     expires_at: datetime | None = Field(
-        None, description="Optional expiration date for the key",
+        None,
+        description="Optional expiration date for the key",
     )
 
     @field_validator("label")
@@ -437,7 +439,8 @@ class APIKeyCreate(BaseModel):
 
     label: str = Field(..., description="Human-readable label for the API key")
     scopes: list[str] = Field(
-        default_factory=list, description="List of scopes for the API key",
+        default_factory=list,
+        description="List of scopes for the API key",
     )
     expires_at: datetime | None = Field(None, description="Optional expiration date")
 
@@ -465,7 +468,8 @@ class APIKeyCreateResponse(BaseModel):
 
     api_key: APIKeyResponse
     raw_key: str = Field(
-        ..., description="The raw API key (only returned once upon creation)",
+        ...,
+        description="The raw API key (only returned once upon creation)",
     )
 
 
@@ -474,13 +478,13 @@ class APIKeyRotateResponse(BaseModel):
 
     api_key: APIKeyResponse
     new_raw_key: str = Field(
-        ..., description="The new raw API key (only returned once upon rotation)",
+        ...,
+        description="The new raw API key (only returned once upon rotation)",
     )
 
 
 class APIKeyListResponse(PaginatedResponse[APIKeyResponse]):
     """Paginated response for API key list."""
-
 
 
 class APIKeyUser(BaseModel):

@@ -46,13 +46,16 @@ class AdminUserResponse(BaseModel):
     oauth_id: str | None = Field(None, description="OAuth provider's user ID")
     oauth_email: str | None = Field(None, description="Email from OAuth provider")
     deletion_requested_at: datetime | None = Field(
-        None, description="When deletion was requested",
+        None,
+        description="When deletion was requested",
     )
     deletion_confirmed_at: datetime | None = Field(
-        None, description="When deletion was confirmed",
+        None,
+        description="When deletion was confirmed",
     )
     deletion_scheduled_for: datetime | None = Field(
-        None, description="When user will be deleted",
+        None,
+        description="When user will be deleted",
     )
 
     model_config = ConfigDict(from_attributes=True)
@@ -97,7 +100,8 @@ class AdminBulkOperationRequest(BaseModel):
 
     user_ids: list[UUID] = Field(..., description="List of user IDs to operate on")
     operation: str = Field(
-        ..., description="Operation to perform (delete, verify, etc.)",
+        ...,
+        description="Operation to perform (delete, verify, etc.)",
     )
 
 

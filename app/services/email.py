@@ -38,7 +38,10 @@ class EmailService:
         )
 
     def send_verification_email(
-        self, email: str, username: str, verification_token: str,
+        self,
+        email: str,
+        username: str,
+        verification_token: str,
     ) -> bool:
         """Send email verification email."""
         if not self.is_configured():
@@ -88,7 +91,10 @@ class EmailService:
         expires = utc_now() + timedelta(hours=settings.VERIFICATION_TOKEN_EXPIRE_HOURS)
 
         success = crud_user.update_verification_token_sync(
-            db, user_id=user_id, token=token, expires=expires,
+            db,
+            user_id=user_id,
+            token=token,
+            expires=expires,
         )
 
         return token if success else None
@@ -110,7 +116,10 @@ class EmailService:
         return str(user.id)
 
     def send_password_reset_email(
-        self, email: str, username: str, reset_token: str,
+        self,
+        email: str,
+        username: str,
+        reset_token: str,
     ) -> bool:
         """Send password reset email."""
         if not self.is_configured():
@@ -153,7 +162,9 @@ class EmailService:
             return response.status_code == 250  # type: ignore
 
     async def create_password_reset_token(
-        self, db: Session, user_id: str,
+        self,
+        db: Session,
+        user_id: str,
     ) -> str | None:
         """Create and store password reset token for a user."""
         token = self.generate_verification_token()
@@ -162,7 +173,10 @@ class EmailService:
         )
 
         success = crud_user.update_password_reset_token_sync(
-            db, user_id=user_id, token=token, expires=expires,
+            db,
+            user_id=user_id,
+            token=token,
+            expires=expires,
         )
 
         return token if success else None
@@ -184,7 +198,10 @@ class EmailService:
         return str(user.id)
 
     def send_account_deletion_email(
-        self, email: str, username: str, deletion_token: str,
+        self,
+        email: str,
+        username: str,
+        deletion_token: str,
     ) -> bool:
         """Send account deletion confirmation email."""
         if not self.is_configured():
@@ -230,7 +247,11 @@ class EmailService:
             return response.status_code == 250  # type: ignore
 
     def send_account_deletion_reminder_email(
-        self, email: str, username: str, days_remaining: int, deletion_date: str,
+        self,
+        email: str,
+        username: str,
+        days_remaining: int,
+        deletion_date: str,
     ) -> bool:
         """Send account deletion reminder email."""
         if not self.is_configured():
@@ -279,7 +300,10 @@ class EmailService:
         )
 
         success = crud_user.update_deletion_token_sync(
-            db, user_id=user_id, token=token, expires=expires,
+            db,
+            user_id=user_id,
+            token=token,
+            expires=expires,
         )
 
         return token if success else None

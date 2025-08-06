@@ -217,7 +217,9 @@ class TestAccountDeletionStatus:
     """Test account deletion status checking."""
 
     def test_deletion_status_not_requested(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ):
         """Test status for user who hasn't requested deletion."""
         user = User(
@@ -240,7 +242,9 @@ class TestAccountDeletionStatus:
         assert data["grace_period_days"] == settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS
 
     def test_deletion_status_requested(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ):
         """Test status for user who requested deletion."""
         user = User(
@@ -268,7 +272,9 @@ class TestAccountDeletionStatus:
         assert data["grace_period_days"] == settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS
 
     def test_deletion_status_confirmed(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ):
         """Test status for user who confirmed deletion."""
         scheduled_time = datetime.now(timezone.utc) + timedelta(
@@ -299,7 +305,9 @@ class TestAccountDeletionStatus:
         assert data["grace_period_days"] == settings.ACCOUNT_DELETION_GRACE_PERIOD_DAYS
 
     def test_deletion_status_user_not_found(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ):
         """Test status for non-existent user."""
         response = client.get(
@@ -322,7 +330,9 @@ class TestAccountDeletionRateLimiting:
     """Test rate limiting for account deletion endpoints."""
 
     def test_request_deletion_rate_limited(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ):
         """Test rate limiting for deletion requests."""
         # Skip test if rate limiting is disabled
@@ -343,7 +353,8 @@ class TestAccountDeletionRateLimiting:
         # Make multiple requests quickly
         for _ in range(4):
             response = client.post(
-                "/api/v1/auth/request-deletion", json={"email": "rate@example.com"},
+                "/api/v1/auth/request-deletion",
+                json={"email": "rate@example.com"},
             )
 
         # The last request should be rate limited
@@ -352,7 +363,9 @@ class TestAccountDeletionRateLimiting:
         assert "Too many requests" in data["detail"]
 
     def test_confirm_deletion_rate_limited(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ):
         """Test rate limiting for deletion confirmation."""
         # Skip test if rate limiting is disabled
@@ -364,7 +377,8 @@ class TestAccountDeletionRateLimiting:
         # Make multiple requests quickly
         for _ in range(4):
             response = client.post(
-                "/api/v1/auth/confirm-deletion", json={"token": "some_token"},
+                "/api/v1/auth/confirm-deletion",
+                json={"token": "some_token"},
             )
 
         # The last request should be rate limited
@@ -373,7 +387,9 @@ class TestAccountDeletionRateLimiting:
         assert "Too many requests" in data["detail"]
 
     def test_cancel_deletion_rate_limited(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ):
         """Test rate limiting for deletion cancellation."""
         # Skip test if rate limiting is disabled
@@ -385,7 +401,8 @@ class TestAccountDeletionRateLimiting:
         # Make multiple requests quickly
         for _ in range(4):
             response = client.post(
-                "/api/v1/auth/cancel-deletion", json={"email": "rate@example.com"},
+                "/api/v1/auth/cancel-deletion",
+                json={"email": "rate@example.com"},
             )
 
         # The last request should be rate limited

@@ -101,7 +101,11 @@ class ResourceNotFoundError(BaseAPIException):
         resource_id: str | None = None,
         **kwargs: Any,
     ) -> None:
-        error_details = {"resource_type": resource_type, "resource_id": resource_id, **kwargs}
+        error_details = {
+            "resource_type": resource_type,
+            "resource_id": resource_id,
+            **kwargs,
+        }
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             message=message,
@@ -122,7 +126,11 @@ class ConflictError(BaseAPIException):
         conflicting_value: str | None = None,
         **kwargs: Any,
     ) -> None:
-        error_details = {"conflicting_field": conflicting_field, "conflicting_value": conflicting_value, **kwargs}
+        error_details = {
+            "conflicting_field": conflicting_field,
+            "conflicting_value": conflicting_value,
+            **kwargs,
+        }
         super().__init__(
             status_code=status.HTTP_409_CONFLICT,
             message=message,
@@ -228,22 +236,46 @@ class BusinessLogicError(BaseAPIException):
 
 
 # Convenience functions for common error scenarios
-def raise_validation_error(message: str, code: ErrorCode = ErrorCode.INVALID_REQUEST, field: str | None = None, value: Any = None) -> None:
+def raise_validation_error(
+    message: str,
+    code: ErrorCode = ErrorCode.INVALID_REQUEST,
+    field: str | None = None,
+    value: Any = None,
+) -> None:
     """Raise a validation error."""
     raise ValidationException(message=message, code=code, field=field, value=value)
 
 
-def raise_not_found_error(message: str, code: ErrorCode = ErrorCode.RESOURCE_NOT_FOUND, resource_type: str | None = None, resource_id: str | None = None) -> None:
+def raise_not_found_error(
+    message: str,
+    code: ErrorCode = ErrorCode.RESOURCE_NOT_FOUND,
+    resource_type: str | None = None,
+    resource_id: str | None = None,
+) -> None:
     """Raise a resource not found error."""
-    raise NotFoundException(message=message, code=code, resource_type=resource_type, resource_id=resource_id)
+    raise NotFoundException(
+        message=message, code=code, resource_type=resource_type, resource_id=resource_id
+    )
 
 
-def raise_conflict_error(message: str, code: ErrorCode = ErrorCode.CONFLICT, conflicting_field: str | None = None, conflicting_value: str | None = None) -> None:
+def raise_conflict_error(
+    message: str,
+    code: ErrorCode = ErrorCode.CONFLICT,
+    conflicting_field: str | None = None,
+    conflicting_value: str | None = None,
+) -> None:
     """Raise a conflict error."""
-    raise ConflictException(message=message, code=code, conflicting_field=conflicting_field, conflicting_value=conflicting_value)
+    raise ConflictException(
+        message=message,
+        code=code,
+        conflicting_field=conflicting_field,
+        conflicting_value=conflicting_value,
+    )
 
 
-def raise_rate_limit_error(message: str = "Rate limit exceeded", retry_after: int | None = None) -> None:
+def raise_rate_limit_error(
+    message: str = "Rate limit exceeded", retry_after: int | None = None
+) -> None:
     """Raise a rate limit error."""
     raise RateLimitError(message=message, retry_after=retry_after)
 
@@ -270,11 +302,19 @@ class ValidationException(ValidationError):
 
 
 # Additional helper functions for backward compatibility
-def raise_authentication_error(message: str = "Authentication failed", code: ErrorCode = ErrorCode.INVALID_CREDENTIALS, **kwargs: Any) -> None:
+def raise_authentication_error(
+    message: str = "Authentication failed",
+    code: ErrorCode = ErrorCode.INVALID_CREDENTIALS,
+    **kwargs: Any,
+) -> None:
     """Raise an authentication error."""
     raise AuthenticationException(message=message, code=code, **kwargs)
 
 
-def raise_authorization_error(message: str = "Insufficient permissions", code: ErrorCode = ErrorCode.INSUFFICIENT_PERMISSIONS, **kwargs: Any) -> None:
+def raise_authorization_error(
+    message: str = "Insufficient permissions",
+    code: ErrorCode = ErrorCode.INSUFFICIENT_PERMISSIONS,
+    **kwargs: Any,
+) -> None:
     """Raise an authorization error."""
     raise AuthorizationException(message=message, code=code, **kwargs)

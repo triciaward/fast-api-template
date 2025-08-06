@@ -18,7 +18,8 @@ sys.path.insert(0, str(project_root))
 
 # Import the TemplateCustomizer class
 spec = importlib.util.spec_from_file_location(
-    "customize_template", project_root / "scripts" / "customize_template.py",
+    "customize_template",
+    project_root / "scripts" / "customize_template.py",
 )
 if spec is not None:
     customize_module = importlib.util.module_from_spec(spec)
@@ -271,7 +272,6 @@ def show_before_after_demo() -> None:
 
         for _old_text, _new_text in customizer.replacements.items():
             pass
-
 
     finally:
         # Cleanup

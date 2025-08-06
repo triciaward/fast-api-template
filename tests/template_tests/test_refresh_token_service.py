@@ -276,7 +276,9 @@ class TestSessionManagement:
 
         # Test session creation
         access_token, refresh_token = await create_user_session(
-            mock_db, mock_user, mock_request,
+            mock_db,
+            mock_user,
+            mock_request,
         )
 
         # Verify results
@@ -285,7 +287,8 @@ class TestSessionManagement:
 
         # Verify function calls
         mock_create_access.assert_called_once_with(
-            subject="test@example.com", expires_delta=timedelta(minutes=15),
+            subject="test@example.com",
+            expires_delta=timedelta(minutes=15),
         )
         mock_create_refresh.assert_called_once_with()
         mock_get_device.assert_called_once_with(mock_request)
@@ -296,7 +299,10 @@ class TestSessionManagement:
     @patch("app.services.refresh_token.verify_refresh_token_in_db")
     @patch("app.services.refresh_token.create_access_token")
     async def test_refresh_access_token_success(
-        self, mock_create_access, mock_verify_token, mock_settings,
+        self,
+        mock_create_access,
+        mock_verify_token,
+        mock_settings,
     ):
         """Test successful access token refresh."""
         # Mock settings
@@ -329,7 +335,8 @@ class TestSessionManagement:
         # Verify function calls
         mock_verify_token.assert_called_once_with(mock_db, "valid_refresh_token")
         mock_create_access.assert_called_once_with(
-            subject="test@example.com", expires_delta=timedelta(minutes=15),
+            subject="test@example.com",
+            expires_delta=timedelta(minutes=15),
         )
 
     @patch("app.services.refresh_token.verify_refresh_token_in_db")
@@ -413,7 +420,9 @@ class TestSessionManagement:
     @patch("app.crud.revoke_all_user_sessions")
     @patch("app.crud.get_refresh_token_by_hash")
     async def test_revoke_all_sessions_except_one(
-        self, mock_get_token, mock_revoke_all,
+        self,
+        mock_get_token,
+        mock_revoke_all,
     ):
         """Test revocation of all sessions except one."""
         # Mock dependencies
@@ -511,7 +520,9 @@ class TestRefreshTokenIntegration:
 
         # Test 1: Create session
         access_token, refresh_token = await create_user_session(
-            mock_db, mock_user, mock_request,
+            mock_db,
+            mock_user,
+            mock_request,
         )
         assert access_token == "access_token_123"
         assert refresh_token == "refresh_token_456"

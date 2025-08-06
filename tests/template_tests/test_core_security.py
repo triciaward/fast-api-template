@@ -94,7 +94,9 @@ class TestJWTAccessTokens:
 
         # Decode and verify token
         decoded = jwt.decode(
-            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM],
+            token,
+            mock_settings.SECRET_KEY,
+            algorithms=[mock_settings.ALGORITHM],
         )
         assert decoded["sub"] == subject
         assert "exp" in decoded
@@ -113,7 +115,9 @@ class TestJWTAccessTokens:
 
         # Decode and verify token
         decoded = jwt.decode(
-            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM],
+            token,
+            mock_settings.SECRET_KEY,
+            algorithms=[mock_settings.ALGORITHM],
         )
         assert decoded["sub"] == subject
 
@@ -144,7 +148,9 @@ class TestJWTAccessTokens:
 
         # Decode and verify token
         decoded = jwt.decode(
-            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM],
+            token,
+            mock_settings.SECRET_KEY,
+            algorithms=[mock_settings.ALGORITHM],
         )
         assert decoded["sub"] == str(subject)
 
@@ -162,7 +168,9 @@ class TestJWTAccessTokens:
 
         # Decode and verify token
         decoded = jwt.decode(
-            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM],
+            token,
+            mock_settings.SECRET_KEY,
+            algorithms=[mock_settings.ALGORITHM],
         )
         assert decoded["sub"] == "12345"
 
@@ -180,7 +188,9 @@ class TestJWTAccessTokens:
 
         # Decode and verify token
         decoded = jwt.decode(
-            token, mock_settings.SECRET_KEY, algorithms=[mock_settings.ALGORITHM],
+            token,
+            mock_settings.SECRET_KEY,
+            algorithms=[mock_settings.ALGORITHM],
         )
 
         # Verify expiry is a valid timestamp

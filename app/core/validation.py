@@ -5,7 +5,6 @@ class ValidationError(Exception):
     """Custom exception for validation errors."""
 
 
-
 def validate_password(password: str) -> tuple[bool, str]:
     """
     Validate password strength.
@@ -143,7 +142,6 @@ def clean_input(text: str) -> str:
 
     # Trim whitespace
     return text.strip()
-
 
 
 def sanitize_input(text: str, max_length: int = 100) -> str:

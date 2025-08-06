@@ -18,7 +18,9 @@ def always_configured_email(monkeypatch: pytest.MonkeyPatch) -> None:
 )
 class TestPasswordResetEndpoints:
     def test_forgot_password_success(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ) -> None:
         """Test successful password reset request."""
         # Create user
@@ -39,7 +41,8 @@ class TestPasswordResetEndpoints:
             return_value=True,
         ):
             response = client.post(
-                "/api/v1/auth/forgot-password", json={"email": "test@example.com"},
+                "/api/v1/auth/forgot-password",
+                json={"email": "test@example.com"},
             )
             assert response.status_code == 200
             data = response.json()
@@ -64,7 +67,9 @@ class TestPasswordResetEndpoints:
         assert data["email_sent"] is True
 
     def test_forgot_password_oauth_user(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ) -> None:
         """Test password reset request for OAuth user (should be blocked)."""
         # Create OAuth user
@@ -82,7 +87,8 @@ class TestPasswordResetEndpoints:
         sync_db_session.commit()
 
         response = client.post(
-            "/api/v1/auth/forgot-password", json={"email": "oauth@example.com"},
+            "/api/v1/auth/forgot-password",
+            json={"email": "oauth@example.com"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -93,7 +99,9 @@ class TestPasswordResetEndpoints:
         assert data["email_sent"] is True
 
     def test_forgot_password_email_not_configured(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ) -> None:
         """Test password reset request when email is not configured."""
         # Create user
@@ -110,10 +118,12 @@ class TestPasswordResetEndpoints:
         sync_db_session.commit()
 
         with patch(
-            "app.services.email.email_service.is_configured", return_value=False,
+            "app.services.email.email_service.is_configured",
+            return_value=False,
         ):
             response = client.post(
-                "/api/v1/auth/forgot-password", json={"email": "test@example.com"},
+                "/api/v1/auth/forgot-password",
+                json={"email": "test@example.com"},
             )
             assert response.status_code == 200
             data = response.json()
@@ -124,7 +134,9 @@ class TestPasswordResetEndpoints:
             assert data["email_sent"] is False
 
     def test_forgot_password_token_creation_failed(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ) -> None:
         """Test password reset request when token creation fails."""
         # Create user
@@ -145,7 +157,8 @@ class TestPasswordResetEndpoints:
             return_value=None,
         ):
             response = client.post(
-                "/api/v1/auth/forgot-password", json={"email": "test@example.com"},
+                "/api/v1/auth/forgot-password",
+                json={"email": "test@example.com"},
             )
             assert response.status_code == 200
             data = response.json()
@@ -156,7 +169,9 @@ class TestPasswordResetEndpoints:
             assert data["email_sent"] is False
 
     def test_forgot_password_email_send_failed(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ) -> None:
         """Test password reset request when email sending fails."""
         # Create user
@@ -177,7 +192,8 @@ class TestPasswordResetEndpoints:
             return_value=False,
         ):
             response = client.post(
-                "/api/v1/auth/forgot-password", json={"email": "test@example.com"},
+                "/api/v1/auth/forgot-password",
+                json={"email": "test@example.com"},
             )
             assert response.status_code == 200
             data = response.json()
@@ -188,7 +204,9 @@ class TestPasswordResetEndpoints:
             assert data["email_sent"] is False
 
     def test_reset_password_success(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ) -> None:
         """Test successful password reset."""
         # Create user with password reset token
@@ -201,7 +219,8 @@ class TestPasswordResetEndpoints:
             hashed_password=get_password_hash("OldPassword123!"),
             is_verified=True,
             password_reset_token="valid_reset_token",
-            password_reset_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc)
+            + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -239,13 +258,17 @@ class TestPasswordResetEndpoints:
 
         # Old password should not work
         old_auth = authenticate_user_sync(
-            sync_db_session, "test@example.com", "OldPassword123!",
+            sync_db_session,
+            "test@example.com",
+            "OldPassword123!",
         )
         assert old_auth is None
 
         # New password should work
         new_auth = authenticate_user_sync(
-            sync_db_session, "test@example.com", "NewPassword123!",
+            sync_db_session,
+            "test@example.com",
+            "NewPassword123!",
         )
         assert new_auth is not None
         assert new_auth.email == "test@example.com"
@@ -268,7 +291,9 @@ class TestPasswordResetEndpoints:
         assert data["password_reset"] is False
 
     def test_reset_password_expired_token(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ) -> None:
         """Test password reset with expired token."""
         # Create user with expired password reset token
@@ -281,7 +306,8 @@ class TestPasswordResetEndpoints:
             hashed_password=get_password_hash("OldPassword123!"),
             is_verified=True,
             password_reset_token="expired_reset_token",
-            password_reset_token_expires=datetime.now(timezone.utc) - timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc)
+            - timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -302,7 +328,9 @@ class TestPasswordResetEndpoints:
         assert data["password_reset"] is False
 
     def test_reset_password_oauth_user(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ) -> None:
         """Test password reset for OAuth user (should be blocked)."""
         # Create OAuth user with password reset token
@@ -316,7 +344,8 @@ class TestPasswordResetEndpoints:
             oauth_provider="google",
             oauth_id="google_123",
             password_reset_token="valid_reset_token",
-            password_reset_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc)
+            + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -339,7 +368,8 @@ class TestPasswordResetEndpoints:
     def test_reset_password_email_not_configured(self, client: TestClient) -> None:
         """Test password reset when email service is not configured."""
         with patch(
-            "app.services.email.email_service.is_configured", return_value=False,
+            "app.services.email.email_service.is_configured",
+            return_value=False,
         ):
             response = client.post(
                 "/api/v1/auth/reset-password",
@@ -357,7 +387,9 @@ class TestPasswordResetEndpoints:
             assert data["password_reset"] is False
 
     def test_reset_password_user_not_found(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ) -> None:
         """Test password reset when user is not found."""
         # Create user with password reset token
@@ -370,7 +402,8 @@ class TestPasswordResetEndpoints:
             hashed_password=get_password_hash("OldPassword123!"),
             is_verified=True,
             password_reset_token="valid_reset_token",
-            password_reset_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc)
+            + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -423,7 +456,8 @@ class TestPasswordResetEndpoints:
 )
 class TestPasswordResetCRUDOperations:
     def test_get_user_by_password_reset_token_sync(
-        self, sync_db_session: Session,
+        self,
+        sync_db_session: Session,
     ) -> None:
         """Test getting user by password reset token."""
         from app.core.security import get_password_hash
@@ -437,14 +471,16 @@ class TestPasswordResetCRUDOperations:
             hashed_password=get_password_hash("TestPassword123!"),
             is_verified=True,
             password_reset_token="test_reset_token",
-            password_reset_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc)
+            + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
 
         # Test finding user by token
         found_user = get_user_by_password_reset_token_sync(
-            sync_db_session, "test_reset_token",
+            sync_db_session,
+            "test_reset_token",
         )
         assert found_user is not None
         assert found_user.email == "test@example.com"
@@ -452,7 +488,8 @@ class TestPasswordResetCRUDOperations:
 
         # Test with non-existent token
         not_found_user = get_user_by_password_reset_token_sync(
-            sync_db_session, "non_existent_token",
+            sync_db_session,
+            "non_existent_token",
         )
         assert not_found_user is None
 
@@ -478,7 +515,10 @@ class TestPasswordResetCRUDOperations:
 
         # Update password reset token
         success = update_password_reset_token_sync(
-            sync_db_session, user_id, token, expires,
+            sync_db_session,
+            user_id,
+            token,
+            expires,
         )
         assert success is True
 
@@ -488,7 +528,8 @@ class TestPasswordResetCRUDOperations:
         assert user.password_reset_token_expires == expires
 
     def test_update_password_reset_token_user_not_found(
-        self, sync_db_session: Session,
+        self,
+        sync_db_session: Session,
     ) -> None:
         """Test updating password reset token for non-existent user."""
         from app.crud.user import update_password_reset_token_sync
@@ -499,7 +540,10 @@ class TestPasswordResetCRUDOperations:
         # Try to update token for non-existent user with valid UUID format
         fake_uuid = str(uuid.uuid4())
         success = update_password_reset_token_sync(
-            sync_db_session, fake_uuid, token, expires,
+            sync_db_session,
+            fake_uuid,
+            token,
+            expires,
         )
         assert success is False
 
@@ -516,7 +560,8 @@ class TestPasswordResetCRUDOperations:
             hashed_password=get_password_hash("OldPassword123!"),
             is_verified=True,
             password_reset_token="test_reset_token",
-            password_reset_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc)
+            + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
@@ -544,7 +589,9 @@ class TestPasswordResetCRUDOperations:
         # Try to reset password for non-existent user with valid UUID format
         fake_uuid = str(uuid.uuid4())
         success = reset_user_password_sync(
-            sync_db_session, fake_uuid, "NewPassword123!",
+            sync_db_session,
+            fake_uuid,
+            "NewPassword123!",
         )
         assert success is False
 
@@ -565,7 +612,9 @@ class TestPasswordResetEmailService:
             ),
         ):
             success = email_service.send_password_reset_email(
-                "test@example.com", "testuser", "reset_token_123",
+                "test@example.com",
+                "testuser",
+                "reset_token_123",
             )
             assert success is True
 
@@ -574,10 +623,13 @@ class TestPasswordResetEmailService:
         from app.services.email import email_service
 
         with patch(
-            "app.services.email.email_service.is_configured", return_value=False,
+            "app.services.email.email_service.is_configured",
+            return_value=False,
         ):
             success = email_service.send_password_reset_email(
-                "test@example.com", "testuser", "reset_token_123",
+                "test@example.com",
+                "testuser",
+                "reset_token_123",
             )
             assert success is False
 
@@ -593,13 +645,16 @@ class TestPasswordResetEmailService:
             ),
         ):
             success = email_service.send_password_reset_email(
-                "test@example.com", "testuser", "reset_token_123",
+                "test@example.com",
+                "testuser",
+                "reset_token_123",
             )
             assert success is False
 
     @pytest.mark.asyncio
     async def test_create_password_reset_token_success(
-        self, sync_db_session: Session,
+        self,
+        sync_db_session: Session,
     ) -> None:
         """Test successful password reset token creation."""
         from app.core.security import get_password_hash
@@ -618,7 +673,8 @@ class TestPasswordResetEmailService:
 
         # Create password reset token
         token = await email_service.create_password_reset_token(
-            sync_db_session, str(user.id),
+            sync_db_session,
+            str(user.id),
         )
         assert token is not None
         assert len(token) == 32  # Token should be 32 characters
@@ -631,7 +687,8 @@ class TestPasswordResetEmailService:
 
     @pytest.mark.asyncio
     async def test_verify_password_reset_token_success(
-        self, sync_db_session: Session,
+        self,
+        sync_db_session: Session,
     ) -> None:
         """Test successful password reset token verification."""
         from app.core.security import get_password_hash
@@ -645,20 +702,23 @@ class TestPasswordResetEmailService:
             hashed_password=get_password_hash("TestPassword123!"),
             is_verified=True,
             password_reset_token="valid_reset_token",
-            password_reset_token_expires=datetime.now(timezone.utc) + timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc)
+            + timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
 
         # Verify token
         user_id = await email_service.verify_password_reset_token(
-            sync_db_session, "valid_reset_token",
+            sync_db_session,
+            "valid_reset_token",
         )
         assert user_id == str(user.id)
 
     @pytest.mark.asyncio
     async def test_verify_password_reset_token_expired(
-        self, sync_db_session: Session,
+        self,
+        sync_db_session: Session,
     ) -> None:
         """Test password reset token verification with expired token."""
         from app.core.security import get_password_hash
@@ -672,27 +732,31 @@ class TestPasswordResetEmailService:
             hashed_password=get_password_hash("TestPassword123!"),
             is_verified=True,
             password_reset_token="expired_reset_token",
-            password_reset_token_expires=datetime.now(timezone.utc) - timedelta(hours=1),
+            password_reset_token_expires=datetime.now(timezone.utc)
+            - timedelta(hours=1),
         )
         sync_db_session.add(user)
         sync_db_session.commit()
 
         # Verify expired token
         user_id = await email_service.verify_password_reset_token(
-            sync_db_session, "expired_reset_token",
+            sync_db_session,
+            "expired_reset_token",
         )
         assert user_id is None
 
     @pytest.mark.asyncio
     async def test_verify_password_reset_token_invalid(
-        self, sync_db_session: Session,
+        self,
+        sync_db_session: Session,
     ) -> None:
         """Test password reset token verification with invalid token."""
         from app.services.email import email_service
 
         # Verify invalid token
         user_id = await email_service.verify_password_reset_token(
-            sync_db_session, "invalid_token",
+            sync_db_session,
+            "invalid_token",
         )
         assert user_id is None
 
@@ -702,7 +766,9 @@ class TestPasswordResetEmailService:
 )
 class TestPasswordResetIntegration:
     def test_full_password_reset_flow(
-        self, client: TestClient, sync_db_session: Session,
+        self,
+        client: TestClient,
+        sync_db_session: Session,
     ) -> None:
         """Test complete password reset flow from request to completion."""
         # Create user
@@ -724,7 +790,8 @@ class TestPasswordResetIntegration:
             return_value=True,
         ):
             response = client.post(
-                "/api/v1/auth/forgot-password", json={"email": "test@example.com"},
+                "/api/v1/auth/forgot-password",
+                json={"email": "test@example.com"},
             )
             assert response.status_code == 200
             data = response.json()
@@ -766,13 +833,17 @@ class TestPasswordResetIntegration:
 
         # Old password should not work
         old_auth = authenticate_user_sync(
-            sync_db_session, "test@example.com", "OldPassword123!",
+            sync_db_session,
+            "test@example.com",
+            "OldPassword123!",
         )
         assert old_auth is None
 
         # New password should work
         new_auth = authenticate_user_sync(
-            sync_db_session, "test@example.com", "NewPassword123!",
+            sync_db_session,
+            "test@example.com",
+            "NewPassword123!",
         )
         assert new_auth is not None
         assert new_auth.email == "test@example.com"

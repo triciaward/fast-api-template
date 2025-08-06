@@ -20,20 +20,25 @@ depends_on = None
 def upgrade() -> None:
     # Add account deletion fields to users table
     op.add_column(
-        "users", sa.Column("deletion_requested_at", sa.DateTime(), nullable=True),
+        "users",
+        sa.Column("deletion_requested_at", sa.DateTime(), nullable=True),
     )
     op.add_column(
-        "users", sa.Column("deletion_confirmed_at", sa.DateTime(), nullable=True),
+        "users",
+        sa.Column("deletion_confirmed_at", sa.DateTime(), nullable=True),
     )
     op.add_column(
-        "users", sa.Column("deletion_scheduled_for", sa.DateTime(), nullable=True),
+        "users",
+        sa.Column("deletion_scheduled_for", sa.DateTime(), nullable=True),
     )
     op.add_column("users", sa.Column("deletion_token", sa.String(), nullable=True))
     op.add_column(
-        "users", sa.Column("deletion_token_expires", sa.DateTime(), nullable=True),
+        "users",
+        sa.Column("deletion_token_expires", sa.DateTime(), nullable=True),
     )
     op.add_column(
-        "users", sa.Column("is_deleted", sa.Boolean(), default=False, nullable=False),
+        "users",
+        sa.Column("is_deleted", sa.Boolean(), default=False, nullable=False),
     )
 
 

@@ -27,7 +27,8 @@ logger = get_auth_logger()
 @router.post("/forgot-password", response_model=PasswordResetResponse)
 @rate_limit_password_reset
 async def forgot_password(
-    request: PasswordResetRequest, db: Session = Depends(get_db_sync),
+    request: PasswordResetRequest,
+    db: Session = Depends(get_db_sync),
 ) -> PasswordResetResponse:
     """Request password reset."""
     logger.info("Password reset request", email=request.email)
@@ -38,7 +39,8 @@ async def forgot_password(
         if not user:
             # Don't reveal if user exists or not for security
             logger.info(
-                "Password reset request for non-existent user", email=request.email,
+                "Password reset request for non-existent user",
+                email=request.email,
             )
             return PasswordResetResponse(
                 message="If an account with that email exists, a password reset link has been sent.",
@@ -60,7 +62,8 @@ async def forgot_password(
 
         if not email_service or not email_service.is_configured():
             logger.warning(
-                "Email service not configured for password reset", email=request.email,
+                "Email service not configured for password reset",
+                email=request.email,
             )
             return PasswordResetResponse(
                 message="Password reset service temporarily unavailable. Please try again later.",
@@ -82,7 +85,9 @@ async def forgot_password(
 
         # Send password reset email
         email_sent = email_service.send_password_reset_email(
-            str(user.email), str(user.username), reset_token,
+            str(user.email),
+            str(user.username),
+            reset_token,
         )
 
         if email_sent:
@@ -121,7 +126,8 @@ async def forgot_password(
 @router.post("/reset-password", response_model=PasswordResetConfirmResponse)
 @rate_limit_password_reset
 async def reset_password(
-    request: PasswordResetConfirmRequest, db: Session = Depends(get_db_sync),
+    request: PasswordResetConfirmRequest,
+    db: Session = Depends(get_db_sync),
 ) -> PasswordResetConfirmResponse:
     """Reset password with token."""
     logger.info("Password reset confirmation attempt")
@@ -150,7 +156,8 @@ async def reset_password(
         if not user:
             logger.warning("User not found for password reset", user_id=user_id)
             return PasswordResetConfirmResponse(
-                message="User not found.", password_reset=False,
+                message="User not found.",
+                password_reset=False,
             )
 
         # Don't allow password reset for OAuth users
@@ -205,13 +212,15 @@ async def change_password(
     def _handle_oauth_user_password_change() -> NoReturn:
         """Handle OAuth user password change error."""
         raise HTTPException(
-            status_code=400, detail="OAuth users cannot change password",
+            status_code=400,
+            detail="OAuth users cannot change password",
         )
 
     def _handle_user_not_found() -> NoReturn:
         """Handle user not found error."""
         raise HTTPException(
-            status_code=500, detail="User not found. Please try again later.",
+            status_code=500,
+            detail="User not found. Please try again later.",
         )
 
     def _handle_incorrect_current_password() -> NoReturn:
@@ -228,7 +237,8 @@ async def change_password(
     def _handle_general_password_error(exc: Exception) -> NoReturn:
         """Handle general password change error."""
         raise HTTPException(
-            status_code=500, detail="Password change failed. Please try again later.",
+            status_code=500,
+            detail="Password change failed. Please try again later.",
         ) from exc
 
     try:
@@ -249,7 +259,8 @@ async def change_password(
 
         # Verify the current password
         if not verify_password(
-            change_req.current_password, str(db_user.hashed_password),
+            change_req.current_password,
+            str(db_user.hashed_password),
         ):
             logger.warning(
                 "Password change failed - incorrect current password",
@@ -259,7 +270,9 @@ async def change_password(
 
         # Change the password
         success = crud_user.update_user_password_sync(
-            db, str(current_user.id), change_req.new_password,
+            db,
+            str(current_user.id),
+            change_req.new_password,
         )
         if not success:
             logger.error("Failed to change user password", user_id=str(current_user.id))
@@ -267,7 +280,10 @@ async def change_password(
 
         # Log password change
         await log_password_change(
-            db, request=request, user=db_user, change_type="password_change",
+            db,
+            request=request,
+            user=db_user,
+            change_type="password_change",
         )
 
         logger.info(

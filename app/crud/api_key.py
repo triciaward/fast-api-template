@@ -101,7 +101,10 @@ async def verify_api_key_in_db(db: DBSession, raw_key: str) -> APIKey | None:
 
 
 async def get_user_api_keys(
-    db: DBSession, user_id: str, skip: int = 0, limit: int = 100,
+    db: DBSession,
+    user_id: str,
+    skip: int = 0,
+    limit: int = 100,
 ) -> list[APIKey]:
     """Get all API keys for a user."""
     if isinstance(db, AsyncSession):
@@ -146,7 +149,9 @@ async def count_user_api_keys(db: DBSession, user_id: str) -> int:
 
 
 async def get_api_key_by_id(
-    db: DBSession, key_id: str, user_id: str | None = None,
+    db: DBSession,
+    key_id: str,
+    user_id: str | None = None,
 ) -> APIKey | None:
     """Get API key by ID, optionally filtering by user."""
     query = select(APIKey).filter(
@@ -164,7 +169,9 @@ async def get_api_key_by_id(
 
 
 async def deactivate_api_key(
-    db: DBSession, key_id: str, user_id: str | None = None,
+    db: DBSession,
+    key_id: str,
+    user_id: str | None = None,
 ) -> bool:
     """Deactivate an API key."""
     api_key = await get_api_key_by_id(db, key_id, user_id)
@@ -181,7 +188,9 @@ async def deactivate_api_key(
 
 
 async def rotate_api_key(
-    db: DBSession, key_id: str, user_id: str | None = None,
+    db: DBSession,
+    key_id: str,
+    user_id: str | None = None,
 ) -> tuple[APIKey | None, str | None]:
     """Rotate an API key by generating a new one and deactivating the old one."""
     api_key = await get_api_key_by_id(db, key_id, user_id)
@@ -282,7 +291,10 @@ def verify_api_key_in_db_sync(db: Session, raw_key: str) -> APIKey | None:
 
 
 def get_user_api_keys_sync(
-    db: Session, user_id: str, skip: int = 0, limit: int = 100,
+    db: Session,
+    user_id: str,
+    skip: int = 0,
+    limit: int = 100,
 ) -> list[APIKey]:
     """Get all API keys for a user (sync version)."""
     result = db.execute(
@@ -305,7 +317,9 @@ def count_user_api_keys_sync(db: Session, user_id: str) -> int:
 
 
 def get_api_key_by_id_sync(
-    db: Session, key_id: str, user_id: str | None = None,
+    db: Session,
+    key_id: str,
+    user_id: str | None = None,
 ) -> APIKey | None:
     """Get API key by ID, optionally filtering by user (sync version)."""
     query = select(APIKey).filter(
@@ -320,7 +334,9 @@ def get_api_key_by_id_sync(
 
 
 def deactivate_api_key_sync(
-    db: Session, key_id: str, user_id: str | None = None,
+    db: Session,
+    key_id: str,
+    user_id: str | None = None,
 ) -> bool:
     """Deactivate an API key (sync version)."""
     api_key = get_api_key_by_id_sync(db, key_id, user_id)
@@ -334,7 +350,9 @@ def deactivate_api_key_sync(
 
 
 def rotate_api_key_sync(
-    db: Session, key_id: str, user_id: str | None = None,
+    db: Session,
+    key_id: str,
+    user_id: str | None = None,
 ) -> tuple[APIKey | None, str | None]:
     """Rotate an API key by generating a new one and deactivating the old one (sync version)."""
     api_key = get_api_key_by_id_sync(db, key_id, user_id)

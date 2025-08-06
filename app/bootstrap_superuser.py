@@ -21,7 +21,10 @@ logger = logging.getLogger(__name__)
 
 
 async def create_superuser(
-    db: AsyncSession, email: str, password: str, username: str | None = None,
+    db: AsyncSession,
+    email: str,
+    password: str,
+    username: str | None = None,
 ) -> bool:
     """
     Create a superuser account.
@@ -92,7 +95,10 @@ async def create_superuser(
     from app.crud.user import create_user
 
     superuser_data = UserCreate(
-        email=email, username=username, password=password, is_superuser=True,
+        email=email,
+        username=username,
+        password=password,
+        is_superuser=True,
     )
 
     try:

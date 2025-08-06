@@ -116,13 +116,18 @@ async def request_account_deletion(
 
         # Send deletion confirmation email
         email_sent = email_service.send_account_deletion_email(
-            str(user.email), str(user.username), deletion_token,
+            str(user.email),
+            str(user.username),
+            deletion_token,
         )
 
         if email_sent:
             # Log account deletion request
             await log_account_deletion(
-                db, request, user, deletion_stage="deletion_requested",
+                db,
+                request,
+                user,
+                deletion_stage="deletion_requested",
             )
 
             logger.info(
@@ -227,7 +232,10 @@ async def confirm_account_deletion(
 
         # Log account deletion confirmation
         await log_account_deletion(
-            db, request, user, deletion_stage="deletion_confirmed",
+            db,
+            request,
+            user,
+            deletion_stage="deletion_confirmed",
         )
 
         logger.info(
@@ -318,7 +326,10 @@ async def cancel_account_deletion(
 
         # Log account deletion cancellation
         await log_account_deletion(
-            db, request, user, deletion_stage="deletion_cancelled",
+            db,
+            request,
+            user,
+            deletion_stage="deletion_cancelled",
         )
 
         logger.info(
@@ -346,7 +357,8 @@ async def cancel_account_deletion(
 
 @router.get("/deletion-status", response_model=AccountDeletionStatusResponse)
 async def get_account_deletion_status(
-    email: str, db: Session = Depends(get_db_sync),
+    email: str,
+    db: Session = Depends(get_db_sync),
 ) -> AccountDeletionStatusResponse:
     """Get account deletion status."""
     logger.info("Account deletion status request", email=email)

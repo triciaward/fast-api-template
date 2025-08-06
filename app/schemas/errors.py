@@ -200,7 +200,8 @@ class AuthorizationErrorDetail(ErrorDetail):
 
     type: ErrorType = Field(default=ErrorType.AUTHORIZATION_ERROR)
     required_permissions: list[str] | None = Field(
-        None, description="Required permissions for this operation",
+        None,
+        description="Required permissions for this operation",
     )
 
     model_config = ConfigDict(
@@ -240,10 +241,12 @@ class ConflictErrorDetail(ErrorDetail):
 
     type: ErrorType = Field(default=ErrorType.CONFLICT)
     conflicting_field: str | None = Field(
-        None, description="Field that caused the conflict",
+        None,
+        description="Field that caused the conflict",
     )
     conflicting_value: str | None = Field(
-        None, description="Value that caused the conflict",
+        None,
+        description="Value that caused the conflict",
     )
 
     model_config = ConfigDict(

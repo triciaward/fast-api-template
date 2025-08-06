@@ -37,17 +37,20 @@ class OAuthService:
             async with httpx.AsyncClient() as client:
                 headers = {"Authorization": f"Bearer {access_token}"}
                 response = await client.get(
-                    "https://www.googleapis.com/oauth2/v2/userinfo", headers=headers,
+                    "https://www.googleapis.com/oauth2/v2/userinfo",
+                    headers=headers,
                 )
                 response.raise_for_status()
                 return response.json()  # type: ignore
         except Exception as e:
             raise HTTPException(
-                status_code=400, detail=f"Failed to get Google user info: {e!s}",
+                status_code=400,
+                detail=f"Failed to get Google user info: {e!s}",
             ) from e
 
     async def verify_google_token(self, id_token: str) -> dict[str, Any] | None:
         """Verify Google ID token."""
+
         def _handle_google_not_configured() -> NoReturn:
             """Handle Google OAuth not configured error."""
             raise HTTPException(status_code=400, detail="Google OAuth not configured")
@@ -59,7 +62,8 @@ class OAuthService:
         def _handle_google_verification_error(exc: Exception) -> NoReturn:
             """Handle Google verification error."""
             raise HTTPException(
-                status_code=400, detail=f"Failed to verify Google token: {exc!s}",
+                status_code=400,
+                detail=f"Failed to verify Google token: {exc!s}",
             ) from exc
 
         if not settings.GOOGLE_CLIENT_ID:
@@ -87,6 +91,7 @@ class OAuthService:
 
     async def verify_apple_token(self, id_token: str) -> dict[str, Any] | None:
         """Verify Apple ID token."""
+
         def _handle_apple_not_configured() -> NoReturn:
             """Handle Apple OAuth not configured error."""
             raise HTTPException(status_code=400, detail="Apple OAuth not configured")
@@ -102,7 +107,8 @@ class OAuthService:
         def _handle_apple_verification_error(exc: Exception) -> NoReturn:
             """Handle Apple verification error."""
             raise HTTPException(
-                status_code=400, detail=f"Failed to verify Apple token: {exc!s}",
+                status_code=400,
+                detail=f"Failed to verify Apple token: {exc!s}",
             ) from exc
 
         if not all(
@@ -138,10 +144,12 @@ class OAuthService:
 
     def get_oauth_provider_config(self, provider: str) -> dict[str, Any]:
         """Get OAuth provider configuration."""
+
         def _handle_unsupported_provider() -> NoReturn:
             """Handle unsupported provider error."""
             raise HTTPException(
-                status_code=400, detail=f"Unsupported OAuth provider: {provider}",
+                status_code=400,
+                detail=f"Unsupported OAuth provider: {provider}",
             )
 
         if provider == "google":

@@ -188,7 +188,8 @@ async def rotate_api_key(
 
     if not new_raw_key:
         raise HTTPException(
-            status_code=500, detail="Failed to rotate API key. Please try again later.",
+            status_code=500,
+            detail="Failed to rotate API key. Please try again later.",
         )
 
     return APIKeyRotateResponse(

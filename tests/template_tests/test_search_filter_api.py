@@ -13,13 +13,17 @@ def test_users_endpoint_with_search(client: TestClient, sync_db_session: Session
     user1 = crud_user.create_user_sync(
         sync_db_session,
         UserCreate(
-            email="trish@example.com", username="trish_ward", password="Password123!",
+            email="trish@example.com",
+            username="trish_ward",
+            password="Password123!",
         ),
     )
     _user2 = crud_user.create_user_sync(
         sync_db_session,
         UserCreate(
-            email="john@example.com", username="john_doe", password="Password123!",
+            email="john@example.com",
+            username="john_doe",
+            password="Password123!",
         ),
     )
 
@@ -52,13 +56,17 @@ def test_users_endpoint_with_oauth_filter(client: TestClient, sync_db_session: S
     user1 = crud_user.create_user_sync(
         sync_db_session,
         UserCreate(
-            email="trish@example.com", username="trish_ward", password="Password123!",
+            email="trish@example.com",
+            username="trish_ward",
+            password="Password123!",
         ),
     )
     _user2 = crud_user.create_user_sync(
         sync_db_session,
         UserCreate(
-            email="john@example.com", username="john_doe", password="Password123!",
+            email="john@example.com",
+            username="john_doe",
+            password="Password123!",
         ),
     )
 
@@ -90,13 +98,17 @@ def test_enhanced_search_endpoint(client: TestClient, sync_db_session: Session):
     user1 = crud_user.create_user_sync(
         sync_db_session,
         UserCreate(
-            email="trish@example.com", username="trish_ward", password="Password123!",
+            email="trish@example.com",
+            username="trish_ward",
+            password="Password123!",
         ),
     )
     _user2 = crud_user.create_user_sync(
         sync_db_session,
         UserCreate(
-            email="john@example.com", username="john_doe", password="Password123!",
+            email="john@example.com",
+            username="john_doe",
+            password="Password123!",
         ),
     )
 
@@ -114,7 +126,8 @@ def test_enhanced_search_endpoint(client: TestClient, sync_db_session: Session):
     # Test enhanced search endpoint
     headers = {"Authorization": f"Bearer {token}"}
     response = client.get(
-        "/api/v1/users/search?search=trish&is_verified=true", headers=headers,
+        "/api/v1/users/search?search=trish&is_verified=true",
+        headers=headers,
     )
 
     assert response.status_code == 200

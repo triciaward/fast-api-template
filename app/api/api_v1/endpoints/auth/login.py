@@ -30,7 +30,8 @@ logger = get_auth_logger()
 @router.post("/register", response_model=UserResponse, status_code=201)
 @rate_limit_register
 async def register_user(
-    user: UserCreate, db: Session = Depends(get_db_sync),
+    user: UserCreate,
+    db: Session = Depends(get_db_sync),
 ) -> UserResponse:
     logger.info("User registration attempt", email=user.email, username=user.username)
 
@@ -72,7 +73,8 @@ async def register_user(
     def _handle_general_error(exc: Exception) -> NoReturn:
         """Handle general unexpected error."""
         raise HTTPException(
-            status_code=500, detail="Registration failed. Please try again later.",
+            status_code=500,
+            detail="Registration failed. Please try again later.",
         ) from exc
 
     try:
@@ -80,7 +82,8 @@ async def register_user(
         db_user = crud_user.get_user_by_email_sync(db, email=user.email)
         if db_user:
             logger.warning(
-                "Registration failed - email already exists", email=user.email,
+                "Registration failed - email already exists",
+                email=user.email,
             )
             _handle_email_exists()
 
@@ -88,31 +91,40 @@ async def register_user(
         db_user = crud_user.get_user_by_username_sync(db, username=user.username)
         if db_user:
             logger.warning(
-                "Registration failed - username already taken", username=user.username,
+                "Registration failed - username already taken",
+                username=user.username,
             )
             _handle_username_taken()
 
         # Create new user (not verified initially)
         db_user = crud_user.create_user_sync(db=db, user=user)
         logger.info(
-            "User created successfully", user_id=str(db_user.id), email=user.email,
+            "User created successfully",
+            user_id=str(db_user.id),
+            email=user.email,
         )
 
         # Send verification email if service is available
         if email_service and email_service.is_configured():
             verification_token = await email_service.create_verification_token(
-                db, str(db_user.id),
+                db,
+                str(db_user.id),
             )
             if verification_token:
                 email_service.send_verification_email(
-                    str(user.email), str(user.username), verification_token,
+                    str(user.email),
+                    str(user.username),
+                    verification_token,
                 )
                 logger.info(
-                    "Verification email sent", user_id=str(db_user.id), email=user.email,
+                    "Verification email sent",
+                    user_id=str(db_user.id),
+                    email=user.email,
                 )
             else:
                 logger.warning(
-                    "Failed to create verification token", user_id=str(db_user.id),
+                    "Failed to create verification token",
+                    user_id=str(db_user.id),
                 )
         else:
             logger.warning("Email service not configured - skipping verification email")
@@ -208,18 +220,22 @@ async def login_user(
         is_valid, error_msg = validate_email_format(form_data.username)
         if not is_valid:
             logger.warning(
-                "Login failed - invalid email format", email=form_data.username,
+                "Login failed - invalid email format",
+                email=form_data.username,
             )
             _handle_invalid_email_format()
 
         user = crud_user.authenticate_user_sync(
-            db, form_data.username, form_data.password,
+            db,
+            form_data.username,
+            form_data.password,
         )
         if not user:
             # Log failed login attempt
             await log_login_attempt(db, request, user=None, success=False)
             logger.warning(
-                "Login failed - invalid credentials", email=form_data.username,
+                "Login failed - invalid credentials",
+                email=form_data.username,
             )
             _handle_invalid_credentials()
 
@@ -285,7 +301,8 @@ async def oauth_login(
     def _handle_provider_not_configured(provider_name: str) -> NoReturn:
         """Handle provider not configured error."""
         raise HTTPException(
-            status_code=400, detail=f"{provider_name.title()} OAuth not configured",
+            status_code=400,
+            detail=f"{provider_name.title()} OAuth not configured",
         )
 
     def _handle_invalid_google_token() -> NoReturn:
@@ -303,7 +320,8 @@ async def oauth_login(
     def _handle_email_already_registered() -> NoReturn:
         """Handle email already registered with different method error."""
         raise HTTPException(
-            status_code=400, detail="Email already registered with different method",
+            status_code=400,
+            detail="Email already registered with different method",
         )
 
     if not oauth_service:
@@ -318,7 +336,8 @@ async def oauth_login(
 
     if not oauth_service.is_provider_configured(provider):
         logger.warning(
-            "OAuth login failed - provider not configured", provider=provider,
+            "OAuth login failed - provider not configured",
+            provider=provider,
         )
         _handle_provider_not_configured(provider)
 
@@ -328,7 +347,8 @@ async def oauth_login(
             user_info = await oauth_service.verify_google_token(oauth_data.access_token)
             if not user_info:
                 logger.warning(
-                    "OAuth login failed - invalid Google token", provider=provider,
+                    "OAuth login failed - invalid Google token",
+                    provider=provider,
                 )
                 _handle_invalid_google_token()
 
@@ -339,7 +359,8 @@ async def oauth_login(
             user_info = await oauth_service.verify_apple_token(oauth_data.access_token)
             if not user_info:
                 logger.warning(
-                    "OAuth login failed - invalid Apple token", provider=provider,
+                    "OAuth login failed - invalid Apple token",
+                    provider=provider,
                 )
                 _handle_invalid_apple_token()
 
@@ -372,7 +393,9 @@ async def oauth_login(
             )
 
             access_token, refresh_token_value = await create_user_session(
-                db, existing_user, request,
+                db,
+                existing_user,
+                request,
             )
 
             # Set refresh token as HttpOnly cookie
@@ -423,7 +446,9 @@ async def oauth_login(
             set_refresh_token_cookie,
         )
 
-        access_token, refresh_token_value = await create_user_session(db, new_user, request)
+        access_token, refresh_token_value = await create_user_session(
+            db, new_user, request
+        )
 
         # Set refresh token as HttpOnly cookie
         set_refresh_token_cookie(response, refresh_token_value)
@@ -449,7 +474,8 @@ async def oauth_login(
             exc_info=True,
         )
         raise HTTPException(
-            status_code=400, detail=f"OAuth login failed: {e!s}",
+            status_code=400,
+            detail=f"OAuth login failed: {e!s}",
         ) from e
 
 
