@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic_settings.main import BaseSettings, SettingsConfigDict
 
 
