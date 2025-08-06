@@ -379,7 +379,9 @@ async def oauth_login(
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(status_code=400, detail=f"OAuth login failed: {str(e)}") from e
+        raise HTTPException(
+            status_code=400, detail=f"OAuth login failed: {str(e)}"
+        ) from e
 
 
 @router.get("/oauth/providers")

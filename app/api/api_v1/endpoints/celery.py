@@ -107,7 +107,9 @@ async def get_celery_status() -> CeleryStatsResponse:
         return CeleryStatsResponse(**stats)
     except Exception as e:
         app_logger.error("Failed to get Celery status", error=str(e), exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to get Celery status") from e
+        raise HTTPException(
+            status_code=500, detail="Failed to get Celery status"
+        ) from e
 
 
 @router.post("/tasks/submit", response_model=TaskSubmitResponse)
@@ -293,7 +295,9 @@ async def submit_email_task(
             error=str(e),
             exc_info=True,
         )
-        raise HTTPException(status_code=500, detail="Failed to submit email task") from e
+        raise HTTPException(
+            status_code=500, detail="Failed to submit email task"
+        ) from e
 
 
 @router.post("/tasks/process-data", response_model=TaskSubmitResponse)
@@ -365,7 +369,9 @@ async def submit_cleanup_task(
         raise
     except Exception as e:
         app_logger.error("Failed to submit cleanup task", error=str(e), exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to submit cleanup task") from e
+        raise HTTPException(
+            status_code=500, detail="Failed to submit cleanup task"
+        ) from e
 
 
 @router.post("/tasks/long-running", response_model=TaskSubmitResponse)

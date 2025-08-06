@@ -187,14 +187,14 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
         result = await db.execute(text("SELECT 1"))
         result.fetchone()
         readiness_status["components"]["database"]["ready"] = True
-        readiness_status["components"]["database"]["message"] = (
-            "Database connection successful"
-        )
+        readiness_status["components"]["database"][
+            "message"
+        ] = "Database connection successful"
     except Exception as e:
         readiness_status["components"]["database"]["ready"] = False
-        readiness_status["components"]["database"]["message"] = (
-            f"Database connection failed: {str(e)}"
-        )
+        readiness_status["components"]["database"][
+            "message"
+        ] = f"Database connection failed: {str(e)}"
         readiness_status["ready"] = False
 
     # Check Redis readiness if enabled
