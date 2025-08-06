@@ -194,6 +194,12 @@ jobs:
           timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_user_password_hashing -v --tb=short || echo "CRUD password hashing test failed"
           timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_user_uuid_generation -v --tb=short || echo "CRUD UUID generation test failed"
           timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_user_timestamp_generation -v --tb=short || echo "CRUD timestamp generation test failed"
+          
+      - name: Run async tests (pgbouncer - final phase)
+        run: |
+          echo "CI DEBUG: Running final phase async PgBouncer tests individually..."
+          timeout 60s pytest tests/template_tests/test_pgbouncer_integration.py::TestPgBouncerIntegration::test_pgbouncer_connection_recycling -v --tb=short || echo "PgBouncer connection recycling test failed"
+          timeout 60s pytest tests/template_tests/test_pgbouncer_integration.py::TestPgBouncerIntegration::test_pgbouncer_connection_health_monitoring -v --tb=short || echo "PgBouncer health monitoring test failed"
 
   lint:
     name: 🔍 Lint (ruff)
