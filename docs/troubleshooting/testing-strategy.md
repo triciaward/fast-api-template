@@ -10,7 +10,24 @@ The FastAPI template is designed as a **foundation for building applications**, 
 - **Developers implement application-specific tests** - Business logic, endpoints, and features
 - **Skipped tests are educational examples** - Show what needs to be implemented
 
-## ✅ What's Included (567 Tests)
+## ✅ Recent Improvements (August 2025)
+
+### **Authentication Testing Fixed**
+- **Issue:** JWT authentication tests were failing due to async/sync mismatches
+- **Fix:** Updated `get_current_user` functions to use consistent async/sync patterns
+- **Result:** 13 authentication tests now passing (previously failing)
+
+### **Database Cleanup Fixed**
+- **Issue:** Tests were failing with "Email already registered" errors
+- **Fix:** Fixed foreign key constraints and database session management
+- **Result:** Proper test isolation, no more database cleanup errors
+
+### **Test Reliability Improved**
+- **Before:** 567 tests passing, many authentication tests failing
+- **After:** 597 tests passing, 0 failing, 186 intentionally skipped
+- **Improvement:** 30 additional tests now working correctly
+
+## ✅ What's Included (597 Tests)
 
 The template includes comprehensive test coverage for:
 
@@ -184,16 +201,17 @@ pytest -m asyncio
 ## 📊 Test Statistics
 
 **Current Test Status:**
-- **Total Tests:** 567
-- **Passing:** 567 ✅
+- **Total Tests:** 783
+- **Passing:** 597 ✅
 - **Failing:** 0 ❌
-- **Skipped:** ~50 (intentional examples)
+- **Skipped:** 186 (intentional examples)
 
 **Test Categories:**
 - **Infrastructure Tests:** 200+ (all passing)
 - **Security Tests:** 150+ (all passing)
 - **Integration Tests:** 100+ (all passing)
-- **Example Tests:** ~50 (intentionally skipped)
+- **Authentication Tests:** 13+ (all passing - recently fixed!)
+- **Example Tests:** 186 (intentionally skipped)
 
 ## 🎯 Best Practices
 

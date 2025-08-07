@@ -65,7 +65,7 @@ async def get_current_user(
     if token_data.email is None:
         raise credentials_exception
 
-    user = crud_user.get_user_by_email_sync(db, email=token_data.email)
+    user = await crud_user.get_user_by_email(db, email=token_data.email)
     if user is None:
         raise credentials_exception
     return user

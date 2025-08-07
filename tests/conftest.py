@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.orm import sessionmaker
 
 # Import app modules early
-from app.database.database import Base, get_db
+from app.database.database import Base, get_db, get_db_sync
 from app.main import app
 from app.models.user import User  # Import User for type annotations
 
@@ -315,12 +315,17 @@ def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
 
     # Override the database dependency with our test-specific sync version
     app.dependency_overrides[get_db] = override_get_db_sync
+    app.dependency_overrides[get_db_sync] = override_get_db_sync
     if RUNNING_IN_CI:
         pass
 
     # Clean the database before each test - more robust cleanup
     with sync_test_engine.begin() as conn:
         try:
+            # Delete in order to respect foreign key constraints
+            conn.execute(text("DELETE FROM audit_logs"))
+            conn.execute(text("DELETE FROM api_keys"))
+            conn.execute(text("DELETE FROM refresh_tokens"))
             conn.execute(text("DELETE FROM users"))
             conn.commit()
         except Exception:
@@ -332,6 +337,10 @@ def client(setup_sync_test_db: None) -> Generator[TestClient, None, None]:
         # Clean up after the test
         with sync_test_engine.begin() as conn:
             try:
+                # Delete in order to respect foreign key constraints
+                conn.execute(text("DELETE FROM audit_logs"))
+                conn.execute(text("DELETE FROM api_keys"))
+                conn.execute(text("DELETE FROM refresh_tokens"))
                 conn.execute(text("DELETE FROM users"))
                 conn.commit()
             except Exception:
@@ -401,7 +410,6 @@ def test_user(sync_db_session) -> User:
         email="test@example.com",
         username="testuser",
         hashed_password=hashed_password,
-        is_active=True,
         is_verified=True,
     )
     sync_db_session.add(user)
