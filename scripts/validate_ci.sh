@@ -83,17 +83,7 @@ fi
 
 # 5. Import check for critical modules
 echo "📦 Checking critical imports..."
-python -c "
-import sys
-try:
-    from app.main import app
-    from app.database.database import get_db
-    from app.models.user import User
-    print('✅ Critical imports successful')
-except ImportError as e:
-    print(f'❌ Import error: {e}')
-    sys.exit(1)
-"
+python -c "import sys; from app.main import app; from app.database.database import get_db; from app.models.user import User; print('✅ Critical imports successful')"
 
 print_status "All CI validation checks passed! 🎉"
 print_warning "You can now push with confidence" 

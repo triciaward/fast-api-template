@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 
 from app.core.security import create_access_token
 from app.crud import user as crud_user
-from tests.template_tests.conftest import TestingSyncSessionLocal
+from tests.conftest import TestingSyncSessionLocal
 
 
 @pytest.mark.skip(
