@@ -42,7 +42,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         }
 
     async def dispatch(
-        self, request: Request, call_next: Callable[[Request], Awaitable[Response]],
+        self,
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
         """Add security headers to the response and validate requests."""
 

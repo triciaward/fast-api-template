@@ -96,7 +96,10 @@ class AuditLog(Base):
 
     # Relationships
     user = relationship(
-        "User", back_populates="audit_logs", foreign_keys=[user_id], lazy="select",
+        "User",
+        back_populates="audit_logs",
+        foreign_keys=[user_id],
+        lazy="select",
     )
 
     # Performance-optimized indexes

@@ -354,7 +354,9 @@ async def get_user_by_id_any_status(db: DBSession, user_id: str) -> User | None:
 
 
 async def get_deleted_users(
-    db: DBSession, skip: int = 0, limit: int = 100,
+    db: DBSession,
+    skip: int = 0,
+    limit: int = 100,
 ) -> list[User]:
     """Get list of deleted users."""
     result = await db.execute(

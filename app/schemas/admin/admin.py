@@ -24,10 +24,16 @@ class AdminUserCreate(BaseModel):
 
     email: str = Field(..., description="User's email address", max_length=254)
     username: str = Field(
-        ..., description="User's username", min_length=3, max_length=30,
+        ...,
+        description="User's username",
+        min_length=3,
+        max_length=30,
     )
     password: str = Field(
-        ..., description="User's password", min_length=8, max_length=128,
+        ...,
+        description="User's password",
+        min_length=8,
+        max_length=128,
     )
     is_superuser: bool = Field(default=False, description="Whether user is a superuser")
     is_verified: bool = Field(default=False, description="Whether user is verified")
@@ -67,10 +73,16 @@ class AdminUserUpdate(BaseModel):
 
     email: str | None = Field(None, description="User's email address", max_length=254)
     username: str | None = Field(
-        None, description="User's username", min_length=3, max_length=30,
+        None,
+        description="User's username",
+        min_length=3,
+        max_length=30,
     )
     password: str | None = Field(
-        None, description="User's password", min_length=8, max_length=128,
+        None,
+        description="User's password",
+        min_length=8,
+        max_length=128,
     )
     is_superuser: bool | None = Field(None, description="Whether user is a superuser")
     is_verified: bool | None = Field(None, description="Whether user is verified")
@@ -178,7 +190,10 @@ class AdminBulkOperationRequest(BaseModel):
     """Schema for bulk operations on users."""
 
     user_ids: list[UUID] = Field(
-        ..., description="List of user IDs to operate on", min_length=1, max_length=100,
+        ...,
+        description="List of user IDs to operate on",
+        min_length=1,
+        max_length=100,
     )
     operation: str = Field(
         ...,
