@@ -49,7 +49,7 @@ class TemplateCustomizer:
             print("  ./scripts/rename_template.sh your_project_name_backend")
             print()
             print(
-                "Then reopen VS Code in the renamed directory and run this script again."
+                "Then reopen VS Code in the renamed directory and run this script again.",
             )
 
             # Ask for user confirmation (but exit regardless for safety)

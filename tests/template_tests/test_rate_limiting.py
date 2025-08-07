@@ -207,8 +207,8 @@ class TestRateLimitingIntegration:
             pass
 
     def test_rate_limiting_configuration(
-        self, client: TestClient
-    ) -> None:  # noqa: ARG002
+        self, client: TestClient,
+    ) -> None:
         """Test rate limiting configuration through settings."""
         # Test that rate limiting can be configured
         assert hasattr(settings, "ENABLE_RATE_LIMITING")

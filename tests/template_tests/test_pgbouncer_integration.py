@@ -128,7 +128,7 @@ class TestPgBouncerIntegration:
 
             # Check that connections were properly managed
             if hasattr(test_engine.pool, "checkedout") and hasattr(
-                test_engine.pool, "checkedin"
+                test_engine.pool, "checkedin",
             ):
                 assert test_engine.pool.checkedout() >= 0
                 assert test_engine.pool.checkedin() >= 0

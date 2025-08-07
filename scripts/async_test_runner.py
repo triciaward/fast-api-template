@@ -9,10 +9,9 @@ resolution document. It runs tests in phases to avoid async connection conflicts
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 
-def run_command(cmd: List[str]) -> Tuple[int, str]:
+def run_command(cmd: list[str]) -> tuple[int, str]:
     """Run a command and return exit code and output."""
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
@@ -122,7 +121,7 @@ def main():
         sys.exit(0)
     else:
         print(
-            f"\n⚠️  Some tests failed ({total_passed}/{total_tests} async tests passed)"
+            f"\n⚠️  Some tests failed ({total_passed}/{total_tests} async tests passed)",
         )
         print("   ℹ️  Check individual test output above for details")
         sys.exit(1)

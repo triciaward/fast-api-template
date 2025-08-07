@@ -60,7 +60,7 @@ class TestConnectionPooling:
         if hasattr(sync_engine.pool, "_max_overflow"):
             assert (
                 sync_engine.pool._max_overflow == expected_sync_max_overflow
-            )  # noqa: SLF001
+            )
         if hasattr(sync_engine.pool, "_recycle"):
             assert sync_engine.pool._recycle == settings.DB_POOL_RECYCLE  # noqa: SLF001
         if hasattr(sync_engine.pool, "_timeout"):
@@ -68,7 +68,7 @@ class TestConnectionPooling:
         if hasattr(sync_engine.pool, "_pre_ping"):
             assert (
                 sync_engine.pool._pre_ping == settings.DB_POOL_PRE_PING
-            )  # noqa: SLF001
+            )
 
     def test_engine_connect_args(self) -> None:
         """Test that engine connect arguments are properly set."""
@@ -251,7 +251,7 @@ class TestConnectionPooling:
         if hasattr(sync_engine.pool, "_max_overflow"):
             assert (
                 sync_engine.pool._max_overflow == expected_sync_max_overflow
-            )  # noqa: SLF001
+            )
 
     def test_pool_recycle_setting(self) -> None:
         """Test that pool recycle is properly configured."""
@@ -274,7 +274,7 @@ class TestConnectionPooling:
         if hasattr(sync_engine.pool, "_pre_ping"):
             assert (
                 sync_engine.pool._pre_ping == settings.DB_POOL_PRE_PING
-            )  # noqa: SLF001
+            )
 
     @pytest.mark.asyncio
     async def test_connection_health_check(self, db_session: AsyncSession) -> None:

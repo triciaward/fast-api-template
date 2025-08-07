@@ -154,16 +154,16 @@ async def setup_async_test_db() -> AsyncGenerator[None, None]:
                     # Test if audit_logs table exists
                     await conn.execute(
                         text(
-                            "SELECT 1 FROM information_schema.tables WHERE table_name='audit_logs'"
-                        )
+                            "SELECT 1 FROM information_schema.tables WHERE table_name='audit_logs'",
+                        ),
                     )
         else:
             # Fallback for Python < 3.11
             async with test_engine.begin() as conn:
                 await conn.execute(
                     text(
-                        "SELECT 1 FROM information_schema.tables WHERE table_name='audit_logs'"
-                    )
+                        "SELECT 1 FROM information_schema.tables WHERE table_name='audit_logs'",
+                    ),
                 )
     except TimeoutError:
         pass
