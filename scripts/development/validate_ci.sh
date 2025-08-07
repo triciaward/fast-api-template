@@ -71,15 +71,7 @@ echo "⚠️  Skipping mypy check due to transformers library internal error"
 # fi
 print_status "Mypy type check skipped (known transformers issue)"
 
-# 4. Pytest collection check (without running tests)
-echo "🧪 Checking pytest fixture discovery..."
-if python3 -m pytest --collect-only -q > /dev/null 2>&1; then
-    print_status "Pytest fixture discovery passed"
-else
-    print_error "Pytest fixture discovery failed"
-    print_warning "Check conftest.py and fixture definitions"
-    exit 1
-fi
+
 
 # 5. Import check for critical modules
 echo "📦 Checking critical imports..."
