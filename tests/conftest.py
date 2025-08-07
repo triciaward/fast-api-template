@@ -345,6 +345,7 @@ def sync_db_session(setup_sync_test_db: None) -> Generator:
     with TestingSyncSessionLocal() as session:
         # Clean the database before each test
         try:
+            session.execute(text("DELETE FROM audit_logs"))
             session.execute(text("DELETE FROM users"))
             session.commit()
         except Exception:
@@ -360,6 +361,7 @@ def sync_db_session(setup_sync_test_db: None) -> Generator:
 
                 # Clean up test data
                 try:
+                    session.execute(text("DELETE FROM audit_logs"))
                     session.execute(text("DELETE FROM users"))
                     session.commit()
                 except Exception:
