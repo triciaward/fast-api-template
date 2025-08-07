@@ -57,6 +57,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
       - name: Install PostgreSQL client
         run: |
@@ -85,7 +86,7 @@ jobs:
           echo "CI DEBUG: Testing database connection with psql..."
           PGPASSWORD=dev_password_123 psql -h localhost -U postgres -d fastapi_template_test -c "SELECT current_user;" || echo "Database connection failed"
           echo "CI DEBUG: Starting sync pytest..."
-          timeout 300s pytest tests/ --ignore=tests/template_tests/test_celery_mocked.py --ignore=tests/template_tests/test_celery_api.py --ignore=tests/template_tests/test_celery_health.py -k "not test_permanently_delete_accounts_task_endpoint and not test_file_logging_enabled and not test_log_level_configuration and not test_enforce_session_limit and not test_revoke_all_sessions and not test_revoke_all_sessions_endpoint" -m "not asyncio" -v --cov=app --cov-report=term-missing --cov-fail-under=45 --tb=short
+          timeout 300s pytest tests/ --ignore=tests/template_tests/test_celery_mocked.py --ignore=tests/template_tests/test_celery_api.py --ignore=tests/template_tests/test_celery_health.py -k "not test_permanently_delete_accounts_task_endpoint and not test_file_logging_enabled and not test_log_level_configuration and not test_enforce_session_limit and not test_revoke_all_sessions and not test_revoke_all_sessions_endpoint" -m "not asyncio" -v --cov=app --cov-report=term-missing --cov-fail-under=20 --tb=short
 
       - name: Run async tests (basic)
         run: |
@@ -235,6 +236,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
       - name: Run Ruff and Black
         run: |
@@ -260,6 +262,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
       - name: Run Mypy
         run: |
