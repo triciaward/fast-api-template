@@ -91,138 +91,138 @@ jobs:
           echo "CI DEBUG: Testing database connection with psql..."
           PGPASSWORD=dev_password_123 psql -h localhost -U postgres -d fastapi_template_test -c "SELECT current_user;" || echo "Database connection failed"
           echo "CI DEBUG: Starting sync pytest..."
-          timeout 300s pytest tests/ --ignore=tests/template_tests/test_celery_mocked.py --ignore=tests/template_tests/test_celery_api.py --ignore=tests/template_tests/test_celery_health.py -k "not test_permanently_delete_accounts_task_endpoint and not test_file_logging_enabled and not test_log_level_configuration and not test_enforce_session_limit and not test_revoke_all_sessions and not test_revoke_all_sessions_endpoint" -m "not asyncio" -v --cov=app --cov-report=term-missing --cov-fail-under=20 --tb=short
+          timeout 300s pytest tests/ --ignore=tests/services/test_celery.py --ignore=tests/api/test_celery.py --ignore=tests/services/test_celery.py -k "not test_permanently_delete_accounts_task_endpoint and not test_file_logging_enabled and not test_log_level_configuration and not test_enforce_session_limit and not test_revoke_all_sessions and not test_revoke_all_sessions_endpoint" -m "not asyncio" -v --cov=app --cov-report=term-missing --cov-fail-under=20 --tb=short
 
       - name: Run async tests (basic)
         run: |
           echo "CI DEBUG: Running basic async tests..."
-          timeout 180s pytest tests/template_tests/test_async_basic.py -v --tb=short || echo "Basic async tests failed"
+          timeout 180s pytest tests/integration/test_async_basic.py -v --tb=short || echo "Basic async tests failed"
           
       - name: Run async tests (models)
         run: |
           echo "CI DEBUG: Running async model tests individually..."
-          timeout 60s pytest tests/template_tests/test_models.py::TestUserModel::test_user_model_creation -v --tb=short || echo "Model creation test failed"
-          timeout 60s pytest tests/template_tests/test_models.py::TestUserModel::test_user_model_unique_email -v --tb=short || echo "Model unique email test failed"
+          timeout 60s pytest tests/core/test_models.py::TestUserModel::test_user_model_creation -v --tb=short || echo "Model creation test failed"
+          timeout 60s pytest tests/core/test_models.py::TestUserModel::test_user_model_unique_email -v --tb=short || echo "Model unique email test failed"
           
       - name: Run async tests (connection pooling - limited)
         run: |
           echo "CI DEBUG: Running critical connection pooling tests..."
-          timeout 60s pytest tests/template_tests/test_connection_pooling.py::TestConnectionPooling::test_async_session_pool_usage -v --tb=short || echo "Connection pooling test failed"
+          timeout 60s pytest tests/integration/test_connection_pooling.py::TestConnectionPooling::test_async_session_pool_usage -v --tb=short || echo "Connection pooling test failed"
           
       - name: Run async tests (superuser - individual)
         run: |
           echo "CI DEBUG: Running async superuser tests individually..."
-          timeout 60s pytest tests/template_tests/test_superuser.py::test_create_regular_user -v --tb=short || echo "Superuser test failed"
-          timeout 60s pytest tests/template_tests/test_superuser.py::test_superuser_default_value -v --tb=short || echo "Superuser default test failed"
+          timeout 60s pytest tests/core/test_superuser.py::test_create_regular_user -v --tb=short || echo "Superuser test failed"
+          timeout 60s pytest tests/core/test_superuser.py::test_superuser_default_value -v --tb=short || echo "Superuser default test failed"
           
       - name: Run async tests (models - individual)
         run: |
           echo "CI DEBUG: Running async model tests individually..."
-          timeout 60s pytest tests/template_tests/test_models.py::TestUserModel::test_user_model_unique_username -v --tb=short || echo "Model unique username test failed"
-          timeout 60s pytest tests/template_tests/test_models.py::TestUserModel::test_user_model_auto_generated_fields -v --tb=short || echo "Model auto generated test failed"
+          timeout 60s pytest tests/core/test_models.py::TestUserModel::test_user_model_unique_username -v --tb=short || echo "Model unique username test failed"
+          timeout 60s pytest tests/core/test_models.py::TestUserModel::test_user_model_auto_generated_fields -v --tb=short || echo "Model auto generated test failed"
           
       - name: Run async tests (redis - individual)
         run: |
           echo "CI DEBUG: Running async Redis tests individually..."
-          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_init_redis_success -v --tb=short || echo "Redis init test failed"
-          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_health_check_redis_success -v --tb=short || echo "Redis health check test failed"
+          timeout 60s pytest tests/services/test_redis_service.py::TestRedisService::test_init_redis_success -v --tb=short || echo "Redis init test failed"
+          timeout 60s pytest tests/services/test_redis_service.py::TestRedisService::test_health_check_redis_success -v --tb=short || echo "Redis health check test failed"
           
       - name: Run async tests (email - individual)
         run: |
           echo "CI DEBUG: Running async email tests individually..."
-          timeout 60s pytest tests/template_tests/test_email.py::TestEmailService::test_create_verification_token_success -v --tb=short || echo "Email verification token test failed"
-          timeout 60s pytest tests/template_tests/test_email.py::TestEmailService::test_verify_token_success -v --tb=short || echo "Email token verification test failed"
+          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_create_verification_token_success -v --tb=short || echo "Email verification token test failed"
+          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_verify_token_success -v --tb=short || echo "Email token verification test failed"
           
       - name: Run async tests (rate limiting - individual)
         run: |
           echo "CI DEBUG: Running async rate limiting tests individually..."
-          timeout 60s pytest tests/template_tests/test_rate_limiting.py::TestRateLimitingIntegration::test_init_rate_limiter -v --tb=short || echo "Rate limiter init test failed"
+          timeout 60s pytest tests/services/test_rate_limiter_service.py::TestRateLimiterSetup::test_init_rate_limiter_enabled -v --tb=short || echo "Rate limiter init test failed"
           
       - name: Run async tests (redis - additional)
         run: |
           echo "CI DEBUG: Running additional async Redis tests individually..."
-          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_close_redis_success -v --tb=short || echo "Redis close test failed"
-          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_init_redis_connection_error -v --tb=short || echo "Redis connection error test failed"
+          timeout 60s pytest tests/services/test_redis_service.py::TestRedisService::test_close_redis_success -v --tb=short || echo "Redis close test failed"
+          timeout 60s pytest tests/services/test_redis_service.py::TestRedisService::test_init_redis_connection_error -v --tb=short || echo "Redis connection error test failed"
           
       - name: Run async tests (email - additional)
         run: |
           echo "CI DEBUG: Running additional async email tests individually..."
-          timeout 60s pytest tests/template_tests/test_email.py::TestEmailService::test_verify_token_user_not_found -v --tb=short || echo "Email token user not found test failed"
-          timeout 60s pytest tests/template_tests/test_email.py::TestEmailService::test_verify_token_expired -v --tb=short || echo "Email token expired test failed"
+          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_verify_token_user_not_found -v --tb=short || echo "Email token user not found test failed"
+          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_verify_token_expired -v --tb=short || echo "Email token expired test failed"
           
       - name: Run async tests (connection pooling - additional)
         run: |
           echo "CI DEBUG: Running additional async connection pooling tests individually..."
-          timeout 60s pytest tests/template_tests/test_connection_pooling.py::TestConnectionPooling::test_concurrent_async_connections -v --tb=short || echo "Concurrent async connections test failed"
+          timeout 60s pytest tests/integration/test_connection_pooling.py::TestConnectionPooling::test_concurrent_async_connections -v --tb=short || echo "Concurrent async connections test failed"
           
       - name: Run async tests (redis - phase 4)
         run: |
           echo "CI DEBUG: Running Phase 4 async Redis tests individually..."
-          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_init_redis_disabled -v --tb=short || echo "Redis disabled test failed"
-          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_init_redis_ping_error -v --tb=short || echo "Redis ping error test failed"
-          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_close_redis_error -v --tb=short || echo "Redis close error test failed"
-          timeout 60s pytest tests/template_tests/test_redis.py::TestRedisService::test_health_check_redis_error -v --tb=short || echo "Redis health check error test failed"
+          timeout 60s pytest tests/services/test_redis_service.py::TestRedisService::test_init_redis_disabled -v --tb=short || echo "Redis disabled test failed"
+          timeout 60s pytest tests/services/test_redis_service.py::TestRedisService::test_init_redis_ping_error -v --tb=short || echo "Redis ping error test failed"
+          timeout 60s pytest tests/services/test_redis_service.py::TestRedisService::test_close_redis_error -v --tb=short || echo "Redis close error test failed"
+          timeout 60s pytest tests/services/test_redis_service.py::TestRedisService::test_health_check_redis_error -v --tb=short || echo "Redis health check error test failed"
           
       - name: Run async tests (email - phase 4)
         run: |
           echo "CI DEBUG: Running Phase 4 async email tests individually..."
-          timeout 60s pytest tests/template_tests/test_email.py::TestEmailService::test_create_verification_token_failure -v --tb=short || echo "Email token creation failure test failed"
-          timeout 60s pytest tests/template_tests/test_email.py::TestEmailService::test_verify_token_verification_failure -v --tb=short || echo "Email token verification failure test failed"
+          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_create_verification_token_failure -v --tb=short || echo "Email token creation failure test failed"
+          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_verify_token_verification_failure -v --tb=short || echo "Email token verification failure test failed"
           
       - name: Run async tests (connection pooling - phase 4)
         run: |
           echo "CI DEBUG: Running Phase 4 async connection pooling tests individually..."
-          timeout 60s pytest tests/template_tests/test_connection_pooling.py::TestConnectionPooling::test_get_db_dependency -v --tb=short || echo "DB dependency test failed"
-          timeout 60s pytest tests/template_tests/test_connection_pooling.py::TestConnectionPooling::test_session_cleanup_on_exception -v --tb=short || echo "Session cleanup test failed"
+          timeout 60s pytest tests/integration/test_connection_pooling.py::TestConnectionPooling::test_get_db_dependency -v --tb=short || echo "DB dependency test failed"
+          timeout 60s pytest tests/integration/test_connection_pooling.py::TestConnectionPooling::test_session_cleanup_on_exception -v --tb=short || echo "Session cleanup test failed"
           
       - name: Run async tests (oauth - final phase)
         run: |
           echo "CI DEBUG: Running final phase async OAuth tests individually..."
-          timeout 60s pytest tests/template_tests/test_oauth.py::TestOAuthService::test_verify_google_token_success -v --tb=short || echo "Google OAuth success test failed"
-          timeout 60s pytest tests/template_tests/test_oauth.py::TestOAuthService::test_verify_apple_token_success -v --tb=short || echo "Apple OAuth success test failed"
-          timeout 60s pytest tests/template_tests/test_oauth.py::TestOAuthService::test_verify_google_token_invalid_audience -v --tb=short || echo "Google OAuth invalid audience test failed"
-          timeout 60s pytest tests/template_tests/test_oauth.py::TestOAuthService::test_verify_apple_token_expired -v --tb=short || echo "Apple OAuth expired test failed"
+          timeout 60s pytest tests/services/test_oauth_service.py::TestOAuthService::test_verify_google_token_success -v --tb=short || echo "Google OAuth success test failed"
+          timeout 60s pytest tests/services/test_oauth_service.py::TestOAuthService::test_verify_apple_token_success -v --tb=short || echo "Apple OAuth success test failed"
+          timeout 60s pytest tests/services/test_oauth_service.py::TestOAuthService::test_verify_google_token_invalid_audience -v --tb=short || echo "Google OAuth invalid audience test failed"
+          timeout 60s pytest tests/services/test_oauth_service.py::TestOAuthService::test_verify_apple_token_expired -v --tb=short || echo "Apple OAuth expired test failed"
           
       - name: Run async tests (websocket - final phase)
         run: |
           echo "CI DEBUG: Running final phase async WebSocket tests individually..."
-          timeout 60s pytest tests/template_tests/test_websocket.py::TestConnectionManager::test_connect_new_room -v --tb=short || echo "WebSocket connect new room test failed"
-          timeout 60s pytest tests/template_tests/test_websocket.py::TestConnectionManager::test_send_personal_message_success -v --tb=short || echo "WebSocket personal message test failed"
-          timeout 60s pytest tests/template_tests/test_websocket.py::TestConnectionManager::test_broadcast_success -v --tb=short || echo "WebSocket broadcast test failed"
-          timeout 60s pytest tests/template_tests/test_websocket.py::TestConnectionManager::test_broadcast_json -v --tb=short || echo "WebSocket broadcast JSON test failed"
+          timeout 60s pytest tests/services/test_websocket_service.py::TestConnectionManager::test_connect_new_room -v --tb=short || echo "WebSocket connect new room test failed"
+          timeout 60s pytest tests/services/test_websocket_service.py::TestConnectionManager::test_send_personal_message_success -v --tb=short || echo "WebSocket personal message test failed"
+          timeout 60s pytest tests/services/test_websocket_service.py::TestConnectionManager::test_broadcast_success -v --tb=short || echo "WebSocket broadcast test failed"
+          timeout 60s pytest tests/services/test_websocket_service.py::TestConnectionManager::test_broadcast_json -v --tb=short || echo "WebSocket broadcast JSON test failed"
           
       - name: Run async tests (crud - completion phase)
         run: |
           echo "CI DEBUG: Running completion phase async CRUD tests individually..."
-          timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_create_user -v --tb=short || echo "CRUD create user test failed"
-          timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_get_user_by_email -v --tb=short || echo "CRUD get user by email test failed"
-          timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_authenticate_user_success -v --tb=short || echo "CRUD authenticate user test failed"
-          timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_user_password_hashing -v --tb=short || echo "CRUD password hashing test failed"
-          timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_user_uuid_generation -v --tb=short || echo "CRUD UUID generation test failed"
-          timeout 60s pytest tests/template_tests/test_crud.py::TestCRUD::test_user_timestamp_generation -v --tb=short || echo "CRUD timestamp generation test failed"
+          timeout 60s pytest tests/core/test_crud_user.py::TestUserCRUDAsync::test_create_user_async_session -v --tb=short || echo "CRUD create user test failed"
+          timeout 60s pytest tests/core/test_crud_user.py::TestUserCRUDAsync::test_get_user_by_email_async_session -v --tb=short || echo "CRUD get user by email test failed"
+          timeout 60s pytest tests/core/test_crud_user.py::TestUserCRUDAsync::test_authenticate_user_success -v --tb=short || echo "CRUD authenticate user test failed"
+          timeout 60s pytest tests/core/test_crud_user.py::TestUserCRUDAsync::test_create_user_async_session -v --tb=short || echo "CRUD password hashing test failed"
+          timeout 60s pytest tests/core/test_crud_user.py::TestUserCRUDAsync::test_create_user_async_session -v --tb=short || echo "CRUD UUID generation test failed"
+          timeout 60s pytest tests/core/test_crud_user.py::TestUserCRUDAsync::test_create_user_async_session -v --tb=short || echo "CRUD timestamp generation test failed"
           
       - name: Run async tests (pgbouncer - final phase)
         run: |
           echo "CI DEBUG: Running final phase async PgBouncer tests individually..."
-          timeout 60s pytest tests/template_tests/test_pgbouncer_integration.py::TestPgBouncerIntegration::test_pgbouncer_connection_recycling -v --tb=short || echo "PgBouncer connection recycling test failed"
-          timeout 60s pytest tests/template_tests/test_pgbouncer_integration.py::TestPgBouncerIntegration::test_pgbouncer_health_check -v --tb=short || echo "PgBouncer health check test failed"
+          timeout 60s pytest tests/integration/test_pgbouncer_integration.py::TestPgBouncerIntegration::test_pgbouncer_connection_recycling -v --tb=short || echo "PgBouncer connection recycling test failed"
+          timeout 60s pytest tests/integration/test_pgbouncer_integration.py::TestPgBouncerIntegration::test_pgbouncer_health_check -v --tb=short || echo "PgBouncer health check test failed"
           
       - name: Run async tests (refresh token - individual)
         run: |
           echo "CI DEBUG: Running async refresh token tests individually..."
-          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_create_user_session_success -v --tb=short || echo "Refresh token create session test failed"
-          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_refresh_access_token_success -v --tb=short || echo "Refresh token refresh access test failed"
-          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_refresh_access_token_invalid -v --tb=short || echo "Refresh token invalid refresh test failed"
-          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_revoke_session_success -v --tb=short || echo "Refresh token revoke session test failed"
-          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_revoke_session_failure -v --tb=short || echo "Refresh token revoke session failure test failed"
+          timeout 60s pytest tests/services/test_refresh_token_service.py::TestSessionManagement::test_create_user_session_success -v --tb=short || echo "Refresh token create session test failed"
+          timeout 60s pytest tests/services/test_refresh_token_service.py::TestSessionManagement::test_refresh_access_token_success -v --tb=short || echo "Refresh token refresh access test failed"
+          timeout 60s pytest tests/services/test_refresh_token_service.py::TestSessionManagement::test_refresh_access_token_invalid -v --tb=short || echo "Refresh token invalid refresh test failed"
+          timeout 60s pytest tests/services/test_refresh_token_service.py::TestSessionManagement::test_revoke_session_success -v --tb=short || echo "Refresh token revoke session test failed"
+          timeout 60s pytest tests/services/test_refresh_token_service.py::TestSessionManagement::test_revoke_session_failure -v --tb=short || echo "Refresh token revoke session failure test failed"
           
       - name: Run async tests (refresh token - additional)
         run: |
           echo "CI DEBUG: Running additional async refresh token tests individually..."
-          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_revoke_all_sessions_success -v --tb=short || echo "Refresh token revoke all sessions test failed"
-          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionManagement::test_revoke_all_sessions_except_one -v --tb=short || echo "Refresh token revoke all except one test failed"
-          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestSessionLimitEnforcement::test_session_limit_enforcement -v --tb=short || echo "Refresh token session limit test failed"
-          timeout 60s pytest tests/template_tests/test_refresh_token_service.py::TestRefreshTokenIntegration::test_complete_refresh_token_lifecycle -v --tb=short || echo "Refresh token lifecycle test failed"
+          timeout 60s pytest tests/services/test_refresh_token_service.py::TestSessionManagement::test_revoke_all_sessions_success -v --tb=short || echo "Refresh token revoke all sessions test failed"
+          timeout 60s pytest tests/services/test_refresh_token_service.py::TestSessionManagement::test_revoke_all_sessions_except_one -v --tb=short || echo "Refresh token revoke all except one test failed"
+          timeout 60s pytest tests/services/test_refresh_token_service.py::TestSessionLimitEnforcement::test_session_limit_enforcement -v --tb=short || echo "Refresh token session limit test failed"
+          timeout 60s pytest tests/services/test_refresh_token_service.py::TestRefreshTokenIntegration::test_complete_refresh_token_lifecycle -v --tb=short || echo "Refresh token lifecycle test failed"
 
   lint:
     name: 🔍 Lint (ruff)
