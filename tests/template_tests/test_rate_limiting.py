@@ -206,7 +206,9 @@ class TestRateLimitingIntegration:
             # Note: slowapi might not always add these headers, so we just check the response works
             pass
 
-    def test_rate_limiting_configuration(self, client: TestClient) -> None:  # noqa: ARG002
+    def test_rate_limiting_configuration(
+        self, client: TestClient
+    ) -> None:  # noqa: ARG002
         """Test rate limiting configuration through settings."""
         # Test that rate limiting can be configured
         assert hasattr(settings, "ENABLE_RATE_LIMITING")

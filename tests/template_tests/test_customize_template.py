@@ -214,7 +214,9 @@ class TestTemplateCustomization:
                 assert exc_info.value.code == 1
 
                 # Verify that the instructions were printed
-                printed_messages = [call.args[0] for call in mock_print.call_args_list if call.args]
+                printed_messages = [
+                    call.args[0] for call in mock_print.call_args_list if call.args
+                ]
 
                 assert any(
                     "❌ Error: You're still in the 'fast-api-template' directory!"

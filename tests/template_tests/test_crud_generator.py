@@ -93,24 +93,40 @@ class TestCRUDGenerator:
 
                 # Test SQLAlchemy type mapping
                 assert generator._get_sqlalchemy_type("str") == "String"  # noqa: SLF001
-                assert generator._get_sqlalchemy_type("int") == "Integer"  # noqa: SLF001
-                assert generator._get_sqlalchemy_type("float") == "Float"  # noqa: SLF001
-                assert generator._get_sqlalchemy_type("bool") == "Boolean"  # noqa: SLF001
-                assert generator._get_sqlalchemy_type("datetime") == "DateTime"  # noqa: SLF001
+                assert (
+                    generator._get_sqlalchemy_type("int") == "Integer"
+                )  # noqa: SLF001
+                assert (
+                    generator._get_sqlalchemy_type("float") == "Float"
+                )  # noqa: SLF001
+                assert (
+                    generator._get_sqlalchemy_type("bool") == "Boolean"
+                )  # noqa: SLF001
+                assert (
+                    generator._get_sqlalchemy_type("datetime") == "DateTime"
+                )  # noqa: SLF001
                 assert generator._get_sqlalchemy_type("date") == "Date"  # noqa: SLF001
-                assert generator._get_sqlalchemy_type("uuid") == "UUID(as_uuid=True)"  # noqa: SLF001
+                assert (
+                    generator._get_sqlalchemy_type("uuid") == "UUID(as_uuid=True)"
+                )  # noqa: SLF001
                 assert generator._get_sqlalchemy_type("text") == "Text"  # noqa: SLF001
                 assert generator._get_sqlalchemy_type("json") == "JSON"  # noqa: SLF001
-                assert generator._get_sqlalchemy_type("unknown") == "String"  # noqa: SLF001
+                assert (
+                    generator._get_sqlalchemy_type("unknown") == "String"
+                )  # noqa: SLF001
 
                 # Test Pydantic type mapping
                 assert generator._get_pydantic_type("str") == "str"  # noqa: SLF001
                 assert generator._get_pydantic_type("int") == "int"  # noqa: SLF001
                 assert generator._get_pydantic_type("float") == "float"  # noqa: SLF001
                 assert generator._get_pydantic_type("bool") == "bool"  # noqa: SLF001
-                assert generator._get_pydantic_type("datetime") == "datetime"  # noqa: SLF001
+                assert (
+                    generator._get_pydantic_type("datetime") == "datetime"
+                )  # noqa: SLF001
                 assert generator._get_pydantic_type("date") == "date"  # noqa: SLF001
-                assert generator._get_pydantic_type("uuid") == "uuid.UUID"  # noqa: SLF001
+                assert (
+                    generator._get_pydantic_type("uuid") == "uuid.UUID"
+                )  # noqa: SLF001
                 assert generator._get_pydantic_type("text") == "str"  # noqa: SLF001
                 assert generator._get_pydantic_type("json") == "dict"  # noqa: SLF001
                 assert generator._get_pydantic_type("unknown") == "str"  # noqa: SLF001
@@ -120,9 +136,15 @@ class TestCRUDGenerator:
                 assert generator._get_default_value("int") == "0"  # noqa: SLF001
                 assert generator._get_default_value("float") == "0.0"  # noqa: SLF001
                 assert generator._get_default_value("bool") == "False"  # noqa: SLF001
-                assert generator._get_default_value("datetime") == "datetime.utcnow"  # noqa: SLF001
-                assert generator._get_default_value("date") == "date.today"  # noqa: SLF001
-                assert generator._get_default_value("uuid") == "uuid.uuid4"  # noqa: SLF001
+                assert (
+                    generator._get_default_value("datetime") == "datetime.utcnow"
+                )  # noqa: SLF001
+                assert (
+                    generator._get_default_value("date") == "date.today"
+                )  # noqa: SLF001
+                assert (
+                    generator._get_default_value("uuid") == "uuid.uuid4"
+                )  # noqa: SLF001
                 assert generator._get_default_value("text") == '""'  # noqa: SLF001
                 assert generator._get_default_value("json") == "{}"  # noqa: SLF001
                 assert generator._get_default_value("unknown") == '""'  # noqa: SLF001

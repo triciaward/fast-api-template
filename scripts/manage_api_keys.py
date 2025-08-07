@@ -37,7 +37,9 @@ def validate_datetime(datetime_string: str) -> datetime:
     try:
         return datetime.fromisoformat(datetime_string.replace("Z", "+00:00"))
     except ValueError as e:
-        raise argparse.ArgumentTypeError("Invalid datetime format") from e  # noqa: TRY003
+        raise argparse.ArgumentTypeError(
+            "Invalid datetime format"
+        ) from e  # noqa: TRY003
 
 
 def create_api_key(args: argparse.Namespace) -> None:
@@ -113,7 +115,8 @@ def list_api_keys(args: argparse.Namespace) -> None:
             for _i, api_key in enumerate(api_keys, 1):
                 (
                     " (Expired)"
-                    if api_key.expires_at and api_key.expires_at <= datetime.now(timezone.utc)
+                    if api_key.expires_at
+                    and api_key.expires_at <= datetime.now(timezone.utc)
                     else ""
                 )
 

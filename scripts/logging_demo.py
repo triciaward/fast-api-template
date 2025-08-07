@@ -101,6 +101,7 @@ def demo_error_logging() -> None:
             divisor=0,
             exc_info=True,
         )
+
     def _raise_validation_error():
         raise ValueError("Invalid input provided")  # noqa: TRY003
 

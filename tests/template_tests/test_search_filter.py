@@ -27,7 +27,9 @@ from app.utils.search_filter import (
 class TestSearchFilterUtility:
     """Test the search and filter utility functionality."""
 
-    def test_search_filter_builder_initialization(self, sync_db_session: Session):  # noqa: ARG002
+    def test_search_filter_builder_initialization(
+        self, sync_db_session: Session
+    ):  # noqa: ARG002
         """Test SearchFilterBuilder initialization."""
         builder = SearchFilterBuilder(User)
         assert builder.model_class == User

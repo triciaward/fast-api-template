@@ -152,11 +152,19 @@ async def setup_async_test_db() -> AsyncGenerator[None, None]:
             async with asyncio.timeout(30):  # 30 second timeout
                 async with test_engine.begin() as conn:
                     # Test if audit_logs table exists
-                    await conn.execute(text("SELECT 1 FROM information_schema.tables WHERE table_name='audit_logs'"))
+                    await conn.execute(
+                        text(
+                            "SELECT 1 FROM information_schema.tables WHERE table_name='audit_logs'"
+                        )
+                    )
         else:
             # Fallback for Python < 3.11
             async with test_engine.begin() as conn:
-                await conn.execute(text("SELECT 1 FROM information_schema.tables WHERE table_name='audit_logs'"))
+                await conn.execute(
+                    text(
+                        "SELECT 1 FROM information_schema.tables WHERE table_name='audit_logs'"
+                    )
+                )
     except TimeoutError:
         pass
     except Exception:
@@ -409,7 +417,8 @@ def test_user_token(test_user) -> str:
 
     access_token_expires = timedelta(minutes=60)
     return create_access_token(
-        subject=test_user.id, expires_delta=access_token_expires,
+        subject=test_user.id,
+        expires_delta=access_token_expires,
     )
 
 
