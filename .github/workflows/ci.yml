@@ -147,8 +147,8 @@ jobs:
       - name: Run async tests (email - additional)
         run: |
           echo "CI DEBUG: Running additional async email tests individually..."
-          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_verify_token_user_not_found -v --tb=short || echo "Email token user not found test failed"
-          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_verify_token_expired -v --tb=short || echo "Email token expired test failed"
+          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_verify_token_invalid -v --tb=short || echo "Email token user not found test failed"
+          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_verify_token_success -v --tb=short || echo "Email token expired test failed"
           
       - name: Run async tests (connection pooling - additional)
         run: |
@@ -166,8 +166,8 @@ jobs:
       - name: Run async tests (email - phase 4)
         run: |
           echo "CI DEBUG: Running Phase 4 async email tests individually..."
-          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_create_verification_token_failure -v --tb=short || echo "Email token creation failure test failed"
-          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_verify_token_verification_failure -v --tb=short || echo "Email token verification failure test failed"
+          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_create_verification_token_db_error -v --tb=short || echo "Email token creation failure test failed"
+          timeout 60s pytest tests/services/test_email_service.py::TestEmailService::test_verify_token_invalid -v --tb=short || echo "Email token verification failure test failed"
           
       - name: Run async tests (connection pooling - phase 4)
         run: |
@@ -205,7 +205,7 @@ jobs:
         run: |
           echo "CI DEBUG: Running final phase async PgBouncer tests individually..."
           timeout 60s pytest tests/integration/test_pgbouncer_integration.py::TestPgBouncerIntegration::test_pgbouncer_connection_recycling -v --tb=short || echo "PgBouncer connection recycling test failed"
-          timeout 60s pytest tests/integration/test_pgbouncer_integration.py::TestPgBouncerIntegration::test_pgbouncer_health_check -v --tb=short || echo "PgBouncer health check test failed"
+          timeout 60s pytest tests/integration/test_pgbouncer_integration.py::TestPgBouncerIntegration::test_pgbouncer_health_check_integration -v --tb=short || echo "PgBouncer health check test failed"
           
       - name: Run async tests (refresh token - individual)
         run: |
