@@ -32,14 +32,19 @@ def validate_uuid(uuid_string: str) -> str:
         return uuid_string
 
 
+class InvalidDatetimeError(argparse.ArgumentTypeError):
+    """Custom exception for invalid datetime format."""
+
+    def __init__(self):
+        super().__init__("Invalid datetime format")
+
+
 def validate_datetime(datetime_string: str) -> datetime:
     """Validate and parse a datetime string."""
     try:
         return datetime.fromisoformat(datetime_string.replace("Z", "+00:00"))
     except ValueError as e:
-        raise argparse.ArgumentTypeError(
-            "Invalid datetime format"
-        ) from e  # noqa: TRY003
+        raise InvalidDatetimeError from e
 
 
 def create_api_key(args: argparse.Namespace) -> None:
