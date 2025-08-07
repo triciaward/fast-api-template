@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -55,6 +56,14 @@ def verify_refresh_token(plain_token: str, hashed_token: str) -> bool:
     return pwd_context.verify(plain_token, hashed_token)
 
 
+def fingerprint_refresh_token(token: str) -> str:
+    """Create a deterministic fingerprint (SHA-256 hex) of the refresh token.
+
+    This is safe to store and index; it is not reversible to the original token.
+    """
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
 # API Key functions
 def generate_api_key() -> str:
     """Generate a cryptographically secure API key."""
@@ -74,3 +83,8 @@ def hash_api_key(key: str) -> str:
 def verify_api_key(plain_key: str, hashed_key: str) -> bool:
     """Verify an API key against its hash."""
     return pwd_context.verify(plain_key, hashed_key)
+
+
+def fingerprint_api_key(key: str) -> str:
+    """Deterministic fingerprint of an API key (SHA-256 hex)."""
+    return hashlib.sha256(key.encode("utf-8")).hexdigest()

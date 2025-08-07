@@ -1,13 +1,20 @@
+from typing import TypeAlias
+
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security.security import generate_api_key, hash_api_key, verify_api_key
+from app.core.security.security import (
+    fingerprint_api_key,
+    generate_api_key,
+    hash_api_key,
+    verify_api_key,
+)
 from app.models import APIKey
 from app.schemas.auth.user import APIKeyCreate
 from app.utils.datetime_utils import utc_now
 
 # Type alias for async sessions only
-DBSession = AsyncSession
+DBSession: TypeAlias = AsyncSession
 
 
 async def create_api_key(
@@ -21,10 +28,12 @@ async def create_api_key(
         raw_key = generate_api_key()
 
     key_hash = hash_api_key(raw_key)
+    key_fp = fingerprint_api_key(raw_key)
 
     db_api_key = APIKey(
         user_id=user_id,
         key_hash=key_hash,
+        key_fingerprint=key_fp,
         label=api_key_data.label,
         scopes=api_key_data.scopes,
         expires_at=api_key_data.expires_at,
@@ -54,23 +63,21 @@ async def get_api_key_by_hash(db: DBSession, key_hash: str) -> APIKey | None:
 
 async def verify_api_key_in_db(db: DBSession, raw_key: str) -> APIKey | None:
     """Verify an API key against the database."""
-    # Get all non-deleted API keys (regardless of status)
-    result = await db.execute(select(APIKey).filter(APIKey.is_deleted.is_(False)))
-    api_keys = result.scalars().all()
-
-    # Check each key to see if the raw key matches
-    for api_key in api_keys:
-        assert api_key.key_hash is not None
-        if verify_api_key(raw_key, api_key.key_hash):  # type: ignore[arg-type]
-            # Found the key, now check if it's active and not expired
-            if not api_key.is_active:
-                # Return the key so the caller can check is_active and raise appropriate error
-                return api_key
-            if api_key.expires_at and api_key.expires_at <= utc_now():
-                # Return the key so the caller can check expires_at and raise appropriate error
-                return api_key
-            # Key is valid
+    # Narrow by deterministic fingerprint first, then bcrypt verify
+    fp = fingerprint_api_key(raw_key)
+    result = await db.execute(
+        select(APIKey).filter(
+            APIKey.key_fingerprint == fp,
+            APIKey.is_deleted.is_(False),
+        ),
+    )
+    api_key = result.scalar_one_or_none()
+    if api_key and verify_api_key(raw_key, str(api_key.key_hash)):
+        if not api_key.is_active:
             return api_key
+        if api_key.expires_at and api_key.expires_at <= utc_now():
+            return api_key
+        return api_key
 
     return None
 

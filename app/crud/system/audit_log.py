@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Any
+from typing import Any, TypeAlias
 
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +8,7 @@ from app.models import AuditLog
 from app.utils.datetime_utils import utc_now
 
 # Type alias for async sessions only
-DBSession = AsyncSession
+DBSession: TypeAlias = AsyncSession
 
 
 async def create_audit_log(

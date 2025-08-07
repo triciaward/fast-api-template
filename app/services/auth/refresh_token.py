@@ -105,7 +105,7 @@ async def create_user_session(
     request: Request,
 ) -> tuple[str, str]:
     """Create a new user session with access and refresh tokens."""
-    # Create refresh token
+    # Create refresh token (raw value)
     refresh_token_value = create_refresh_token_value()
 
     # Get device info and IP
@@ -122,12 +122,14 @@ async def create_user_session(
     )
 
     # Enforce session limit
-    await enforce_session_limit(db, user.id, 5)  # type: ignore
+    from app.core.config import settings as _settings
+
+    await enforce_session_limit(db, user.id, _settings.MAX_SESSIONS_PER_USER)  # type: ignore
 
     # Create access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        subject=user.email,
+        subject=user.id,
         expires_delta=access_token_expires,
     )
 
@@ -155,7 +157,7 @@ async def refresh_access_token(
     # Create new access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        subject=user.email,
+        subject=user.id,
         expires_delta=access_token_expires,
     )
 
@@ -175,10 +177,10 @@ async def revoke_session(
     if not db_refresh_token:
         return False
 
-    # Revoke the token
-    from app.crud import revoke_refresh_token
+    # Revoke the token by its id
+    from app.crud.auth.refresh_token import revoke_refresh_token_by_id
 
-    return await revoke_refresh_token(db, str(db_refresh_token.id))
+    return await revoke_refresh_token_by_id(db, str(db_refresh_token.id))
 
 
 async def revoke_all_sessions(

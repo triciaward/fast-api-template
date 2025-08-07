@@ -15,7 +15,7 @@ from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from app.services.middleware.websocket import manager
+from app.services.middleware.websockets import manager
 
 logger = logging.getLogger(__name__)
 

@@ -47,12 +47,12 @@ Think of optional features like add-ons for your car. The basic car works great,
 
 2. **Start Redis with Docker:**
    ```bash
-   docker-compose up -d redis
+   docker compose up -d redis
    ```
 
 3. **Restart your FastAPI server:**
    ```bash
-   docker-compose restart api
+   docker compose restart api
    ```
 
 ### Redis Lifecycle Flow
@@ -114,7 +114,7 @@ curl http://localhost:8000/system/health
 
 2. **Restart your FastAPI server:**
    ```bash
-   docker-compose restart api
+   docker compose restart api
    ```
 
 3. **Connect to WebSocket endpoint:**
@@ -172,7 +172,7 @@ websocat ws://localhost:8000/integrations/ws/demo
 
 2. **Start Redis (if not already running):**
    ```bash
-   docker-compose up -d redis
+   docker compose up -d redis
    ```
 
 3. **Start Celery worker:**
@@ -182,7 +182,7 @@ websocat ws://localhost:8000/integrations/ws/demo
 
 4. **Restart your FastAPI server:**
    ```bash
-   docker-compose restart api
+   docker compose restart api
    ```
 
 ### Celery Task Lifecycle
@@ -263,7 +263,7 @@ curl -X GET "http://localhost:8000/system/background-tasks/task-status/{task_id}
 
 2. **Restart your FastAPI server:**
    ```bash
-   docker-compose restart api
+   docker compose restart api
    ```
 
 ### Email Features
@@ -349,7 +349,7 @@ python scripts/admin/admin_cli.py stats
 
 | Feature | Environment Variable | Dependencies | Command to Start |
 |---------|---------------------|--------------|------------------|
-| **Redis** | `ENABLE_REDIS=true` | Docker | `docker-compose up -d redis` |
+| **Redis** | `ENABLE_REDIS=true` | Docker | `docker compose up -d redis` |
 | **WebSockets** | `ENABLE_WEBSOCKETS=true` | None | Restart server |
 | **Celery** | `ENABLE_CELERY=true` | Redis | `celery -A app.services.background.celery_app worker` |
 | **Email** | SMTP settings | None | Restart server |
@@ -405,7 +405,7 @@ curl -I http://localhost:8000/
 ## 🚨 Troubleshooting
 
 ### Redis Issues
-- **Connection refused**: Make sure Redis is running (`docker-compose up -d redis`)
+- **Connection refused**: Make sure Redis is running (`docker compose up -d redis`)
 - **Authentication error**: Check `REDIS_URL` in `.env`
 
 ### WebSocket Issues

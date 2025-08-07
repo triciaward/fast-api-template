@@ -258,7 +258,7 @@ async def revoke_session(
         ) from exc
 
     try:
-        from app.crud import revoke_refresh_token
+        from app.crud.auth.refresh_token import revoke_refresh_token_by_id
 
         # Validate session ID format
         try:
@@ -268,7 +268,7 @@ async def revoke_session(
             _handle_invalid_session_id(e)
 
         # Revoke the session
-        success = await revoke_refresh_token(db, str(session_uuid))
+        success = await revoke_refresh_token_by_id(db, str(session_uuid))
         if not success:
             logger.warning(
                 "Session not found or already revoked",

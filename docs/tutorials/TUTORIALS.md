@@ -363,7 +363,7 @@ Each tutorial includes:
 ### Essential Commands
 ```bash
 # Start all services with Docker (recommended)
-docker-compose up -d
+docker compose up -d
 
 
 
@@ -371,7 +371,7 @@ docker-compose up -d
 alembic upgrade head
 
 # View Docker logs
-docker-compose logs -f
+docker compose logs -f
 
 # Check application health
 curl http://localhost:8000/system/health

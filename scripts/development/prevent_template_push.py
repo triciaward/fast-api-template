@@ -6,6 +6,7 @@ This script checks if the user is trying to push to the original template reposi
 and warns them if they haven't set up their own repository yet.
 """
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -50,6 +51,13 @@ def main():
     remote_url = get_remote_url()
 
     if is_template_repository(remote_url):
+        # In non-interactive environments (CI/pre-commit batch), do not block
+        if (
+            not sys.stdin.isatty()
+            or os.environ.get("CI")
+            or os.environ.get("PRE_COMMIT")
+        ):
+            return 0
 
         # Ask user if they want to continue anyway
         response = input("Do you want to continue with git operations anyway? (y/N): ")

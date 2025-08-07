@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import TypeAlias
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +10,7 @@ from app.schemas.auth.user import UserCreate
 from app.utils.datetime_utils import utc_now
 
 # Type alias for async sessions only
-DBSession = AsyncSession
+DBSession: TypeAlias = AsyncSession
 
 
 async def get_user_by_email(db: DBSession, email: str) -> User | None:

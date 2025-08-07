@@ -596,10 +596,10 @@ async def check_database_health(db: AsyncSession) -> dict[str, Any]:
 
 ```bash
 # Check database connection
-docker-compose exec postgres psql -U postgres -d your_db -c "SELECT 1;"
+docker compose exec postgres psql -U postgres -d your_db -c "SELECT 1;"
 
 # Check tables
-docker-compose exec postgres psql -U postgres -d your_db -c "\dt"
+docker compose exec postgres psql -U postgres -d your_db -c "\dt"
 
 # Check migration status
 alembic current

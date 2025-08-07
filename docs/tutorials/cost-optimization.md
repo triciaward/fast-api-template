@@ -291,13 +291,13 @@ case $choice in
         print_info "Setting up direct VPS deployment..."
         print_info "1. SSH into your VPS"
         print_info "2. Clone your repository"
-        print_info "3. Run: docker-compose -f docker-compose.coolify.yml up -d"
+        print_info "3. Run: docker compose -f docker-compose.coolify.yml up -d"
         print_success "Direct VPS deployment guide created"
         ;;
     3)
         print_info "Setting up local budget development..."
         print_info "Running with budget optimizations..."
-        docker-compose -f docker-compose.coolify.yml up -d
+docker compose -f docker-compose.coolify.yml up -d
         print_success "Local budget development environment started"
         ;;
     *)

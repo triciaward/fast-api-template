@@ -6,7 +6,7 @@ This module provides admin-only utilities, base classes, and dependencies for ad
 
 import logging
 from collections.abc import Callable
-from typing import Any, Generic, Protocol, TypeVar
+from typing import Any, Generic, Protocol, TypeAlias, TypeVar
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
@@ -39,9 +39,9 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 ResponseSchemaType = TypeVar("ResponseSchemaType", bound=BaseModel)
 
 # Type alias for database sessions (now async only)
-DBSession = AsyncSession
+DBSession: TypeAlias = AsyncSession
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 async def get_current_user(
@@ -75,23 +75,20 @@ async def get_current_user(
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
-        email = payload.get("sub")
-        if email is None:
+        user_id = payload.get("sub")
+        if user_id is None:
             raise credentials_exception
         # Local import to avoid circular dependency
         from app.schemas.auth.user import TokenData
 
-        token_data = TokenData(email=email)
+        TokenData(email=None)
     except JWTError as e:
         raise credentials_exception from e
 
-    if token_data.email is None:
-        raise credentials_exception
-
     # Local import to avoid circular dependency
-    from app.crud.auth.user import get_user_by_email
+    from app.crud.auth.user import get_user_by_id
 
-    user = await get_user_by_email(db, email=token_data.email)
+    user = await get_user_by_id(db, user_id=str(user_id))
     if user is None:
         raise credentials_exception
     return user

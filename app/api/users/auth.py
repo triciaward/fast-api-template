@@ -25,7 +25,7 @@ def utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 async def get_current_user(
@@ -43,17 +43,15 @@ async def get_current_user(
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
-        email = payload.get("sub")
-        if email is None:
+        user_id = payload.get("sub")
+        if user_id is None:
             raise credentials_exception
-        token_data = TokenData(email=email)
+        TokenData(email=None)
     except JWTError as e:
         raise credentials_exception from e
 
-    if token_data.email is None:
-        raise credentials_exception
-
-    user = await crud_user.get_user_by_email(db, email=token_data.email)
+    # Fetch by user id (subject)
+    user = await crud_user.get_user_by_id(db, user_id=str(user_id))
     if user is None:
         raise credentials_exception
     return user

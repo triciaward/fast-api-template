@@ -27,6 +27,7 @@ from .auth.refresh_token import (
     revoke_all_user_sessions,
     revoke_refresh_token,
     revoke_refresh_token_by_hash,
+    revoke_refresh_token_by_id,
     verify_refresh_token_in_db,
 )
 from .auth.user import (
@@ -125,6 +126,7 @@ __all__ = [
     "get_refresh_token_by_hash",
     "revoke_refresh_token",
     "revoke_refresh_token_by_hash",
+    "revoke_refresh_token_by_id",
     "get_user_sessions",
     "get_user_session_count",
     "revoke_all_user_sessions",

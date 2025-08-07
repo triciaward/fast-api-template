@@ -60,20 +60,39 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         # Content Security Policy (CSP)
         # Restricts which resources can be loaded
-        csp_policy = (
-            "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
-            "style-src 'self' 'unsafe-inline'; "
-            "img-src 'self' data: https:; "
-            "font-src 'self' data:; "
-            "connect-src 'self' ws: wss:; "
-            "frame-ancestors 'none'; "
-            "base-uri 'self'; "
-            "form-action 'self'; "
-            "object-src 'none'; "
-            "media-src 'self'; "
-            "worker-src 'self'"
-        )
+        # Use stricter defaults for API, relax for docs only
+        if request.url.path.startswith("/docs") or request.url.path.startswith(
+            "/redoc",
+        ):
+            csp_policy = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+                "style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data: https:; "
+                "font-src 'self' data:; "
+                "connect-src 'self' ws: wss:; "
+                "frame-ancestors 'none'; "
+                "base-uri 'self'; "
+                "form-action 'self'; "
+                "object-src 'none'; "
+                "media-src 'self'; "
+                "worker-src 'self'"
+            )
+        else:
+            csp_policy = (
+                "default-src 'self'; "
+                "script-src 'self'; "
+                "style-src 'self'; "
+                "img-src 'self' data: https:; "
+                "font-src 'self' data:; "
+                "connect-src 'self' ws: wss:; "
+                "frame-ancestors 'none'; "
+                "base-uri 'self'; "
+                "form-action 'self'; "
+                "object-src 'none'; "
+                "media-src 'self'; "
+                "worker-src 'self'"
+            )
         response.headers["Content-Security-Policy"] = csp_policy
 
         # X-Content-Type-Options
@@ -141,7 +160,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             response.headers["Strict-Transport-Security"] = hsts_value
 
         # Cache Control for sensitive endpoints
-        if request.url.path.startswith("/api/v1/auth"):
+        if request.url.path.startswith("/api/"):
             response.headers["Cache-Control"] = (
                 "no-store, no-cache, must-revalidate, max-age=0"
             )

@@ -49,6 +49,14 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
         comment="Hashed refresh token value",
     )
 
+    # Deterministic fingerprint for efficient lookup before bcrypt verify
+    token_fingerprint = Column(
+        String(64),
+        nullable=True,
+        index=True,
+        comment="Deterministic fingerprint of the refresh token for lookup",
+    )
+
     # Expiration with consistent timezone handling
     expires_at = Column(
         TIMESTAMP(timezone=True),
@@ -93,15 +101,10 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
         Index("ix_refresh_token_user_active", "user_id", "is_revoked", "expires_at"),
         # Composite index for token validation
         Index("ix_refresh_token_validation", "token_hash", "is_revoked", "expires_at"),
+        # Index on fingerprint for quick candidate lookup
+        Index("ix_refresh_token_fingerprint", "token_fingerprint"),
         # Index for security monitoring
         Index("ix_refresh_token_ip_timestamp", "ip_address", "created_at"),
-        # Partial index for expired tokens
-        Index(
-            "ix_refresh_token_expired",
-            "id",
-            "is_revoked",
-            postgresql_where="expires_at < NOW()",
-        ),
         # Partial index for revoked tokens
         Index(
             "ix_refresh_token_revoked",

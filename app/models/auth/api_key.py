@@ -5,7 +5,7 @@ Improved APIKey model with better constraints and indexing.
 import uuid
 
 from sqlalchemy import Boolean, Column, ForeignKey, Index, String
-from sqlalchemy.dialects.postgresql import JSON, TIMESTAMP, UUID
+from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP, UUID
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -48,6 +48,14 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
         unique=True,
         comment="Hashed API key value",
     )
+
+    # Deterministic fingerprint for efficient lookup before bcrypt verify
+    key_fingerprint = Column(
+        String(64),
+        nullable=True,
+        index=True,
+        comment="Deterministic fingerprint (SHA-256) of API key for lookup",
+    )
     label = Column(
         String(255),
         nullable=False,
@@ -56,7 +64,7 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
 
     # Scopes with proper JSON handling
     scopes = Column(
-        JSON,
+        JSONB,
         nullable=False,
         default=list,
         comment="List of permission scopes for this key",
@@ -91,15 +99,10 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
         Index("ix_api_key_user_active", "user_id", "is_active", "expires_at"),
         # Composite index for system keys
         Index("ix_api_key_system", "is_active", "expires_at"),
-        # Index for scope-based queries
-        Index("ix_api_key_scopes", "scopes"),
-        # Partial index for expired keys
-        Index(
-            "ix_api_key_expired",
-            "id",
-            "is_active",
-            postgresql_where="expires_at IS NOT NULL AND expires_at < NOW()",
-        ),
+        # GIN index for JSONB scopes lookups
+        Index("ix_api_key_scopes", "scopes", postgresql_using="gin"),
+        # Fingerprint index for verification shortcuts
+        Index("ix_api_key_fingerprint", "key_fingerprint"),
     )
 
     def __repr__(self) -> str:

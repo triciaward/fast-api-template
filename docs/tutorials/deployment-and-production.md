@@ -207,7 +207,7 @@ flowchart TD
 2. **Log in to your Coolify dashboard**
 3. **Click "Add New App"**
 4. **Select your GitHub repo**
-5. **Set build and run commands** (e.g., `docker-compose up -d` or `uvicorn app.main:app --host 0.0.0.0 --port 8000`)
+5. **Set build and run commands** (e.g., `docker compose up -d` or `uvicorn app.main:app --host 0.0.0.0 --port 8000`)
 6. **Add environment variables** (copy from `.env.production`)
 7. **Deploy!**
 
@@ -265,15 +265,15 @@ graph TD
 
 1. **Build and run Docker containers:**
     ```bash
-    docker-compose -f docker-compose.yml up -d
+    docker compose -f docker-compose.yml up -d
     ```
 2. **Run migrations:**
     ```bash
-    docker-compose exec api alembic upgrade head
+    docker compose exec api alembic upgrade head
     ```
 3. **Create a superuser:**
     ```bash
-    docker-compose exec api python app/bootstrap_superuser.py
+    docker compose exec api python app/bootstrap_superuser.py
     ```
 4. **Set up Caddy for HTTPS**
 5. **Point your domain to your server's IP in Cloudflare**

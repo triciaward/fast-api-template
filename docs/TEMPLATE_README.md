@@ -218,9 +218,9 @@ Running superuser creation script...
 3. Start developing!
 
 💡 Useful Commands:
-  docker-compose up -d          # Start all services
-  docker-compose logs -f        # View logs
-  docker-compose down           # Stop all services
+  docker compose up -d          # Start all services
+  docker compose logs -f        # View logs
+  docker compose down           # Stop all services
   
   alembic revision --autogenerate -m 'description'  # Create migration
   alembic upgrade head          # Apply migrations
@@ -232,7 +232,7 @@ Once your project is set up, you can use these commands:
 
 ```bash
 # Start the application
-docker-compose up -d
+docker compose up -d
 
 # View API documentation
 open http://localhost:8000/docs
@@ -243,10 +243,10 @@ open http://localhost:8000/docs
 ./scripts/development/validate_ci.sh
 
 # View logs
-docker-compose logs -f api
+docker compose logs -f api
 
 # Stop services
-docker-compose down
+docker compose down
 ```
 
 ## 🛠️ What's Included
@@ -391,15 +391,17 @@ async def create_user(
 ### **Local Development**
 ```bash
 # Start services
-docker-compose up -d
+docker compose up -d
 
 # Run development tools
 ruff format .
 ruff check .
 
 # View logs
-docker-compose logs -f api
+docker compose logs -f api
 ```
+
+> Note: The backend (`api`) and database (`postgres`) run inside Docker. Use the Python virtual environment only for developer tooling (formatting, linting, Alembic command generation), not for running the server.
 
 ### **Database Migrations**
 ```bash

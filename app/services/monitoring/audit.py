@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, TypeAlias
 
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,8 +7,8 @@ from app.core.config.logging_config import get_auth_logger
 from app.crud.system.audit_log import create_audit_log
 from app.models import User
 
-# Type alias for both sync and async sessions
-DBSession = AsyncSession
+# Type alias for async sessions only
+DBSession: TypeAlias = AsyncSession
 
 # Get the auth logger for structlog integration
 auth_logger = get_auth_logger()

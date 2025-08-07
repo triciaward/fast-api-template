@@ -49,7 +49,7 @@ except ImportError:
 
 
 try:
-    from .websocket import ConnectionManager
+    from .websockets import ConnectionManager
 
     websocket_manager = ConnectionManager()
 except ImportError:

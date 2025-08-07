@@ -490,13 +490,13 @@ async def get_data(
 
 ```bash
 # Check user in database
-docker-compose exec postgres psql -U postgres -d your_db -c "SELECT * FROM users WHERE email = 'user@example.com';"
+docker compose exec postgres psql -U postgres -d your_db -c "SELECT * FROM users WHERE email = 'user@example.com';"
 
 # Check API keys
-docker-compose exec postgres psql -U postgres -d your_db -c "SELECT * FROM api_keys;"
+docker compose exec postgres psql -U postgres -d your_db -c "SELECT * FROM api_keys;"
 
 # Check audit logs
-docker-compose exec postgres psql -U postgres -d your_db -c "SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 10;"
+docker compose exec postgres psql -U postgres -d your_db -c "SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 10;"
 ```
 
 ## 📚 Next Steps

@@ -7,13 +7,13 @@ A comprehensive guide for developers using the FastAPI template, covering what t
 ### Essential Commands
 ```bash
 # Start all services
-docker-compose up -d
+docker compose up -d
 
 # Stop all services  
-docker-compose down
+docker compose down
 
 # View logs
-docker-compose logs -f
+docker compose logs -f
 
 
 
@@ -45,10 +45,10 @@ python app/bootstrap_superuser.py
 ### Database Commands
 ```bash
 # Connect to database
-docker-compose exec postgres psql -U postgres -d fastapi_template
+docker compose exec postgres psql -U postgres -d fastapi_template
 
 # Reset database (⚠️ destructive)
-docker-compose down -v && docker-compose up -d
+docker compose down -v && docker compose up -d
 alembic upgrade head
 
 # Check migration status
@@ -59,7 +59,7 @@ alembic history
 ### Development Workflow
 ```bash
 # 1. Start services
-docker-compose up -d
+docker compose up -d
 
 # 2. Make code changes
 # 3. Check code quality

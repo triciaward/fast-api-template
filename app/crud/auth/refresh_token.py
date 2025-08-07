@@ -1,14 +1,20 @@
 from datetime import datetime, timedelta
+from typing import TypeAlias
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.security.security import (
+    fingerprint_refresh_token,
+    hash_refresh_token,
+    verify_refresh_token,
+)
 from app.models import RefreshToken
 from app.utils.datetime_utils import utc_now
 
 # Type alias for async sessions only
-DBSession = AsyncSession
+DBSession: TypeAlias = AsyncSession
 
 
 async def create_refresh_token(
@@ -21,9 +27,19 @@ async def create_refresh_token(
     """Create a new refresh token."""
     expires_at = utc_now() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
 
+    # token_hash here is expected to be the HASH of the raw token
+    # compute fingerprint from the corresponding raw token if provided as raw
+    # However, since callers pass the raw token, compute hash+fingerprint here instead
+    # If a hash is already passed, treat it as raw (legacy) and still compute correctly
+    # Compute fingerprint from raw token and store hashed token
+    raw_token = token_hash
+    fingerprint = fingerprint_refresh_token(raw_token)
+    hashed = hash_refresh_token(raw_token)
+
     refresh_token = RefreshToken(
         user_id=user_id,
-        token_hash=token_hash,
+        token_hash=hashed,
+        token_fingerprint=fingerprint,
         expires_at=expires_at,
         device_info=device_info,
         ip_address=ip_address,
@@ -43,7 +59,7 @@ async def cleanup_expired_tokens(db: DBSession) -> int:
     """Clean up expired refresh tokens."""
     result = await db.execute(
         select(RefreshToken).filter(
-            RefreshToken.expires_at > utc_now(),
+            RefreshToken.expires_at < utc_now(),
             RefreshToken.is_revoked.is_(False),
         ),
     )
@@ -63,6 +79,7 @@ async def get_refresh_token_by_hash(
     token_hash: str,
 ) -> RefreshToken | None:
     """Get refresh token by hash."""
+    # This function is kept for backward-compat or administrative usage only.
     result = await db.execute(
         select(RefreshToken).filter(
             RefreshToken.token_hash == token_hash,
@@ -70,7 +87,6 @@ async def get_refresh_token_by_hash(
             RefreshToken.is_revoked.is_(False),
         ),
     )
-
     return result.scalar_one_or_none()
 
 
@@ -89,6 +105,19 @@ async def revoke_refresh_token(db: DBSession, token_hash: str) -> bool:
 async def revoke_refresh_token_by_hash(db: DBSession, token_hash: str) -> bool:
     """Revoke a refresh token by hash."""
     return await revoke_refresh_token(db, token_hash)
+
+
+async def revoke_refresh_token_by_id(db: DBSession, token_id: str) -> bool:
+    """Revoke a refresh token by its database id."""
+    result = await db.execute(
+        select(RefreshToken).filter(RefreshToken.id == token_id),
+    )
+    token = result.scalar_one_or_none()
+    if not token:
+        return False
+    token.is_revoked = True  # type: ignore
+    await db.commit()
+    return True
 
 
 async def get_user_sessions(db: DBSession, user_id: str) -> list[RefreshToken]:
@@ -125,8 +154,43 @@ async def verify_refresh_token_in_db(
     db: DBSession,
     token_hash: str,
 ) -> RefreshToken | None:
-    """Verify a refresh token in the database."""
-    return await get_refresh_token_by_hash(db, token_hash)
+    """Verify a refresh token in the database.
+
+    This takes a RAW token value, locates candidate by fingerprint, and verifies via bcrypt.
+    """
+    raw_token = token_hash
+    fingerprint = fingerprint_refresh_token(raw_token)
+
+    result = await db.execute(
+        select(RefreshToken).filter(
+            RefreshToken.token_fingerprint == fingerprint,
+            RefreshToken.expires_at > utc_now(),
+            RefreshToken.is_revoked.is_(False),
+        ),
+    )
+    candidate = result.scalar_one_or_none()
+    if not candidate:
+        # Backward compatibility: legacy records stored raw token in token_hash
+        legacy_result = await db.execute(
+            select(RefreshToken).filter(
+                RefreshToken.token_hash == raw_token,
+                RefreshToken.expires_at > utc_now(),
+                RefreshToken.is_revoked.is_(False),
+            ),
+        )
+        candidate = legacy_result.scalar_one_or_none()
+        if not candidate:
+            return None
+        # Migrate legacy record in-place to hashed+fingerprint
+        candidate.token_fingerprint = fingerprint  # type: ignore
+        candidate.token_hash = hash_refresh_token(raw_token)  # type: ignore
+        await db.commit()
+
+    # Verify using bcrypt hash
+    if not verify_refresh_token(raw_token, str(candidate.token_hash)):
+        return None
+
+    return candidate
 
 
 async def enforce_session_limit(
