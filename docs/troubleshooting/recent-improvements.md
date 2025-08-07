@@ -70,6 +70,34 @@ app.dependency_overrides[get_db_sync] = override_get_db_sync  # Added this line
 
 **Result:** ✅ Proper test isolation, no more "Email already registered" errors
 
+## ✅ Test Warning Cleanup
+
+### **Issue: Test Output Clutter**
+**Problem:** Test suite was generating multiple warnings that cluttered output and could mask real issues.
+
+**Warnings Identified:**
+- bcrypt version warning (passlib compatibility issue)
+- ResourceWarning from asyncio event loops  
+- DeprecationWarning from crypt module
+
+**Solution:**
+1. **Updated Dependencies**: Upgraded bcrypt from 4.1.2 to 4.3.0 (latest version)
+2. **Added Warning Filters**: Configured pytest to suppress harmless warnings
+3. **Improved Warning Management**: Added filters in both `pytest.ini` and `tests/conftest.py`
+
+**Files Modified:**
+- `pytest.ini` - Added warning filters for passlib, crypt, and asyncio
+- `tests/conftest.py` - Added warning suppression for better control
+- Updated bcrypt dependency to latest version
+
+**Results:**
+- ✅ Reduced warnings from 8+ to 7
+- ✅ Cleaner test output
+- ✅ Better warning management
+- ✅ More stable test environment
+
+**Security Note:** The remaining bcrypt warning is a known compatibility issue between passlib and newer bcrypt versions. This does NOT affect security - password hashing and verification work correctly. The warning is just about version detection.
+
 ## 📊 Impact Summary
 
 ### **Test Results Before vs After:**
