@@ -207,7 +207,8 @@ class TestRateLimitingIntegration:
             pass
 
     def test_rate_limiting_configuration(
-        self, client: TestClient,
+        self,
+        client: TestClient,
     ) -> None:
         """Test rate limiting configuration through settings."""
         # Test that rate limiting can be configured

@@ -93,40 +93,24 @@ class TestCRUDGenerator:
 
                 # Test SQLAlchemy type mapping
                 assert generator._get_sqlalchemy_type("str") == "String"
-                assert (
-                    generator._get_sqlalchemy_type("int") == "Integer"
-                )
-                assert (
-                    generator._get_sqlalchemy_type("float") == "Float"
-                )
-                assert (
-                    generator._get_sqlalchemy_type("bool") == "Boolean"
-                )
-                assert (
-                    generator._get_sqlalchemy_type("datetime") == "DateTime"
-                )
+                assert generator._get_sqlalchemy_type("int") == "Integer"
+                assert generator._get_sqlalchemy_type("float") == "Float"
+                assert generator._get_sqlalchemy_type("bool") == "Boolean"
+                assert generator._get_sqlalchemy_type("datetime") == "DateTime"
                 assert generator._get_sqlalchemy_type("date") == "Date"
-                assert (
-                    generator._get_sqlalchemy_type("uuid") == "UUID(as_uuid=True)"
-                )
+                assert generator._get_sqlalchemy_type("uuid") == "UUID(as_uuid=True)"
                 assert generator._get_sqlalchemy_type("text") == "Text"
                 assert generator._get_sqlalchemy_type("json") == "JSON"
-                assert (
-                    generator._get_sqlalchemy_type("unknown") == "String"
-                )
+                assert generator._get_sqlalchemy_type("unknown") == "String"
 
                 # Test Pydantic type mapping
                 assert generator._get_pydantic_type("str") == "str"
                 assert generator._get_pydantic_type("int") == "int"
                 assert generator._get_pydantic_type("float") == "float"
                 assert generator._get_pydantic_type("bool") == "bool"
-                assert (
-                    generator._get_pydantic_type("datetime") == "datetime"
-                )
+                assert generator._get_pydantic_type("datetime") == "datetime"
                 assert generator._get_pydantic_type("date") == "date"
-                assert (
-                    generator._get_pydantic_type("uuid") == "uuid.UUID"
-                )
+                assert generator._get_pydantic_type("uuid") == "uuid.UUID"
                 assert generator._get_pydantic_type("text") == "str"
                 assert generator._get_pydantic_type("json") == "dict"
                 assert generator._get_pydantic_type("unknown") == "str"
@@ -136,15 +120,9 @@ class TestCRUDGenerator:
                 assert generator._get_default_value("int") == "0"
                 assert generator._get_default_value("float") == "0.0"
                 assert generator._get_default_value("bool") == "False"
-                assert (
-                    generator._get_default_value("datetime") == "datetime.utcnow"
-                )
-                assert (
-                    generator._get_default_value("date") == "date.today"
-                )
-                assert (
-                    generator._get_default_value("uuid") == "uuid.uuid4"
-                )
+                assert generator._get_default_value("datetime") == "datetime.utcnow"
+                assert generator._get_default_value("date") == "date.today"
+                assert generator._get_default_value("uuid") == "uuid.uuid4"
                 assert generator._get_default_value("text") == '""'
                 assert generator._get_default_value("json") == "{}"
                 assert generator._get_default_value("unknown") == '""'

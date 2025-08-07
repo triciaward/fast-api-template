@@ -28,7 +28,8 @@ class TestSearchFilterUtility:
     """Test the search and filter utility functionality."""
 
     def test_search_filter_builder_initialization(
-        self, sync_db_session: Session,
+        self,
+        sync_db_session: Session,
     ):
         """Test SearchFilterBuilder initialization."""
         builder = SearchFilterBuilder(User)
