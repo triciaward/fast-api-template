@@ -59,6 +59,11 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
+      - name: Copy environment files
+        run: |
+          cp .env.example .env
+          echo "Environment file copied for CI"
+
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update
@@ -238,6 +243,11 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
+      - name: Copy environment files
+        run: |
+          cp .env.example .env
+          echo "Environment file copied for CI"
+
       - name: Run Ruff and Black
         run: |
           echo "Running ruff check..."
@@ -263,6 +273,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
+
+      - name: Copy environment files
+        run: |
+          cp .env.example .env
+          echo "Environment file copied for CI"
 
       - name: Run Mypy
         run: |
