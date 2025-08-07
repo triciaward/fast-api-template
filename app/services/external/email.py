@@ -93,7 +93,7 @@ class EmailService:
             return response.status_code == 250  # type: ignore
 
     async def create_verification_token(
-        self, db: AsyncSession, user_id: str
+        self, db: AsyncSession, user_id: str,
     ) -> str | None:
         """Create and store verification token for a user."""
         token = self.generate_verification_token()
@@ -191,7 +191,7 @@ class EmailService:
         return token if success else None
 
     async def verify_password_reset_token(
-        self, db: AsyncSession, token: str
+        self, db: AsyncSession, token: str,
     ) -> str | None:
         """Verify a password reset token and return user ID if valid."""
         user = await get_user_by_password_reset_token(db, token=token)

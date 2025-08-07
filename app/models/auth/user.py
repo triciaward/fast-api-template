@@ -140,7 +140,7 @@ class User(Base, SoftDeleteMixin, TimestampMixin):
 
     # Relationships (lazy loading for better performance)
     api_keys = relationship(
-        "APIKey", back_populates="user", foreign_keys="APIKey.user_id", lazy="select"
+        "APIKey", back_populates="user", foreign_keys="APIKey.user_id", lazy="select",
     )
     refresh_tokens = relationship(
         "RefreshToken",

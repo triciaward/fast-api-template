@@ -81,7 +81,7 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
 
     # Relationships
     user = relationship(
-        "User", back_populates="refresh_tokens", foreign_keys=[user_id], lazy="select"
+        "User", back_populates="refresh_tokens", foreign_keys=[user_id], lazy="select",
     )
 
     # Performance-optimized indexes

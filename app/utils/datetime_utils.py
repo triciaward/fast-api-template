@@ -23,7 +23,7 @@ def format_datetime(dt: datetime, format_str: str = "%Y-%m-%d %H:%M:%S") -> str:
 
 
 def parse_datetime(
-    date_string: str, format_str: str = "%Y-%m-%d %H:%M:%S"
+    date_string: str, format_str: str = "%Y-%m-%d %H:%M:%S",
 ) -> datetime | None:
     """Parse a datetime string into a datetime object."""
     try:
