@@ -132,8 +132,6 @@ register_error_handlers(app)
 app.include_router(api_router)
 
 
-
-
 @app.get("/")
 async def root() -> dict[str, str]:
     """

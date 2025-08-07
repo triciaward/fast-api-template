@@ -19,6 +19,7 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
 
     Supports both user-specific and system-level API keys.
     """
+
     __tablename__ = "api_keys"
 
     # Primary key
@@ -77,7 +78,9 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Relationships
-    user = relationship("User", back_populates="api_keys", foreign_keys=[user_id], lazy="select")
+    user = relationship(
+        "User", back_populates="api_keys", foreign_keys=[user_id], lazy="select"
+    )
 
     # Performance-optimized indexes
     __table_args__ = (
@@ -90,7 +93,8 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
         # Partial index for expired keys
         Index(
             "ix_api_key_expired",
-            "id", "is_active",
+            "id",
+            "is_active",
             postgresql_where="expires_at IS NOT NULL AND expires_at < NOW()",
         ),
     )

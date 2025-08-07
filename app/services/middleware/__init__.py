@@ -33,7 +33,9 @@ except ImportError:
     rate_limit_oauth = _no_op_decorator
     rate_limit_account_deletion = _no_op_decorator
 
-    def rate_limit_custom(limit: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    def rate_limit_custom(
+        limit: str,
+    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         return _no_op_decorator
 
     def setup_rate_limiting(app: Any) -> None:
@@ -45,8 +47,10 @@ except ImportError:
     def get_client_ip(request: Request) -> str:
         return "unknown"
 
+
 try:
     from .websocket import ConnectionManager
+
     websocket_manager = ConnectionManager()
 except ImportError:
     ConnectionManager = None  # type: ignore

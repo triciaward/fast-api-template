@@ -18,6 +18,7 @@ class User(Base, SoftDeleteMixin, TimestampMixin):
 
     Supports both regular authentication and OAuth.
     """
+
     __tablename__ = "users"
 
     # Primary key
@@ -138,9 +139,21 @@ class User(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Relationships (lazy loading for better performance)
-    api_keys = relationship("APIKey", back_populates="user", foreign_keys="APIKey.user_id", lazy="select")
-    refresh_tokens = relationship("RefreshToken", back_populates="user", foreign_keys="RefreshToken.user_id", lazy="select")
-    audit_logs = relationship("AuditLog", back_populates="user", foreign_keys="AuditLog.user_id", lazy="select")
+    api_keys = relationship(
+        "APIKey", back_populates="user", foreign_keys="APIKey.user_id", lazy="select"
+    )
+    refresh_tokens = relationship(
+        "RefreshToken",
+        back_populates="user",
+        foreign_keys="RefreshToken.user_id",
+        lazy="select",
+    )
+    audit_logs = relationship(
+        "AuditLog",
+        back_populates="user",
+        foreign_keys="AuditLog.user_id",
+        lazy="select",
+    )
 
     # Improved table constraints and indexes
     __table_args__ = (

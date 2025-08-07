@@ -3,6 +3,7 @@
 # Try to import optional services
 try:
     from .email import EmailService
+
     email_service = EmailService()
 except ImportError:
     email_service = None  # type: ignore
@@ -50,7 +51,6 @@ __all__ = [
     "init_sentry",
     "capture_exception",
     "capture_message",
-
     "set_request_context",
     "set_user_context",
 ]

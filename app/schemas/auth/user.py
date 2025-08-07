@@ -499,7 +499,9 @@ class APIKeyUser(BaseModel):
     key_id: uuid.UUID
 
     @field_serializer("id", "user_id", "key_id")
-    def serialize_uuid(self, uuid_value: uuid.UUID | None, _info: SerializationInfo) -> str | None:
+    def serialize_uuid(
+        self, uuid_value: uuid.UUID | None, _info: SerializationInfo
+    ) -> str | None:
         return str(uuid_value) if uuid_value else None
 
 

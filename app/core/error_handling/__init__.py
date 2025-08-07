@@ -13,7 +13,6 @@ from .exceptions import (
 __all__ = [
     # Error handlers
     "register_error_handlers",
-
     # Custom exceptions
     "BaseAPIException",
     "ConflictException",

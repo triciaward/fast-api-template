@@ -79,7 +79,9 @@ def is_sentry_working() -> bool:
         return False
 
 
-def capture_exception(exception: Exception, context: dict[str, Any] | None = None) -> None:
+def capture_exception(
+    exception: Exception, context: dict[str, Any] | None = None
+) -> None:
     """Capture an exception with optional context."""
     if not settings.ENABLE_SENTRY:
         return

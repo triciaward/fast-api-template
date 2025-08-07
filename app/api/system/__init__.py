@@ -16,6 +16,7 @@ router.include_router(health_router)
 # Conditionally include Celery routes if enabled
 if settings.ENABLE_CELERY:
     from .background_tasks import router as background_tasks_router
+
     router.include_router(background_tasks_router)
 
 __all__ = ["router"]

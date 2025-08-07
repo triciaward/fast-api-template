@@ -146,6 +146,7 @@ async def refresh_access_token(
 
     # Get user
     from sqlalchemy import select
+
     result = await db.execute(select(User).filter(User.id == db_refresh_token.user_id))
     user = result.scalar_one_or_none()
     if not user or user.is_deleted:

@@ -67,24 +67,20 @@ __all__ = [
     "UserUpdate",
     "UserListResponse",
     "UserSearchResponse",
-
     # Token/Session schemas
     "Token",
     "TokenData",
     "RefreshTokenResponse",
     "SessionInfo",
     "SessionListResponse",
-
     # OAuth schemas
     "OAuthLogin",
     "OAuthUserInfo",
-
     # Email verification schemas
     "EmailVerificationRequest",
     "EmailVerificationResponse",
     "VerifyEmailRequest",
     "VerifyEmailResponse",
-
     # Password management schemas
     "PasswordResetRequest",
     "PasswordResetResponse",
@@ -92,7 +88,6 @@ __all__ = [
     "PasswordResetConfirmResponse",
     "PasswordChangeRequest",
     "PasswordChangeResponse",
-
     # Account deletion schemas
     "AccountDeletionRequest",
     "AccountDeletionResponse",
@@ -102,14 +97,12 @@ __all__ = [
     "AccountDeletionCancelResponse",
     "AccountDeletionStatusResponse",
     "DeletedUserResponse",
-
     # Soft delete schemas
     "SoftDeleteRequest",
     "SoftDeleteResponse",
     "RestoreUserResponse",
     "DeletedUserListResponse",
     "DeletedUserSearchResponse",
-
     # API Key schemas
     "APIKeyBase",
     "APIKeyCreate",
@@ -118,7 +111,6 @@ __all__ = [
     "APIKeyRotateResponse",
     "APIKeyListResponse",
     "APIKeyUser",
-
     # Custom exceptions
     "ScopesTypeError",
     "InvalidScopeError",

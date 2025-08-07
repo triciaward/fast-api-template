@@ -22,7 +22,9 @@ def format_datetime(dt: datetime, format_str: str = "%Y-%m-%d %H:%M:%S") -> str:
     return dt.strftime(format_str)
 
 
-def parse_datetime(date_string: str, format_str: str = "%Y-%m-%d %H:%M:%S") -> datetime | None:
+def parse_datetime(
+    date_string: str, format_str: str = "%Y-%m-%d %H:%M:%S"
+) -> datetime | None:
     """Parse a datetime string into a datetime object."""
     try:
         # Check if format includes timezone info

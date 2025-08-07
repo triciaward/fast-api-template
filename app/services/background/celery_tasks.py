@@ -128,17 +128,21 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
                     for user in accounts_for_reminder:
                         try:
                             # Calculate days remaining
-                            days_remaining = (user.deletion_scheduled_for - utc_now()).days
+                            days_remaining = (
+                                user.deletion_scheduled_for - utc_now()
+                            ).days
 
                             # Send reminder email
                             if email_service and email_service.is_configured():
-                                email_sent = email_service.send_account_deletion_reminder_email(
-                                    str(user.email),
-                                    str(user.username),
-                                    days_remaining,
-                                    user.deletion_scheduled_for.strftime(
-                                        "%Y-%m-%d %H:%M:%S UTC",
-                                    ),
+                                email_sent = (
+                                    email_service.send_account_deletion_reminder_email(
+                                        str(user.email),
+                                        str(user.username),
+                                        days_remaining,
+                                        user.deletion_scheduled_for.strftime(
+                                            "%Y-%m-%d %H:%M:%S UTC",
+                                        ),
+                                    )
                                 )
 
                                 if email_sent:

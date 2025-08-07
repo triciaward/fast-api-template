@@ -19,6 +19,7 @@ class AuditLog(Base):
 
     Provides comprehensive audit trail with proper indexing for performance.
     """
+
     __tablename__ = "audit_logs"
 
     # Primary key
@@ -94,7 +95,9 @@ class AuditLog(Base):
     )
 
     # Relationships
-    user = relationship("User", back_populates="audit_logs", foreign_keys=[user_id], lazy="select")
+    user = relationship(
+        "User", back_populates="audit_logs", foreign_keys=[user_id], lazy="select"
+    )
 
     # Performance-optimized indexes
     __table_args__ = (
@@ -109,7 +112,9 @@ class AuditLog(Base):
         # Partial index for failed events (more efficient)
         Index(
             "ix_audit_log_failed_events",
-            "timestamp", "event_type", "user_id",
+            "timestamp",
+            "event_type",
+            "user_id",
             postgresql_where="success = false",
         ),
     )
@@ -125,9 +130,14 @@ class AuditLog(Base):
     def is_security_event(self) -> bool:
         """Check if this is a security-related event."""
         security_events = {
-            "login_success", "login_failed", "password_change",
-            "password_reset", "account_locked", "permission_denied",
-            "api_key_created", "api_key_deleted",
+            "login_success",
+            "login_failed",
+            "password_change",
+            "password_reset",
+            "account_locked",
+            "permission_denied",
+            "api_key_created",
+            "api_key_deleted",
         }
         return self.event_type in security_events
 

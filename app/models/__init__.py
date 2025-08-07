@@ -10,12 +10,10 @@ __all__ = [
     "Base",
     "SoftDeleteMixin",
     "TimestampMixin",
-
     # Auth models
     "User",
     "APIKey",
     "RefreshToken",
-
     # System models
     "AuditLog",
 ]

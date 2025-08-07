@@ -44,6 +44,7 @@ except ImportError:
     def get_celery_stats() -> dict[str, Any]:
         return {"enabled": False}
 
+
 # Rate limiting service
 try:
     from .middleware import (
@@ -73,7 +74,9 @@ except ImportError:
     rate_limit_oauth = _no_op_decorator
     rate_limit_account_deletion = _no_op_decorator
 
-    def rate_limit_custom(limit: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    def rate_limit_custom(
+        limit: str,
+    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         return _no_op_decorator
 
     def setup_rate_limiting(app: Any) -> None:
@@ -82,20 +85,25 @@ except ImportError:
     def get_rate_limit_info(request: Request) -> dict[str, Any]:
         return {"enabled": False}
 
+
 # Sentry monitoring (no-op if not available)
 def init_sentry() -> None:
     """Initialize Sentry error monitoring (no-op if not available)."""
+
 
 # Redis functions (no-op if not available)
 async def init_redis() -> None:
     """Initialize Redis connection (no-op if not available)."""
 
+
 async def close_redis() -> None:
     """Close Redis connection (no-op if not available)."""
+
 
 # Rate limiter functions (no-op if not available)
 async def init_rate_limiter() -> None:
     """Initialize rate limiting (no-op if not available)."""
+
 
 __all__ = [
     "email_service",

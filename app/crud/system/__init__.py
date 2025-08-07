@@ -15,7 +15,6 @@ __all__ = [
     # Admin CRUD
     "AdminUserCRUD",
     "admin_user_crud",
-
     # Audit Log CRUD (actual function names)
     "create_audit_log",
     "get_audit_logs_by_user",

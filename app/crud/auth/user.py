@@ -353,13 +353,12 @@ async def get_user_by_id_any_status(db: DBSession, user_id: str) -> User | None:
     return result.scalar_one_or_none()
 
 
-async def get_deleted_users(db: DBSession, skip: int = 0, limit: int = 100) -> list[User]:
+async def get_deleted_users(
+    db: DBSession, skip: int = 0, limit: int = 100
+) -> list[User]:
     """Get list of deleted users."""
     result = await db.execute(
-        select(User)
-        .filter(User.is_deleted.is_(True))
-        .offset(skip)
-        .limit(limit),
+        select(User).filter(User.is_deleted.is_(True)).offset(skip).limit(limit),
     )
     return list(result.scalars().all())
 
@@ -375,9 +374,6 @@ async def count_deleted_users(db: DBSession) -> int:
 async def get_users(db: DBSession, skip: int = 0, limit: int = 100) -> list[User]:
     """Get list of non-deleted users."""
     result = await db.execute(
-        select(User)
-        .filter(User.is_deleted.is_(False))
-        .offset(skip)
-        .limit(limit),
+        select(User).filter(User.is_deleted.is_(False)).offset(skip).limit(limit),
     )
     return list(result.scalars().all())

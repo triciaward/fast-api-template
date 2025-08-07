@@ -26,10 +26,8 @@ __all__ = [
     "hash_api_key",
     "verify_api_key",
     "verify_password",
-
     # Security headers
     "configure_security_headers",
-
     # Validation
     "clean_input",
     "sanitize_input",

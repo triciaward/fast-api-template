@@ -111,10 +111,7 @@ async def get_recent_audit_logs(
 ) -> list[AuditLog]:
     """Get recent audit logs."""
     result = await db.execute(
-        select(AuditLog)
-        .order_by(desc(AuditLog.timestamp))
-        .offset(offset)
-        .limit(limit),
+        select(AuditLog).order_by(desc(AuditLog.timestamp)).offset(offset).limit(limit),
     )
 
     return list(result.scalars().all())

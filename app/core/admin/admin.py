@@ -80,6 +80,7 @@ async def get_current_user(
             raise credentials_exception
         # Local import to avoid circular dependency
         from app.schemas.auth.user import TokenData
+
         token_data = TokenData(email=email)
     except JWTError as e:
         raise credentials_exception from e
@@ -89,6 +90,7 @@ async def get_current_user(
 
     # Local import to avoid circular dependency
     from app.crud.auth.user import get_user_by_email
+
     user = await get_user_by_email(db, email=token_data.email)
     if user is None:
         raise credentials_exception

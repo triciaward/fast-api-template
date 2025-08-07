@@ -281,7 +281,9 @@ async def database_health_check(db: AsyncSession = Depends(get_db)) -> dict[str,
         result.fetchone()  # fetchone() doesn't need to be awaited
 
         # Test more complex query
-        result = await db.execute(text("SELECT COUNT(*) FROM information_schema.tables"))
+        result = await db.execute(
+            text("SELECT COUNT(*) FROM information_schema.tables")
+        )
         row = result.fetchone()  # fetchone() doesn't need to be awaited
         table_count = row[0] if row else 0
 

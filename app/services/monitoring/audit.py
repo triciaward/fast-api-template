@@ -66,9 +66,6 @@ async def log_event(
     auth_logger.info("Audit log event", **log_context)
 
 
-
-
-
 # Convenience functions for common audit events
 async def log_login_attempt(
     db: DBSession,
@@ -169,9 +166,6 @@ async def log_oauth_login(
     )
 
 
-
-
-
 async def log_api_key_usage(
     db: DBSession,
     request: Request,
@@ -200,6 +194,3 @@ async def log_api_key_usage(
         success=True,
         context=context,
     )
-
-
-

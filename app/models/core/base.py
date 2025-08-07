@@ -40,9 +40,7 @@ class SoftDeleteMixin:
     )
 
     # Composite index for efficient soft delete queries
-    __table_args__ = (
-        Index("ix_soft_delete_composite", "is_deleted", "deleted_at"),
-    )
+    __table_args__ = (Index("ix_soft_delete_composite", "is_deleted", "deleted_at"),)
 
     def soft_delete(
         self,
@@ -77,18 +75,21 @@ class SoftDeleteMixin:
     def get_active_query(cls) -> "Select":
         """Get a query that excludes soft-deleted records."""
         from sqlalchemy import select
+
         return select(cls).filter(cls.is_deleted.is_(False))
 
     @classmethod
     def get_deleted_query(cls) -> "Select":
         """Get a query that includes only soft-deleted records."""
         from sqlalchemy import select
+
         return select(cls).filter(cls.is_deleted.is_(True))
 
     @classmethod
     def get_all_query(cls) -> "Select":
         """Get a query that includes all records (active and deleted)."""
         from sqlalchemy import select
+
         return select(cls)
 
 

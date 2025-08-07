@@ -41,7 +41,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "/openapi.json": ["application/json"],
         }
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         """Add security headers to the response and validate requests."""
 
         # Request Size Validation

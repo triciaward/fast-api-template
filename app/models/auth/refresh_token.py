@@ -19,6 +19,7 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
 
     Provides secure token-based authentication with proper expiration handling.
     """
+
     __tablename__ = "refresh_tokens"
 
     # Primary key
@@ -79,7 +80,9 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Relationships
-    user = relationship("User", back_populates="refresh_tokens", foreign_keys=[user_id], lazy="select")
+    user = relationship(
+        "User", back_populates="refresh_tokens", foreign_keys=[user_id], lazy="select"
+    )
 
     # Performance-optimized indexes
     __table_args__ = (
@@ -92,13 +95,15 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
         # Partial index for expired tokens
         Index(
             "ix_refresh_token_expired",
-            "id", "is_revoked",
+            "id",
+            "is_revoked",
             postgresql_where="expires_at < NOW()",
         ),
         # Partial index for revoked tokens
         Index(
             "ix_refresh_token_revoked",
-            "user_id", "created_at",
+            "user_id",
+            "created_at",
             postgresql_where="is_revoked = true",
         ),
     )
@@ -118,11 +123,7 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
     @property
     def is_valid(self) -> bool:
         """Check if the refresh token is valid (not revoked, not expired, not deleted)."""
-        return (
-            not self.is_revoked and
-            not self.is_expired and
-            not self.is_deleted
-        )
+        return not self.is_revoked and not self.is_expired and not self.is_deleted
 
     @property
     def is_active(self) -> bool:

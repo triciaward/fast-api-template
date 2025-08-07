@@ -19,6 +19,7 @@ api_router.include_router(system.router)
 # Conditionally include optional features
 if settings.ENABLE_WEBSOCKETS:
     from . import integrations
+
     api_router.include_router(integrations.router)
 
 __all__ = ["api_router"]

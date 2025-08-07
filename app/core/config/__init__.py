@@ -8,10 +8,8 @@ __all__ = [
     # Settings
     "Settings",
     "settings",
-
     # CORS
     "configure_cors",
-
     # Logging
     "get_app_logger",
     "get_auth_logger",

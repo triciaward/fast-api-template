@@ -51,7 +51,6 @@ __all__ = [
     "get_app_logger",
     "get_auth_logger",
     "setup_logging",
-
     # Security
     "create_access_token",
     "generate_api_key",
@@ -66,7 +65,6 @@ __all__ = [
     "validate_password",
     "validate_username",
     "ValidationError",
-
     # Error handling
     "register_error_handlers",
     "BaseAPIException",
@@ -75,14 +73,12 @@ __all__ = [
     "AuthenticationException",
     "AuthorizationException",
     "ValidationException",
-
     # Admin
     "BaseAdminCRUD",
     "DBSession",
     "require_superuser",
     "get_current_user",
     "admin_only_endpoint",
-
     # Category modules
     "config",
     "security",
