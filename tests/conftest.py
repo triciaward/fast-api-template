@@ -32,6 +32,14 @@ os.environ.setdefault("TESTING", "1")
 os.environ.setdefault("ENABLE_CELERY", "true")
 os.environ.setdefault("CELERY_TASK_ALWAYS_EAGER", "true")
 
+# Suppress known warnings
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="passlib")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="passlib")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="crypt")
+warnings.filterwarnings("ignore", category=ResourceWarning, module="asyncio")
+warnings.filterwarnings("ignore", message=".*error reading bcrypt version.*")
+
 # Clear config cache to force reload with new environment variables
 sys.modules.pop("app.core.config", None)
 sys.modules.pop("app.main", None)
