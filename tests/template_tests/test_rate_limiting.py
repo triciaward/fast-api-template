@@ -144,9 +144,9 @@ class TestRateLimiter:
         mock_app.add_exception_handler.assert_called_once()
 
     @patch("app.services.rate_limiter.settings")
-    def test_get_rate_limit_info_disabled(self, mock_settings: MagicMock) -> None:
+    def test_get_rate_limit_info_disabled(self, _mock_settings: MagicMock) -> None:
         """Test get_rate_limit_info when rate limiting is disabled."""
-        mock_settings.ENABLE_RATE_LIMITING = False
+        _mock_settings.ENABLE_RATE_LIMITING = False
 
         mock_request = MagicMock()
         result = get_rate_limit_info(mock_request)
@@ -206,7 +206,7 @@ class TestRateLimitingIntegration:
             # Note: slowapi might not always add these headers, so we just check the response works
             pass
 
-    def test_rate_limiting_configuration(self, client: TestClient) -> None:
+    def test_rate_limiting_configuration(self, client: TestClient) -> None:  # noqa: ARG002
         """Test rate limiting configuration through settings."""
         # Test that rate limiting can be configured
         assert hasattr(settings, "ENABLE_RATE_LIMITING")

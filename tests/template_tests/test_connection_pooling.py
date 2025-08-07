@@ -44,13 +44,13 @@ class TestConnectionPooling:
         if hasattr(engine.pool, "size"):
             assert engine.pool.size() == settings.DB_POOL_SIZE
         if hasattr(engine.pool, "_max_overflow"):
-            assert engine.pool._max_overflow == settings.DB_MAX_OVERFLOW
+            assert engine.pool._max_overflow == settings.DB_MAX_OVERFLOW  # noqa: SLF001
         if hasattr(engine.pool, "_recycle"):
-            assert engine.pool._recycle == settings.DB_POOL_RECYCLE
+            assert engine.pool._recycle == settings.DB_POOL_RECYCLE  # noqa: SLF001
         if hasattr(engine.pool, "_timeout"):
-            assert engine.pool._timeout == settings.DB_POOL_TIMEOUT
+            assert engine.pool._timeout == settings.DB_POOL_TIMEOUT  # noqa: SLF001
         if hasattr(engine.pool, "_pre_ping"):
-            assert engine.pool._pre_ping == settings.DB_POOL_PRE_PING
+            assert engine.pool._pre_ping == settings.DB_POOL_PRE_PING  # noqa: SLF001
 
         # Test sync engine pool configuration (should be smaller)
         expected_sync_pool_size = min(settings.DB_POOL_SIZE, 10)
@@ -58,13 +58,13 @@ class TestConnectionPooling:
         if hasattr(sync_engine.pool, "size"):
             assert sync_engine.pool.size() == expected_sync_pool_size
         if hasattr(sync_engine.pool, "_max_overflow"):
-            assert sync_engine.pool._max_overflow == expected_sync_max_overflow
+            assert sync_engine.pool._max_overflow == expected_sync_max_overflow  # noqa: SLF001
         if hasattr(sync_engine.pool, "_recycle"):
-            assert sync_engine.pool._recycle == settings.DB_POOL_RECYCLE
+            assert sync_engine.pool._recycle == settings.DB_POOL_RECYCLE  # noqa: SLF001
         if hasattr(sync_engine.pool, "_timeout"):
-            assert sync_engine.pool._timeout == settings.DB_POOL_TIMEOUT
+            assert sync_engine.pool._timeout == settings.DB_POOL_TIMEOUT  # noqa: SLF001
         if hasattr(sync_engine.pool, "_pre_ping"):
-            assert sync_engine.pool._pre_ping == settings.DB_POOL_PRE_PING
+            assert sync_engine.pool._pre_ping == settings.DB_POOL_PRE_PING  # noqa: SLF001
 
     def test_engine_connect_args(self) -> None:
         """Test that engine connect arguments are properly set."""
@@ -238,35 +238,35 @@ class TestConnectionPooling:
         """Test that pool overflow is properly configured."""
         # Test async pool overflow
         if hasattr(engine.pool, "_max_overflow"):
-            assert engine.pool._max_overflow == settings.DB_MAX_OVERFLOW
+            assert engine.pool._max_overflow == settings.DB_MAX_OVERFLOW  # noqa: SLF001
         if hasattr(engine.pool, "size"):
             assert engine.pool.size() == settings.DB_POOL_SIZE
 
         # Test sync pool overflow
         expected_sync_max_overflow = min(settings.DB_MAX_OVERFLOW, 20)
         if hasattr(sync_engine.pool, "_max_overflow"):
-            assert sync_engine.pool._max_overflow == expected_sync_max_overflow
+            assert sync_engine.pool._max_overflow == expected_sync_max_overflow  # noqa: SLF001
 
     def test_pool_recycle_setting(self) -> None:
         """Test that pool recycle is properly configured."""
         if hasattr(engine.pool, "_recycle"):
-            assert engine.pool._recycle == settings.DB_POOL_RECYCLE
+            assert engine.pool._recycle == settings.DB_POOL_RECYCLE  # noqa: SLF001
         if hasattr(sync_engine.pool, "_recycle"):
-            assert sync_engine.pool._recycle == settings.DB_POOL_RECYCLE
+            assert sync_engine.pool._recycle == settings.DB_POOL_RECYCLE  # noqa: SLF001
 
     def test_pool_timeout_setting(self) -> None:
         """Test that pool timeout is properly configured."""
         if hasattr(engine.pool, "_timeout"):
-            assert engine.pool._timeout == settings.DB_POOL_TIMEOUT
+            assert engine.pool._timeout == settings.DB_POOL_TIMEOUT  # noqa: SLF001
         if hasattr(sync_engine.pool, "_timeout"):
-            assert sync_engine.pool._timeout == settings.DB_POOL_TIMEOUT
+            assert sync_engine.pool._timeout == settings.DB_POOL_TIMEOUT  # noqa: SLF001
 
     def test_pool_pre_ping_setting(self) -> None:
         """Test that pool pre-ping is properly configured."""
         if hasattr(engine.pool, "_pre_ping"):
-            assert engine.pool._pre_ping == settings.DB_POOL_PRE_PING
+            assert engine.pool._pre_ping == settings.DB_POOL_PRE_PING  # noqa: SLF001
         if hasattr(sync_engine.pool, "_pre_ping"):
-            assert sync_engine.pool._pre_ping == settings.DB_POOL_PRE_PING
+            assert sync_engine.pool._pre_ping == settings.DB_POOL_PRE_PING  # noqa: SLF001
 
     @pytest.mark.asyncio
     async def test_connection_health_check(self, db_session: AsyncSession) -> None:
@@ -325,6 +325,9 @@ class TestConnectionPooling:
             pass
 
         session = None
+        def _raise_test_exception():
+            raise Exception("Test exception")  # noqa: TRY002, TRY003
+
         try:
             if RUNNING_IN_CI:
                 pass
@@ -336,7 +339,7 @@ class TestConnectionPooling:
 
             if RUNNING_IN_CI:
                 pass
-            raise Exception("Test exception")
+            _raise_test_exception()
         except Exception:
             if RUNNING_IN_CI:
                 pass
@@ -365,6 +368,9 @@ class TestConnectionPooling:
         if RUNNING_IN_CI:
             pass
 
+        def _raise_test_exception():
+            raise Exception("Test exception")  # noqa: TRY002, TRY003
+
         try:
             if RUNNING_IN_CI:
                 pass
@@ -374,7 +380,7 @@ class TestConnectionPooling:
                 session.execute(text("SELECT 1"))
                 if RUNNING_IN_CI:
                     pass
-                raise Exception("Test exception")
+                _raise_test_exception()
         except Exception:
             if RUNNING_IN_CI:
                 pass

@@ -134,7 +134,7 @@ class TestCeleryTasks:
     def test_permanently_delete_accounts_task_no_accounts(
         self,
         mock_logger,
-        mock_delete_user,
+        _mock_delete_user,
         mock_get_db,
     ):
         """Test permanently_delete_accounts_task with no accounts to delete."""

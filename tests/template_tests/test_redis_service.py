@@ -146,7 +146,7 @@ class TestRedisService:
             redis_module.redis_client = original_client
 
     @patch("app.services.redis.redis_client")
-    async def test_close_redis_no_client(self, mock_redis_client):
+    async def test_close_redis_no_client(self, _mock_redis_client):
         """Test Redis connection closure when no client exists."""
         # Mock no Redis client
         _ = None
@@ -219,7 +219,7 @@ class TestRedisService:
             redis_module.redis_client = original_client
 
     @patch("app.services.redis.redis_client")
-    async def test_health_check_redis_no_client(self, mock_redis_client):
+    async def test_health_check_redis_no_client(self, _mock_redis_client):
         """Test Redis health check when no client exists."""
         # Mock no Redis client
         _ = None

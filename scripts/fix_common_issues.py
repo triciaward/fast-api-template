@@ -247,6 +247,8 @@ def run_fix_workflow(project_root: Path) -> bool:
         return True
     except Exception:
         return False
+    else:
+        return True
 
 
 if __name__ == "__main__":

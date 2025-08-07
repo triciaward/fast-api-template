@@ -33,7 +33,7 @@ def test_pre_commit_config_updated() -> None:
     config_path = Path(".pre-commit-config.yaml")
     assert config_path.exists(), "Pre-commit config should exist"
 
-    with open(config_path) as f:
+    with config_path.open() as f:
         content = f.read()
 
     # Check for updated versions
@@ -47,7 +47,7 @@ def test_mypy_config_updated() -> None:
     config_path = Path("mypy.ini")
     assert config_path.exists(), "Mypy config should exist"
 
-    with open(config_path) as f:
+    with config_path.open() as f:
         content = f.read()
 
     # Check for transformers ignore
@@ -67,7 +67,7 @@ def test_validation_script_has_virtual_env_detection() -> None:
     """Test that validation script includes virtual environment detection."""
     script_path = Path("scripts/validate_ci.sh")
 
-    with open(script_path) as f:
+    with script_path.open() as f:
         content = f.read()
 
     # Check for virtual environment detection

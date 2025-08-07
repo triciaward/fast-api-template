@@ -26,13 +26,9 @@ try:
     from customize_template import TemplateCustomizer
 except ImportError:
     # Fallback: try to import from scripts directory directly
-    import os
-
-    scripts_abs_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../../scripts"),
-    )
-    if scripts_abs_path not in sys.path:
-        sys.path.insert(0, scripts_abs_path)
+    scripts_abs_path = Path(__file__).parent.parent.parent / "scripts"
+    if str(scripts_abs_path) not in sys.path:
+        sys.path.insert(0, str(scripts_abs_path))
     # type: ignore[import-not-found]
     from customize_template import TemplateCustomizer
 
@@ -64,7 +60,7 @@ class TestTemplateCustomization:
         for file_path in test_files:
             full_path = self.project_root / file_path
             full_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(full_path, "w") as f:
+            with full_path.open("w") as f:
                 f.write(f"# Test file: {file_path}\n")
                 f.write("fast-api-template\n")
                 f.write("fastapi_template\n")
@@ -81,7 +77,7 @@ class TestTemplateCustomization:
         mock_input.return_value = "y"
 
         # Create customizer with template directory name
-        with patch.object(TemplateCustomizer, "__init__", lambda self: None):
+        with patch.object(TemplateCustomizer, "__init__", lambda _self: None):
             customizer = TemplateCustomizer()
             customizer.project_root = self.project_root
 
@@ -105,7 +101,7 @@ class TestTemplateCustomization:
         mock_input.return_value = "n"
 
         # Create customizer with template directory name
-        with patch.object(TemplateCustomizer, "__init__", lambda self: None):
+        with patch.object(TemplateCustomizer, "__init__", lambda _self: None):
             customizer = TemplateCustomizer()
             customizer.project_root = self.project_root
 
@@ -124,7 +120,7 @@ class TestTemplateCustomization:
         custom_project_root = Path(self.temp_dir) / "myawesomeproject_backend"
         custom_project_root.mkdir()
 
-        with patch.object(TemplateCustomizer, "__init__", lambda self: None):
+        with patch.object(TemplateCustomizer, "__init__", lambda _self: None):
             customizer = TemplateCustomizer()
             customizer.project_root = custom_project_root
 
@@ -167,7 +163,7 @@ class TestTemplateCustomization:
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dst)
 
-        with patch.object(TemplateCustomizer, "__init__", lambda self: None):
+        with patch.object(TemplateCustomizer, "__init__", lambda _self: None):
             customizer = TemplateCustomizer()
             customizer.project_root = custom_project_root
             customizer.replacements = {
@@ -202,7 +198,7 @@ class TestTemplateCustomization:
 
     def test_directory_check_instructions_content(self):
         """Test that directory check provides clear instructions."""
-        with patch.object(TemplateCustomizer, "__init__", lambda self: None):
+        with patch.object(TemplateCustomizer, "__init__", lambda _self: None):
             customizer = TemplateCustomizer()
             customizer.project_root = self.project_root
 
@@ -218,7 +214,7 @@ class TestTemplateCustomization:
                 assert exc_info.value.code == 1
 
                 # Verify that the instructions were printed
-                printed_messages = [call.args[0] for call in mock_print.call_args_list]
+                printed_messages = [call.args[0] for call in mock_print.call_args_list if call.args]
 
                 assert any(
                     "❌ Error: You're still in the 'fast-api-template' directory!"

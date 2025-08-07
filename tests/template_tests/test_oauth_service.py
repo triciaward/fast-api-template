@@ -433,7 +433,7 @@ class TestOAuthProviderConfiguration:
         assert config["scope"] == "name email"
 
     @patch("app.services.oauth.settings")
-    def test_get_oauth_provider_config_unknown(self, mock_settings):
+    def test_get_oauth_provider_config_unknown(self, _mock_settings):
         """Test getting unknown OAuth provider configuration."""
         # Test provider config
         oauth_service = OAuthService()
@@ -505,7 +505,7 @@ class TestOAuthProviderConfiguration:
         assert result is False
 
     @patch("app.services.oauth.settings")
-    def test_is_provider_configured_unknown(self, mock_settings):
+    def test_is_provider_configured_unknown(self, _mock_settings):
         """Test unknown provider configuration check."""
         # Test provider configuration check
         oauth_service = OAuthService()
@@ -523,7 +523,7 @@ class TestOAuthIntegration:
     @patch("app.services.oauth.jwt.decode")
     async def test_oauth_lifecycle_google(
         self,
-        mock_jwt_decode,
+        _mock_jwt_decode,
         mock_client,
         mock_settings,
     ):

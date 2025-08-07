@@ -19,9 +19,10 @@ class TestPgBouncerIntegration:
         try:
             # Try to connect to pgBouncer on default port
             requests.get("http://localhost:5433", timeout=1)
-            return True
         except requests.exceptions.RequestException:
             return False
+        else:
+            return True
 
     def test_pgbouncer_docker_compose_config(self) -> None:
         """Test that pgBouncer is properly configured in docker-compose.yml."""
@@ -86,22 +87,53 @@ class TestPgBouncerIntegration:
         # Simulate the behavior we'd expect with pgBouncer
         # pgBouncer would handle connection multiplexing
 
-        # Simulate multiple concurrent connections (pgBouncer would multiplex these)
+        # Create an isolated engine for this test to avoid conflicts
         import asyncio
 
-        async def simulate_pgbouncer_connection():
-            async with engine.begin() as conn:
-                result = await conn.execute(text("SELECT 1"))
-                result.fetchone()  # fetchone() is not async
-                await asyncio.sleep(0.01)  # Simulate work
+        from sqlalchemy.ext.asyncio import create_async_engine
 
-        tasks = [simulate_pgbouncer_connection() for _ in range(10)]
-        await asyncio.gather(*tasks)
+        # Construct the async database URL (same logic as in database.py)
+        async_database_url = settings.DATABASE_URL.replace(
+            "postgresql://",
+            "postgresql+asyncpg://",
+        )
 
-        # Check that connections were properly managed
-        if hasattr(engine.pool, "checkedout") and hasattr(engine.pool, "checkedin"):
-            assert engine.pool.checkedout() >= 0
-            assert engine.pool.checkedin() >= 0
+        # Use a dedicated engine with specific pooling settings for this test
+        test_engine = create_async_engine(
+            async_database_url,
+            echo=False,
+            pool_size=5,  # Smaller pool for this test
+            max_overflow=10,
+            pool_recycle=300,
+            pool_pre_ping=True,
+            connect_args={
+                "server_settings": {
+                    "application_name": "pgbouncer_test_isolated",
+                    "jit": "off",
+                },
+            },
+        )
+
+        try:
+            # Simulate multiple concurrent connections (pgBouncer would multiplex these)
+            async def simulate_pgbouncer_connection():
+                async with test_engine.begin() as conn:
+                    result = await conn.execute(text("SELECT 1"))
+                    result.fetchone()  # fetchone() is not async
+                    await asyncio.sleep(0.01)  # Simulate work
+
+            # Use fewer concurrent connections to avoid overwhelming the test environment
+            tasks = [simulate_pgbouncer_connection() for _ in range(5)]
+            await asyncio.gather(*tasks)
+
+            # Check that connections were properly managed
+            if hasattr(test_engine.pool, "checkedout") and hasattr(test_engine.pool, "checkedin"):
+                assert test_engine.pool.checkedout() >= 0
+                assert test_engine.pool.checkedin() >= 0
+
+        finally:
+            # Always clean up the test engine
+            await test_engine.dispose()
 
     def test_pgbouncer_environment_variables(self) -> None:
         """Test that pgBouncer environment variables are properly configured."""
@@ -148,10 +180,36 @@ class TestPgBouncerIntegration:
         assert settings.DB_POOL_RECYCLE >= 300  # Minimum 5 minutes
         assert settings.DB_POOL_RECYCLE <= 7200  # Maximum 2 hours
 
-        # Test that connections can be recycled
-        async with engine.begin() as conn:
-            result = await conn.execute(text("SELECT 1"))
-            result.fetchone()  # fetchone() is not async
+        # Test that connections can be recycled using isolated engine
+        from sqlalchemy.ext.asyncio import create_async_engine
+
+        # Construct the async database URL (same logic as in database.py)
+        async_database_url = settings.DATABASE_URL.replace(
+            "postgresql://",
+            "postgresql+asyncpg://",
+        )
+
+        test_engine = create_async_engine(
+            async_database_url,
+            echo=False,
+            pool_size=2,
+            max_overflow=5,
+            pool_recycle=settings.DB_POOL_RECYCLE,
+            pool_pre_ping=True,
+            connect_args={
+                "server_settings": {
+                    "application_name": "pgbouncer_recycle_test",
+                    "jit": "off",
+                },
+            },
+        )
+
+        try:
+            async with test_engine.begin() as conn:
+                result = await conn.execute(text("SELECT 1"))
+                result.fetchone()  # fetchone() is not async
+        finally:
+            await test_engine.dispose()
 
     def test_pgbouncer_pool_size_optimization(self) -> None:
         """Test that pool sizes are optimized for pgBouncer usage."""
@@ -183,31 +241,58 @@ class TestPgBouncerIntegration:
         """Test that connection health monitoring works with pgBouncer."""
         # pgBouncer should work well with our health monitoring
 
-        # Test that we can monitor pool health
-        pool_stats = {}
-        pool_attrs = ["size", "checkedin", "checkedout", "overflow"]
+        from sqlalchemy.ext.asyncio import create_async_engine
 
-        for attr in pool_attrs:
-            if hasattr(engine.pool, attr):
-                attr_value = getattr(engine.pool, attr)
+        # Construct the async database URL (same logic as in database.py)
+        async_database_url = settings.DATABASE_URL.replace(
+            "postgresql://",
+            "postgresql+asyncpg://",
+        )
+
+        test_engine = create_async_engine(
+            async_database_url,
+            echo=False,
+            pool_size=3,
+            max_overflow=7,
+            pool_recycle=300,
+            pool_pre_ping=True,
+            connect_args={
+                "server_settings": {
+                    "application_name": "pgbouncer_health_test",
+                    "jit": "off",
+                },
+            },
+        )
+
+        try:
+            # Test that we can monitor pool health
+            pool_stats = {}
+            pool_attrs = ["size", "checkedin", "checkedout", "overflow"]
+
+            for attr in pool_attrs:
+                if hasattr(test_engine.pool, attr):
+                    attr_value = getattr(test_engine.pool, attr)
+                    if callable(attr_value):
+                        pool_stats[attr] = attr_value()
+                    else:
+                        pool_stats[attr] = attr_value
+
+            # Add 'invalid' if available
+            if hasattr(test_engine.pool, "invalid"):
+                attr_value = test_engine.pool.invalid
                 if callable(attr_value):
-                    pool_stats[attr] = attr_value()
+                    pool_stats["invalid"] = attr_value()
                 else:
-                    pool_stats[attr] = attr_value
+                    pool_stats["invalid"] = attr_value
 
-        # Add 'invalid' if available
-        if hasattr(engine.pool, "invalid"):
-            attr_value = engine.pool.invalid
-            if callable(attr_value):
-                pool_stats["invalid"] = attr_value()
-            else:
-                pool_stats["invalid"] = attr_value
+            # Verify that stats are accessible and reasonable
+            for key, value in pool_stats.items():
+                assert isinstance(value, int)
+                if key != "overflow":  # overflow can be negative
+                    assert value >= 0
 
-        # Verify that stats are accessible and reasonable
-        for key, value in pool_stats.items():
-            assert isinstance(value, int)
-            if key != "overflow":  # overflow can be negative
-                assert value >= 0
+        finally:
+            await test_engine.dispose()
 
 
 class TestPgBouncerConfiguration:

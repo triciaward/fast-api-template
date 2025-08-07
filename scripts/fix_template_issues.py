@@ -139,7 +139,7 @@ format = %(levelname)-5.5s [%(name)s] %(message)s
 datefmt = %H:%M:%S
 """
 
-        with open(alembic_ini, "w") as f:
+        with Path(alembic_ini).open("w") as f:
             f.write(alembic_content)
 
     def fix_env_example(self):
@@ -148,7 +148,7 @@ datefmt = %H:%M:%S
             return
 
         # Read the file
-        with open(self.env_example) as f:
+        with self.env_example.open() as f:
             content = f.read()
 
         # Fix commented out superuser variables
@@ -173,7 +173,7 @@ datefmt = %H:%M:%S
             )
 
         # Write back the fixed content
-        with open(self.env_example, "w") as f:
+        with self.env_example.open("w") as f:
             f.write(content)
 
     def fix_setup_script(self):
@@ -184,7 +184,7 @@ datefmt = %H:%M:%S
             return
 
         # Read the file
-        with open(setup_script) as f:
+        with setup_script.open() as f:
             content = f.read()
 
         # Fix the directory name check to be clean and simple
@@ -385,7 +385,7 @@ fi"""
         content = content.replace(old_superuser, new_superuser)
 
         # Write back the fixed content
-        with open(setup_script, "w") as f:
+        with setup_script.open("w") as f:
             f.write(content)
 
     def run_all_fixes(self):

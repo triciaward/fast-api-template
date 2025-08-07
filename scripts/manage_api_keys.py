@@ -11,7 +11,7 @@ Usage:
 
 import argparse
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID
 
 from app.crud import api_key as crud_api_key
@@ -26,9 +26,10 @@ def validate_uuid(uuid_string: str) -> str:
     """Validate that a string is a valid UUID."""
     try:
         UUID(uuid_string)
-        return uuid_string
     except ValueError as e:
-        raise argparse.ArgumentTypeError(f"'{uuid_string}' is not a valid UUID") from e
+        raise argparse.ArgumentTypeError("Invalid UUID") from e  # noqa: TRY003
+    else:
+        return uuid_string
 
 
 def validate_datetime(datetime_string: str) -> datetime:
@@ -36,9 +37,7 @@ def validate_datetime(datetime_string: str) -> datetime:
     try:
         return datetime.fromisoformat(datetime_string.replace("Z", "+00:00"))
     except ValueError as e:
-        raise argparse.ArgumentTypeError(
-            f"'{datetime_string}' is not a valid datetime (use ISO format: YYYY-MM-DDTHH:MM:SS)",
-        ) from e
+        raise argparse.ArgumentTypeError("Invalid datetime format") from e  # noqa: TRY003
 
 
 def create_api_key(args: argparse.Namespace) -> None:
@@ -74,6 +73,8 @@ def create_api_key(args: argparse.Namespace) -> None:
 
         except Exception:
             sys.exit(1)
+        else:
+            pass
 
 
 def deactivate_api_key(args: argparse.Namespace) -> None:
@@ -93,6 +94,8 @@ def deactivate_api_key(args: argparse.Namespace) -> None:
 
         except Exception:
             sys.exit(1)
+        else:
+            pass
 
 
 def list_api_keys(args: argparse.Namespace) -> None:
@@ -110,7 +113,7 @@ def list_api_keys(args: argparse.Namespace) -> None:
             for _i, api_key in enumerate(api_keys, 1):
                 (
                     " (Expired)"
-                    if api_key.expires_at and api_key.expires_at <= datetime.utcnow()
+                    if api_key.expires_at and api_key.expires_at <= datetime.now(timezone.utc)
                     else ""
                 )
 
@@ -119,6 +122,8 @@ def list_api_keys(args: argparse.Namespace) -> None:
 
         except Exception:
             sys.exit(1)
+        else:
+            pass
 
 
 def rotate_api_key(args: argparse.Namespace) -> None:
@@ -141,6 +146,8 @@ def rotate_api_key(args: argparse.Namespace) -> None:
 
         except Exception:
             sys.exit(1)
+        else:
+            pass
 
 
 def main():

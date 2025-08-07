@@ -101,8 +101,11 @@ def demo_error_logging() -> None:
             divisor=0,
             exc_info=True,
         )
+    def _raise_validation_error():
+        raise ValueError("Invalid input provided")  # noqa: TRY003
+
     try:
-        raise ValueError("Invalid input provided")
+        _raise_validation_error()
     except ValueError as e:
         logger.error(
             "Validation error",
@@ -114,12 +117,12 @@ def demo_error_logging() -> None:
 
 def demo_different_formats() -> None:
     """Demonstrate different log formats."""
-    with open(".env", "a") as f:
+    with Path(".env").open("a") as f:
         f.write("\nLOG_FORMAT=json\n")
     setup_logging()
     logger = get_app_logger()
     logger.info("JSON format test", test_field="json_value")
-    with open(".env", "a") as f:
+    with Path(".env").open("a") as f:
         f.write("\nLOG_FORMAT=text\n")
     setup_logging()
     logger = get_app_logger()

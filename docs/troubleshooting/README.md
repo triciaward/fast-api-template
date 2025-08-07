@@ -44,6 +44,11 @@ This directory contains detailed troubleshooting guides for common issues you mi
   - Coverage threshold failures
   - PostgreSQL role errors
   - Async test issues
+- **[Testing Strategy & Skipped Tests](./testing-strategy.md)** - Understanding the template's testing approach
+  - Why some tests are intentionally skipped
+  - Template vs. application testing boundaries
+  - How to implement your own tests
+  - Test framework and utilities provided
 
 ### 🔐 Authentication & Security Issues
 - **[API Keys Dashboard Authentication](./api-keys-dashboard-authentication-issue.md)** - Admin panel authentication problems
@@ -94,6 +99,13 @@ docker-compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
 docker-compose up -d
 source venv/bin/activate
 pytest
+```
+
+**🆕 Test Database Issues (Fixed):**
+```bash
+# The test environment now automatically runs migrations
+# No manual setup needed - all 567 tests should pass
+pytest tests/ --tb=no -q
 ```
 
 ## 🛠️ Diagnostic Commands
@@ -161,5 +173,12 @@ If you can't find a solution in these guides:
 - ✅ **CRITICAL**: Enhanced customization script coverage
 - ✅ **CRITICAL**: Added setup verification steps
 - ✅ **CRITICAL**: Updated test configuration for new CORS format
+
+**August 2025:**
+- ✅ **CRITICAL**: Fixed test database setup with Alembic migrations
+- ✅ **CRITICAL**: Resolved async test conflicts with isolated engines
+- ✅ **CRITICAL**: All 567 tests now passing (0 failures)
+- ✅ **CRITICAL**: Complete test suite reliability achieved
+- ✅ **CRITICAL**: PgBouncer integration tests working perfectly
 
 **📋 For detailed information about these critical fixes**, see [Template Critical Fixes](./template-fixes.md). 

@@ -208,11 +208,14 @@ def test_list_users_invalid_pagination(
     access_token = create_access_token(subject=test_user.email)
     headers = {"Authorization": f"Bearer {access_token}"}
 
+    def _raise_validation_error(message: str):
+        raise AssertionError(message)
+
     # Test invalid page number (should be caught by Pydantic validation)
     try:
         client.get("/api/v1/users?page=0", headers=headers)
         # If we get here, the validation didn't work as expected
-        raise AssertionError("Expected validation error for page=0")
+        _raise_validation_error("Expected validation error for page=0")
     except Exception as e:
         # FastAPI should catch this and return a validation error
         assert "validation error" in str(e).lower() or "422" in str(e)
@@ -221,7 +224,7 @@ def test_list_users_invalid_pagination(
     try:
         client.get("/api/v1/users?size=0", headers=headers)
         # If we get here, the validation didn't work as expected
-        raise AssertionError("Expected validation error for size=0")
+        _raise_validation_error("Expected validation error for size=0")
     except Exception as e:
         # FastAPI should catch this and return a validation error
         assert "validation error" in str(e).lower() or "422" in str(e)
@@ -229,7 +232,7 @@ def test_list_users_invalid_pagination(
     try:
         client.get("/api/v1/users?size=101", headers=headers)
         # If we get here, the validation didn't work as expected
-        raise AssertionError("Expected validation error for size=101")
+        _raise_validation_error("Expected validation error for size=101")
     except Exception as e:
         # FastAPI should catch this and return a validation error
         assert "validation error" in str(e).lower() or "422" in str(e)

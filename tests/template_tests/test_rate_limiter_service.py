@@ -529,8 +529,8 @@ class TestRateLimitInfo:
     @patch("app.services.rate_limiter.get_remote_address")
     def test_get_rate_limit_info_enabled_error(
         self,
-        mock_get_remote_address,
-        mock_settings,
+        _mock_get_remote_address,
+        _mock_settings,
     ):
         """Test getting rate limit info when enabled but with error."""
         pytest.skip("Error handling test needs investigation")
@@ -578,7 +578,7 @@ class TestRateLimiterIntegration:
         assert register_function() == "register"
 
     @patch("app.services.rate_limiter.settings")
-    def test_client_ip_detection_integration(self, mock_settings):
+    def test_client_ip_detection_integration(self, _mock_settings):
         """Test client IP detection in integration scenarios."""
         # Test different header combinations
         test_cases = [
@@ -598,7 +598,7 @@ class TestRateLimiterIntegration:
 
     @patch("app.services.rate_limiter.settings")
     @patch("app.services.rate_limiter.get_limiter")
-    def test_rate_limit_info_integration(self, mock_get_limiter, mock_settings):
+    def test_rate_limit_info_integration(self, _mock_get_limiter, mock_settings):
         """Test rate limit info in integration scenarios."""
         # Mock settings
         mock_settings.ENABLE_RATE_LIMITING = True

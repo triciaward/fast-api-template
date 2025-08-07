@@ -57,16 +57,15 @@ class CRUDGenerator:
         if word.endswith("y"):
             return word[:-1] + "ies"
         # Handle words ending in 's', 'sh', 'ch', 'x', 'z' (add 'es')
-        elif word.endswith(("s", "sh", "ch", "x", "z")):
+        if word.endswith(("s", "sh", "ch", "x", "z")):
             return word + "es"
         # Handle words ending in 'f' or 'fe' (change to 'ves')
-        elif word.endswith("f"):
+        if word.endswith("f"):
             return word[:-1] + "ves"
-        elif word.endswith("fe"):
+        if word.endswith("fe"):
             return word[:-2] + "ves"
         # Default case (add 's')
-        else:
-            return word + "s"
+        return word + "s"
 
     def _pluralize_lower(self, word: str) -> str:
         """Pluralize and convert to lowercase for function names."""
@@ -658,7 +657,7 @@ test_{self.model_name_lower}_data = {{
         if not api_file.exists():
             return
 
-        with open(api_file) as f:
+        with api_file.open() as f:
             content = f.read()
 
         # Add import
@@ -685,34 +684,34 @@ test_{self.model_name_lower}_data = {{
                 match.group(0) + "\n" + new_include,
             )
 
-        with open(api_file, "w") as f:
+        with api_file.open("w") as f:
             f.write(content)
 
     def create_files(self):
         """Create all the generated files."""
         # Create model file
         model_file = self.models_dir / f"{self.model_name_lower}.py"
-        with open(model_file, "w") as f:
+        with model_file.open("w") as f:
             f.write(self.generate_model())
 
         # Create schema file
         schema_file = self.schemas_dir / f"{self.model_name_lower}.py"
-        with open(schema_file, "w") as f:
+        with schema_file.open("w") as f:
             f.write(self.generate_schemas())
 
         # Create CRUD file
         crud_file = self.crud_dir / f"{self.model_name_lower}.py"
-        with open(crud_file, "w") as f:
+        with crud_file.open("w") as f:
             f.write(self.generate_crud())
 
         # Create endpoints file
         endpoint_file = self.endpoints_dir / f"{self.model_name_lower}.py"
-        with open(endpoint_file, "w") as f:
+        with endpoint_file.open("w") as f:
             f.write(self.generate_endpoints())
 
         # Create test file
         test_file = self.tests_dir / f"test_{self.model_name_lower}.py"
-        with open(test_file, "w") as f:
+        with test_file.open("w") as f:
             f.write(self.generate_tests())
 
         # Update API router
@@ -726,14 +725,14 @@ test_{self.model_name_lower}_data = {{
         init_file = self.models_dir / "__init__.py"
 
         if not init_file.exists():
-            with open(init_file, "w") as f:
+            with init_file.open("w") as f:
                 f.write(f"from .{self.model_name_lower} import {self.model_name}\n")
         else:
-            with open(init_file) as f:
+            with init_file.open() as f:
                 content = f.read()
 
             if f"from .{self.model_name_lower} import {self.model_name}" not in content:
-                with open(init_file, "a") as f:
+                with init_file.open("a") as f:
                     f.write(
                         f"\nfrom .{self.model_name_lower} import {self.model_name}\n",
                     )
@@ -742,9 +741,7 @@ test_{self.model_name_lower}_data = {{
 def parse_field_spec(field_spec: str) -> tuple[str, str]:
     """Parse field specification like 'name:str' into (name, type)."""
     if ":" not in field_spec:
-        raise ValueError(
-            f"Invalid field specification: {field_spec}. Use format 'name:type'",
-        )
+        raise ValueError("Invalid field specification format")  # noqa: TRY003
 
     name, field_type = field_spec.split(":", 1)
     name = name.strip()
@@ -752,9 +749,7 @@ def parse_field_spec(field_spec: str) -> tuple[str, str]:
 
     # Validate that both name and type are not empty
     if not name or not field_type:
-        raise ValueError(
-            f"Invalid field specification: {field_spec}. Both name and type must be provided",
-        )
+        raise ValueError("Invalid field specification")  # noqa: TRY003
 
     return name, field_type
 

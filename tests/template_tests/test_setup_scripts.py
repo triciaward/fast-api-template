@@ -28,7 +28,7 @@ class TestSetupComprehensiveScript:
     @patch("subprocess.run")
     @patch("builtins.open", new_callable=mock_open)
     @patch("os.path.exists")
-    def test_setup_script_creates_env_file(self, mock_exists, mock_file, mock_run):
+    def test_setup_script_creates_env_file(self, mock_exists, _mock_file, _mock_run):
         """Test that the setup script creates a .env file when it doesn't exist."""
         # Mock file existence checks
         mock_exists.side_effect = lambda path: {
@@ -39,7 +39,7 @@ class TestSetupComprehensiveScript:
         }.get(path, True)
 
         # Mock subprocess calls
-        mock_run.return_value.returncode = 0
+        _mock_run.return_value.returncode = 0
 
         # Test the script logic (simplified version)
         from scripts.setup_comprehensive import create_env_file
@@ -71,10 +71,10 @@ class TestSetupComprehensiveScript:
         assert result is False
 
     @patch("subprocess.run")
-    def test_setup_script_handles_migration_conflicts(self, mock_run):
+    def test_setup_script_handles_migration_conflicts(self, _mock_run):
         """Test that the script handles migration conflicts correctly."""
         # Mock alembic upgrade failing, then stamp succeeding
-        mock_run.side_effect = [
+        _mock_run.side_effect = [
             # alembic upgrade head fails
             subprocess.CalledProcessError(1, "alembic"),
             MagicMock(returncode=0),  # alembic stamp head succeeds
@@ -85,14 +85,14 @@ class TestSetupComprehensiveScript:
 
         result = run_migrations()
         assert result is True
-        assert mock_run.call_count == 2
+        assert _mock_run.call_count == 2
 
     @patch("subprocess.run")
-    def test_python_version_detection(self, mock_run):
+    def test_python_version_detection(self, _mock_run):
         """Test Python version detection functionality."""
         # Mock Python 3.11 version check
-        mock_run.return_value.returncode = 0
-        mock_run.return_value.stdout = "Python 3.11.5"
+        _mock_run.return_value.returncode = 0
+        _mock_run.return_value.stdout = "Python 3.11.5"
 
         from scripts.setup_comprehensive import check_python_version, get_python_command
 
@@ -105,7 +105,7 @@ class TestSetupComprehensiveScript:
         assert result is True
 
     @patch("subprocess.run")
-    def test_alembic_ini_creation(self, mock_run):
+    def test_alembic_ini_creation(self, _mock_run):
         """Test alembic.ini creation functionality."""
         with tempfile.TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)

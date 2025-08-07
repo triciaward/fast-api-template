@@ -218,7 +218,7 @@ class TestGitHooks:
 
     def test_git_hook_script_content(self):
         """Test that the git hook script contains required logic."""
-        with open("scripts/git-hooks/pre-commit") as f:
+        with Path("scripts/git-hooks/pre-commit").open() as f:
             content = f.read()
 
         # Check for required elements
@@ -235,7 +235,7 @@ class TestGitHooks:
 
     def test_install_git_hooks_script_content(self):
         """Test that the install script contains required commands."""
-        with open("scripts/install_git_hooks.sh") as f:
+        with Path("scripts/install_git_hooks.sh").open() as f:
             content = f.read()
 
         assert "cp scripts/git-hooks/pre-commit" in content, "Should copy hook script"
@@ -267,7 +267,7 @@ class TestPreCommitConfiguration:
         """Test that pre-commit config includes template protection hook."""
         import yaml
 
-        with open(".pre-commit-config.yaml") as f:
+        with Path(".pre-commit-config.yaml").open() as f:
             config = yaml.safe_load(f)
 
         # Find the local repo with template protection
@@ -296,7 +296,7 @@ class TestDocumentationWarnings:
 
     def test_readme_has_template_protection_warnings(self):
         """Test that README.md includes template protection warnings."""
-        with open("README.md") as f:
+        with Path("README.md").open() as f:
             content = f.read()
 
         # Check for critical warning section
@@ -307,7 +307,7 @@ class TestDocumentationWarnings:
 
     def test_template_readme_has_protection_warnings(self):
         """Test that TEMPLATE_README.md includes template protection warnings."""
-        with open("docs/TEMPLATE_README.md") as f:
+        with Path("docs/TEMPLATE_README.md").open() as f:
             content = f.read()
 
         # Check for critical warning section
@@ -318,7 +318,7 @@ class TestDocumentationWarnings:
 
     def test_getting_started_has_protection_warnings(self):
         """Test that getting-started.md includes template protection warnings."""
-        with open("docs/tutorials/getting-started.md") as f:
+        with Path("docs/tutorials/getting-started.md").open() as f:
             content = f.read()
 
         # Check for critical warning section
@@ -336,7 +336,7 @@ class TestDocumentationWarnings:
         ]
 
         for file_path in files_to_check:
-            with open(file_path) as f:
+            with Path(file_path).open() as f:
                 content = f.read()
 
             # Check for safety features mention

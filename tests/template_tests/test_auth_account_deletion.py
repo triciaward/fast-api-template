@@ -307,7 +307,7 @@ class TestAccountDeletionStatus:
     def test_deletion_status_user_not_found(
         self,
         client: TestClient,
-        sync_db_session: Session,
+        _sync_db_session: Session,
     ):
         """Test status for non-existent user."""
         response = client.get(
@@ -365,7 +365,7 @@ class TestAccountDeletionRateLimiting:
     def test_confirm_deletion_rate_limited(
         self,
         client: TestClient,
-        sync_db_session: Session,
+        _sync_db_session: Session,
     ):
         """Test rate limiting for deletion confirmation."""
         # Skip test if rate limiting is disabled
@@ -389,7 +389,7 @@ class TestAccountDeletionRateLimiting:
     def test_cancel_deletion_rate_limited(
         self,
         client: TestClient,
-        sync_db_session: Session,
+        _sync_db_session: Session,
     ):
         """Test rate limiting for deletion cancellation."""
         # Skip test if rate limiting is disabled

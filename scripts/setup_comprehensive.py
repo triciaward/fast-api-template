@@ -96,10 +96,9 @@ def get_python_command() -> str:
     if shutil.which("python3.11"):
         return "python3.11"
     # Fall back to python3
-    elif shutil.which("python3"):
+    if shutil.which("python3"):
         return "python3"
-    else:
-        raise RuntimeError("Python 3.11+ is required but not found")
+    raise RuntimeError("Python 3.11+ required")  # noqa: TRY003
 
 
 def check_python_version() -> bool:
@@ -117,10 +116,10 @@ def check_python_version() -> bool:
         # Parse version (e.g., "Python 3.11.5")
         version_parts = version.split()[1].split(".")
         major, minor = int(version_parts[0]), int(version_parts[1])
-
-        return major >= 3 and minor >= 11
     except (subprocess.CalledProcessError, FileNotFoundError, IndexError):
         return False
+    else:
+        return major >= 3 and minor >= 11
 
 
 def check_docker_services() -> bool:
@@ -132,9 +131,10 @@ def check_docker_services() -> bool:
             text=True,
             check=True,
         )
-        return True
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
+    else:
+        return True
 
 
 def create_alembic_ini(project_root: Path, db_name: str = "fastapi_template") -> None:
@@ -291,10 +291,10 @@ def create_database(db_name: str, test_db_name: str | None = None) -> bool:
                 text=True,
                 check=True,
             )
-
-        return True
     except subprocess.CalledProcessError:
         # Database might already exist, which is fine
+        return True
+    else:
         return True
 
 
@@ -308,7 +308,6 @@ def run_migrations() -> bool:
             text=True,
             check=True,
         )
-        return True
     except subprocess.CalledProcessError:
         # If migration fails, try to stamp head
         try:
@@ -318,9 +317,12 @@ def run_migrations() -> bool:
                 text=True,
                 check=True,
             )
-            return True
         except subprocess.CalledProcessError:
             return False
+        else:
+            return True
+    else:
+        return True
 
 
 def run_setup_workflow(project_root: Path) -> bool:
@@ -359,10 +361,10 @@ def run_setup_workflow(project_root: Path) -> bool:
 
         # Run migrations
         migrations_success = run_migrations()
-
-        return docker_available and migrations_success
     except Exception:
         return False
+    else:
+        return docker_available and migrations_success
 
 
 if __name__ == "__main__":

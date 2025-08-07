@@ -1,3 +1,4 @@
+# ruff: noqa: SLF001
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.orm import declarative_base
 

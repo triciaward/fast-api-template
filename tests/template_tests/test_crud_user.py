@@ -168,25 +168,27 @@ class TestUserCRUDAsync:
         mock_user.hashed_password = "$2b$12$test_hash"
 
         # Mock get_user_by_email
-        with patch("app.crud.user.get_user_by_email") as mock_get_user:
-            with patch("app.crud.user.verify_password") as mock_verify:
-                mock_get_user.return_value = mock_user
-                mock_verify.return_value = True
+        with (
+            patch("app.crud.user.get_user_by_email") as mock_get_user,
+            patch("app.crud.user.verify_password") as mock_verify,
+        ):
+            mock_get_user.return_value = mock_user
+            mock_verify.return_value = True
 
-                # Mock async session
-                mock_db = AsyncMock(spec=AsyncSession)
+            # Mock async session
+            mock_db = AsyncMock(spec=AsyncSession)
 
-                # Test
-                result = await authenticate_user(
-                    mock_db,
-                    "test@example.com",
-                    "password123",
-                )
+            # Test
+            result = await authenticate_user(
+                mock_db,
+                "test@example.com",
+                "password123",
+            )
 
-                # Verify
-                assert result == mock_user
-                mock_get_user.assert_called_once_with(mock_db, "test@example.com")
-                mock_verify.assert_called_once_with("password123", "$2b$12$test_hash")
+            # Verify
+            assert result == mock_user
+            mock_get_user.assert_called_once_with(mock_db, "test@example.com")
+            mock_verify.assert_called_once_with("password123", "$2b$12$test_hash")
 
     async def test_authenticate_user_invalid_password(self):
         """Test user authentication with invalid password."""
@@ -195,23 +197,25 @@ class TestUserCRUDAsync:
         mock_user.hashed_password = "$2b$12$test_hash"
 
         # Mock get_user_by_email
-        with patch("app.crud.user.get_user_by_email") as mock_get_user:
-            with patch("app.crud.user.verify_password") as mock_verify:
-                mock_get_user.return_value = mock_user
-                mock_verify.return_value = False
+        with (
+            patch("app.crud.user.get_user_by_email") as mock_get_user,
+            patch("app.crud.user.verify_password") as mock_verify,
+        ):
+            mock_get_user.return_value = mock_user
+            mock_verify.return_value = False
 
-                # Mock async session
-                mock_db = AsyncMock(spec=AsyncSession)
+            # Mock async session
+            mock_db = AsyncMock(spec=AsyncSession)
 
-                # Test
-                result = await authenticate_user(
-                    mock_db,
-                    "test@example.com",
-                    "wrongpassword",
-                )
+            # Test
+            result = await authenticate_user(
+                mock_db,
+                "test@example.com",
+                "wrongpassword",
+            )
 
-                # Verify
-                assert result is None
+            # Verify
+            assert result is None
 
     async def test_authenticate_user_not_found(self):
         """Test user authentication when user not found."""
@@ -339,25 +343,27 @@ class TestUserCRUDSync:
         mock_user.hashed_password = "$2b$12$test_hash"
 
         # Mock get_user_by_email_sync
-        with patch("app.crud.user.get_user_by_email_sync") as mock_get_user:
-            with patch("app.crud.user.verify_password") as mock_verify:
-                mock_get_user.return_value = mock_user
-                mock_verify.return_value = True
+        with (
+            patch("app.crud.user.get_user_by_email_sync") as mock_get_user,
+            patch("app.crud.user.verify_password") as mock_verify,
+        ):
+            mock_get_user.return_value = mock_user
+            mock_verify.return_value = True
 
-                # Mock session
-                mock_db = MagicMock(spec=Session)
+            # Mock session
+            mock_db = MagicMock(spec=Session)
 
-                # Test
-                result = authenticate_user_sync(
-                    mock_db,
-                    "test@example.com",
-                    "password123",
-                )
+            # Test
+            result = authenticate_user_sync(
+                mock_db,
+                "test@example.com",
+                "password123",
+            )
 
-                # Verify
-                assert result == mock_user
-                mock_get_user.assert_called_once_with(mock_db, "test@example.com")
-                mock_verify.assert_called_once_with("password123", "$2b$12$test_hash")
+            # Verify
+            assert result == mock_user
+            mock_get_user.assert_called_once_with(mock_db, "test@example.com")
+            mock_verify.assert_called_once_with("password123", "$2b$12$test_hash")
 
     def test_get_user_by_oauth_id_sync(self):
         """Test getting user by OAuth ID with sync function."""

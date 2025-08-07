@@ -18,7 +18,7 @@ class TestPreCommitConfiguration:
         # Verify it's a valid YAML file
         import yaml
 
-        with open(config_path) as f:
+        with config_path.open() as f:
             config = yaml.safe_load(f)
 
         assert "repos" in config, "Config should have 'repos' section"
@@ -28,13 +28,12 @@ class TestPreCommitConfiguration:
         """Test that required hooks are configured."""
         import yaml
 
-        with open(".pre-commit-config.yaml") as f:
+        with Path(".pre-commit-config.yaml").open() as f:
             config = yaml.safe_load(f)
 
-        hook_ids = []
-        for repo in config["repos"]:
-            for hook in repo.get("hooks", []):
-                hook_ids.append(hook["id"])
+        hook_ids = [
+            hook["id"] for repo in config["repos"] for hook in repo.get("hooks", [])
+        ]
 
         # Check for required hooks
         assert "ruff" in hook_ids, "ruff hook should be configured"
@@ -54,7 +53,7 @@ class TestPreCommitConfiguration:
 
     def test_install_script_content(self):
         """Test that install script contains required commands."""
-        with open("scripts/install_precommit.sh") as f:
+        with Path("scripts/install_precommit.sh").open() as f:
             content = f.read()
 
         assert "pip install pre-commit" in content, "Script should install pre-commit"
@@ -72,7 +71,7 @@ class TestPreCommitConfiguration:
             assert os.access(hook_path, os.X_OK), "Pre-commit hook should be executable"
 
             # Verify it's not the sample file
-            with open(hook_path) as f:
+            with hook_path.open() as f:
                 content = f.read()
             assert "pre-commit" in content, "Hook should contain pre-commit logic"
 
@@ -81,7 +80,7 @@ class TestPreCommitConfiguration:
         # Check if pyproject.toml has ruff configuration
         pyproject_path = Path("pyproject.toml")
         if pyproject_path.exists():
-            with open(pyproject_path) as f:
+            with pyproject_path.open() as f:
                 content = f.read()
 
             # Verify ruff section exists
@@ -94,7 +93,7 @@ class TestPreCommitConfiguration:
         # Check if pyproject.toml has black configuration
         pyproject_path = Path("pyproject.toml")
         if pyproject_path.exists():
-            with open(pyproject_path) as f:
+            with pyproject_path.open() as f:
                 content = f.read()
 
             # This project uses ruff for formatting instead of black
@@ -141,7 +140,7 @@ class TestPreCommitConfiguration:
         readme_path = Path("README.md")
         assert readme_path.exists(), "README.md should exist"
 
-        with open(readme_path) as f:
+        with readme_path.open() as f:
             content = f.read()
 
         # Check for pre-commit section
@@ -201,7 +200,7 @@ class TestPreCommitHooks:
         import yaml
 
         try:
-            with open(".pre-commit-config.yaml") as f:
+            with Path(".pre-commit-config.yaml").open() as f:
                 yaml.safe_load(f)
         except yaml.YAMLError as e:
             pytest.fail(f"Invalid YAML in .pre-commit-config.yaml: {e}")
@@ -210,7 +209,7 @@ class TestPreCommitHooks:
         """Test that all repo URLs in config are valid."""
         import yaml
 
-        with open(".pre-commit-config.yaml") as f:
+        with Path(".pre-commit-config.yaml").open() as f:
             config = yaml.safe_load(f)
 
         for repo in config["repos"]:

@@ -49,41 +49,39 @@ class SetupVerifier:
         self.issues.append("Virtual environment Python executable not found")
         return False
 
-    def check_file_exists(self, file_path: str, description: str) -> bool:
+    def check_file_exists(self, file_path: str, _description: str) -> bool:
         """Check if a file exists."""
         full_path = self.project_root / file_path
         if full_path.exists():
             return True
-        else:
-            self.issues.append(f"Missing file: {file_path}")
-            return False
+        self.issues.append(f"Missing file: {file_path}")
+        return False
 
-    def check_directory_exists(self, dir_path: str, description: str) -> bool:
+    def check_directory_exists(self, dir_path: str, _description: str) -> bool:
         """Check if a directory exists."""
         full_path = self.project_root / dir_path
         if full_path.exists() and full_path.is_dir():
             return True
-        else:
-            self.issues.append(f"Missing directory: {dir_path}")
-            return False
+        self.issues.append(f"Missing directory: {dir_path}")
+        return False
 
-    def check_environment_variable(self, var_name: str, description: str) -> bool:
+    def check_environment_variable(self, var_name: str, _description: str) -> bool:
         """Check if an environment variable is set."""
         value = os.getenv(var_name)
         if value:
             return True
-        else:
-            self.warnings.append(f"Environment variable not set: {var_name}")
-            return False
+        self.warnings.append(f"Environment variable not set: {var_name}")
+        return False
 
-    def check_python_import(self, module_name: str, description: str) -> bool:
+    def check_python_import(self, module_name: str, _description: str) -> bool:
         """Check if a Python module can be imported."""
         try:
             __import__(module_name)
-            return True
         except ImportError:
             self.issues.append(f"Python import failed: {module_name}")
             return False
+        else:
+            return True
 
     def check_database_connection(self) -> bool:
         """Check if database connection works."""
@@ -99,31 +97,29 @@ class SetupVerifier:
                 try:
                     async with engine.begin() as conn:
                         await conn.execute(text("SELECT 1"))
-                    return True
                 except Exception as e:
                     self.issues.append(f"Database connection failed: {e}")
                     return False
+                else:
+                    return True
 
             result = asyncio.run(test_connection())
-            if result:
-                pass
-            return result
-
         except Exception as e:
             self.issues.append(f"Database connection test failed: {e}")
             return False
+        else:
+            return result
 
     def check_api_startup(self) -> bool:
         """Check if the API can start without errors."""
         try:
             # Add project root to Python path
             sys.path.insert(0, str(self.project_root))
-
-            return True
-
         except Exception as e:
             self.issues.append(f"API startup test failed: {e}")
             return False
+        else:
+            return True
 
     def check_docker_services(self) -> bool:
         """Check if Docker services are running."""
@@ -135,23 +131,20 @@ class SetupVerifier:
                 text=True,
                 cwd=self.project_root,
             )
-
-            if result.returncode == 0:
-                output = result.stdout
-                if "postgres" in output.lower() and "api" in output.lower():
-                    return True
-                else:
-                    self.warnings.append("Docker services may not be running")
-                    return False
-            else:
-                self.issues.append("Docker services check failed")
-                return False
-
         except FileNotFoundError:
             self.warnings.append("docker-compose not found")
             return False
         except Exception as e:
             self.issues.append(f"Docker services check failed: {e}")
+            return False
+        else:
+            if result.returncode == 0:
+                output = result.stdout
+                if "postgres" in output.lower() and "api" in output.lower():
+                    return True
+                self.warnings.append("Docker services may not be running")
+                return False
+            self.issues.append("Docker services check failed")
             return False
 
     def check_alembic_migrations(self) -> bool:
@@ -163,18 +156,16 @@ class SetupVerifier:
                 text=True,
                 cwd=self.project_root,
             )
-
-            if result.returncode == 0:
-                return True
-            else:
-                self.warnings.append("Alembic migrations may not be up to date")
-                return False
-
         except FileNotFoundError:
             self.warnings.append("alembic not found")
             return False
         except Exception as e:
             self.issues.append(f"Alembic check failed: {e}")
+            return False
+        else:
+            if result.returncode == 0:
+                return True
+            self.warnings.append("Alembic migrations may not be up to date")
             return False
 
     def check_project_structure(self) -> None:

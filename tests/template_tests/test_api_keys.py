@@ -447,7 +447,7 @@ class TestAPIKeyEndpoints:
     async def test_create_api_key(
         self,
         client: TestClient,
-        db_session: AsyncSession,
+        _db_session: AsyncSession,
         test_user: User,
         test_user_token: str,
     ):
@@ -480,7 +480,7 @@ class TestAPIKeyEndpoints:
     async def test_list_api_keys(
         self,
         client: TestClient,
-        db_session: AsyncSession,
+        _db_session: AsyncSession,
         test_user: User,
         test_user_token: str,
     ):
@@ -493,7 +493,7 @@ class TestAPIKeyEndpoints:
                 expires_at=datetime.now(timezone.utc) + timedelta(days=30),
             )
             await crud_api_key.create_api_key(
-                db_session,
+                _db_session,
                 api_key_data,
                 str(test_user.id),
             )
@@ -514,7 +514,7 @@ class TestAPIKeyEndpoints:
     async def test_deactivate_api_key(
         self,
         client: TestClient,
-        db_session: AsyncSession,
+        _db_session: AsyncSession,
         test_user: User,
         test_user_token: str,
     ):
@@ -526,7 +526,7 @@ class TestAPIKeyEndpoints:
             expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
         api_key = await crud_api_key.create_api_key(
-            db_session,
+            _db_session,
             api_key_data,
             str(test_user.id),
         )
@@ -539,7 +539,7 @@ class TestAPIKeyEndpoints:
         assert response.status_code == 204  # No Content for DELETE operations
 
         # Refresh the session to get the updated data
-        await db_session.refresh(api_key)
+        await _db_session.refresh(api_key)
         assert api_key.is_active is False
 
     @pytest.mark.skip(
@@ -548,7 +548,7 @@ class TestAPIKeyEndpoints:
     async def test_rotate_api_key(
         self,
         client: TestClient,
-        db_session: AsyncSession,
+        _db_session: AsyncSession,
         test_user: User,
         test_user_token: str,
     ):
@@ -560,7 +560,7 @@ class TestAPIKeyEndpoints:
             expires_at=datetime.now(timezone.utc) + timedelta(days=30),
         )
         api_key = await crud_api_key.create_api_key(
-            db_session,
+            _db_session,
             api_key_data,
             str(test_user.id),
         )
@@ -592,7 +592,7 @@ class TestAPIKeyEndpoints:
         self,
         client: TestClient,
         sync_db_session: Session,
-        test_user: User,
+        test_user: User,  # noqa: ARG002
         test_user_token: str,
     ):
         """Test that users cannot deactivate other users' keys."""
@@ -632,7 +632,7 @@ class TestAPIKeyEndpoints:
         self,
         client: TestClient,
         sync_db_session: Session,
-        test_user: User,
+        test_user: User,  # noqa: ARG002
         test_user_token: str,
     ):
         """Test that users cannot rotate other users' keys."""
@@ -674,7 +674,7 @@ class TestAPIKeyScopes:
 
     def test_require_api_scope_success(
         self,
-        client: TestClient,
+        _client: TestClient,
         sync_db_session: Session,
         test_user: User,
     ):
@@ -705,7 +705,7 @@ class TestAPIKeyScopes:
 
     def test_require_api_scope_failure(
         self,
-        client: TestClient,
+        _client: TestClient,
         sync_db_session: Session,
         test_user: User,
     ):
@@ -743,7 +743,7 @@ class TestAPIKeyIntegration:
 
     def test_api_key_works_with_user_endpoints(
         self,
-        client: TestClient,
+        _client: TestClient,
         sync_db_session: Session,
         test_user: User,
     ):
@@ -774,7 +774,7 @@ class TestAPIKeyIntegration:
 
     def test_api_key_scope_enforcement(
         self,
-        client: TestClient,
+        _client: TestClient,
         sync_db_session: Session,
         test_user: User,
     ):

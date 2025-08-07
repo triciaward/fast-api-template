@@ -26,7 +26,7 @@ if spec is not None:
     if spec.loader is not None:
         spec.loader.exec_module(customize_module)
 else:
-    raise ImportError("Could not load customize_template module")
+    raise ImportError("Could not load customize_template module")  # noqa: TRY003
 TemplateCustomizer = customize_module.TemplateCustomizer
 
 

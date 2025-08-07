@@ -41,10 +41,25 @@ class TemplateCustomizer:
         current_dir = self.project_root.name
 
         # If it's still the default template name, this is an error
-        if current_dir == "fast-api-template" or not current_dir.endswith("_backend"):
+        if current_dir == "fast-api-template":
+            print("❌ Error: You're still in the 'fast-api-template' directory!")
+            print()
+            print("This script should be run AFTER renaming the directory.")
+            print("Please run the rename script first:")
+            print("  ./scripts/rename_template.sh your_project_name_backend")
+            print()
+            print("Then reopen VS Code in the renamed directory and run this script again.")
+            
+            # Ask for user confirmation (but exit regardless for safety)
+            input("Press Enter to exit...")
+            sys.exit(1)
+        elif not current_dir.endswith("_backend"):
+            print("❌ Error: You're still in the 'fast-api-template' directory!")
+            print("Directory should end with '_backend' for consistency.")
             sys.exit(1)
         else:
-            pass
+            print(f"✅ Directory name looks good: {current_dir}")
+            print()
 
     def get_user_input(self) -> None:
         """Get project details from user input."""

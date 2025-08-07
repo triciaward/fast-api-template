@@ -66,11 +66,11 @@ class TestCRUDGenerator:
                 generator = CRUDGenerator("Post", fields, options)
 
                 # Test pluralization
-                assert generator._pluralize("Post") == "Posts"
-                assert generator._pluralize("Category") == "Categories"
-                assert generator._pluralize("User") == "Users"
-                assert generator._pluralize("Box") == "Boxes"
-                assert generator._pluralize("City") == "Cities"
+                assert generator._pluralize("Post") == "Posts"  # noqa: SLF001
+                assert generator._pluralize("Category") == "Categories"  # noqa: SLF001
+                assert generator._pluralize("User") == "Users"  # noqa: SLF001
+                assert generator._pluralize("Box") == "Boxes"  # noqa: SLF001
+                assert generator._pluralize("City") == "Cities"  # noqa: SLF001
 
     def test_type_mapping(self):
         """Test type mapping functions."""
@@ -92,40 +92,40 @@ class TestCRUDGenerator:
                 generator = CRUDGenerator("Post", fields, options)
 
                 # Test SQLAlchemy type mapping
-                assert generator._get_sqlalchemy_type("str") == "String"
-                assert generator._get_sqlalchemy_type("int") == "Integer"
-                assert generator._get_sqlalchemy_type("float") == "Float"
-                assert generator._get_sqlalchemy_type("bool") == "Boolean"
-                assert generator._get_sqlalchemy_type("datetime") == "DateTime"
-                assert generator._get_sqlalchemy_type("date") == "Date"
-                assert generator._get_sqlalchemy_type("uuid") == "UUID(as_uuid=True)"
-                assert generator._get_sqlalchemy_type("text") == "Text"
-                assert generator._get_sqlalchemy_type("json") == "JSON"
-                assert generator._get_sqlalchemy_type("unknown") == "String"  # Default
+                assert generator._get_sqlalchemy_type("str") == "String"  # noqa: SLF001
+                assert generator._get_sqlalchemy_type("int") == "Integer"  # noqa: SLF001
+                assert generator._get_sqlalchemy_type("float") == "Float"  # noqa: SLF001
+                assert generator._get_sqlalchemy_type("bool") == "Boolean"  # noqa: SLF001
+                assert generator._get_sqlalchemy_type("datetime") == "DateTime"  # noqa: SLF001
+                assert generator._get_sqlalchemy_type("date") == "Date"  # noqa: SLF001
+                assert generator._get_sqlalchemy_type("uuid") == "UUID(as_uuid=True)"  # noqa: SLF001
+                assert generator._get_sqlalchemy_type("text") == "Text"  # noqa: SLF001
+                assert generator._get_sqlalchemy_type("json") == "JSON"  # noqa: SLF001
+                assert generator._get_sqlalchemy_type("unknown") == "String"  # noqa: SLF001
 
                 # Test Pydantic type mapping
-                assert generator._get_pydantic_type("str") == "str"
-                assert generator._get_pydantic_type("int") == "int"
-                assert generator._get_pydantic_type("float") == "float"
-                assert generator._get_pydantic_type("bool") == "bool"
-                assert generator._get_pydantic_type("datetime") == "datetime"
-                assert generator._get_pydantic_type("date") == "date"
-                assert generator._get_pydantic_type("uuid") == "uuid.UUID"
-                assert generator._get_pydantic_type("text") == "str"
-                assert generator._get_pydantic_type("json") == "dict"
-                assert generator._get_pydantic_type("unknown") == "str"  # Default
+                assert generator._get_pydantic_type("str") == "str"  # noqa: SLF001
+                assert generator._get_pydantic_type("int") == "int"  # noqa: SLF001
+                assert generator._get_pydantic_type("float") == "float"  # noqa: SLF001
+                assert generator._get_pydantic_type("bool") == "bool"  # noqa: SLF001
+                assert generator._get_pydantic_type("datetime") == "datetime"  # noqa: SLF001
+                assert generator._get_pydantic_type("date") == "date"  # noqa: SLF001
+                assert generator._get_pydantic_type("uuid") == "uuid.UUID"  # noqa: SLF001
+                assert generator._get_pydantic_type("text") == "str"  # noqa: SLF001
+                assert generator._get_pydantic_type("json") == "dict"  # noqa: SLF001
+                assert generator._get_pydantic_type("unknown") == "str"  # noqa: SLF001
 
                 # Test default value mapping
-                assert generator._get_default_value("str") == '""'
-                assert generator._get_default_value("int") == "0"
-                assert generator._get_default_value("float") == "0.0"
-                assert generator._get_default_value("bool") == "False"
-                assert generator._get_default_value("datetime") == "datetime.utcnow"
-                assert generator._get_default_value("date") == "date.today"
-                assert generator._get_default_value("uuid") == "uuid.uuid4"
-                assert generator._get_default_value("text") == '""'
-                assert generator._get_default_value("json") == "{}"
-                assert generator._get_default_value("unknown") == '""'  # Default
+                assert generator._get_default_value("str") == '""'  # noqa: SLF001
+                assert generator._get_default_value("int") == "0"  # noqa: SLF001
+                assert generator._get_default_value("float") == "0.0"  # noqa: SLF001
+                assert generator._get_default_value("bool") == "False"  # noqa: SLF001
+                assert generator._get_default_value("datetime") == "datetime.utcnow"  # noqa: SLF001
+                assert generator._get_default_value("date") == "date.today"  # noqa: SLF001
+                assert generator._get_default_value("uuid") == "uuid.uuid4"  # noqa: SLF001
+                assert generator._get_default_value("text") == '""'  # noqa: SLF001
+                assert generator._get_default_value("json") == "{}"  # noqa: SLF001
+                assert generator._get_default_value("unknown") == '""'  # noqa: SLF001
 
     def test_model_generation(self):
         """Test model generation."""

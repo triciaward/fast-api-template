@@ -1,4 +1,5 @@
 # mypy: disable-error-code=assignment
+# ruff: noqa: SLF001
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
@@ -26,7 +27,7 @@ from app.utils.search_filter import (
 class TestSearchFilterUtility:
     """Test the search and filter utility functionality."""
 
-    def test_search_filter_builder_initialization(self, sync_db_session: Session):
+    def test_search_filter_builder_initialization(self, sync_db_session: Session):  # noqa: ARG002
         """Test SearchFilterBuilder initialization."""
         builder = SearchFilterBuilder(User)
         assert builder.model_class == User
@@ -34,7 +35,7 @@ class TestSearchFilterUtility:
         assert "email" in builder._allowed_fields
         assert "username" in builder._allowed_fields
 
-    def test_field_validation(self, sync_db_session: Session):
+    def test_field_validation(self, sync_db_session: Session):  # noqa: ARG002
         """Test field validation in SearchFilterBuilder."""
         builder = SearchFilterBuilder(User)
 
@@ -760,7 +761,7 @@ class TestSearchFilterUtility:
 
         # Update user1's creation date to be older
         # type: ignore[assignment]
-        user1.date_created = datetime.now() - timedelta(days=10)
+        user1.date_created = datetime.now(timezone.utc) - timedelta(days=10)
         sync_db_session.commit()
 
         _user2 = crud_user.create_user_sync(
@@ -776,7 +777,7 @@ class TestSearchFilterUtility:
         filter_config = FieldFilter(
             field="date_created",
             operator=FilterOperator.GREATER_THAN,
-            value=datetime.now() - timedelta(days=5),
+            value=datetime.now(timezone.utc) - timedelta(days=5),
             values=None,
         )
 
@@ -808,7 +809,7 @@ class TestSearchFilterUtility:
 
         # Update user1's creation date to be older
         # type: ignore[assignment]
-        user1.date_created = datetime.now() - timedelta(days=10)
+        user1.date_created = datetime.now(timezone.utc) - timedelta(days=10)
         sync_db_session.commit()
 
         _user2 = crud_user.create_user_sync(
@@ -824,7 +825,7 @@ class TestSearchFilterUtility:
         filter_config = FieldFilter(
             field="date_created",
             operator=FilterOperator.LESS_THAN,
-            value=datetime.now() - timedelta(days=5),
+            value=datetime.now(timezone.utc) - timedelta(days=5),
             values=None,
         )
 
@@ -1052,7 +1053,7 @@ class TestSearchFilterUtility:
 
     def test_create_user_search_filters_with_all_params(self):
         """Test create_user_search_filters with all parameters."""
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         config = create_user_search_filters(
             search_query="test",
             use_full_text_search=True,
@@ -1088,7 +1089,7 @@ class TestSearchFilterUtility:
 
     def test_create_deleted_user_search_filters(self):
         """Test create_deleted_user_search_filters function."""
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         deleted_by = uuid4()
 
         config = create_deleted_user_search_filters(
@@ -1109,7 +1110,7 @@ class TestSearchFilterUtility:
 
     def test_deleted_user_search_params(self):
         """Test DeletedUserSearchParams class."""
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         deleted_by = uuid4()
 
         params = DeletedUserSearchParams(
@@ -1129,7 +1130,7 @@ class TestSearchFilterUtility:
 
     def test_user_search_params_with_date_filters(self):
         """Test UserSearchParams with date filters."""
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
 
         params = UserSearchParams(
             search="test",
