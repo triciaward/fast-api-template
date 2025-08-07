@@ -44,13 +44,13 @@ class TestConnectionPooling:
         if hasattr(engine.pool, "size"):
             assert engine.pool.size() == settings.DB_POOL_SIZE
         if hasattr(engine.pool, "_max_overflow"):
-            assert engine.pool._max_overflow == settings.DB_MAX_OVERFLOW  # noqa: SLF001
+            assert engine.pool._max_overflow == settings.DB_MAX_OVERFLOW
         if hasattr(engine.pool, "_recycle"):
-            assert engine.pool._recycle == settings.DB_POOL_RECYCLE  # noqa: SLF001
+            assert engine.pool._recycle == settings.DB_POOL_RECYCLE
         if hasattr(engine.pool, "_timeout"):
-            assert engine.pool._timeout == settings.DB_POOL_TIMEOUT  # noqa: SLF001
+            assert engine.pool._timeout == settings.DB_POOL_TIMEOUT
         if hasattr(engine.pool, "_pre_ping"):
-            assert engine.pool._pre_ping == settings.DB_POOL_PRE_PING  # noqa: SLF001
+            assert engine.pool._pre_ping == settings.DB_POOL_PRE_PING
 
         # Test sync engine pool configuration (should be smaller)
         expected_sync_pool_size = min(settings.DB_POOL_SIZE, 10)
@@ -62,9 +62,9 @@ class TestConnectionPooling:
                 sync_engine.pool._max_overflow == expected_sync_max_overflow
             )
         if hasattr(sync_engine.pool, "_recycle"):
-            assert sync_engine.pool._recycle == settings.DB_POOL_RECYCLE  # noqa: SLF001
+            assert sync_engine.pool._recycle == settings.DB_POOL_RECYCLE
         if hasattr(sync_engine.pool, "_timeout"):
-            assert sync_engine.pool._timeout == settings.DB_POOL_TIMEOUT  # noqa: SLF001
+            assert sync_engine.pool._timeout == settings.DB_POOL_TIMEOUT
         if hasattr(sync_engine.pool, "_pre_ping"):
             assert (
                 sync_engine.pool._pre_ping == settings.DB_POOL_PRE_PING
@@ -242,7 +242,7 @@ class TestConnectionPooling:
         """Test that pool overflow is properly configured."""
         # Test async pool overflow
         if hasattr(engine.pool, "_max_overflow"):
-            assert engine.pool._max_overflow == settings.DB_MAX_OVERFLOW  # noqa: SLF001
+            assert engine.pool._max_overflow == settings.DB_MAX_OVERFLOW
         if hasattr(engine.pool, "size"):
             assert engine.pool.size() == settings.DB_POOL_SIZE
 
@@ -256,21 +256,21 @@ class TestConnectionPooling:
     def test_pool_recycle_setting(self) -> None:
         """Test that pool recycle is properly configured."""
         if hasattr(engine.pool, "_recycle"):
-            assert engine.pool._recycle == settings.DB_POOL_RECYCLE  # noqa: SLF001
+            assert engine.pool._recycle == settings.DB_POOL_RECYCLE
         if hasattr(sync_engine.pool, "_recycle"):
-            assert sync_engine.pool._recycle == settings.DB_POOL_RECYCLE  # noqa: SLF001
+            assert sync_engine.pool._recycle == settings.DB_POOL_RECYCLE
 
     def test_pool_timeout_setting(self) -> None:
         """Test that pool timeout is properly configured."""
         if hasattr(engine.pool, "_timeout"):
-            assert engine.pool._timeout == settings.DB_POOL_TIMEOUT  # noqa: SLF001
+            assert engine.pool._timeout == settings.DB_POOL_TIMEOUT
         if hasattr(sync_engine.pool, "_timeout"):
-            assert sync_engine.pool._timeout == settings.DB_POOL_TIMEOUT  # noqa: SLF001
+            assert sync_engine.pool._timeout == settings.DB_POOL_TIMEOUT
 
     def test_pool_pre_ping_setting(self) -> None:
         """Test that pool pre-ping is properly configured."""
         if hasattr(engine.pool, "_pre_ping"):
-            assert engine.pool._pre_ping == settings.DB_POOL_PRE_PING  # noqa: SLF001
+            assert engine.pool._pre_ping == settings.DB_POOL_PRE_PING
         if hasattr(sync_engine.pool, "_pre_ping"):
             assert (
                 sync_engine.pool._pre_ping == settings.DB_POOL_PRE_PING

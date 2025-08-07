@@ -592,7 +592,7 @@ class TestAPIKeyEndpoints:
         self,
         client: TestClient,
         sync_db_session: Session,
-        test_user: User,  # noqa: ARG002
+        test_user: User,
         test_user_token: str,
     ):
         """Test that users cannot deactivate other users' keys."""
@@ -632,7 +632,7 @@ class TestAPIKeyEndpoints:
         self,
         client: TestClient,
         sync_db_session: Session,
-        test_user: User,  # noqa: ARG002
+        test_user: User,
         test_user_token: str,
     ):
         """Test that users cannot rotate other users' keys."""

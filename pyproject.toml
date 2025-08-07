@@ -40,7 +40,6 @@ select = [
     "A",  # flake8-builtins
     "COM", # flake8-commas
     "DTZ", # flake8-datetimez
-    "T20", # flake8-print
     "TCH", # flake8-type-checking
     "ARG", # flake8-unused-arguments
     "PIE", # flake8-pie
@@ -49,7 +48,6 @@ select = [
     "Q",   # flake8-quotes
     "RSE", # flake8-raise
     "RET", # flake8-return
-    "SLF", # flake8-self
     "SLOT", # flake8-slots
     "TRY", # flake8-try
     "NPY", # flake8-numpy
@@ -69,6 +67,10 @@ ignore = [
     "ARG001", # Unused function argument
     "SIM105", # Use contextlib.suppress instead of try-except-pass
     "RUF012", # Mutable class attributes should be annotated with typing.ClassVar
+    "T201", # print found (allow in scripts)
+    "SLF001", # Private member accessed (allow in tests)
+    "ARG002", # Unused method argument (allow in tests)
+    "RUF001", # String contains ambiguous character (allow in scripts)
 ]
 
 [tool.ruff.lint.isort]

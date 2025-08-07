@@ -37,7 +37,7 @@ class TestSearchFilterUtility:
         assert "email" in builder._allowed_fields
         assert "username" in builder._allowed_fields
 
-    def test_field_validation(self, sync_db_session: Session):  # noqa: ARG002
+    def test_field_validation(self, sync_db_session: Session):
         """Test field validation in SearchFilterBuilder."""
         builder = SearchFilterBuilder(User)
 
