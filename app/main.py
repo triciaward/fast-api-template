@@ -4,19 +4,21 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.api.admin_router import router as admin_html_router
-from app.api.api_v1.api import create_api_router
+from app.api import api_router
 
 # Import API router dynamically based on settings
 from app.bootstrap_superuser import bootstrap_superuser
+from app.core import (
+    configure_cors,
+    configure_security_headers,
+    get_app_logger,
+    register_error_handlers,
+    setup_logging,
+)
 from app.core.config import settings
-from app.core.cors import configure_cors
-from app.core.error_handlers import register_error_handlers
-from app.core.logging_config import get_app_logger, setup_logging
-from app.core.security_headers import configure_security_headers
 from app.database.database import engine
 from app.models import Base
-from app.services.sentry import init_sentry
+from app.services import init_sentry
 
 if settings.ENABLE_CELERY:
     # Import celery tasks to register them with the worker
@@ -65,14 +67,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Initialize Redis if enabled
     if settings.ENABLE_REDIS:
-        from app.services.redis import init_redis
+        from app.services import init_redis
 
         logger.info("Initializing Redis connection")
         await init_redis()
 
     # Initialize rate limiting if enabled
     if settings.ENABLE_RATE_LIMITING:
-        from app.services.rate_limiter import init_rate_limiter
+        from app.services import init_rate_limiter
 
         logger.info("Initializing rate limiting")
         await init_rate_limiter()
@@ -89,7 +91,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Close Redis if enabled
     if settings.ENABLE_REDIS:
-        from app.services.redis import close_redis
+        from app.services import close_redis
 
         await close_redis()
         logger.info("Redis connection closed")
@@ -118,7 +120,7 @@ if settings.ENABLE_SENTRY:
 
 # Setup rate limiting
 if settings.ENABLE_RATE_LIMITING:
-    from app.services.rate_limiter import setup_rate_limiting
+    from app.services import setup_rate_limiting
 
     setup_rate_limiting(app)
 
@@ -126,11 +128,10 @@ if settings.ENABLE_RATE_LIMITING:
 
 register_error_handlers(app)
 
-# Include API router dynamically based on settings
-app.include_router(create_api_router(), prefix=settings.API_V1_STR)
+# Include API router with clean domain organization
+app.include_router(api_router)
 
-# Include admin HTML router
-app.include_router(admin_html_router, prefix="/admin", tags=["admin-html"])
+
 
 
 @app.get("/")

@@ -1,830 +1,642 @@
-# Database Management Tutorial
+# Database Management Guide
 
-Welcome to the database management tutorial! This guide will teach you how to work with the database in your FastAPI application, from basic operations to advanced features like migrations and search.
+This guide covers database operations in your FastAPI application, including models, migrations, CRUD operations, and async database sessions.
 
----
+## 🗄️ Overview
 
-## What is a Database?
+The database system is built with **async-first architecture** and provides:
 
-Think of a database like a digital filing cabinet. It stores all your app's information in an organized way:
-- **Users**: Account information, profiles, settings
-- **Data**: Any information your app needs to remember
-- **Relationships**: How different pieces of data connect to each other
+- **PostgreSQL Database** with connection pooling
+- **Async SQLAlchemy** for all database operations
+- **Alembic Migrations** for schema management
+- **Domain-Based CRUD** operations organized by business logic
+- **Type-Safe Models** with full type annotations
+- **Connection Pooling** for optimal performance
+- **Audit Logging** for data changes
 
----
+## 📁 Architecture
 
-## Database Features Included
-
-### 🗄️ Core Database Features
-- **PostgreSQL**: Professional-grade database for reliability
-- **SQLAlchemy**: Python library for database operations
-- **Connection Pooling**: Efficient database connections
-- **Migrations**: Version-controlled database changes
-
-### 🔍 Data Management Features
-- **Soft Delete**: Hide data instead of permanently deleting it
-- **Search & Filter**: Find data quickly and efficiently
-- **Pagination**: Handle large amounts of data
-- **Audit Logging**: Track all data changes
-
-### 🛡️ Data Safety Features
-- **Data Validation**: Ensure data is correct before saving
-- **Type Safety**: Prevent data type errors
-- **Backup Support**: Easy database backups
-- **Transaction Support**: Ensure data consistency
-
-### 🚀 **CRUD Scaffolding**
-- **One-command generation**: Create complete CRUD boilerplate
-- **Automatic relationships**: Handle complex data connections
-- **Search and filtering**: Built-in search capabilities
-- **Admin integration**: Optional admin panel integration
-
----
-
-## 📁 Database Models Structure
-
-The template uses a modular approach with separated model files:
+The database system is organized in a **domain-based structure**:
 
 ```
-app/models/
-├── __init__.py          # Export all models
-├── base.py             # Base model and mixins
-├── user.py             # User model
-├── api_key.py          # API key model
-├── audit_log.py        # Audit log model
-└── refresh_token.py    # Refresh token model
+app/
+├── database/              # Database configuration
+│   ├── database.py       # Async database setup
+│   └── __init__.py       # Database exports
+├── models/               # Database models (domain-based)
+│   ├── auth/            # Authentication models
+│   │   ├── user.py      # User model
+│   │   ├── api_key.py   # API key model
+│   │   └── refresh_token.py # Refresh token model
+│   ├── core/            # Core models
+│   │   └── base.py      # Base model with common fields
+│   └── system/          # System models
+│       └── audit_log.py # Audit logging model
+├── crud/                # Database operations (domain-based)
+│   ├── auth/            # Authentication CRUD operations
+│   │   ├── user.py      # User database operations
+│   │   ├── api_key.py   # API key operations
+│   │   └── refresh_token.py # Session management
+│   └── system/          # System CRUD operations
+│       ├── admin.py     # Admin operations
+│       └── audit_log.py # Audit logging
+└── alembic/             # Database migrations
+    ├── env.py           # Migration environment
+    ├── script.py.mako   # Migration template
+    └── versions/        # Migration files
 ```
 
-### Base Model and Mixins
+## 🚀 Quick Start
 
-The `base.py` file contains shared functionality:
+### **1. Database Connection**
 
 ```python
-# app/models/base.py
-class SoftDeleteMixin:
-    """Mixin to add soft delete functionality to models."""
-    
-    is_deleted = Column(Boolean, default=False, nullable=False, index=True)
-    deleted_at = Column(DateTime, nullable=True, index=True)
-    deleted_by = Column(UUID(as_uuid=True), nullable=True, index=True)
-    deletion_reason = Column(String(500), nullable=True)
-    
-    def soft_delete(self, deleted_by: uuid.UUID = None, reason: str = None):
-        """Mark the record as deleted without actually removing it."""
-        self.is_deleted = True
-        self.deleted_at = datetime.utcnow()
-        self.deleted_by = deleted_by
-        self.deletion_reason = reason
+from app.database.database import AsyncSessionLocal, get_db
+
+# Get async database session
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
+
+# Use in endpoints
+@router.get("/users")
+async def get_users(db: AsyncSession = Depends(get_db)):
+    users = await get_users(db)
+    return users
 ```
 
-### Individual Model Files
-
-Each model is in its own file for better organization:
+### **2. Basic CRUD Operations**
 
 ```python
-# app/models/user.py
-class User(Base, SoftDeleteMixin):
-    __tablename__ = "users"
-    
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    username = Column(String, unique=True, index=True, nullable=False)
-    # ... other fields
-```
-
----
-
-## Real Example: Add a `bio` Field to User
-
-Let's walk through a real example of adding a `bio` field to the user model, updating the schema, generating a migration, and using the new field via the API.
-
-### 1. Update the SQLAlchemy Model ([app/models/user.py](../../app/models/user.py))
-```python
-class User(Base, SoftDeleteMixin):
-    # ... existing fields ...
-    bio = Column(String, nullable=True)
-```
-
-### 2. Update the Pydantic Schema ([app/schemas/user.py](../../app/schemas/user.py))
-```python
-class UserUpdate(BaseModel):
-    bio: Optional[str] = None
-```
-
-### 3. Generate a Migration
-```bash
-alembic revision --autogenerate -m "Add bio field to user"
-```
-
-### 4. Apply the Migration
-```bash
-alembic upgrade head
-```
-
-### 5. Test the New Field
-```bash
-# Update user bio
-curl -X PUT "http://localhost:8000/api/v1/users/me" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"bio": "I love coding!"}'
-```
-
----
-
-## 🚀 CRUD Scaffolding
-
-The template includes a powerful CRUD scaffolding tool that generates complete CRUD boilerplate with one command.
-
-### Basic Usage
-
-```bash
-# Generate a Post model with title, content, and is_published fields
-python3 scripts/generate_crud.py Post title:str content:str is_published:bool
-```
-
-### Advanced Options
-
-```bash
-# Generate a Product model with soft delete and search capabilities
-python scripts/generate_crud.py Product name:str price:float description:str --soft-delete --searchable
-
-# Generate an admin-managed Category model
-python scripts/generate_crud.py Category name:str slug:str --admin
-
-# Generate a model with slug auto-generation
-python scripts/generate_crud.py Article title:str content:str --slug
-```
-
-### What Gets Generated
-
-#### 1. Model File (`app/models/post.py`)
-
-```python
-import uuid
-from datetime import datetime
-
-from sqlalchemy import Boolean, Column, DateTime, String
-from sqlalchemy.dialects.postgresql import UUID
-
-from app.database.database import Base
-from app.models import SoftDeleteMixin
-
-class Post(Base, SoftDeleteMixin):
-    __tablename__ = "posts"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    date_created = Column(DateTime, default=datetime.utcnow, nullable=False)
-    title = Column(String, nullable=False)
-    content = Column(String, nullable=False)
-    is_published = Column(Boolean, default=False, nullable=True)
-
-    def __repr__(self) -> str:
-        return f"<Post(id={self.id}, title={self.title}, content={self.content}, is_published={self.is_published})>"
-```
-
-**Features:**
-- Proper table naming (pluralized)
-- UUID primary key with indexing
-- Automatic `date_created` timestamp
-- Soft delete mixin (if enabled)
-- Proper field types and constraints
-
-#### 2. Schema File (`app/schemas/post.py`)
-
-```python
-import uuid
-from datetime import datetime
-from typing import Optional
-
-from pydantic import BaseModel, ConfigDict
-from app.utils.pagination import PaginatedResponse
-
-class PostBase(BaseModel):
-    title: str
-    content: str
-    is_published: bool = False
-
-class PostCreate(PostBase):
-    title: str
-    content: str
-    is_published: bool = False
-
-class PostUpdate(BaseModel):
-    title: Optional[str] = None
-    content: Optional[str] = None
-    is_published: Optional[bool] = None
-
-class PostResponse(PostBase):
-    model_config = ConfigDict(from_attributes=True)
-    
-    id: uuid.UUID
-    date_created: datetime
-    
-    class Config:
-        from_attributes = True
-
-class PostPaginatedResponse(PaginatedResponse):
-    items: list[PostResponse]
-```
-
-**Features:**
-- Input validation schemas
-- Response schemas with proper typing
-- Pagination support
-- Optional field updates
-
-#### 3. CRUD File (`app/crud/post.py`)
-
-```python
-from typing import Any, Dict, Optional, Union
-from uuid import UUID
-
-from sqlalchemy.orm import Session
-from sqlalchemy import select, and_
-
-from app.crud.base import CRUDBase
-from app.models.post import Post
-from app.schemas.post import PostCreate, PostUpdate
-from app.utils.search_filter import apply_search_filters
-
-class CRUDPost(CRUDBase[Post, PostCreate, PostUpdate]):
-    def get_by_title(self, db: Session, *, title: str) -> Optional[Post]:
-        return db.query(Post).filter(Post.title == title).first()
-    
-    def get_published_posts(self, db: Session, *, skip: int = 0, limit: int = 100):
-        return db.query(Post).filter(Post.is_published == True).offset(skip).limit(limit).all()
-
-post = CRUDPost(Post)
-```
-
-**Features:**
-- Base CRUD operations (create, read, update, delete)
-- Custom query methods
-- Search and filtering support
-- Pagination handling
-
-#### 4. API Endpoints (`app/api/api_v1/endpoints/post.py`)
-
-```python
-from typing import Any, List
-from uuid import UUID
-
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-
-from app import crud, models, schemas
-from app.api import deps
-from app.utils.pagination import PaginationParams
-
-router = APIRouter()
-
-@router.get("/", response_model=schemas.PostPaginatedResponse)
-def read_posts(
-    db: Session = Depends(deps.get_db),
-    pagination: PaginationParams = Depends(),
-    search: Optional[str] = Query(None, description="Search term"),
-    is_published: Optional[bool] = Query(None, description="Filter by published status"),
-) -> Any:
-    """
-    Retrieve posts with pagination and search.
-    """
-    posts = crud.post.get_multi_with_pagination(
-        db, pagination=pagination, search=search, is_published=is_published
-    )
-    return posts
-
-@router.post("/", response_model=schemas.PostResponse)
-def create_post(
-    *,
-    db: Session = Depends(deps.get_db),
-    post_in: schemas.PostCreate,
-    current_user: models.User = Depends(deps.get_current_user),
-) -> Any:
-    """
-    Create new post.
-    """
-    post = crud.post.create(db=db, obj_in=post_in)
-    return post
-
-# ... more endpoints for GET /{id}, PUT /{id}, DELETE /{id}
-```
-
-**Features:**
-- Full CRUD endpoints
-- Pagination support
-- Search and filtering
-- Authentication integration
-- Proper error handling
-
-#### 5. Test File (`tests/template_tests/test_post.py`)
-
-```python
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-
-from app import crud
-from app.schemas.post import PostCreate
-
-def test_create_post(client: TestClient, db: Session) -> None:
-    """Test creating a new post."""
-    post_data = {
-        "title": "Test Post",
-        "content": "This is a test post",
-        "is_published": True
-    }
-    
-    response = client.post("/api/v1/posts/", json=post_data)
-    assert response.status_code == 200
-    
-    data = response.json()
-    assert data["title"] == post_data["title"]
-    assert data["content"] == post_data["content"]
-    assert data["is_published"] == post_data["is_published"]
-
-# ... more tests
-```
-
-**Features:**
-- Unit tests for all endpoints
-- Integration tests
-- Edge case testing
-- Proper test isolation
-
-### Available Options
-
-| Option | Description |
-|--------|-------------|
-| `--soft-delete` | Include soft delete functionality with restoration |
-| `--searchable` | Add search and filtering capabilities |
-| `--admin` | Include admin panel integration |
-| `--slug` | Auto-generate slug field from title |
-
-### Next Steps After Generation
-
-1. **Review the generated files** in `app/models/`, `app/schemas/`, `app/crud/`, and `app/api/`
-2. **Run database migrations**:
-   ```bash
-   alembic revision --autogenerate -m "Add Post model"
-   alembic upgrade head
-   ```
-3. **Test the endpoints**:
-   ```bash
-   pytest tests/template_tests/test_post.py
-   ```
-4. **Customize as needed** - Add relationships, validation, or business logic
-
----
-
-## Database Operations
-
-### Basic CRUD Operations
-
-#### Create
-```python
-from app.crud import user as crud_user
-from app.schemas.user import UserCreate
-
-# Create a new user
-user_data = UserCreate(
-    email="user@example.com",
-    username="newuser",
-    password="securepassword123"
-)
-user = crud_user.create(db, obj_in=user_data)
-```
-
-#### Read
-```python
-# Get user by ID
-user = crud_user.get(db, id=user_id)
+from app.crud.auth.user import get_user_by_email, create_user
+from app.schemas.auth.user import UserCreate
+
+# Create user
+async def register_user(db: AsyncSession, user_data: UserCreate) -> User:
+    user = await create_user(db, user_data)
+    return user
 
 # Get user by email
-user = crud_user.get_by_email(db, email="user@example.com")
-
-# Get multiple users with pagination
-users = crud_user.get_multi(db, skip=0, limit=100)
+async def get_user(db: AsyncSession, email: str) -> User | None:
+    user = await get_user_by_email(db, email=email)
+    return user
 ```
 
-#### Update
-```python
-from app.schemas.user import UserUpdate
-
-# Update user
-update_data = UserUpdate(username="newusername")
-user = crud_user.update(db, db_obj=user, obj_in=update_data)
-```
-
-#### Delete
-```python
-# Soft delete (recommended)
-crud_user.remove(db, id=user_id)
-
-# Hard delete (permanent)
-crud_user.delete(db, id=user_id)
-```
-
-### Advanced Queries
-
-#### Search and Filtering
-```python
-# Search users by name or email
-users = crud_user.search(db, search_term="john")
-
-# This searches in: username, email, first_name, last_name
-```
-
-#### Pagination
-```python
-from app.utils.pagination import PaginationParams
-
-# Get paginated results
-pagination = PaginationParams(page=1, size=20)
-users = crud_user.get_multi_with_pagination(
-    db, 
-    pagination=pagination,
-    search="john"
-)
-```
-
-#### Relationships
-```python
-# Get user with related data
-user = crud_user.get_with_relationships(
-    db, 
-    id=user_id,
-    relationships=["api_keys", "audit_logs"]
-)
-```
-
----
-
-## Database Migrations
-
-### Creating Migrations
+### **3. Database Migrations**
 
 ```bash
-# Auto-generate migration from model changes
-alembic revision --autogenerate -m "Add user bio field"
+# Create new migration
+alembic revision --autogenerate -m "Add user profile fields"
 
-# Create empty migration for manual changes
-alembic revision -m "Custom data migration"
+# Apply migrations
+alembic upgrade head
+
+# Rollback migration
+alembic downgrade -1
+
+# Check migration status
+alembic current
 ```
 
-### Applying Migrations
+## 🔧 Core Components
+
+### **Async Database Sessions**
+
+All database operations use **async sessions** for optimal performance:
+
+```python
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy import create_async_engine
+
+# Create async engine
+engine = create_async_engine(
+    "postgresql+asyncpg://user:password@localhost/dbname",
+    echo=False,
+    pool_size=20,
+    max_overflow=30,
+    pool_pre_ping=True
+)
+
+# Create async session factory
+AsyncSessionLocal = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
+
+# Use in operations
+async def create_user(db: AsyncSession, user_data: UserCreate) -> User:
+    user = User(**user_data.model_dump())
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user
+```
+
+### **Domain-Based Models**
+
+Models are organized by business domain:
+
+```python
+# User model (app/models/auth/user.py)
+from app.models.core.base import Base, SoftDeleteMixin, TimestampMixin
+from sqlalchemy import Column, String, Boolean, DateTime
+from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
+import uuid
+
+class User(Base, SoftDeleteMixin, TimestampMixin):
+    __tablename__ = "users"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String(254), unique=True, index=True, nullable=False)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=True)  # Nullable for OAuth users
+    is_superuser = Column(Boolean, default=False, nullable=False, index=True)
+    is_verified = Column(Boolean, default=False, nullable=False, index=True)
+    
+    # OAuth fields
+    oauth_provider = Column(String(20), nullable=True)
+    oauth_id = Column(String(255), nullable=True)
+    oauth_email = Column(String(254), nullable=True)
+    
+    # Token fields for verification and password reset
+    verification_token = Column(String(255), nullable=True, unique=True)
+    verification_token_expires = Column(TIMESTAMP(timezone=True), nullable=True)
+    password_reset_token = Column(String(255), nullable=True, unique=True)
+    password_reset_token_expires = Column(TIMESTAMP(timezone=True), nullable=True)
+    
+    # Account deletion fields (GDPR compliance)
+    deletion_requested_at = Column(TIMESTAMP(timezone=True), nullable=True)
+    deletion_confirmed_at = Column(TIMESTAMP(timezone=True), nullable=True)
+    deletion_scheduled_for = Column(TIMESTAMP(timezone=True), nullable=True)
+    deletion_token = Column(String(255), nullable=True, unique=True)
+    deletion_token_expires = Column(TIMESTAMP(timezone=True), nullable=True)
+```
+
+### **Type-Safe CRUD Operations**
+
+All CRUD operations are fully typed and async:
+
+```python
+from typing import Any
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from app.models import User
+from app.schemas.auth.user import UserCreate
+
+# Type alias for async sessions
+DBSession = AsyncSession
+
+async def get_user_by_email(db: DBSession, email: str) -> User | None:
+    result = await db.execute(
+        select(User).filter(User.email == email, User.is_deleted.is_(False))
+    )
+    return result.scalar_one_or_none()
+
+async def create_user(db: DBSession, user_data: UserCreate) -> User:
+    hashed_password = get_password_hash(user_data.password)
+    user = User(
+        email=user_data.email,
+        username=user_data.username,
+        hashed_password=hashed_password,
+        is_superuser=user_data.is_superuser,
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+async def authenticate_user(db: DBSession, email: str, password: str) -> User | None:
+    user = await get_user_by_email(db, email)
+    if not user or not verify_password(password, str(user.hashed_password)):
+        return None
+    return user
+```
+
+## 📋 Available Operations
+
+### **User Operations**
+
+```python
+from app.crud.auth.user import (
+    get_user_by_email,
+    get_user_by_username,
+    get_user_by_id,
+    create_user,
+    authenticate_user,
+    get_users,
+    count_users,
+    soft_delete_user,
+    restore_user,
+    permanently_delete_user
+)
+
+# Get user by email
+user = await get_user_by_email(db, "user@example.com")
+
+# Get user by username
+user = await get_user_by_username(db, "johndoe")
+
+# Get user by ID
+user = await get_user_by_id(db, "user-uuid-here")
+
+# Create new user
+user_data = UserCreate(
+    email="newuser@example.com",
+    password="securepassword123",
+    username="newuser"
+)
+user = await create_user(db, user_data)
+
+# Authenticate user
+authenticated_user = await authenticate_user(db, "user@example.com", "password")
+
+# Get all users with pagination
+users = await get_users(db, skip=0, limit=10)
+
+# Count users
+user_count = await count_users(db)
+
+# Soft delete user
+await soft_delete_user(db, user.id)
+
+# Restore deleted user
+await restore_user(db, user.id)
+
+# Permanently delete user
+await permanently_delete_user(db, user.id)
+```
+
+### **API Key Operations**
+
+```python
+from app.crud.auth.api_key import (
+    create_api_key,
+    get_user_api_keys,
+    get_api_key_by_id,
+    deactivate_api_key,
+    rotate_api_key,
+    verify_api_key_in_db
+)
+
+# Create API key
+api_key = await create_api_key(db, user_id=user.id, name="My API Key")
+
+# Get user's API keys
+api_keys = await get_user_api_keys(db, user_id=user.id)
+
+# Get API key by ID
+api_key = await get_api_key_by_id(db, api_key_id=api_key.id)
+
+# Deactivate API key
+await deactivate_api_key(db, api_key_id=api_key.id)
+
+# Rotate API key
+new_api_key = await rotate_api_key(db, api_key_id=api_key.id)
+
+# Verify API key
+user = await verify_api_key_in_db(db, api_key="sk_abc123...")
+```
+
+### **Session Management**
+
+```python
+from app.crud.auth.refresh_token import (
+    create_refresh_token,
+    get_refresh_token_by_hash,
+    revoke_refresh_token,
+    get_user_sessions,
+    revoke_all_user_sessions,
+    cleanup_expired_tokens
+)
+
+# Create refresh token
+refresh_token = await create_refresh_token(db, user_id=user.id)
+
+# Get refresh token by hash
+token = await get_refresh_token_by_hash(db, token_hash="token_hash_here")
+
+# Revoke specific token
+await revoke_refresh_token(db, token_hash="token_hash_here")
+
+# Get user sessions
+sessions = await get_user_sessions(db, user_id=user.id)
+
+# Revoke all user sessions
+revoked_count = await revoke_all_user_sessions(db, user_id=user.id)
+
+# Cleanup expired tokens
+cleaned_count = await cleanup_expired_tokens(db)
+```
+
+### **Audit Logging**
+
+```python
+from app.crud.system.audit_log import create_audit_log
+
+# Log user action
+await create_audit_log(
+    db,
+    event_type="user_login",
+    user_id=user.id,
+    ip_address="192.168.1.100",
+    success=True,
+    context={"login_method": "email"}
+)
+
+# Log system event
+await create_audit_log(
+    db,
+    event_type="api_key_created",
+    user_id=user.id,
+    success=True,
+    context={"api_key_id": api_key.id}
+)
+```
+
+## 🗄️ Database Migrations
+
+### **Creating Migrations**
+
+```bash
+# Create migration for model changes
+alembic revision --autogenerate -m "Add user profile fields"
+
+# Create empty migration
+alembic revision -m "Add custom SQL"
+
+# Create migration with specific dependencies
+alembic revision --autogenerate -m "Add user roles" --depends-on=abc123
+```
+
+### **Applying Migrations**
 
 ```bash
 # Apply all pending migrations
 alembic upgrade head
 
 # Apply specific migration
-alembic upgrade <revision_id>
+alembic upgrade abc123
 
-# Rollback to previous migration
+# Apply migrations to specific revision
+alembic upgrade +2
+
+# Rollback migrations
 alembic downgrade -1
+alembic downgrade base
 ```
 
-### Migration Best Practices
+### **Migration Management**
 
-1. **Always review auto-generated migrations** before applying
-2. **Test migrations on development data** first
-3. **Backup your database** before applying migrations
-4. **Use descriptive migration messages**
-5. **Include both upgrade and downgrade logic**
+```bash
+# Check current migration
+alembic current
 
-### Example Migration
+# Check migration history
+alembic history
+
+# Check migration status
+alembic show abc123
+
+# Generate migration SQL
+alembic upgrade head --sql
+```
+
+### **Example Migration**
 
 ```python
-"""Add user bio field
+# alembic/versions/abc123_add_user_profile.py
+"""Add user profile fields
 
-Revision ID: 123456789abc
-Revises: previous_revision
-Create Date: 2024-01-15 10:30:00.000000
+Revision ID: abc123
+Revises: def456
+Create Date: 2024-01-01 12:00:00.000000
 
 """
 from alembic import op
 import sqlalchemy as sa
 
 def upgrade() -> None:
-    # Add bio column to users table
-    op.add_column('users', sa.Column('bio', sa.String(), nullable=True))
+    # Add new columns
+    op.add_column('users', sa.Column('first_name', sa.String(), nullable=True))
+    op.add_column('users', sa.Column('last_name', sa.String(), nullable=True))
+    op.add_column('users', sa.Column('phone', sa.String(), nullable=True))
+    
+    # Create index
+    op.create_index(op.f('ix_users_first_name'), 'users', ['first_name'], unique=False)
 
 def downgrade() -> None:
-    # Remove bio column from users table
-    op.drop_column('users', 'bio')
-```
-
----
-
-## Search and Filtering
-
-The template includes a powerful search and filtering system.
-
-### Basic Search
-
-```python
-# Search across multiple fields
-users = crud_user.search(db, search_term="john")
-
-# This searches in: username, email, first_name, last_name
-```
-
-### Advanced Filtering
-
-```python
-# Filter by multiple criteria
-filters = {
-    "is_active": True,
-    "is_verified": True,
-    "date_created__gte": "2024-01-01"
-}
-
-users = crud_user.get_multi_with_filters(db, filters=filters)
-```
-
-### Search Operators
-
-| Operator | Description | Example |
-|----------|-------------|---------|
-| `__exact` | Exact match | `{"username__exact": "john"}` |
-| `__contains` | Contains text | `{"email__contains": "gmail"}` |
-| `__startswith` | Starts with | `{"username__startswith": "j"}` |
-| `__endswith` | Ends with | `{"email__endswith": ".com"}` |
-| `__gte` | Greater than or equal | `{"date_created__gte": "2024-01-01"}` |
-| `__lte` | Less than or equal | `{"date_created__lte": "2024-12-31"}` |
-| `__in` | In list | `{"status__in": ["active", "pending"]}` |
-| `__isnull` | Is null | `{"deleted_at__isnull": True}` |
-
-### Full-Text Search
-
-```python
-# PostgreSQL full-text search
-users = crud_user.full_text_search(db, query="john doe")
-```
-
----
-
-## Soft Delete
-
-The template includes soft delete functionality to prevent data loss.
-
-### Using Soft Delete
-
-```python
-# Soft delete a user (marks as deleted but keeps data)
-crud_user.soft_delete(db, id=user_id, deleted_by=admin_id, reason="User request")
-
-# Get only active users
-active_users = crud_user.get_active(db)
-
-# Get only deleted users
-deleted_users = crud_user.get_deleted(db)
-
-# Get all users (active and deleted)
-all_users = crud_user.get_all(db)
-
-# Restore a soft-deleted user
-crud_user.restore(db, id=user_id)
-```
-
-### Soft Delete in Queries
-
-```python
-# By default, queries exclude soft-deleted records
-users = crud_user.get_multi(db)  # Only active users
-
-# Include soft-deleted records
-users = crud_user.get_multi_including_deleted(db)
-
-# Only soft-deleted records
-users = crud_user.get_multi_deleted_only(db)
-```
-
----
-
-## Audit Logging
-
-The template automatically logs database changes for audit purposes.
-
-### Automatic Logging
-
-```python
-# These operations are automatically logged
-user = crud_user.create(db, obj_in=user_data)  # CREATE
-user = crud_user.update(db, db_obj=user, obj_in=update_data)  # UPDATE
-crud_user.remove(db, id=user_id)  # DELETE
-```
-
-### Manual Logging
-
-```python
-from app.services.audit import log_audit_event
-
-# Log custom events
-log_audit_event(
-    db=db,
-    user_id=current_user.id,
-    event_type="password_changed",
-    success=True,
-    context={"ip_address": "192.168.1.1"}
-)
-```
-
-### Querying Audit Logs
-
-```python
-from app.crud import audit_log as crud_audit
-
-# Get audit logs for a user
-logs = crud_audit.get_by_user_id(db, user_id=user_id)
-
-# Get audit logs by event type
-logs = crud_audit.get_by_event_type(db, event_type="login")
-
-# Get recent audit logs
-logs = crud_audit.get_recent(db, hours=24)
-```
-
----
-
-## Performance Optimization
-
-### Connection Pooling
-
-The template uses SQLAlchemy connection pooling for better performance:
-
-```python
-# Configuration in app/core/config.py
-DB_POOL_SIZE = 20
-DB_MAX_OVERFLOW = 30
-DB_POOL_RECYCLE = 3600
-DB_POOL_TIMEOUT = 30
-DB_POOL_PRE_PING = True
-```
-
-### Query Optimization
-
-```python
-# Use select() for better performance
-from sqlalchemy import select
-
-# Instead of: db.query(User).filter(User.is_active == True).all()
-stmt = select(User).where(User.is_active == True)
-users = db.execute(stmt).scalars().all()
-
-# Use joins to avoid N+1 queries
-stmt = select(User).options(joinedload(User.api_keys))
-users = db.execute(stmt).scalars().all()
-```
-
-### Indexing
-
-```python
-# Add indexes for frequently queried fields
-class User(Base):
-    __tablename__ = "users"
+    # Remove index
+    op.drop_index(op.f('ix_users_first_name'), table_name='users')
     
-    id = Column(UUID(as_uuid=True), primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)  # Indexed for lookups
-    username = Column(String, unique=True, index=True)  # Indexed for lookups
-    is_active = Column(Boolean, default=True, index=True)  # Indexed for filtering
+    # Remove columns
+    op.drop_column('users', 'phone')
+    op.drop_column('users', 'last_name')
+    op.drop_column('users', 'first_name')
 ```
 
----
+## 🔧 Configuration
 
-## Troubleshooting
+### **Database Settings**
 
-### Common Issues
-
-#### Migration Conflicts
-```bash
-# If migrations conflict, stamp the head
-alembic stamp head
-
-# Then create a new migration
-alembic revision --autogenerate -m "Fix migration conflict"
+```python
+# app/core/config/config.py
+class Settings(BaseSettings):
+    # Database configuration
+    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/fastapi_template"
+    
+    # Connection pool settings
+    DB_POOL_SIZE: int = 20
+    DB_MAX_OVERFLOW: int = 30
+    DB_POOL_RECYCLE: int = 3600  # 1 hour
+    DB_POOL_TIMEOUT: int = 30
+    DB_POOL_PRE_PING: bool = True
 ```
 
-#### Database Connection Issues
+### **Environment Variables**
+
 ```bash
-# Check if PostgreSQL is running
-docker-compose ps postgres
+# Database connection
+DATABASE_URL=postgresql://postgres:password@localhost:5432/your_project
 
-# Restart PostgreSQL
-docker-compose restart postgres
-
-# Check connection
-python -c "from app.database.database import engine; print(engine.url)"
+# Connection pool settings
+DB_POOL_SIZE=20
+DB_MAX_OVERFLOW=30
+DB_POOL_RECYCLE=3600
+DB_POOL_TIMEOUT=30
+DB_POOL_PRE_PING=true
 ```
 
-#### Performance Issues
-```bash
-# Check slow queries
-# Add to your .env file:
-SQLALCHEMY_ECHO = true
 
-# Monitor connection pool
+
+## 🚀 Advanced Features
+
+### **Connection Pooling**
+
+```python
+from app.database.database import engine
+
+# Get pool statistics
+pool = engine.pool
+print(f"Pool size: {pool.size()}")
+print(f"Checked in: {pool.checkedin()}")
+print(f"Checked out: {pool.checkedout()}")
+print(f"Overflow: {pool.overflow()}")
+```
+
+### **Query Optimization**
+
+```python
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
+# Eager loading with relationships
+query = select(User).options(
+    selectinload(User.api_keys),
+    selectinload(User.refresh_tokens)
+)
+result = await db.execute(query)
+users = result.scalars().all()
+
+# Pagination
+query = select(User).offset(skip).limit(limit)
+result = await db.execute(query)
+users = result.scalars().all()
+
+# Filtering
+query = select(User).filter(
+    User.is_active == True,
+    User.is_verified == True
+)
+result = await db.execute(query)
+active_users = result.scalars().all()
+```
+
+### **Bulk Operations**
+
+```python
+from sqlalchemy import insert
+
+# Bulk insert
+users_data = [
+    {"email": "user1@example.com", "username": "user1"},
+    {"email": "user2@example.com", "username": "user2"},
+    {"email": "user3@example.com", "username": "user3"}
+]
+
+await db.execute(insert(User), users_data)
+await db.commit()
+
+# Bulk update
+from sqlalchemy import update
+
+await db.execute(
+    update(User)
+    .where(User.is_active == False)
+    .values(is_active=True)
+)
+await db.commit()
+```
+
+### **Database Health Checks**
+
+```python
+from sqlalchemy import text
+
+async def check_database_health(db: AsyncSession) -> dict[str, Any]:
+    try:
+        # Test basic connectivity
+        result = await db.execute(text("SELECT 1"))
+        result.fetchone()
+        
+        # Test more complex query
+        result = await db.execute(text("SELECT COUNT(*) FROM users"))
+        user_count = result.scalar()
+        
+        return {
+            "status": "healthy",
+            "user_count": user_count,
+            "connection": "ok"
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "error": str(e),
+            "connection": "failed"
+        }
+```
+
+## 🛠️ Troubleshooting
+
+### **Common Issues**
+
+**1. "Connection refused"**
+- Check if PostgreSQL is running
+- Verify connection string in DATABASE_URL
+- Ensure database exists
+
+**2. "Table doesn't exist"**
+- Run migrations: `alembic upgrade head`
+- Check if tables were created properly
+
+**3. "Pool exhausted"**
+- Increase pool size in settings
+- Check for connection leaks
+- Monitor pool statistics
+
+**4. "Transaction rollback"**
+- Check for constraint violations
+- Verify data types match schema
+- Look for foreign key issues
+
+### **Debug Commands**
+
+```bash
+# Check database connection
+docker-compose exec postgres psql -U postgres -d your_db -c "SELECT 1;"
+
+# Check tables
+docker-compose exec postgres psql -U postgres -d your_db -c "\dt"
+
+# Check migration status
+alembic current
+
+# Check pool statistics
 python -c "from app.database.database import engine; print(engine.pool.status())"
 ```
 
-### Debugging Queries
+### **Performance Monitoring**
 
 ```python
-# Enable SQL logging
-import logging
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-
-# Or use SQLAlchemy echo
+import time
 from app.database.database import engine
-engine.echo = True
+
+async def monitor_query_performance():
+    start_time = time.time()
+    
+    # Your database operation
+    result = await db.execute(select(User))
+    users = result.scalars().all()
+    
+    execution_time = time.time() - start_time
+    print(f"Query executed in {execution_time:.3f} seconds")
+    
+    # Pool statistics
+    pool = engine.pool
+    print(f"Pool size: {pool.size()}")
+    print(f"Checked out: {pool.checkedout()}")
 ```
+
+## 📚 Next Steps
+
+1. **Explore the Models**: Check out the models in `app/models/` to understand the data structure
+2. **Read the CRUD Guide**: Learn about CRUD operations in `app/crud/`
+3. **Check the Testing Guide**: See how to test database operations in [Testing Guide](testing-and-development.md)
+4. **Deploy to Production**: Follow the [Deployment Guide](deployment-and-production.md)
 
 ---
 
-## Best Practices
-
-### 1. **Always Use Transactions**
-```python
-from sqlalchemy.orm import Session
-
-def create_user_with_profile(db: Session, user_data, profile_data):
-    try:
-        # Create user
-        user = crud_user.create(db, obj_in=user_data)
-        
-        # Create profile
-        profile_data["user_id"] = user.id
-        profile = crud_profile.create(db, obj_in=profile_data)
-        
-        db.commit()
-        return user
-    except Exception:
-        db.rollback()
-        raise
-```
-
-### 2. **Use Proper Data Types**
-```python
-# Good: Use proper UUID type
-id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-
-# Good: Use proper string lengths
-email = Column(String(255), unique=True, index=True)
-
-# Good: Use proper boolean defaults
-is_active = Column(Boolean, default=True, nullable=False)
-```
-
-### 3. **Validate Data at Multiple Levels**
-```python
-# Database level (constraints)
-email = Column(String(255), unique=True, nullable=False)
-
-# Schema level (Pydantic)
-class UserCreate(BaseModel):
-    email: EmailStr
-    username: str = Field(..., min_length=3, max_length=50)
-
-# Application level (business logic)
-def create_user(db: Session, user_data: UserCreate):
-    if crud_user.get_by_email(db, email=user_data.email):
-        raise HTTPException(400, "Email already registered")
-```
-
-### 4. **Use Soft Delete for Important Data**
-```python
-# Instead of hard delete
-# crud_user.delete(db, id=user_id)
-
-# Use soft delete
-crud_user.soft_delete(db, id=user_id, reason="User request")
-```
-
-### 5. **Optimize for Common Queries**
-```python
-# Add indexes for frequently queried fields
-class User(Base):
-    email = Column(String(255), unique=True, index=True)
-    username = Column(String(255), unique=True, index=True)
-    is_active = Column(Boolean, default=True, index=True)
-    date_created = Column(DateTime, default=datetime.utcnow, index=True)
-```
-
----
-
-## Next Steps
-
-Now that you understand database management, you can:
-
-1. **Generate CRUD boilerplate** for your own models
-2. **Customize the search and filtering** for your needs
-3. **Add relationships** between your models
-4. **Implement business logic** in your CRUD operations
-5. **Set up monitoring** for database performance
-6. **Create data migrations** for production deployments
-
-For more advanced topics, check out:
-- [Authentication Tutorial](authentication.md) - User management and security
-- [Testing Tutorial](testing-and-development.md) - Testing database operations
-- [Deployment Tutorial](deployment-and-production.md) - Production database setup 
+**Happy coding! 🗄️** 

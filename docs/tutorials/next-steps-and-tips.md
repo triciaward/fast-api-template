@@ -15,8 +15,7 @@ docker-compose down
 # View logs
 docker-compose logs -f
 
-# Run tests
-pytest
+
 
 # Format code
 ruff format .
@@ -33,14 +32,14 @@ alembic revision --autogenerate -m "description"
 # Create superuser
 python app/bootstrap_superuser.py
 
-# Generate CRUD boilerplate
-python scripts/generate_crud.py ModelName field1:type field2:type
+# Run validation checks
+./scripts/development/validate_ci.sh
 ```
 
 ### Key Endpoints
 - **API Documentation**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/api/v1/health
-- **Admin Panel**: http://localhost:8000/admin
+- **Health Check**: http://localhost:8000/system/health
+- **Admin API**: http://localhost:8000/admin/users
 - **Alternative Docs**: http://localhost:8000/redoc
 
 ### Database Commands
@@ -63,8 +62,8 @@ alembic history
 docker-compose up -d
 
 # 2. Make code changes
-# 3. Run tests
-pytest
+# 3. Check code quality
+ruff check .
 
 # 4. Format code
 ruff format .
@@ -78,7 +77,7 @@ git add . && git commit -m "description"
 ### For Template Users (Creating New Projects)
 1. **Follow the Quick Start** - Use the rename and customization scripts
 2. **Set up your environment** - Run the setup scripts
-3. **Explore the codebase** - Familiarize yourself with the structure
+3. **Explore the codebase** - Familiarize yourself with the domain-based structure
 4. **Start with a simple model** - Create your first domain entity
 
 ### For Existing Projects (Ready to Build Features)
@@ -87,7 +86,7 @@ git add . && git commit -m "description"
 1. **Customize branding** - Update README, project name, and documentation
 2. **Explore the codebase** - Study the patterns in `app/` folder
 3. **Set up your domain models** - Add core business entities to `app/models/`
-4. **Create your first CRUD endpoints** - Use existing patterns in `app/api/v1/endpoints/`
+4. **Create your first CRUD endpoints** - Use existing patterns in `app/api/`
 
 **Phase 2: Core Features (Week 2-3)**
 1. **Add main API endpoints** - Build primary business logic
@@ -102,7 +101,7 @@ git add . && git commit -m "description"
 4. **Set up monitoring** - Add logging and error tracking
 
 ### Quick Wins to Build First
-1. **Simple CRUD endpoint** - Create a basic resource (e.g., `/api/v1/items`)
+1. **Simple CRUD endpoint** - Create a basic resource (e.g., `/items`)
 2. **Data validation** - Add proper request/response schemas
 3. **Error handling** - Customize error responses for your domain
 4. **Basic tests** - Write tests for your new endpoints
@@ -134,12 +133,12 @@ git add . && git commit -m "description"
 - **❌ Inconsistent response formats** - Use the existing response schemas as templates
 - **❌ Not handling errors properly** - Use the existing error handling patterns
 - **❌ Missing pagination** - Always paginate list endpoints using the existing utilities
-- **❌ Not versioning APIs** - Use the `/api/v1/` pattern for future compatibility
+- **❌ Not using domain-based organization** - Follow the existing domain structure
 - **❌ Returning too much data** - Use response models to limit data exposure
 - **❌ Not documenting endpoints** - Keep OpenAPI documentation current
 
 ### Development Workflow Issues
-- **❌ Not running tests** - Always run `pytest` before committing
+
 - **❌ Ignoring linting errors** - Fix all `ruff check` issues
 - **❌ Not using pre-commit hooks** - Install and use pre-commit for code quality
 - **❌ Forgetting to format code** - Run `ruff format .` regularly
@@ -181,8 +180,8 @@ git add . && git commit -m "description"
 ## 🚀 Advanced Tips & Best Practices
 
 ### Code Organization
-- **Follow the existing patterns** - Study how the template organizes code
-- **Use the CRUD generator** - Generate boilerplate with `python scripts/generate_crud.py`
+- **Follow the existing patterns** - Study how the template organizes code by domains
+- **Use domain-based structure** - Organize code by business domains (auth, users, system)
 - **Keep models simple** - Don't put business logic in models
 - **Use services for business logic** - Keep endpoints thin, services thick
 - **Separate concerns** - Keep database, business logic, and API layers separate
@@ -217,6 +216,7 @@ git add . && git commit -m "description"
 - [Testing Guide](testing-and-development.md) - Testing best practices
 - [Deployment Guide](deployment-and-production.md) - Production deployment
 - [Optional Features](optional-features.md) - Advanced features and integrations
+- [Health Monitoring](health-monitoring.md) - Health check endpoints and monitoring
 
 ### External Resources
 - [FastAPI Documentation](https://fastapi.tiangolo.com/) - Official FastAPI docs

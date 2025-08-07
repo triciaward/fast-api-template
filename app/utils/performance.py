@@ -17,7 +17,7 @@ from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
-from app.core.logging_config import get_app_logger
+from app.core.config import get_app_logger
 
 logger = get_app_logger()
 
@@ -33,13 +33,13 @@ def monitor_database_queries() -> None:
 
     @event.listens_for(Engine, "before_cursor_execute")
     def before_cursor_execute(
-        conn,
-        cursor,
-        statement,
-        parameters,
-        context,
-        executemany,
-    ):
+        conn: Any,
+        cursor: Any,
+        statement: str,
+        parameters: dict[str, Any],
+        context: Any,
+        executemany: bool,
+    ) -> None:
         conn.info.setdefault("query_start_time", []).append(time.time())
         logger.debug(
             "Database query starting",
@@ -48,7 +48,14 @@ def monitor_database_queries() -> None:
         )
 
     @event.listens_for(Engine, "after_cursor_execute")
-    def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+    def after_cursor_execute(
+        conn: Any,
+        cursor: Any,
+        statement: str,
+        parameters: dict[str, Any],
+        context: Any,
+        executemany: bool,
+    ) -> None:
         total = time.time() - conn.info["query_start_time"].pop()
         if total > 0.1:  # Log slow queries (>100ms)
             logger.warning(

@@ -4,18 +4,20 @@ This guide covers the comprehensive health monitoring system included in the Fas
 
 ## 🏥 Overview
 
-The template includes a complete health monitoring system with 7 different endpoints designed for various use cases:
+The template includes a complete health monitoring system with 8 different endpoints designed for various use cases:
 
 - **Load Balancer Health Checks** - Simple status checks
 - **Kubernetes Probes** - Readiness and liveness checks
 - **Comprehensive Monitoring** - Detailed system status
 - **Database Health** - Database-specific monitoring
 - **Application Metrics** - Performance and usage metrics
+- **Rate Limiting Info** - Rate limiting configuration
+- **Sentry Testing** - Error monitoring test endpoint
 
 ## 📊 Health Check Endpoints
 
 ### 1. Basic Health Check
-**Endpoint**: `GET /api/v1/health`
+**Endpoint**: `GET /system/health`
 
 **Purpose**: Simple application status check
 
@@ -27,16 +29,26 @@ The template includes a complete health monitoring system with 7 different endpo
   "version": "1.0.0",
   "environment": "development",
   "checks": {
-    "database": {"status": "unknown"},
+    "database": "healthy",
     "application": "healthy",
-    "redis": {"status": "unknown"},
-    "external_services": {"status": "unknown"}
+    "external_services": "unknown"
+  },
+  "sentry": {
+    "enabled": false
+  },
+  "database_pools": {
+    "async": {
+      "size": 20,
+      "checked_in": 18,
+      "checked_out": 2,
+      "overflow": 0
+    }
   }
 }
 ```
 
 ### 2. Simple Health Check
-**Endpoint**: `GET /api/v1/health/simple`
+**Endpoint**: `GET /system/health/simple`
 
 **Purpose**: Load balancer health check (minimal response)
 
@@ -49,7 +61,7 @@ The template includes a complete health monitoring system with 7 different endpo
 ```
 
 ### 3. Readiness Probe
-**Endpoint**: `GET /api/v1/health/ready`
+**Endpoint**: `GET /system/health/ready`
 
 **Purpose**: Kubernetes readiness probe - checks if app is ready to receive traffic
 
@@ -68,16 +80,12 @@ The template includes a complete health monitoring system with 7 different endpo
 **Response** (Failure):
 ```json
 {
-  "error": {
-    "message": "Service not ready",
-    "type": "ReadinessError",
-    "code": "service_unavailable"
-  }
+  "detail": "Service not ready"
 }
 ```
 
 ### 4. Liveness Probe
-**Endpoint**: `GET /api/v1/health/live`
+**Endpoint**: `GET /system/health/live`
 
 **Purpose**: Kubernetes liveness probe - checks if app is alive and should not be restarted
 
@@ -90,7 +98,7 @@ The template includes a complete health monitoring system with 7 different endpo
 ```
 
 ### 5. Detailed Health Check
-**Endpoint**: `GET /api/v1/health/detailed`
+**Endpoint**: `GET /system/health/detailed`
 
 **Purpose**: Comprehensive system status with all component checks
 
@@ -107,8 +115,8 @@ The template includes a complete health monitoring system with 7 different endpo
       "response_time": 0.002
     },
     "redis": {
-      "status": "healthy",
-      "response_time": 0.001
+      "status": "disabled",
+      "message": "Redis is not enabled"
     },
     "external_services": {
       "email": {
@@ -122,7 +130,7 @@ The template includes a complete health monitoring system with 7 different endpo
 ```
 
 ### 6. Database Health Check
-**Endpoint**: `GET /api/v1/health/database`
+**Endpoint**: `GET /system/health/database`
 
 **Purpose**: Database-specific health and performance metrics
 
@@ -133,37 +141,60 @@ The template includes a complete health monitoring system with 7 different endpo
   "response_time": 0.002,
   "table_count": 8,
   "connection_pool": {
-    "pool_size": 5,
-    "max_overflow": 10,
+    "pool_size": 20,
+    "max_overflow": 30,
     "pool_recycle": 3600
   },
   "database_url": "localhost:5432/fastapi_template"
 }
 ```
 
-### 7. Metrics Endpoint
-**Endpoint**: `GET /api/v1/health/metrics`
+### 7. Rate Limiting Info
+**Endpoint**: `GET /system/health/rate-limit`
+
+**Purpose**: Rate limiting configuration and status
+
+**Response**:
+```json
+{
+  "enabled": false,
+  "timestamp": "2025-08-06T18:05:06.289177Z",
+  "configuration": {
+    "default_limit": "100/minute",
+    "login_limit": "5/minute",
+    "register_limit": "3/minute",
+    "storage_backend": "memory"
+  }
+}
+```
+
+### 8. Metrics Endpoint
+**Endpoint**: `GET /system/health/metrics`
 
 **Purpose**: Application metrics and performance data
 
 **Response**:
 ```json
 {
-  "application": {
-    "uptime": 3600,
-    "version": "1.0.0",
-    "environment": "development"
-  },
   "system": {
     "cpu_percent": 2.5,
     "memory_percent": 15.3,
-    "disk_usage_percent": 45.2
+    "memory_available": 8589934592,
+    "disk_percent": 45.2,
+    "disk_free": 107374182400
   },
-  "database": {
-    "active_connections": 3,
-    "pool_size": 5,
-    "overflow": 0
-  }
+  "application": {
+    "version": "1.0.0",
+    "environment": "development",
+    "features": {
+      "redis_enabled": false,
+      "websockets_enabled": false,
+      "celery_enabled": false,
+      "rate_limiting_enabled": false,
+      "sentry_enabled": false
+    }
+  },
+  "timestamp": 1691352306.289177
 }
 ```
 
@@ -189,7 +220,7 @@ server {
 
     # Health check for load balancer
     location /health {
-        proxy_pass http://fastapi_backend/api/v1/health/simple;
+        proxy_pass http://fastapi_backend/system/health/simple;
         access_log off;
     }
 }
@@ -221,7 +252,7 @@ spec:
         # Readiness probe
         readinessProbe:
           httpGet:
-            path: /api/v1/health/ready
+            path: /system/health/ready
             port: 8000
           initialDelaySeconds: 10
           periodSeconds: 5
@@ -230,7 +261,7 @@ spec:
         # Liveness probe
         livenessProbe:
           httpGet:
-            path: /api/v1/health/live
+            path: /system/health/live
             port: 8000
           initialDelaySeconds: 30
           periodSeconds: 10
@@ -251,7 +282,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health/simple"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/system/health/simple"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -280,6 +311,7 @@ Configure health check behavior through environment variables:
 # Enable/disable specific health checks
 ENABLE_REDIS=true
 ENABLE_CELERY=false
+ENABLE_WEBSOCKETS=false
 
 # Health check timeouts
 HEALTH_CHECK_TIMEOUT=5
@@ -295,7 +327,7 @@ METRICS_INTERVAL=60
 Add custom health checks to your application:
 
 ```python
-from app.api.api_v1.endpoints.health import router
+from app.api.system.health import router
 from app.core.logging_config import get_app_logger
 
 logger = get_app_logger()
@@ -430,7 +462,7 @@ spec:
 **1. Health Check Timeouts**
 ```bash
 # Check if the application is responding
-curl -v http://localhost:8000/api/v1/health/simple
+curl -v http://localhost:8000/system/health/simple
 
 # Check application logs
 docker-compose logs api
@@ -442,7 +474,7 @@ docker-compose logs api
 docker-compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
 
 # Check database health endpoint
-curl http://localhost:8000/api/v1/health/database
+curl http://localhost:8000/system/health/database
 ```
 
 **3. Redis Connection Issues**
@@ -451,7 +483,7 @@ curl http://localhost:8000/api/v1/health/database
 docker-compose exec redis redis-cli ping
 
 # Check if Redis is enabled in health checks
-curl http://localhost:8000/api/v1/health/detailed
+curl http://localhost:8000/system/health/detailed
 ```
 
 ### Debug Mode
@@ -461,7 +493,7 @@ Enable debug logging for health checks:
 ```python
 # In your application startup
 import logging
-logging.getLogger("app.api.api_v1.endpoints.health").setLevel(logging.DEBUG)
+logging.getLogger("app.api.system.health").setLevel(logging.DEBUG)
 ```
 
 ## 📚 Best Practices

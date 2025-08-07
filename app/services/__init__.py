@@ -1,28 +1,24 @@
-# Services package for optional features like Redis and WebSockets
+# Services package for optional features organized by category
 from collections.abc import Callable
 from typing import Any
 
 from fastapi import Request
 
-# Try to import optional services
+# Import from organized subfolders
 try:
-    from .email import email_service
-except ImportError:
-    email_service = None  # type: ignore
-
-try:
-    from .oauth import oauth_service
+    from .auth import oauth_service
 except ImportError:
     oauth_service = None  # type: ignore
 
 try:
-    from .redis import redis_client
+    from .external import email_service, redis_client
 except ImportError:
+    email_service = None  # type: ignore
     redis_client = None
 
-# Celery service
+# Background task services
 try:
-    from .celery import (
+    from .background import (
         cancel_task,
         get_active_tasks,
         get_celery_app,
@@ -48,10 +44,9 @@ except ImportError:
     def get_celery_stats() -> dict[str, Any]:
         return {"enabled": False}
 
-
 # Rate limiting service
 try:
-    from .rate_limiter import (
+    from .middleware import (
         get_limiter,
         get_rate_limit_info,
         rate_limit_account_deletion,
@@ -78,7 +73,7 @@ except ImportError:
     rate_limit_oauth = _no_op_decorator
     rate_limit_account_deletion = _no_op_decorator
 
-    def rate_limit_custom(limit: str) -> Callable[[Callable], Callable]:
+    def rate_limit_custom(limit: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         return _no_op_decorator
 
     def setup_rate_limiting(app: Any) -> None:
@@ -87,8 +82,20 @@ except ImportError:
     def get_rate_limit_info(request: Request) -> dict[str, Any]:
         return {"enabled": False}
 
+# Sentry monitoring (no-op if not available)
+def init_sentry() -> None:
+    """Initialize Sentry error monitoring (no-op if not available)."""
 
-# Note: websocket_manager doesn't exist in websocket.py, so we'll skip it for now
+# Redis functions (no-op if not available)
+async def init_redis() -> None:
+    """Initialize Redis connection (no-op if not available)."""
+
+async def close_redis() -> None:
+    """Close Redis connection (no-op if not available)."""
+
+# Rate limiter functions (no-op if not available)
+async def init_rate_limiter() -> None:
+    """Initialize rate limiting (no-op if not available)."""
 
 __all__ = [
     "email_service",
@@ -111,4 +118,8 @@ __all__ = [
     "rate_limit_custom",
     "setup_rate_limiting",
     "get_rate_limit_info",
+    "init_sentry",
+    "init_redis",
+    "close_redis",
+    "init_rate_limiter",
 ]

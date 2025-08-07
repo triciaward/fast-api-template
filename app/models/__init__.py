@@ -1,17 +1,21 @@
-# Models package
+"""Database models organized by category."""
 
-from app.database.database import Base
-from app.models.api_key import APIKey
-from app.models.audit_log import AuditLog
-from app.models.base import SoftDeleteMixin
-from app.models.refresh_token import RefreshToken
-from app.models.user import User
+# Import from organized subfolders
+from .auth import APIKey, RefreshToken, User
+from .core import Base, SoftDeleteMixin, TimestampMixin
+from .system import AuditLog
 
 __all__ = [
+    # Core components
     "Base",
-    "AuditLog",
-    "APIKey",
     "SoftDeleteMixin",
-    "RefreshToken",
+    "TimestampMixin",
+
+    # Auth models
     "User",
+    "APIKey",
+    "RefreshToken",
+
+    # System models
+    "AuditLog",
 ]

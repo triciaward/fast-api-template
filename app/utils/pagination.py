@@ -6,7 +6,7 @@ pagination across all API endpoints.
 """
 
 import math
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -83,16 +83,16 @@ class PaginatedResponse(BaseModel, Generic[T]):
 
 
 async def paginate(
-    query,
+    query: Any,
     page: int = 1,
     size: int = 20,
     max_size: int = 100,
-) -> PaginatedResponse:
+) -> PaginatedResponse[Any]:
     """
-    Generic pagination helper for SQLAlchemy queries.
+    Generic pagination helper for async SQLAlchemy queries.
 
     Args:
-        query: SQLAlchemy query object
+        query: Async SQLAlchemy query object
         page: Page number (1-based)
         size: Number of items per page
         max_size: Maximum allowed page size
@@ -108,10 +108,10 @@ async def paginate(
     skip = (page - 1) * size
 
     # Get total count
-    total = query.count()
+    total = await query.count()
 
     # Get paginated results
-    items = query.offset(skip).limit(size).all()
+    items = await query.offset(skip).limit(size).all()
 
     # Create metadata
     metadata = PaginationMetadata.create(page=page, size=size, total=total)
@@ -123,7 +123,7 @@ def create_pagination_links(
     base_url: str,
     page: int,
     pages: int,
-    **query_params,
+    **query_params: Any,
 ) -> dict[str, str | None]:
     """
     Create pagination links for HATEOAS support.
@@ -185,7 +185,7 @@ class PaginatedResponseWithLinks(PaginatedResponse[T]):
         size: int,
         total: int,
         base_url: str,
-        **query_params,
+        **query_params: Any,
     ) -> "PaginatedResponseWithLinks[T]":
         """Create a paginated response with HATEOAS links."""
         metadata = PaginationMetadata.create(page=page, size=size, total=total)

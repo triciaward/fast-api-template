@@ -34,7 +34,7 @@ from app.utils.performance import (
 # In your main.py or application startup
 from app.utils.performance import monitor_database_queries
 
-# Enable database query monitoring
+# Enable database query monitoring (automatically enabled)
 monitor_database_queries()
 ```
 
@@ -46,8 +46,8 @@ monitor_database_queries()
 
 **Example output**:
 ```
-INFO - Database query executed in 45ms: SELECT * FROM users WHERE email = ?
-WARNING - Slow query detected (250ms): SELECT * FROM users JOIN posts ON users.id = posts.user_id
+INFO - Database query starting: SELECT * FROM users WHERE email = ?
+WARNING - Slow database query detected (250ms): SELECT * FROM users JOIN posts ON users.id = posts.user_id
 ```
 
 ### 2. Request Performance Monitoring
@@ -241,24 +241,15 @@ async def analyze_user_queries():
 
 ## 🔧 Configuration
 
-### Environment Variables
+### Performance Monitoring Features
 
-Configure performance monitoring behavior:
+The performance monitoring system is **enabled by default** and includes:
 
-```bash
-# Enable/disable performance monitoring
-ENABLE_PERFORMANCE_MONITORING=true
-ENABLE_QUERY_MONITORING=true
-ENABLE_REQUEST_MONITORING=true
-
-# Performance thresholds
-SLOW_QUERY_THRESHOLD=100  # milliseconds
-SLOW_REQUEST_THRESHOLD=1000  # milliseconds
-
-# Cache settings
-CACHE_ENABLED=true
-CACHE_DEFAULT_TTL=300  # seconds
-```
+- **Database Query Monitoring**: Automatically logs all database queries
+- **Slow Query Detection**: Logs queries taking longer than 100ms
+- **Request Performance Tracking**: Monitors endpoint execution times
+- **Caching System**: In-memory caching with configurable TTL
+- **Query Analysis**: SQL analysis with optimization suggestions
 
 ### Custom Performance Monitoring
 
@@ -524,7 +515,7 @@ async def get_cache_metrics():
 
 ### 4. Production Considerations
 
-- **Test performance monitoring** in staging environment
+
 - **Monitor resource usage** of monitoring tools themselves
 - **Set up proper logging** for performance data
 - **Implement performance budgets** for critical endpoints

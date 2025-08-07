@@ -12,7 +12,7 @@ Think of optional features like add-ons for your car. The basic car works great,
 - **Celery**: Background task processing for heavy operations
 - **Email**: Automated email sending for user management
 - **Admin CLI**: Terminal-based administration tools
-- **Admin HTML Dashboard**: Visual web-based administration interface
+- **Security Headers**: HTTP security protection
 
 ---
 
@@ -25,7 +25,6 @@ Think of optional features like add-ons for your car. The basic car works great,
 | **Celery** | `ENABLE_CELERY=true` | Background tasks | Medium |
 | **Email** | SMTP settings | User notifications | Easy |
 | **Admin CLI** | CLI scripts | Terminal admin | Easy |
-| **Admin HTML Dashboard** | Built-in | Visual admin interface | Easy |
 | **Security Headers** | `ENABLE_SECURITY_HEADERS=true` | HTTP security headers | Easy |
 
 ---
@@ -36,7 +35,7 @@ Think of optional features like add-ons for your car. The basic car works great,
 
 **Why use it**: Speeds up your app by storing frequently accessed data in memory instead of hitting the database every time.
 
-**Relevant code**: [`app/services/redis.py`](../../app/services/redis.py)
+**Relevant code**: [`app/services/external/redis.py`](../../app/services/external/redis.py)
 
 ### How to Enable Redis
 
@@ -86,7 +85,7 @@ flowchart TD
 
 ```bash
 # Check if Redis is working
-curl http://localhost:8000/health
+curl http://localhost:8000/system/health
 
 # Look for this in the response:
 {
@@ -104,7 +103,7 @@ curl http://localhost:8000/health
 
 **Why use it**: Enable live chat, notifications, dashboards, and any feature that needs instant updates.
 
-**Relevant code**: [`app/api/api_v1/endpoints/ws_demo.py`](../../app/api/api_v1/endpoints/ws_demo.py)
+**Relevant code**: [`app/api/integrations/websockets.py`](../../app/api/integrations/websockets.py)
 
 ### How to Enable WebSockets
 
@@ -120,15 +119,16 @@ curl http://localhost:8000/health
 
 3. **Connect to WebSocket endpoint:**
    ```
-   ws://localhost:8000/api/v1/ws/chat/{room_name}?token={access_token}
+   ws://localhost:8000/integrations/ws/demo
    ```
 
 ### WebSocket Features
 
-- **Room-based Chat**: Join different chat rooms
+- **Demo Endpoint**: Test WebSocket functionality
 - **Real-time Messaging**: Instant message delivery
-- **User Presence**: See who's online
+- **Room-based Chat**: Join different chat rooms
 - **Broadcast Messages**: Send to all users in a room
+- **Connection Management**: Automatic connection handling
 
 ### Test WebSockets
 
@@ -137,11 +137,17 @@ curl http://localhost:8000/health
 # macOS: brew install websocat
 # Linux: sudo apt install websocat
 
-# Connect to chat room (replace with your access token)
-websocat ws://localhost:8000/api/v1/ws/chat/test-room?token=your_access_token
+# Connect to demo WebSocket
+websocat ws://localhost:8000/integrations/ws/demo
 
 # Send a message
-{"message": "Hello, WebSocket!"}
+{"type": "echo", "message": "Hello, WebSocket!"}
+
+# Join a room
+{"type": "room", "room": "test-room"}
+
+# Broadcast to room
+{"type": "room_broadcast", "message": "Hello room!", "room": "test-room"}
 ```
 
 ---
@@ -153,8 +159,8 @@ websocat ws://localhost:8000/api/v1/ws/chat/test-room?token=your_access_token
 **Why use it**: Process emails, generate reports, handle file uploads, and other time-consuming tasks in the background.
 
 **Relevant code**: 
-- [`app/services/celery_app.py`](../../app/services/celery_app.py)
-- [`app/services/celery_tasks.py`](../../app/services/celery_tasks.py)
+- [`app/services/background/celery_app.py`](../../app/services/background/celery_app.py)
+- [`app/services/background/celery_tasks.py`](../../app/services/background/celery_tasks.py)
 
 ### How to Enable Celery
 
@@ -171,7 +177,7 @@ websocat ws://localhost:8000/api/v1/ws/chat/test-room?token=your_access_token
 
 3. **Start Celery worker:**
    ```bash
-   celery -A app.services.celery_app worker --loglevel=info
+   celery -A app.services.background.celery_app worker --loglevel=info
    ```
 
 4. **Restart your FastAPI server:**
@@ -193,8 +199,9 @@ flowchart TD
 
 ### Example Celery Task
 
-See [`send_email()` in app/services/email.py`](../../app/services/email.py) for the full implementation. Example Celery tasks are provided in [`app/services/celery_tasks.py`](../../app/services/celery_tasks.py).
+See [`send_email()` in app/services/external/email.py`](../../app/services/external/email.py) for the full implementation. Example Celery tasks are provided in [`app/services/background/celery_tasks.py`](../../app/services/background/celery_tasks.py).
 
+```python
 @shared_task
 def send_welcome_email(user_email: str, username: str):
     """Send welcome email to new user."""
@@ -224,13 +231,13 @@ def process_user_data(user_id: int):
 
 ```bash
 # Submit a test task via API
-curl -X POST "http://localhost:8000/api/v1/celery/test-task" \
+curl -X POST "http://localhost:8000/system/background-tasks/test-task" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"message": "Hello from Celery!"}'
 
 # Check task status
-curl -X GET "http://localhost:8000/api/v1/celery/task-status/{task_id}"
+curl -X GET "http://localhost:8000/system/background-tasks/task-status/{task_id}"
 ```
 
 ---
@@ -241,7 +248,7 @@ curl -X GET "http://localhost:8000/api/v1/celery/task-status/{task_id}"
 
 **Why use it**: Keep users informed and provide essential account management features.
 
-**Relevant code**: [`app/services/email.py`](../../app/services/email.py)
+**Relevant code**: [`app/services/external/email.py`](../../app/services/external/email.py)
 
 ### How to Enable Email
 
@@ -249,7 +256,7 @@ curl -X GET "http://localhost:8000/api/v1/celery/task-status/{task_id}"
    ```env
    SMTP_HOST=smtp.gmail.com
    SMTP_PORT=587
-   SMTP_USER=your-email@gmail.com
+   SMTP_USERNAME=your-email@gmail.com
    SMTP_PASSWORD=your-app-password
    SMTP_TLS=True
    ```
@@ -270,7 +277,7 @@ curl -X GET "http://localhost:8000/api/v1/celery/task-status/{task_id}"
 
 ```bash
 # Register a new user (should trigger verification email)
-curl -X POST "http://localhost:8000/api/v1/auth/register" \
+curl -X POST "http://localhost:8000/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -289,28 +296,28 @@ curl -X POST "http://localhost:8000/api/v1/auth/register" \
 
 **Why use it**: Quick administration tasks without needing a web interface.
 
-**Relevant code**: [`scripts/admin_cli.py`](../../scripts/admin_cli.py)
+**Relevant code**: [`scripts/admin/admin_cli.py`](../../scripts/admin/admin_cli.py)
 
 ### How to Use Admin CLI
 
 1. **Make the script executable:**
    ```bash
-   chmod +x scripts/admin_cli.sh
+   chmod +x scripts/admin/admin_cli.sh
    ```
 
 2. **Run admin commands:**
    ```bash
    # Show help
-   python scripts/admin_cli.py --help
+   python scripts/admin/admin_cli.py --help
 
    # List all users
-   python scripts/admin_cli.py list-users
+   python scripts/admin/admin_cli.py list-users
 
    # Create a superuser
-   python scripts/admin_cli.py create-superuser
+   python scripts/admin/admin_cli.py create-superuser
 
    # Show statistics
-   python scripts/admin_cli.py stats
+   python scripts/admin/admin_cli.py stats
    ```
 
 > **Note:** If the CLI script cannot connect to the database (e.g., DB is down or credentials are wrong), it will fail with a connection error. Always ensure your database is running and your `.env` settings are correct before running CLI commands.
@@ -327,13 +334,13 @@ curl -X POST "http://localhost:8000/api/v1/auth/register" \
 
 ```bash
 # Create a superuser
-python scripts/admin_cli.py create-superuser
+python scripts/admin/admin_cli.py create-superuser
 
 # List all users
-python scripts/admin_cli.py list-users
+python scripts/admin/admin_cli.py list-users
 
 # Show system stats
-python scripts/admin_cli.py stats
+python scripts/admin/admin_cli.py stats
 ```
 
 ---
@@ -344,10 +351,10 @@ python scripts/admin_cli.py stats
 |---------|---------------------|--------------|------------------|
 | **Redis** | `ENABLE_REDIS=true` | Docker | `docker-compose up -d redis` |
 | **WebSockets** | `ENABLE_WEBSOCKETS=true` | None | Restart server |
-| **Celery** | `ENABLE_CELERY=true` | Redis | `celery -A app.services.celery_app worker` |
+| **Celery** | `ENABLE_CELERY=true` | Redis | `celery -A app.services.background.celery_app worker` |
 | **Email** | SMTP settings | None | Restart server |
-| **Admin CLI** | None | None | `python scripts/admin_cli.py` |
-| **Admin HTML Dashboard** | Built-in | None | `GET /admin/api-keys` |
+| **Admin CLI** | None | None | `python scripts/admin/admin_cli.py` |
+| **Security Headers** | `ENABLE_SECURITY_HEADERS=true` | None | Enabled by default |
 
 ---
 
@@ -357,7 +364,7 @@ python scripts/admin_cli.py stats
 
 ```bash
 # Check all services are running
-curl http://localhost:8000/health
+curl http://localhost:8000/system/health
 
 # Expected response:
 {
@@ -372,26 +379,25 @@ curl http://localhost:8000/health
 
 ```bash
 # Test Redis caching
-curl http://localhost:8000/api/v1/users?page=1&size=10
+curl http://localhost:8000/users?page=1&size=10
 
 # Test WebSockets
-websocat ws://localhost:8000/api/v1/ws/chat/test-room?token=your_token
+websocat ws://localhost:8000/integrations/ws/demo
 
 # Test Celery
-curl -X POST "http://localhost:8000/api/v1/celery/test-task" \
+curl -X POST "http://localhost:8000/system/background-tasks/test-task" \
   -H "Authorization: Bearer YOUR_TOKEN"
 
 # Test Email
-curl -X POST "http://localhost:8000/api/v1/auth/register" \
+curl -X POST "http://localhost:8000/auth/register" \
   -H "Content-Type: application/json" \
   -d '{"email": "test@example.com", "username": "test", "password": "Test123!"}'
 
 # Test Admin CLI
-python scripts/admin_cli.py stats
+python scripts/admin/admin_cli.py stats
 
-# Test Admin HTML Dashboard
-curl -X GET "http://localhost:8000/admin/api-keys" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+# Test Security Headers
+curl -I http://localhost:8000/
 ```
 
 ---
@@ -408,160 +414,11 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
 
 ### Celery Issues
 - **Worker not starting**: Check `CELERY_BROKER_URL` and ensure Redis is running
-- **Tasks not processing**: Verify worker is running with `celery -A app.services.celery_app worker`
+- **Tasks not processing**: Verify worker is running with `celery -A app.services.background.celery_app worker`
 
 ### Email Issues
 - **SMTP error**: Check SMTP credentials and enable "Less secure app access" for Gmail
 - **No emails sent**: Verify SMTP settings in `.env`
-
----
-
-## Glossary
-
-- **Redis**: An in-memory data structure store used for caching, sessions, and message brokering.
-- **WebSocket**: A communication protocol that provides full-duplex communication channels over a single TCP connection.
-- **Celery**: A distributed task queue system that can process vast amounts of messages.
-- **SMTP**: Simple Mail Transfer Protocol, used for sending emails.
-- **CLI**: Command Line Interface, a text-based interface for interacting with software.
-- **Broker**: A message broker (like Redis) that stores and forwards messages between applications.
-- **Worker**: A Celery process that executes background tasks.
-- **HTML Dashboard**: A web-based interface for visual administration tasks.
-
----
-
-## 🖥️ Admin HTML Dashboard - Visual API Key Management
-
-**One-liner**: A beautiful dark-mode web interface for managing API keys without using the command line.
-
-**Why use it**: Provides a visual, user-friendly way for administrators to manage API keys through their browser, perfect for non-technical users or quick key management tasks.
-
-**Relevant code**: 
-- [`app/templates/admin/api_keys.html`](../../app/templates/admin/api_keys.html)
-- [`app/api/admin_views.py`](../../app/api/admin_views.py)
-
-### How to Access the Admin Dashboard
-
-⚠️ **IMPORTANT**: The admin dashboard requires JWT Bearer token authentication. It is NOT accessible through traditional web browser login forms.
-
-#### Method 1: Browser with Authorization Header (Recommended)
-
-1. **Get a JWT token first:**
-   ```bash
-   curl -X POST "http://localhost:8000/api/v1/auth/login" \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     -d "username=admin@example.com&password=Admin123!"
-   ```
-
-2. **Install a browser extension** like "ModHeader" (Chrome) or "Header Editor" (Firefox)
-
-3. **Add the Authorization header:**
-   - Header Name: `Authorization`
-   - Header Value: `Bearer YOUR_ACCESS_TOKEN_HERE`
-
-4. **Visit the dashboard:**
-   ```
-   http://localhost:8000/admin/api-keys
-   ```
-
-#### Method 2: Browser Developer Tools
-
-1. **Open browser developer tools** (F12)
-2. **Go to Network tab**
-3. **Add a request header:**
-   - Right-click on any request → "Add request header"
-   - Name: `Authorization`
-   - Value: `Bearer YOUR_JWT_TOKEN`
-4. **Visit:** `http://localhost:8000/admin/api-keys`
-
-#### Method 3: Programmatic Access (curl)
-
-```bash
-# Get JWT token
-TOKEN=$(curl -s -X POST "http://localhost:8000/api/v1/auth/login" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=admin@example.com&password=Admin123!" | jq -r '.access_token')
-
-# Access dashboard (returns HTML)
-curl -X GET "http://localhost:8000/admin/api-keys" \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-#### Method 4: For Production Applications
-
-When building a real application with this template:
-
-1. **Create a proper admin interface** that handles JWT authentication
-2. **Store the JWT token** in your admin session/cookies
-3. **Make authenticated requests** to `/admin/api-keys` from your admin dashboard
-4. **Use the API endpoints** programmatically for key management
-
-#### Default Superuser Credentials
-
-- **Email:** `admin@example.com`
-- **Password:** `Admin123!`
-
-⚠️ **Note**: These credentials are for development only. Change them in production!
-
-### Admin Dashboard Features
-
-- **Visual Key Management**: Create, rotate, and revoke keys with one click
-- **Dark Mode Interface**: Modern Bootstrap 5 styling with dark theme
-- **Status Tracking**: See active, inactive, and expired keys at a glance
-- **Pagination**: Handle large numbers of keys efficiently
-- **Real-time Operations**: Immediate feedback on all operations
-- **Security**: Superuser-only access with full audit logging
-
-### Admin Dashboard Lifecycle
-
-```mermaid
-flowchart TD
-  A[Admin Login] --> B[Access Dashboard]
-  B --> C[View All API Keys]
-  C --> D{Choose Action}
-  D --> E[Create New Key]
-  D --> F[Rotate Existing Key]
-  D --> G[Revoke Key]
-  E --> H[Key Created Successfully]
-  F --> I[New Key Generated]
-  G --> J[Key Deactivated]
-  H --> C
-  I --> C
-  J --> C
-```
-
-### What the Admin Dashboard Does
-
-- **Key Creation**: Fill out a form to create new API keys with labels, scopes, and expiration dates
-- **Key Rotation**: Generate new keys while keeping the same ID and metadata
-- **Key Revocation**: Deactivate keys permanently with confirmation
-- **Key Monitoring**: View all keys in the system with their current status
-- **Audit Trail**: All operations are logged for security and compliance
-
-> **Admin Dashboard Benefits:**
-> - **No Command Line**: Perfect for non-technical administrators
-> - **Visual Feedback**: See key status and operations immediately
-> - **Bulk Operations**: Manage multiple keys efficiently
-> - **Security**: All operations require superuser privileges and are audited
->
-> **Use Cases:** API key management for development teams, client key provisioning, security audits, and compliance reporting.
-
-### Test Admin Dashboard
-
-```bash
-# Create a superuser first (if you don't have one)
-python scripts/bootstrap_superuser.py
-
-# Login and get a token
-curl -X POST "http://localhost:8000/api/v1/auth/login" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=admin@example.com&password=your_password"
-
-# Access the dashboard
-curl -X GET "http://localhost:8000/admin/api-keys" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-For complete documentation, see the **[Admin HTML Dashboard section](#️-admin-html-dashboard---visual-api-key-management)** above.
 
 ---
 
@@ -571,7 +428,7 @@ For complete documentation, see the **[Admin HTML Dashboard section](#️-admin-
 
 **Why use it**: Prevents XSS attacks, clickjacking, MIME type sniffing, and other security vulnerabilities that can compromise your application and users.
 
-**Relevant code**: [`app/core/security_headers.py`](../../app/core/security_headers.py)
+**Relevant code**: [`app/core/security/security_headers.py`](../../app/core/security/security_headers.py)
 
 ### How to Enable Security Headers
 
@@ -692,7 +549,7 @@ The default CSP allows:
 To customize CSP for your application:
 
 ```python
-# In app/core/security_headers.py
+# In app/core/security/security_headers.py
 response.headers["Content-Security-Policy"] = (
     "default-src 'self'; "
     "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
@@ -770,11 +627,24 @@ flowchart TD
 curl -I http://localhost:8000/
 
 # Check headers on API endpoint
-curl -I http://localhost:8000/api/v1/health
+curl -I http://localhost:8000/system/health
 
 # Check headers on auth endpoint (should have cache control)
-curl -I http://localhost:8000/api/v1/auth/login
+curl -I http://localhost:8000/auth/login
 ```
+
+---
+
+## Glossary
+
+- **Redis**: An in-memory data structure store used for caching, sessions, and message brokering.
+- **WebSocket**: A communication protocol that provides full-duplex communication channels over a single TCP connection.
+- **Celery**: A distributed task queue system that can process vast amounts of messages.
+- **SMTP**: Simple Mail Transfer Protocol, used for sending emails.
+- **CLI**: Command Line Interface, a text-based interface for interacting with software.
+- **Broker**: A message broker (like Redis) that stores and forwards messages between applications.
+- **Worker**: A Celery process that executes background tasks.
+- **Security Headers**: HTTP headers that protect against common web vulnerabilities.
 
 ---
 
@@ -787,6 +657,6 @@ Now that you understand optional features, you can:
 4. **Handle background tasks** with Celery
 5. **Automate user management** with email notifications
 6. **Manage your app** efficiently with the Admin CLI
-7. **Provide visual administration** with the Admin HTML Dashboard
+7. **Protect your application** with security headers
 
 Remember: Start simple and add features as you need them. The template works great without any optional features, but they can make your app much more powerful when used appropriately! 

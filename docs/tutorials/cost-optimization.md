@@ -22,7 +22,7 @@ This guide shows you how to deploy your FastAPI application for **$10-15/month**
 
 ### **Phase 1: Budget Configuration Settings**
 
-Add these optional settings to `app/core/config.py`:
+Add these optional settings to `app/core/config/config.py`:
 
 ```python
 # Budget Optimization Settings (for solo developers)
@@ -160,7 +160,7 @@ networks:
 
 ### **Phase 4: Budget Deployment Script**
 
-Create `scripts/deploy_budget.sh`:
+Create `scripts/setup/deploy_budget.sh`:
 
 ```bash
 #!/bin/bash
@@ -315,7 +315,7 @@ echo "🚀 Next steps: Deploy to your chosen platform"
 
 ### **Phase 5: Self-Hosted Monitoring Setup**
 
-Create `scripts/setup_self_hosted_monitoring.sh`:
+Create `scripts/setup/setup_self_hosted_monitoring.sh`:
 
 ```bash
 #!/bin/bash
@@ -411,7 +411,7 @@ scrape_configs:
   - job_name: 'fastapi'
     static_configs:
       - targets: ['api:8000']
-    metrics_path: '/api/v1/health/metrics'
+    metrics_path: '/system/health/metrics'
     scrape_interval: 30s
 
   - job_name: 'postgres'

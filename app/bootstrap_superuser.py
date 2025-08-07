@@ -11,9 +11,9 @@ import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.crud.user import get_user_by_email
+from app.crud.auth.user import get_user_by_email
 from app.database.database import get_db
-from app.schemas.user import UserCreate
+from app.schemas.auth.user import UserCreate
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -68,7 +68,7 @@ async def create_superuser(
             username = f"admin_{domain}"
 
         # Validate and fix username if needed
-    from app.core.validation import validate_username
+    from app.core.security import validate_username
 
     is_valid, error_msg = validate_username(username)
     if not is_valid:
@@ -83,7 +83,7 @@ async def create_superuser(
     # Username is valid, continue
 
     # Validate password
-    from app.core.validation import validate_password
+    from app.core.security import validate_password
 
     is_valid, error_msg = validate_password(password)
     if not is_valid:
@@ -92,7 +92,7 @@ async def create_superuser(
         password = "Admin123!"
 
     # Create superuser
-    from app.crud.user import create_user
+    from app.crud.auth.user import create_user
 
     superuser_data = UserCreate(
         email=email,

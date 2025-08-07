@@ -81,7 +81,7 @@ class SearchFilterConfig(BaseModel):
 class SearchFilterBuilder:
     """Builder class for constructing search and filter queries."""
 
-    def __init__(self, model_class):
+    def __init__(self, model_class: type[Any]) -> None:
         self.model_class = model_class
         self._allowed_fields = self._get_model_fields()
 
@@ -211,7 +211,7 @@ class SearchFilterBuilder:
 
     def build_query(self, config: SearchFilterConfig) -> Any:
         """Build a complete SQLAlchemy query with search and filters."""
-        query = select(self.model_class)
+        query: Any = select(self.model_class)
         conditions = []
 
         # Add text search condition

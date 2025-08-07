@@ -51,7 +51,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=15
 REFRESH_TOKEN_EXPIRE_DAYS=30
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=your-production-email@gmail.com
+SMTP_USERNAME=your-production-email@gmail.com
 SMTP_PASSWORD=your-app-password
 SMTP_TLS=True
 ENABLE_RATE_LIMITING=true
@@ -62,6 +62,7 @@ ENABLE_REDIS=true
 REDIS_URL=redis://prod-redis:6379/0
 ENABLE_SENTRY=true
 SENTRY_DSN=your-sentry-dsn
+SENTRY_ENVIRONMENT=production
 ```
 
 ---
@@ -72,41 +73,100 @@ SENTRY_DSN=your-sentry-dsn
 version: '3.8'
 services:
   postgres:
-    image: postgres:13
+    image: postgres:15
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-postgres-1
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
+    restart: unless-stopped
+
+  # Optional Redis service - only used when ENABLE_REDIS=true
   redis:
     image: redis:7-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-redis-1
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     networks:
       - app-network
+    restart: unless-stopped
+    profiles:
+      - redis  # Only start when explicitly requested
+
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-api-1
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
-      - ENVIRONMENT=production
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      ENABLE_REDIS: ${ENABLE_REDIS:-false}
+      ENABLE_WEBSOCKETS: ${ENABLE_WEBSOCKETS:-false}
+      ENABLE_CELERY: ${ENABLE_CELERY:-false}
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      ENABLE_SENTRY: ${ENABLE_SENTRY:-false}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
     ports:
-      - "8000:8000"
+      - "${API_PORT}:8000"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    restart: unless-stopped
+    volumes:
+      - .:/code  # Mount entire project for live code editing
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Optional Celery worker service - only used when ENABLE_CELERY=true
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-celery-worker-1
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      ENABLE_REDIS: ${ENABLE_REDIS:-false}
+      ENABLE_WEBSOCKETS: ${ENABLE_WEBSOCKETS:-false}
+      ENABLE_CELERY: ${ENABLE_CELERY:-false}
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      ENABLE_SENTRY: ${ENABLE_SENTRY:-false}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
     depends_on:
       - postgres
       - redis
     networks:
       - app-network
     restart: unless-stopped
+    profiles:
+      - celery  # Only start when explicitly requested
+
 volumes:
   postgres_data:
+    name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-postgres_data
   redis_data:
+    name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-redis_data
+
 networks:
   app-network:
+    name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-app-network
     driver: bridge
 ```
 
@@ -117,13 +177,14 @@ networks:
 ## Production Settings (What to Check)
 
 - `ENVIRONMENT=production`
-- `SECRET_KEY` is strong and unique
+- `SECRET_KEY` is strong and unique (use `openssl rand -hex 32`)
 - `DATABASE_URL` points to your production DB
 - `ENABLE_RATE_LIMITING=true`
 - `ENABLE_REDIS=true` (if using Redis)
 - `ENABLE_SENTRY=true` (if using Sentry/GlitchTip)
 - All email and OAuth credentials are set for production
 - CORS is restricted to your production domains
+- `SENTRY_ENVIRONMENT=production`
 
 ---
 
@@ -212,7 +273,7 @@ graph TD
     ```
 3. **Create a superuser:**
     ```bash
-    docker-compose exec api python scripts/bootstrap_superuser.py
+    docker-compose exec api python app/bootstrap_superuser.py
     ```
 4. **Set up Caddy for HTTPS**
 5. **Point your domain to your server's IP in Cloudflare**

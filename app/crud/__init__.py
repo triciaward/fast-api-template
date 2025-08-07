@@ -1,14 +1,23 @@
-# Export all CRUD functions
-# Import modules individually to avoid circular imports
-from . import (
-    api_key,
-    audit_log,
-    refresh_token,
-    user,
-)
+"""CRUD operations organized by category."""
 
-# Export refresh_token CRUD functions for test and app imports
-from .refresh_token import (
+# Import from organized subfolders for backward compatibility
+# Also provide category-specific access
+from . import auth, system
+
+# Import all functions explicitly to avoid star import issues
+from .auth.api_key import (
+    count_all_api_keys,
+    count_user_api_keys,
+    create_api_key,
+    deactivate_api_key,
+    get_all_api_keys,
+    get_api_key_by_hash,
+    get_api_key_by_id,
+    get_user_api_keys,
+    rotate_api_key,
+    verify_api_key_in_db,
+)
+from .auth.refresh_token import (
     cleanup_expired_tokens,
     create_refresh_token,
     enforce_session_limit,
@@ -20,42 +29,122 @@ from .refresh_token import (
     revoke_refresh_token_by_hash,
     verify_refresh_token_in_db,
 )
-from .user import (
-    authenticate_user_sync,
-    create_oauth_user_sync,
-    create_user_sync,
-    get_user_by_email_sync,
-    get_user_by_oauth_id_sync,
-    get_user_by_username_sync,
-    get_user_by_verification_token_sync,
-    update_verification_token_sync,
-    verify_user_sync,
+from .auth.user import (
+    authenticate_user,
+    cancel_account_deletion,
+    cancel_user_deletion,
+    confirm_account_deletion,
+    confirm_user_deletion,
+    count_deleted_users,
+    count_users,
+    create_oauth_user,
+    create_user,
+    get_deleted_users,
+    get_user_by_deletion_token,
+    get_user_by_email,
+    get_user_by_id,
+    get_user_by_id_any_status,
+    get_user_by_oauth_id,
+    get_user_by_password_reset_token,
+    get_user_by_username,
+    get_user_by_verification_token,
+    get_users,
+    get_users_for_deletion_reminder,
+    get_users_for_permanent_deletion,
+    permanently_delete_user,
+    request_account_deletion,
+    reset_user_password,
+    restore_user,
+    schedule_user_deletion,
+    soft_delete_user,
+    update_deletion_token,
+    update_password_reset_token,
+    update_user_password,
+    update_verification_token,
+    verify_user,
+)
+from .system.admin import AdminUserCRUD, admin_user_crud
+from .system.audit_log import (
+    cleanup_old_audit_logs,
+    create_audit_log,
+    get_audit_logs_by_event_type,
+    get_audit_logs_by_session,
+    get_audit_logs_by_user,
+    get_failed_audit_logs,
+    get_recent_audit_logs,
 )
 
 __all__ = [
-    "user",
-    "refresh_token",
-    "audit_log",
-    "api_key",
-    # refresh_token functions
-    "cleanup_expired_tokens",
+    # User CRUD operations
+    "create_user",
+    "get_user_by_email",
+    "get_user_by_username",
+    "get_user_by_id",
+    "authenticate_user",
+    "get_user_by_oauth_id",
+    "create_oauth_user",
+    "verify_user",
+    "update_verification_token",
+    "get_user_by_verification_token",
+    "update_password_reset_token",
+    "get_user_by_password_reset_token",
+    "reset_user_password",
+    "update_user_password",
+    "update_deletion_token",
+    "get_user_by_deletion_token",
+    "schedule_user_deletion",
+    "confirm_user_deletion",
+    "cancel_user_deletion",
+    "get_users_for_deletion_reminder",
+    "get_users_for_permanent_deletion",
+    "count_users",
+    "soft_delete_user",
+    "restore_user",
+    "permanently_delete_user",
+    "cancel_account_deletion",
+    "confirm_account_deletion",
+    "request_account_deletion",
+    "get_user_by_id_any_status",
+    "get_deleted_users",
+    "count_deleted_users",
+    "get_users",
+
+    # API Key CRUD operations
+    "create_api_key",
+    "get_api_key_by_hash",
+    "verify_api_key_in_db",
+    "get_user_api_keys",
+    "count_user_api_keys",
+    "get_api_key_by_id",
+    "deactivate_api_key",
+    "rotate_api_key",
+    "get_all_api_keys",
+    "count_all_api_keys",
+
+    # Refresh Token CRUD operations
     "create_refresh_token",
-    "enforce_session_limit",
+    "cleanup_expired_tokens",
     "get_refresh_token_by_hash",
-    "get_user_session_count",
-    "get_user_sessions",
-    "revoke_all_user_sessions",
     "revoke_refresh_token",
     "revoke_refresh_token_by_hash",
+    "get_user_sessions",
+    "get_user_session_count",
+    "revoke_all_user_sessions",
     "verify_refresh_token_in_db",
-    # user functions
-    "authenticate_user_sync",
-    "create_oauth_user_sync",
-    "create_user_sync",
-    "get_user_by_email_sync",
-    "get_user_by_oauth_id_sync",
-    "get_user_by_username_sync",
-    "get_user_by_verification_token_sync",
-    "update_verification_token_sync",
-    "verify_user_sync",
+    "enforce_session_limit",
+
+    # System CRUD operations
+    "AdminUserCRUD",
+    "admin_user_crud",
+    "create_audit_log",
+    "get_audit_logs_by_user",
+    "get_audit_logs_by_event_type",
+    "get_audit_logs_by_session",
+    "get_recent_audit_logs",
+    "get_failed_audit_logs",
+    "cleanup_old_audit_logs",
+
+    # Category modules
+    "auth",
+    "system",
 ]

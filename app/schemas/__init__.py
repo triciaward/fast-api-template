@@ -1,6 +1,78 @@
-# Export all user schemas
-# Export error schemas
-from .errors import (
+"""Pydantic schemas organized by category."""
+
+# Import from organized subfolders
+from .admin import (
+    AdminBulkOperationRequest,
+    AdminBulkOperationResponse,
+    AdminSessionInfo,
+    AdminSessionListResponse,
+    AdminSystemInfo,
+    AdminUserCreate,
+    AdminUserFilters,
+    AdminUserListResponse,
+    AdminUserResponse,
+    AdminUserStatistics,
+    AdminUserToggleResponse,
+    AdminUserUpdate,
+)
+from .auth import (
+    AccountDeletionCancelRequest,
+    AccountDeletionCancelResponse,
+    AccountDeletionConfirmRequest,
+    AccountDeletionConfirmResponse,
+    # Account deletion schemas
+    AccountDeletionRequest,
+    AccountDeletionResponse,
+    AccountDeletionStatusResponse,
+    # API Key schemas
+    APIKeyBase,
+    APIKeyCreate,
+    APIKeyCreateResponse,
+    APIKeyListResponse,
+    APIKeyResponse,
+    APIKeyRotateResponse,
+    APIKeyUser,
+    DeletedUserListResponse,
+    DeletedUserResponse,
+    DeletedUserSearchResponse,
+    # Email verification schemas
+    EmailVerificationRequest,
+    EmailVerificationResponse,
+    InvalidScopeError,
+    # OAuth schemas
+    OAuthLogin,
+    OAuthUserInfo,
+    PasswordChangeRequest,
+    PasswordChangeResponse,
+    PasswordResetConfirmRequest,
+    PasswordResetConfirmResponse,
+    # Password management schemas
+    PasswordResetRequest,
+    PasswordResetResponse,
+    RefreshTokenResponse,
+    RestoreUserResponse,
+    # Custom exceptions
+    ScopesTypeError,
+    SessionInfo,
+    SessionListResponse,
+    # Soft delete schemas
+    SoftDeleteRequest,
+    SoftDeleteResponse,
+    # Token/Session schemas
+    Token,
+    TokenData,
+    # Base schemas
+    UserBase,
+    UserCreate,
+    UserListResponse,
+    UserLogin,
+    UserResponse,
+    UserSearchResponse,
+    UserUpdate,
+    VerifyEmailRequest,
+    VerifyEmailResponse,
+)
+from .core import (
     AuthenticationErrorDetail,
     AuthorizationErrorDetail,
     ConflictErrorDetail,
@@ -13,34 +85,8 @@ from .errors import (
     ServerErrorDetail,
     ValidationErrorDetail,
 )
-from .user import (
-    EmailVerificationRequest,
-    EmailVerificationResponse,
-    OAuthLogin,
-    OAuthUserInfo,
-    Token,
-    TokenData,
-    UserBase,
-    UserCreate,
-    UserLogin,
-    UserResponse,
-    VerifyEmailRequest,
-    VerifyEmailResponse,
-)
 
 __all__ = [
-    "EmailVerificationRequest",
-    "EmailVerificationResponse",
-    "OAuthLogin",
-    "OAuthUserInfo",
-    "Token",
-    "TokenData",
-    "UserBase",
-    "UserCreate",
-    "UserLogin",
-    "UserResponse",
-    "VerifyEmailRequest",
-    "VerifyEmailResponse",
     # Error schemas
     "AuthenticationErrorDetail",
     "AuthorizationErrorDetail",
@@ -53,4 +99,82 @@ __all__ = [
     "ResourceErrorDetail",
     "ServerErrorDetail",
     "ValidationErrorDetail",
+
+    # Base user schemas
+    "UserBase",
+    "UserCreate",
+    "UserLogin",
+    "UserResponse",
+    "UserUpdate",
+    "UserListResponse",
+    "UserSearchResponse",
+
+    # Token/Session schemas
+    "Token",
+    "TokenData",
+    "RefreshTokenResponse",
+    "SessionInfo",
+    "SessionListResponse",
+
+    # OAuth schemas
+    "OAuthLogin",
+    "OAuthUserInfo",
+
+    # Email verification schemas
+    "EmailVerificationRequest",
+    "EmailVerificationResponse",
+    "VerifyEmailRequest",
+    "VerifyEmailResponse",
+
+    # Password management schemas
+    "PasswordResetRequest",
+    "PasswordResetResponse",
+    "PasswordResetConfirmRequest",
+    "PasswordResetConfirmResponse",
+    "PasswordChangeRequest",
+    "PasswordChangeResponse",
+
+    # Account deletion schemas
+    "AccountDeletionRequest",
+    "AccountDeletionResponse",
+    "AccountDeletionConfirmRequest",
+    "AccountDeletionConfirmResponse",
+    "AccountDeletionCancelRequest",
+    "AccountDeletionCancelResponse",
+    "AccountDeletionStatusResponse",
+    "DeletedUserResponse",
+
+    # Soft delete schemas
+    "SoftDeleteRequest",
+    "SoftDeleteResponse",
+    "RestoreUserResponse",
+    "DeletedUserListResponse",
+    "DeletedUserSearchResponse",
+
+    # API Key schemas
+    "APIKeyBase",
+    "APIKeyCreate",
+    "APIKeyResponse",
+    "APIKeyCreateResponse",
+    "APIKeyRotateResponse",
+    "APIKeyListResponse",
+    "APIKeyUser",
+
+    # Admin schemas
+    "AdminBulkOperationRequest",
+    "AdminBulkOperationResponse",
+    "AdminSessionInfo",
+    "AdminSessionListResponse",
+    "AdminSystemInfo",
+    "AdminUserCreate",
+    "AdminUserFilters",
+    "AdminUserListResponse",
+    "AdminUserResponse",
+    "AdminUserStatistics",
+    "AdminUserToggleResponse",
+    "AdminUserUpdate",
+
+    # Custom exceptions
+    "ScopesTypeError",
+    "InvalidScopeError",
 ]

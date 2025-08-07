@@ -29,8 +29,8 @@ Welcome to the tutorials section! Here you'll find comprehensive guides for ever
 1. **📖 [Getting Started Guide](getting-started.md)** - Set up your development environment
 2. **🎯 [Next Steps & Development Tips](next-steps-and-tips.md)** - What to build first and common mistakes to avoid
 3. **🔐 [Authentication System](authentication.md)** - Learn user login and registration
-4. **🗄️ [Database Management](database-management.md)** - Work with data, migrations, and CRUD scaffolding
-5. **🧪 [Testing and Development](testing-and-development.md)** - Write tests and debug
+4. **🗄️ [Database Management](database-management.md)** - Work with data, migrations, and CRUD operations
+
 6. **🌐 [Deployment and Production](deployment-and-production.md)** - Deploy to production
 7. **🔧 [Optional Features](optional-features.md)** - Add advanced features as needed
 
@@ -84,7 +84,7 @@ flowchart TD
     
     subgraph "Development Tools"
         N[Setup Scripts]
-        O[CRUD Scaffolding]
+        O[CRUD Operations]
         P[Pre-commit Hooks]
         Q[Verification Tools]
     end
@@ -97,7 +97,7 @@ flowchart TD
     end
     
     subgraph "Testing & Quality"
-        V[Pytest Tests]
+        
         W[Template Tests]
         X[Code Quality]
         Y[CI/CD Pipeline]
@@ -126,23 +126,41 @@ flowchart TD
 ```
 fast-api-template/
 ├── 📁 app/                    # Main application code
-│   ├── 📁 api/               # API endpoints and routes
+│   ├── 📁 api/               # API endpoints and routes (domain-based)
+│   │   ├── 📁 auth/          # Authentication endpoints
+│   │   ├── 📁 users/         # User management endpoints
+│   │   ├── 📁 system/        # System endpoints (health, metrics)
+│   │   └── 📁 admin/         # Admin endpoints
 │   ├── 📁 core/              # Configuration and core utilities
-│   ├── 📁 crud/              # Database operations
-│   ├── 📁 models/            # Database models (separated by entity)
-│   │   ├── base.py           # Base model and mixins
-│   │   ├── user.py           # User model
-│   │   ├── api_key.py        # API key model
-│   │   ├── audit_log.py      # Audit log model
-│   │   └── refresh_token.py  # Refresh token model
-│   ├── 📁 schemas/           # Pydantic schemas
+│   │   ├── 📁 config/        # Configuration management
+│   │   ├── 📁 security/      # Security utilities
+│   │   └── 📁 error_handling/ # Error handling
+│   ├── 📁 crud/              # Database operations (domain-based)
+│   │   ├── 📁 auth/          # Authentication CRUD
+│   │   ├── 📁 system/        # System CRUD
+│   │   └── 📁 user.py        # User CRUD operations
+│   ├── 📁 models/            # Database models (domain-based)
+│   │   ├── 📁 auth/          # Authentication models
+│   │   ├── 📁 system/        # System models
+│   │   └── 📁 core/          # Base models and mixins
+│   ├── 📁 schemas/           # Pydantic schemas (domain-based)
+│   │   ├── 📁 auth/          # Authentication schemas
+│   │   ├── 📁 admin/         # Admin schemas
+│   │   └── 📁 core/          # Core schemas
 │   ├── 📁 services/          # Business logic and external services
+│   │   ├── 📁 auth/          # Authentication services
+│   │   ├── 📁 background/    # Background tasks
+│   │   ├── 📁 external/      # External service integrations
+│   │   ├── 📁 middleware/    # Middleware services
+│   │   └── 📁 monitoring/    # Monitoring and audit services
 │   └── 📁 utils/             # Utility functions
 ├── 📁 docs/                  # Documentation
 │   └── 📁 tutorials/         # This tutorial section
-├── 📁 tests/                 # Test files
-│   └── 📁 template_tests/    # Template-specific tests
-├── 📁 scripts/               # Utility scripts
+
+├── 📁 scripts/               # Utility scripts (organized by purpose)
+│   ├── 📁 setup/             # Setup and configuration scripts
+│   ├── 📁 development/       # Development tools
+│   └── 📁 admin/             # Administration scripts
 ├── 📄 docker-compose.yml     # Docker services
 ├── 📄 requirements.txt       # Python dependencies
 └── 📄 .env                   # Environment variables
@@ -172,13 +190,13 @@ git clone <your-repo-url>
 cd fast-api-template
 
 # Step 1: Rename the template directory
-./scripts/rename_template.sh
+./scripts/setup/rename_template.sh
 
 # Step 2: Restart VS Code and open the renamed directory
 code your_project_name
 
 # Step 3: Customize for your project
-./scripts/customize_template.sh
+./scripts/setup/customize_template.sh
 
 # Follow the prompts and start developing!
 ```
@@ -194,7 +212,7 @@ code your_project_name
 **Demo:**
 ```bash
 # See the customization process in action
-python3 scripts/demo_customization.py
+python3 scripts/setup/demo_customization.py
 ```
 
 ### 🔧 Core Features
@@ -215,7 +233,7 @@ Master database operations and management:
 - Search and filtering
 - Pagination and audit logging
 - Soft delete functionality
-- **CRUD Scaffolding**: Generate complete CRUD boilerplate automatically with one command
+- **Domain-Based Organization**: CRUD operations organized by business domains
 
 ### ⚡ Optional Features
 
@@ -226,22 +244,13 @@ Explore advanced features that can enhance your application:
 - **Celery**: Background task processing
 - **Email**: Automated notifications
 - **Admin CLI**: Terminal administration
-- **Admin HTML Dashboard**: Visual API key management interface
-
-#### 🖥️ [Admin HTML Dashboard](optional-features.md#️-admin-html-dashboard---visual-api-key-management)
-Manage API keys through a beautiful web interface:
-- **Visual Management**: No command line needed - manage keys through your browser
-- **Dark Mode Interface**: Modern Bootstrap 5 styling with dark theme
-- **Real-time Operations**: Create, rotate, and revoke keys with one click
-- **Status Tracking**: See active, inactive, and expired keys at a glance
-- **Security Features**: Superuser-only access with full audit logging
-- **Responsive Design**: Works on desktop and mobile devices
+- **Security Headers**: HTTP security protection
 
 ### 🛠️ Development & Testing
 
-#### 🧪 [Testing and Development](testing-and-development.md)
+
 Learn best practices for development:
-- Writing comprehensive tests with pytest
+
 - Debugging techniques and tools
 - Code quality tools (linting, formatting)
 - Pre-commit hooks and CI/CD setup
@@ -252,7 +261,7 @@ Learn best practices for development:
 
 #### 🏥 [Health Monitoring](health-monitoring.md)
 Comprehensive health monitoring system:
-- **7 Health Check Endpoints**: Basic, simple, readiness, liveness, detailed, database, metrics
+- **8 Health Check Endpoints**: Basic, simple, readiness, liveness, detailed, database, metrics, rate limiting
 - **Load Balancer Integration**: Simple health checks for load balancers
 - **Kubernetes Probes**: Readiness and liveness probes for container orchestration
 - **Database Monitoring**: Database-specific health and performance metrics
@@ -301,7 +310,7 @@ Deploy your FastAPI app on a budget for solo developers:
 3. Read the **[Authentication System](authentication.md)** tutorial
 4. Learn about **[Database Management](database-management.md)**
 5. Explore **[Optional Features](optional-features.md)** as needed
-6. Study **[Testing and Development](testing-and-development.md)** for best practices
+
 7. Read **[Deployment and Production](deployment-and-production.md)** when ready to deploy
 
 ### For Experienced Developers
@@ -356,11 +365,7 @@ Each tutorial includes:
 # Start all services with Docker (recommended)
 docker-compose up -d
 
-# Run tests
-pytest
 
-# Run only template tests
-pytest -m "template_only"
 
 # Run database migrations
 alembic upgrade head
@@ -369,37 +374,25 @@ alembic upgrade head
 docker-compose logs -f
 
 # Check application health
-curl http://localhost:8000/health
-```
-
-### 🚀 **CRUD Scaffolding**
-```bash
-# Generate a Post model with title, content, and is_published fields
-python3 scripts/generate_crud.py Post title:str content:str is_published:bool
-
-# Generate a Product model with soft delete and search capabilities
-python3 scripts/generate_crud.py Product name:str price:float description:str --soft-delete --searchable
-
-# Generate an admin-managed Category model
-python3 scripts/generate_crud.py Category name:str slug:str --admin
+curl http://localhost:8000/system/health
 ```
 
 ### 🛠️ **Development Tools**
 ```bash
 # Comprehensive setup
-./scripts/setup_comprehensive.sh
+./scripts/setup/setup_comprehensive.sh
 
 # Fix common issues
-./scripts/fix_common_issues.sh
+./scripts/setup/fix_common_issues.sh
 
 # Verify setup
-python scripts/verify_setup.py
+python scripts/setup/verify_setup.py
 
 # Install pre-commit hooks
-./scripts/install_precommit.sh
+./scripts/setup/install_precommit.sh
 
 # Run code quality checks
-./scripts/lint.sh
+./scripts/development/validate_ci.sh
 ```
 
 ### Key Configuration Files
@@ -412,8 +405,8 @@ python scripts/verify_setup.py
 
 ### Important URLs
 - **API Documentation**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
-- **Admin Panel**: http://localhost:8000/admin (if configured)
+- **Health Check**: http://localhost:8000/system/health
+- **Admin API**: http://localhost:8000/admin/users
 
 ### 🔧 Useful External Tools
 - **[pgAdmin](https://www.pgadmin.org/)**: PostgreSQL database management
@@ -434,9 +427,9 @@ python scripts/verify_setup.py
 ### 🔧 **Full Feature Path** (4-6 hours)
 1. [Getting Started Guide](getting-started.md)
 2. [Authentication System](authentication.md) - Complete
-3. [Database Management](database-management.md) - Core features and CRUD scaffolding
+3. [Database Management](database-management.md) - Core features and CRUD operations
 4. [Optional Features](optional-features.md) - Choose what you need
-5. [Testing and Development](testing-and-development.md) - Best practices
+
 
 ### 🌐 **Production Ready Path** (6-8 hours)
 1. Complete the Full Feature Path
@@ -461,7 +454,7 @@ python scripts/verify_setup.py
 - Check the troubleshooting sections in each tutorial
 - Review the [troubleshooting folder](../troubleshooting/) for specific issues
 - Look at the test files for working examples
-- Run the verification script: `python3 scripts/verify_setup.py`
+- Run the verification script: `python3 scripts/setup/verify_setup.py`
 
 ### 💬 **Community Support**
 - **FastAPI Discord**: https://discord.gg/VQjSZaeJmf
@@ -480,12 +473,13 @@ After completing these tutorials, you'll be able to:
 ✅ **Scale your application** as it grows  
 ✅ **Maintain code quality** with testing and best practices  
 ✅ **Monitor and debug** production issues effectively  
-✅ **Generate CRUD boilerplate** automatically  
 ✅ **Set up development environments** with one command  
 ✅ **Monitor application health** with comprehensive health checks  
 ✅ **Optimize performance** with advanced monitoring tools  
 ✅ **Track database performance** with query analysis and optimization  
 ✅ **Cache expensive operations** for better response times  
+✅ **Use domain-based organization** for better code structure  
+✅ **Implement async-first architecture** for better performance  
 
 ---
 
