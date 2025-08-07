@@ -3,6 +3,7 @@ import asyncio
 import os
 import subprocess
 import sys
+import warnings
 from collections.abc import AsyncGenerator, Generator
 
 import pytest
@@ -33,7 +34,6 @@ os.environ.setdefault("ENABLE_CELERY", "true")
 os.environ.setdefault("CELERY_TASK_ALWAYS_EAGER", "true")
 
 # Suppress known warnings
-import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="passlib")
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="passlib")
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="crypt")
