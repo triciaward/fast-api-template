@@ -605,12 +605,13 @@ class ProjectSetup:
                 check=False,
             )
 
+            # ruff: noqa: RET505
             if create_result.returncode == 0:
                 print(f"   ✅ Database '{db_name}' created successfully")
                 return True
-
-            print(f"   ❌ Failed to create database: {create_result.stderr}")
-            return False
+            else:
+                print(f"   ❌ Failed to create database: {create_result.stderr}")
+                return False
 
         except Exception as e:
             print(f"   ❌ Error checking/creating database: {e}")
