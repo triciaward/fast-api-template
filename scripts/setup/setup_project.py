@@ -47,6 +47,60 @@ class ProjectSetup:
                 return False
         return True
 
+    def get_python_executable(self) -> str:
+        """Find and validate the correct Python executable (3.11+)."""
+        # List of Python executables to try in order of preference
+        python_candidates = [
+            "python3.11",
+            "python3.12",
+            "python3.13",
+            "python3.10",  # Minimum fallback
+            "python3",
+            "python",
+        ]
+
+        for python_exe in python_candidates:
+            try:
+                # Check if the executable exists and get version
+                result = subprocess.run(
+                    [python_exe, "--version"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+
+                # Parse version (output like "Python 3.11.0")
+                version_str = result.stdout.strip()
+                if "Python " in version_str:
+                    version_part = version_str.split("Python ")[1]
+                    major, minor = map(int, version_part.split(".")[:2])
+
+                    # Check if version is 3.10+ (minimum requirement)
+                    if major == 3 and minor >= 10:
+                        print(f"   Found Python {major}.{minor} at {python_exe}")
+                        if minor < 11:
+                            print(
+                                f"   ⚠️  Warning: Python 3.11+ recommended, found {major}.{minor}",
+                            )
+                        return python_exe
+
+            except (
+                subprocess.CalledProcessError,
+                FileNotFoundError,
+                ValueError,
+                IndexError,
+            ):
+                continue
+
+        # No suitable Python found
+        print("❌ Error: No suitable Python version found!")
+        print("   This project requires Python 3.10+ (3.11+ recommended)")
+        print("   Please install Python 3.11+ and ensure it's in your PATH")
+        print(
+            "   Try: brew install python@3.11 (macOS) or apt install python3.11 (Ubuntu)",
+        )
+        sys.exit(1)
+
     def get_project_details(self) -> dict[str, str]:
         """Get project details from user input."""
         print("🚀 FastAPI Project Setup")
@@ -228,16 +282,17 @@ class ProjectSetup:
             shutil.copy2(env_example, env_file)
             print("   ✅ .env file created")
 
-        # Create virtual environment
+        # Create virtual environment with proper Python version
         venv_dir = self.project_root / "venv"
         if not venv_dir.exists():
             print("   Creating Python virtual environment...")
+            python_exe = self.get_python_executable()
             subprocess.run(
-                [sys.executable, "-m", "venv", "venv"],
+                [python_exe, "-m", "venv", "venv"],
                 cwd=self.project_root,
                 check=True,
             )
-            print("   ✅ Virtual environment created")
+            print(f"   ✅ Virtual environment created with {python_exe}")
 
         # Install dependencies
         print("   Installing Python dependencies...")
@@ -320,7 +375,7 @@ class ProjectSetup:
             print(f"   Waiting... ({i+1}/30)")
             time.sleep(2)
 
-    def run_migrations(self) -> None:
+    def run_migrations(self) -> bool:
         """Run database migrations."""
         print()
         print("🔄 Running database migrations...")
@@ -348,16 +403,21 @@ class ProjectSetup:
                 text=True,
                 env=env,
             )
-
-            if result.returncode == 0:
-                print("✅ Database migrations completed")
-            else:
-                print("⚠️  Migration completed with warnings")
-                print("   This is normal for existing databases")
-
         except subprocess.CalledProcessError as e:
             print(f"❌ Error running migrations: {e}")
-            # Don't exit - migrations might not be critical for initial setup
+            return False
+        else:
+            if result.returncode == 0:
+                print("✅ Database migrations completed successfully")
+                return True
+            print("❌ Database migrations failed!")
+            print("   Error output:")
+            if result.stderr:
+                print(f"   {result.stderr}")
+            if result.stdout:
+                print(f"   {result.stdout}")
+            print("   Please check your database configuration and Alembic setup")
+            return False
 
     def create_alembic_ini(self) -> None:
         """Create alembic.ini file if it doesn't exist."""
@@ -404,7 +464,7 @@ prepend_sys_path = .
 # sourceless = false
 
 # version number format
-version_num_format = %04d
+version_num_format = %%04d
 
 # version path separator; As mentioned above, this is the character used to split
 # version_locations. The default within new alembic.ini files is "os", which uses
@@ -481,7 +541,7 @@ datefmt = %H:%M:%S
             f.write(content)
         print("   ✅ alembic.ini file created")
 
-    def create_superuser(self, details: dict[str, str]) -> None:
+    def create_superuser(self, details: dict[str, str]) -> bool:
         """Create a superuser account."""
         print()
         print("👤 Creating superuser account...")
@@ -508,20 +568,36 @@ datefmt = %H:%M:%S
             env["FIRST_SUPERUSER"] = superuser_email
             env["FIRST_SUPERUSER_PASSWORD"] = superuser_password
 
-            subprocess.run(
+            result = subprocess.run(
                 [str(python_path), "app/bootstrap_superuser.py"],
                 cwd=self.project_root,
                 env=env,
-                check=True,
+                capture_output=True,
+                text=True,
             )
-            print("✅ Superuser created successfully")
-
-            # Verify the superuser was created and set is_verified=True
-            self.verify_superuser(superuser_email)
-
-        except subprocess.CalledProcessError:
-            print("⚠️  Superuser creation failed (this is often normal)")
-            print("   You can create one manually later if needed")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Error creating superuser: {e}")
+            return False
+        else:
+            if result.returncode == 0:
+                print("✅ Superuser created successfully")
+                # Check for harmless bcrypt warning
+                if "bcrypt" in result.stderr and "__about__" in result.stderr:
+                    print(
+                        "   ℹ️  Note: bcrypt version warning is harmless and can be ignored",
+                    )
+                # Verify the superuser was created and set is_verified=True
+                self.verify_superuser(superuser_email)
+                return True
+            print("❌ Superuser creation failed!")
+            print("   Error output:")
+            if result.stderr:
+                print(f"   {result.stderr}")
+            if result.stdout:
+                print(f"   {result.stdout}")
+            print("   This often happens if the database tables don't exist")
+            print("   Make sure migrations completed successfully first")
+            return False
 
     def verify_superuser(self, email: str) -> None:
         """Verify the superuser account by setting is_verified=True."""
@@ -605,7 +681,7 @@ if __name__ == "__main__":
         else:
             print("   ⚠️  Template protection hook not found")
 
-    def final_checks(self) -> None:
+    def final_checks(self) -> bool:
         """Run final validation checks."""
         print()
         print("🔍 Running final checks...")
@@ -618,6 +694,35 @@ if __name__ == "__main__":
 
         env = os.environ.copy()
         env["PYTHONPATH"] = str(self.project_root)
+
+        checks_passed = 0
+        total_checks = 3
+
+        # Test Python version compatibility
+        try:
+            result = subprocess.run(
+                [str(python_path), "--version"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            version_str = result.stdout.strip()
+            if "Python " in version_str:
+                version_part = version_str.split("Python ")[1]
+                major, minor = map(int, version_part.split(".")[:2])
+                if major == 3 and minor >= 10:
+                    print(
+                        f"   ✅ Python version {major}.{minor} compatibility confirmed",
+                    )
+                    checks_passed += 1
+                else:
+                    print(
+                        f"   ❌ Python version {major}.{minor} is too old (need 3.10+)",
+                    )
+            else:
+                print("   ❌ Could not determine Python version")
+        except (subprocess.CalledProcessError, ValueError, IndexError):
+            print("   ❌ Python version check failed")
 
         # Test imports
         try:
@@ -633,8 +738,12 @@ if __name__ == "__main__":
                 capture_output=True,
             )
             print("   ✅ API imports successfully")
+            checks_passed += 1
         except subprocess.CalledProcessError:
-            print("   ⚠️  API import test failed")
+            print("   ❌ API import test failed")
+            print(
+                "   This usually means the virtual environment has the wrong Python version",
+            )
 
         # Test configuration
         try:
@@ -650,10 +759,28 @@ if __name__ == "__main__":
                 capture_output=True,
             )
             print("   ✅ Configuration loads successfully")
+            checks_passed += 1
         except subprocess.CalledProcessError:
-            print("   ⚠️  Configuration test failed")
+            print("   ❌ Configuration test failed")
+            print(
+                "   This usually means the virtual environment has the wrong Python version",
+            )
 
-    def show_completion_message(self, details: dict[str, str]) -> None:
+        success = checks_passed == total_checks
+        if success:
+            print(f"✅ All {total_checks} validation checks passed!")
+        else:
+            print(f"⚠️  Only {checks_passed}/{total_checks} validation checks passed")
+
+        return success
+
+    def show_completion_message(
+        self,
+        details: dict[str, str],
+        migrations_success: bool,
+        superuser_success: bool,
+        validation_success: bool,
+    ) -> None:
         """Show the completion message with next steps."""
         print()
         print("🎉 PROJECT SETUP COMPLETE!")
@@ -666,9 +793,30 @@ if __name__ == "__main__":
         print("  ✅ Python virtual environment created")
         print("  ✅ Dependencies installed")
         print("  ✅ PostgreSQL database running")
-        print("  ✅ Database migrations applied")
-        print("  ✅ Superuser account created")
+        print(
+            f"  {'✅' if migrations_success else '❌'} Database migrations {'applied' if migrations_success else 'failed'}",
+        )
+        print(
+            f"  {'✅' if superuser_success else '❌'} Superuser account {'created' if superuser_success else 'failed'}",
+        )
         print("  ✅ Git hooks installed (template protection enabled)")
+        print(
+            f"  {'✅' if validation_success else '❌'} Final validation checks {'passed' if validation_success else 'failed'}",
+        )
+
+        if not migrations_success or not superuser_success or not validation_success:
+            print()
+            print("⚠️  Some setup steps failed. You may need to:")
+            if not migrations_success:
+                print("   - Check your database configuration")
+                print("   - Run migrations manually: python -m alembic upgrade head")
+            if not superuser_success:
+                print("   - Create a superuser manually after fixing migrations")
+                print("   - Run: python app/bootstrap_superuser.py")
+            if not validation_success:
+                print("   - Recreate virtual environment with Python 3.11+")
+                print("   - Check that all dependencies installed correctly")
+
         print()
         print("🎯 Next Steps:")
         print("1. Start the API server:")
@@ -724,17 +872,24 @@ def main():
         # Start services
         setup.check_docker()
         setup.start_services()
-        setup.run_migrations()
-        setup.create_superuser(details)
+        migrations_success = setup.run_migrations()
+        superuser_success = (
+            setup.create_superuser(details) if migrations_success else False
+        )
 
         # Install git hooks for protection
         setup.install_git_hooks()
 
         # Final checks
-        setup.final_checks()
+        validation_success = setup.final_checks()
 
         # Show completion message
-        setup.show_completion_message(details)
+        setup.show_completion_message(
+            details,
+            migrations_success,
+            superuser_success,
+            validation_success,
+        )
 
     except KeyboardInterrupt:
         print("\n❌ Setup interrupted by user.")

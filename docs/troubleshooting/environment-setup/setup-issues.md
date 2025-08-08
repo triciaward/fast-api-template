@@ -4,7 +4,36 @@ This guide documents common issues encountered during project setup and their so
 
 ## 🚨 Common Setup Issues & Solutions
 
-### 1. **Missing `alembic.ini` Configuration File**
+### 1. **Wrong Python Version in Virtual Environment** ⚠️ HIGH PRIORITY
+
+**Problem**: Setup script creates venv with system Python (e.g., 3.9) instead of required Python 3.11+, causing import errors:
+```
+TypeError: unsupported operand type(s) for |: 'type' and 'NoneType'
+```
+
+**Root Cause**: The script used `sys.executable` (current Python) instead of finding Python 3.11+.
+
+**Solution**: 
+- Fixed in template: Setup script now automatically detects and uses Python 3.11+ 
+- Validates Python version before creating virtual environment
+- Provides clear error messages if Python 3.11+ is not available
+
+**Manual Fix**:
+```bash
+# Remove old venv and recreate with correct Python version
+rm -rf venv
+python3.11 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+**Prevention**: The setup script now includes Python version validation:
+- Searches for python3.11, python3.12, python3.13 first
+- Falls back to python3.10 (minimum supported)
+- Exits with clear error if no suitable Python version found
+
+### 2. **Missing `alembic.ini` Configuration File**
 
 **Problem**: Setup script fails with "No config file 'alembic.ini' found"
 ```
@@ -27,7 +56,7 @@ cp /path/to/original/alembic.ini .
 # Then update the database URL in the file
 ```
 
-### 2. **Alembic Configuration Interpolation Error**
+### 3. **Alembic Configuration Interpolation Error**
 
 **Problem**: The `version_num_format = %04d` causes a configparser error:
 ```
@@ -37,18 +66,19 @@ configparser.InterpolationSyntaxError: '%' must be followed by '%' or '(', found
 **Root Cause**: Incorrect escaping in the version number format string.
 
 **Solution**: 
-- Fixed in template: `version_num_format = %%(version_num)04d`
+- Fixed in template: `version_num_format = %%04d`
 - The double `%%` properly escapes the percent sign for configparser
+- The setup script now generates the correct format automatically
 
 **Manual Fix**:
 ```ini
 # In alembic.ini, change:
 # version_num_format = %04d
 # To:
-version_num_format = %%(version_num)04d
+version_num_format = %%04d
 ```
 
-### 3. **Database Tables Already Existed**
+### 4. **Database Tables Already Existed**
 
 **Problem**: Migration failed because tables already existed:
 ```
@@ -176,11 +206,12 @@ pip install --upgrade bcrypt
 
 The template now includes these improvements to prevent issues:
 
-1. **Proper alembic.ini customization** during template setup
-2. **Fixed version number format** to prevent interpolation errors
-3. **Smart database state detection** to handle existing tables
-4. **Improved superuser creation** with validation and fallbacks
-5. **Better error handling** and user guidance in setup scripts
+1. **Python version validation** - Automatically detects and uses Python 3.11+ for virtual environment
+2. **Proper alembic.ini customization** - Fixed percent sign escaping (%%04d format)
+3. **Smart database state detection** - Handles existing tables gracefully
+4. **Improved error handling** - Better status reporting for migrations and superuser creation
+5. **Enhanced validation checks** - Verifies Python version, imports, and configuration
+6. **Clear status reporting** - Accurate completion messages showing what succeeded/failed
 
 ## 🚀 **Quick Setup Checklist**
 
