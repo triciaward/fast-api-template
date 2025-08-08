@@ -155,22 +155,7 @@ Proceed with setup? (y/N): y
 ✨ Happy coding! 🚀
 ```
 
-### Legacy Setup (Old Method)
 
-<details>
-<summary>Click to see the old multi-step process (not recommended)</summary>
-
-The old process required multiple manual steps:
-
-1. Clone repository
-2. Run rename script
-3. Close and reopen VS Code
-4. Run customization script
-5. Run environment setup script
-
-This has been replaced by the single `setup_project.py` script above.
-
-</details>
 
 ## 🎯 Quick Commands (After Setup)
 
