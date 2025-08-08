@@ -147,6 +147,7 @@ def test_celery_import_when_enabled(monkeypatch):
             del sys.modules["app.main"]
 
         # Import main module - this should trigger the Celery import
+        import app.main
 
         # Verify Celery tasks were imported
         assert "app.services.background.celery_tasks" in import_calls
