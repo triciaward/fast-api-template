@@ -12,10 +12,13 @@ This script handles the complete setup of your FastAPI project:
 Usage:
     ./scripts/setup/setup_project.py
 
+⚠️  IMPORTANT: This script requires interactive human input.
+    It cannot be automated or run non-interactively.
+
 Designed for GitHub "Use this template" workflow:
 1. Click "Use this template" on GitHub
 2. Clone your new repository
-3. Run this script
+3. Run this script directly in your terminal
 """
 
 import os
@@ -43,6 +46,7 @@ class ProjectSetup:
         This setup script requires human input for project customization.
         It cannot be run non-interactively or automated.
         """
+        # Check for TTY
         if not sys.stdin.isatty():
             print("❌ This script requires interactive mode.")
             print("   You must run this script directly in a terminal.")
@@ -50,6 +54,41 @@ class ProjectSetup:
             print()
             print("   This ensures you can customize your project details personally.")
             sys.exit(1)
+
+        # Additional check for process tree to detect automation
+        try:
+            import psutil
+
+            current_proc = psutil.Process()
+            parent_proc = current_proc.parent()
+
+            # Check if parent process suggests automation
+            if parent_proc and parent_proc.name() in [
+                "python",
+                "python3",
+                "node",
+                "bash",
+                "sh",
+                "zsh",
+            ]:
+                grandparent = parent_proc.parent()
+                if grandparent and grandparent.name() in [
+                    "python",
+                    "python3",
+                    "node",
+                    "Code",
+                    "cursor",
+                ]:
+                    print("❌ Automated execution detected via process tree.")
+                    print("   This script must be run directly by a human user.")
+                    print("   Please run it manually in your terminal.")
+                    sys.exit(1)
+        except ImportError:
+            # psutil not available, continue with basic checks
+            pass
+        except Exception:
+            # Any error in process checking, continue
+            pass
 
     # -------------------------------
     # Port helpers
@@ -281,13 +320,30 @@ class ProjectSetup:
     def _safe_input(self, prompt: str) -> str:
         """Get input with additional automation detection."""
         try:
+            # Record timing to detect rapid automated responses
+            start_time = time.time()
+
             # Add a small delay to detect rapid automated input
             time.sleep(0.1)
-            return input(prompt)
+            response = input(prompt)
         except (EOFError, KeyboardInterrupt):
             print("\n❌ Input interrupted or piped. This script requires manual input.")
             print("   Please run this script directly without automation or piping.")
             sys.exit(1)
+        else:
+            # Check if response came suspiciously fast (likely automated)
+            response_time = time.time() - start_time
+            if response_time < 0.5:  # Less than 500ms suggests automation
+                print("\n❌ Response too fast - automation detected.")
+                print(
+                    "   Please take time to read and answer each question thoughtfully.",
+                )
+                print(
+                    "   This script requires human consideration for project customization.",
+                )
+                sys.exit(1)
+
+            return response
 
     def get_project_details(self) -> dict[str, str]:
         """Get project details from user input."""
@@ -1133,6 +1189,14 @@ def main():
 
     # Require interactive terminal to prevent automation from answering prompts
     setup.ensure_interactive()
+
+    # Clear warning about automation
+    print("🚨 ANTI-AUTOMATION NOTICE:")
+    print("   This script detects and blocks automated execution.")
+    print("   You must personally answer each question for project customization.")
+    print("   Rapid responses or automation tools will be rejected.")
+    print()
+    time.sleep(1)  # Give user time to read
 
     # Get project details
     details = setup.get_project_details()
