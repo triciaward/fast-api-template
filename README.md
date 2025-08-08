@@ -15,7 +15,7 @@ This is your project's main README file - feel free to customize it to describe 
 
 ## 🚀 Getting Started
 
-**🎯 NEW STREAMLINED SETUP** - One command does everything!
+**🎯 STREAMLINED SETUP** - One command does everything!
 
 ### Quick Setup (GitHub Template)
 
