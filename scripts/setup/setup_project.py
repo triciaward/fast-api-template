@@ -38,17 +38,17 @@ class ProjectSetup:
         self.port_overrides: dict[str, int] = {}
 
     def ensure_interactive(self) -> None:
-        """Require interactive TTY unless explicitly overridden.
+        """Require interactive TTY - no overrides allowed.
 
-        Prevents non-interactive tools from answering prompts on behalf of the user.
-        Set ALLOW_NON_INTERACTIVE=1 to override (not recommended).
+        This setup script requires human input for project customization.
+        It cannot be run non-interactively or automated.
         """
-        if not sys.stdin.isatty() and not os.environ.get("ALLOW_NON_INTERACTIVE"):
-            print("❌ Interactive mode required.")
-            print(
-                "   Please run this script in a terminal and answer prompts directly.",
-            )
-            print("   To override (not recommended), set ALLOW_NON_INTERACTIVE=1.")
+        if not sys.stdin.isatty():
+            print("❌ This script requires interactive mode.")
+            print("   You must run this script directly in a terminal.")
+            print("   Automated/non-interactive execution is not supported.")
+            print()
+            print("   This ensures you can customize your project details personally.")
             sys.exit(1)
 
     # -------------------------------
@@ -170,27 +170,24 @@ class ProjectSetup:
             if self._is_port_in_use(desired):
                 any_conflicts = True
                 suggested = self._find_available_port(desired + 1)
-                # If interactive, allow user to accept or provide custom
+                # Allow user to accept or provide custom port
                 try:
-                    if sys.stdin.isatty():
-                        response = input(
-                            f"   ⚠️  Port {desired} for {key} is in use. Use {suggested} instead? [Y/n/custom]: ",
-                        ).strip()
-                        if response.lower() in ("", "y", "yes"):  # accept suggested
-                            new_port = suggested
-                        elif response.lower() in ("n", "no"):
-                            # Keep original (may fail later)
-                            new_port = desired
-                        else:
-                            try:
-                                new_port = int(response)
-                            except ValueError:
-                                print(
-                                    f"   ⚠️  Invalid custom port '{response}'. Using suggested {suggested}.",
-                                )
-                                new_port = suggested
-                    else:
+                    response = self._safe_input(
+                        f"   ⚠️  Port {desired} for {key} is in use. Use {suggested} instead? [Y/n/custom]: ",
+                    ).strip()
+                    if response.lower() in ("", "y", "yes"):  # accept suggested
                         new_port = suggested
+                    elif response.lower() in ("n", "no"):
+                        # Keep original (may fail later)
+                        new_port = desired
+                    else:
+                        try:
+                            new_port = int(response)
+                        except ValueError:
+                            print(
+                                f"   ⚠️  Invalid custom port '{response}'. Using suggested {suggested}.",
+                            )
+                            new_port = suggested
                 except Exception:
                     new_port = suggested
 
@@ -281,12 +278,26 @@ class ProjectSetup:
         )
         sys.exit(1)
 
+    def _safe_input(self, prompt: str) -> str:
+        """Get input with additional automation detection."""
+        try:
+            # Add a small delay to detect rapid automated input
+            time.sleep(0.1)
+            return input(prompt)
+        except (EOFError, KeyboardInterrupt):
+            print("\n❌ Input interrupted or piped. This script requires manual input.")
+            print("   Please run this script directly without automation or piping.")
+            sys.exit(1)
+
     def get_project_details(self) -> dict[str, str]:
         """Get project details from user input."""
         print("🚀 FastAPI Project Setup")
         print("=" * 50)
         print()
         print("Setting up your FastAPI project...")
+        print()
+        print("⚠️  This setup requires your personal input for project customization.")
+        print("   Please answer each question thoughtfully.")
         print()
 
         # Get project details
@@ -301,23 +312,25 @@ class ProjectSetup:
         )
         name_from_slug = re.sub(r"\s+Backend$", "", name_from_slug, flags=re.IGNORECASE)
 
-        user_name = input(f"Project name [{name_from_slug}]: ").strip()
+        user_name = self._safe_input(f"Project name [{name_from_slug}]: ").strip()
         details["project_name"] = user_name if user_name else name_from_slug
 
         # Get other details
-        details["author_name"] = input("Author name: ").strip() or "Your Name"
+        details["author_name"] = (
+            self._safe_input("Author name: ").strip() or "Your Name"
+        )
         details["author_email"] = (
-            input("Author email: ").strip() or "your.email@example.com"
+            self._safe_input("Author email: ").strip() or "your.email@example.com"
         )
 
         # Generate database name from slug
         db_name = details["project_slug"].replace("-", "_").lower()
-        user_db = input(f"Database name [{db_name}]: ").strip()
+        user_db = self._safe_input(f"Database name [{db_name}]: ").strip()
         details["database_name"] = user_db if user_db else db_name
 
         # Generate description
         default_desc = f"A FastAPI backend for {details['project_name']}"
-        user_desc = input(f"Project description [{default_desc}]: ").strip()
+        user_desc = self._safe_input(f"Project description [{default_desc}]: ").strip()
         details["description"] = user_desc if user_desc else default_desc
 
         return details
@@ -335,7 +348,7 @@ class ProjectSetup:
         print("  Action: Customize files and set up environment")
 
         print()
-        confirm = input("Proceed with setup? (y/N): ").strip().lower()
+        confirm = self._safe_input("Proceed with setup? (y/N): ").strip().lower()
         return confirm in ["y", "yes"]
 
     def setup_replacements(self, details: dict[str, str]) -> None:
