@@ -22,10 +22,17 @@ def test_create_pagination_links():
 
 def test_paginated_response_with_links():
     resp = PaginatedResponseWithLinks.create_with_links(
-        items=[1, 2, 3], page=1, size=3, total=9, base_url="/x", q=None,
+        items=[1, 2, 3],
+        page=1,
+        size=3,
+        total=9,
+        base_url="/x",
+        q=None,
     )
     assert resp.metadata.pages == 3
     assert resp.links["first"].startswith("/x?page=1")
+
+
 import pytest
 
 from app.utils.pagination import PaginatedResponse
@@ -49,7 +56,12 @@ def test_pagination_metadata_edges():
     assert m1.pages == 1 and m1.has_next is False and m1.has_prev is False
 
     m2 = PaginationMetadata.create(page=2, size=10, total=25)
-    assert m2.pages == 3 and m2.has_next is True and m2.next_page == 3 and m2.prev_page == 1
+    assert (
+        m2.pages == 3
+        and m2.has_next is True
+        and m2.next_page == 3
+        and m2.prev_page == 1
+    )
 
 
 def test_create_pagination_links_variants():

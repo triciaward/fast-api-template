@@ -28,7 +28,10 @@ def test_websocket_room_and_broadcast_when_enabled():
         pytest.skip("Websockets not enabled")
 
     with TestClient(app) as client:
-        with client.websocket_connect("/ws/demo") as ws1, client.websocket_connect("/ws/demo") as ws2:
+        with (
+            client.websocket_connect("/ws/demo") as ws1,
+            client.websocket_connect("/ws/demo") as ws2,
+        ):
             ws1.send_json({"type": "room", "room": "r1"})
             _ = ws1.receive_json()
             ws2.send_json({"type": "room", "room": "r1"})
@@ -55,5 +58,3 @@ def test_websocket_status_endpoint_when_enabled():
         assert resp.status_code == 200
         data = resp.json()
         assert "total_connections" in data and "active_rooms" in data
-
-

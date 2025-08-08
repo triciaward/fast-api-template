@@ -25,7 +25,9 @@ async def test_resend_verification_branches(monkeypatch, async_client):
 
     # Already verified -> email_sent False
     async def verified_user(db, email):
-        return types.SimpleNamespace(id=UUID(int=1), email=email, username="u", is_verified=True)
+        return types.SimpleNamespace(
+            id=UUID(int=1), email=email, username="u", is_verified=True
+        )
 
     monkeypatch.setattr(crud_user, "get_user_by_email", verified_user)
     r2 = await async_client.post(
@@ -37,7 +39,9 @@ async def test_resend_verification_branches(monkeypatch, async_client):
 
     # Not configured -> email_sent False
     async def unverified_user(db, email):
-        return types.SimpleNamespace(id=UUID(int=1), email=email, username="u", is_verified=False)
+        return types.SimpleNamespace(
+            id=UUID(int=1), email=email, username="u", is_verified=False
+        )
 
     monkeypatch.setattr(crud_user, "get_user_by_email", unverified_user)
     monkeypatch.setattr(ev, "email_service", None)
@@ -101,7 +105,9 @@ async def test_verify_email_branches(monkeypatch, async_client):
     async def verify_token_bad(db, token):
         return None
 
-    esvc = types.SimpleNamespace(is_configured=lambda: True, verify_token=verify_token_bad)
+    esvc = types.SimpleNamespace(
+        is_configured=lambda: True, verify_token=verify_token_bad
+    )
     monkeypatch.setattr(ev, "email_service", esvc)
     r2 = await async_client.post(
         "/auth/verify-email",
@@ -117,7 +123,9 @@ async def test_verify_email_branches(monkeypatch, async_client):
     async def get_user_none(db, uid):
         return None
 
-    esvc2 = types.SimpleNamespace(is_configured=lambda: True, verify_token=verify_token_ok)
+    esvc2 = types.SimpleNamespace(
+        is_configured=lambda: True, verify_token=verify_token_ok
+    )
     monkeypatch.setattr(ev, "email_service", esvc2)
     monkeypatch.setattr(crud_user, "get_user_by_id", get_user_none)
     r3 = await async_client.post(
@@ -154,5 +162,3 @@ async def test_verify_email_branches(monkeypatch, async_client):
         headers={"user-agent": "pytest"},
     )
     assert r5.status_code == 200 and r5.json()["verified"] is False
-
-

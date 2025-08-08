@@ -13,7 +13,9 @@ def _user():
 
 
 @pytest.mark.asyncio
-async def test_forgot_password_success_with_rate_limit_enabled(monkeypatch, async_client):
+async def test_forgot_password_success_with_rate_limit_enabled(
+    monkeypatch, async_client
+):
     from app.api.auth import password_management as pm
     from app.core.config import settings
     from app.crud.auth import user as crud_user
@@ -45,7 +47,9 @@ async def test_forgot_password_success_with_rate_limit_enabled(monkeypatch, asyn
 
 
 @pytest.mark.asyncio
-async def test_reset_password_success_with_rate_limit_enabled(monkeypatch, async_client):
+async def test_reset_password_success_with_rate_limit_enabled(
+    monkeypatch, async_client
+):
     from app.api.auth import password_management as pm
     from app.core.config import settings
     from app.crud.auth import user as crud_user
@@ -77,5 +81,3 @@ async def test_reset_password_success_with_rate_limit_enabled(monkeypatch, async
     )
     assert resp.status_code == 200
     assert resp.json()["password_reset"] is True
-
-

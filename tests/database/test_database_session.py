@@ -36,5 +36,3 @@ async def test_get_db_closes_session(monkeypatch):
     # give loop a chance to settle
     await asyncio.sleep(0)
     assert closed["done"] is True
-
-

@@ -63,4 +63,3 @@ async def test_rate_limit_exception_handler_ducktyped():
     exc = types.SimpleNamespace(retry_after=30, limit=5)
     resp = await rate_limit_exception_handler(req, exc)  # type: ignore[arg-type]
     assert resp.status_code == 429
-

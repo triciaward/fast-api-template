@@ -26,7 +26,9 @@ async def test_soft_delete_failure_returns_500(monkeypatch, async_client):
     monkeypatch.setattr(mod.crud_user, "get_user_by_id", get_user_by_id)
     monkeypatch.setattr(mod.crud_user, "soft_delete_user", soft_delete_user)
 
-    r = await async_client.request("DELETE", f"/users/{uuid.uuid4()}/soft", json={"reason": "cleanup"})
+    r = await async_client.request(
+        "DELETE", f"/users/{uuid.uuid4()}/soft", json={"reason": "cleanup"}
+    )
     app.dependency_overrides.clear()
     assert r.status_code == 500
 

@@ -17,13 +17,26 @@ async def test_list_users_with_filters(monkeypatch, async_client):
 
     app.dependency_overrides[mod.require_superuser] = lambda: _admin()
 
-    async def fake_get_users(db, skip, limit, is_superuser, is_verified, is_deleted, oauth_provider):
-        return [types.SimpleNamespace(
-            id=uuid.uuid4(), email="a@example.com", username="axxx", is_superuser=False,
-            is_verified=True, is_deleted=False, created_at="2025-01-01T00:00:00Z",
-            oauth_provider=None, oauth_id=None, oauth_email=None,
-            deletion_requested_at=None, deletion_confirmed_at=None, deletion_scheduled_for=None,
-        )]
+    async def fake_get_users(
+        db, skip, limit, is_superuser, is_verified, is_deleted, oauth_provider
+    ):
+        return [
+            types.SimpleNamespace(
+                id=uuid.uuid4(),
+                email="a@example.com",
+                username="axxx",
+                is_superuser=False,
+                is_verified=True,
+                is_deleted=False,
+                created_at="2025-01-01T00:00:00Z",
+                oauth_provider=None,
+                oauth_id=None,
+                oauth_email=None,
+                deletion_requested_at=None,
+                deletion_confirmed_at=None,
+                deletion_scheduled_for=None,
+            )
+        ]
 
     async def fake_count(db, filters):
         # Ensure filters propagated
@@ -68,9 +81,15 @@ async def test_create_user_conflicts_and_failure(monkeypatch, async_client):
         return object()
 
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_email", email_conflict)
-    r = await async_client.post("/admin/users", json={
-        "email": "x@example.com", "username": "userxxx", "password": "Password123!", "is_superuser": False,
-    })
+    r = await async_client.post(
+        "/admin/users",
+        json={
+            "email": "x@example.com",
+            "username": "userxxx",
+            "password": "Password123!",
+            "is_superuser": False,
+        },
+    )
     assert r.status_code == 400
 
     # Username conflict
@@ -82,9 +101,15 @@ async def test_create_user_conflicts_and_failure(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_email", none_email)
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_username", username_conflict)
-    r = await async_client.post("/admin/users", json={
-        "email": "x2@example.com", "username": "useryyy", "password": "Password123!", "is_superuser": False,
-    })
+    r = await async_client.post(
+        "/admin/users",
+        json={
+            "email": "x2@example.com",
+            "username": "useryyy",
+            "password": "Password123!",
+            "is_superuser": False,
+        },
+    )
     assert r.status_code == 400
 
     # Create failure
@@ -96,9 +121,15 @@ async def test_create_user_conflicts_and_failure(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_username", username_ok)
     monkeypatch.setattr(mod.admin_user_crud, "create_user", create_fail)
-    r = await async_client.post("/admin/users", json={
-        "email": "x3@example.com", "username": "userzzz", "password": "Password123!", "is_superuser": False,
-    })
+    r = await async_client.post(
+        "/admin/users",
+        json={
+            "email": "x3@example.com",
+            "username": "userzzz",
+            "password": "Password123!",
+            "is_superuser": False,
+        },
+    )
     app.dependency_overrides.clear()
     assert r.status_code == 500
 
@@ -115,6 +146,7 @@ async def test_update_user_conflicts_not_found_and_failure(monkeypatch, async_cl
     # Not found
     async def get_none(db, u):
         return None
+
     monkeypatch.setattr(mod.admin_user_crud, "get", get_none)
     r = await async_client.put(f"/admin/users/{uid}", json={})
     assert r.status_code == 404
@@ -129,6 +161,7 @@ async def test_update_user_conflicts_not_found_and_failure(monkeypatch, async_cl
 
     async def email_conflict2(db, e):
         return object()
+
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_email", email_conflict2)
     r = await async_client.put(f"/admin/users/{uid}", json={"email": "new@example.com"})
     assert r.status_code == 400
@@ -136,8 +169,10 @@ async def test_update_user_conflicts_not_found_and_failure(monkeypatch, async_cl
     # Username conflict
     async def none_email2(db, e):
         return None
+
     async def username_conflict2(db, u):
         return object()
+
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_email", none_email2)
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_username", username_conflict2)
     r = await async_client.put(f"/admin/users/{uid}", json={"username": "userabc"})
@@ -146,8 +181,10 @@ async def test_update_user_conflicts_not_found_and_failure(monkeypatch, async_cl
     # Update failure
     async def username_ok2(db, u):
         return None
+
     async def update_fail(db, u, d):
         return None
+
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_username", username_ok2)
     monkeypatch.setattr(mod.admin_user_crud, "update_user", update_fail)
     r = await async_client.put(f"/admin/users/{uid}", json={"username": "userabc"})
@@ -170,6 +207,7 @@ async def test_delete_user_self_not_found_and_failure(monkeypatch, async_client)
     # Not found
     async def get_none2(db, u):
         return None
+
     monkeypatch.setattr(mod.admin_user_crud, "get", get_none2)
     r = await async_client.delete(f"/admin/users/{uuid.uuid4()}")
     assert r.status_code == 404
@@ -177,8 +215,10 @@ async def test_delete_user_self_not_found_and_failure(monkeypatch, async_client)
     # Failure
     async def get_ok(db, u):
         return object()
+
     async def delete_fail(db, u):
         return False
+
     monkeypatch.setattr(mod.admin_user_crud, "get", get_ok)
     monkeypatch.setattr(mod.admin_user_crud, "delete_user", delete_fail)
     r = await async_client.delete(f"/admin/users/{uuid.uuid4()}")
@@ -201,6 +241,7 @@ async def test_toggle_superuser_self_and_not_found(monkeypatch, async_client):
     # Not found
     async def toggle_none(db, u):
         return None
+
     monkeypatch.setattr(mod.admin_user_crud, "toggle_superuser_status", toggle_none)
     r = await async_client.post(f"/admin/users/{uuid.uuid4()}/toggle-superuser")
     app.dependency_overrides.clear()
@@ -213,8 +254,10 @@ async def test_toggle_verification_not_found(monkeypatch, async_client):
     from app.main import app
 
     app.dependency_overrides[mod.require_superuser] = lambda: _admin()
+
     async def toggle_none(db, u):
         return None
+
     monkeypatch.setattr(mod.admin_user_crud, "toggle_verification_status", toggle_none)
 
     r = await async_client.post(f"/admin/users/{uuid.uuid4()}/toggle-verification")
@@ -231,14 +274,17 @@ async def test_force_delete_not_found_and_failure(monkeypatch, async_client):
 
     async def get_none3(db, u):
         return None
+
     monkeypatch.setattr(mod.admin_user_crud, "get", get_none3)
     r = await async_client.post(f"/admin/users/{uuid.uuid4()}/force-delete")
     assert r.status_code == 404
 
     async def get_ok2(db, u):
         return object()
+
     async def force_fail(db, u):
         return False
+
     monkeypatch.setattr(mod.admin_user_crud, "get", get_ok2)
     monkeypatch.setattr(mod.admin_user_crud, "force_delete_user", force_fail)
     r = await async_client.post(f"/admin/users/{uuid.uuid4()}/force-delete")
@@ -264,7 +310,9 @@ async def test_bulk_operations_variants(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.admin_user_crud, "toggle_verification_status", toggle_ver)
 
-    r = await async_client.post("/admin/bulk-operations", json={"operation": "verify", "user_ids": [str(uid)]})
+    r = await async_client.post(
+        "/admin/bulk-operations", json={"operation": "verify", "user_ids": [str(uid)]}
+    )
     assert r.status_code == 200 and r.json()["successful"] == 1
 
     # unverify path where user becomes unverified on second toggle
@@ -276,14 +324,19 @@ async def test_bulk_operations_variants(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.admin_user_crud, "toggle_verification_status", toggle_ver2)
 
-    r = await async_client.post("/admin/bulk-operations", json={"operation": "unverify", "user_ids": [str(uid)]})
+    r = await async_client.post(
+        "/admin/bulk-operations", json={"operation": "unverify", "user_ids": [str(uid)]}
+    )
     assert r.status_code == 200 and r.json()["successful"] == 1
 
     # exception path using a valid operation
     async def toggle_raise(*a, **k):
         raise RuntimeError("x")
+
     monkeypatch.setattr(mod.admin_user_crud, "toggle_verification_status", toggle_raise)
-    r = await async_client.post("/admin/bulk-operations", json={"operation": "verify", "user_ids": [str(uid)]})
+    r = await async_client.post(
+        "/admin/bulk-operations", json={"operation": "verify", "user_ids": [str(uid)]}
+    )
     app.dependency_overrides.clear()
     assert r.status_code == 200
     body = r.json()

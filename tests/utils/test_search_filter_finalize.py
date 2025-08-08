@@ -35,4 +35,3 @@ def test_field_filter_unknown_operator_falls_through():
     q = SearchFilterBuilder(User).build_query(cfg)
     # No WHERE since operator was unrecognized
     assert "WHERE" not in str(q)
-

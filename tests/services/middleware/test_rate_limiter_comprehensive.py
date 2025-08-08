@@ -1,4 +1,5 @@
 """Comprehensive rate limiter tests with various backends and configurations."""
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -29,10 +30,13 @@ class TestRateLimiterConfiguration:
         """Test limiter creation with memory backend."""
         # Clear any existing limiter
         from app.services.middleware import rate_limiter
+
         rate_limiter.limiter = None
 
         monkeypatch.setattr("app.core.config.settings.ENABLE_REDIS", False)
-        monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "memory")
+        monkeypatch.setattr(
+            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "memory"
+        )
         monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_DEFAULT", "100/hour")
 
         limiter = get_limiter()
@@ -44,11 +48,16 @@ class TestRateLimiterConfiguration:
         """Test limiter creation with Redis backend when Redis is available."""
         # Clear any existing limiter
         from app.services.middleware import rate_limiter
+
         rate_limiter.limiter = None
 
         monkeypatch.setattr("app.core.config.settings.ENABLE_REDIS", True)
-        monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "redis")
-        monkeypatch.setattr("app.core.config.settings.REDIS_URL", "redis://localhost:6379")
+        monkeypatch.setattr(
+            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "redis"
+        )
+        monkeypatch.setattr(
+            "app.core.config.settings.REDIS_URL", "redis://localhost:6379"
+        )
         monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_DEFAULT", "100/hour")
 
         # Mock Redis client as available
@@ -65,10 +74,13 @@ class TestRateLimiterConfiguration:
         """Test fallback to memory when Redis backend is configured but unavailable."""
         # Clear any existing limiter
         from app.services.middleware import rate_limiter
+
         rate_limiter.limiter = None
 
         monkeypatch.setattr("app.core.config.settings.ENABLE_REDIS", True)
-        monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "redis")
+        monkeypatch.setattr(
+            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "redis"
+        )
         monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_DEFAULT", "100/hour")
 
         # Mock Redis client as unavailable
@@ -84,6 +96,7 @@ class TestRateLimiterConfiguration:
         """Test that get_limiter returns the same instance (singleton pattern)."""
         # Clear any existing limiter
         from app.services.middleware import rate_limiter
+
         rate_limiter.limiter = None
 
         monkeypatch.setattr("app.core.config.settings.ENABLE_REDIS", False)
@@ -134,7 +147,9 @@ class TestClientIPExtraction:
         request.client.host = "203.0.113.1"
         request.headers = {}
 
-        with patch("app.services.middleware.rate_limiter.get_remote_address") as mock_get_remote:
+        with patch(
+            "app.services.middleware.rate_limiter.get_remote_address"
+        ) as mock_get_remote:
             mock_get_remote.return_value = "203.0.113.1"
 
             client_ip = get_client_ip(request)
@@ -160,7 +175,9 @@ class TestClientIPExtraction:
         request = MagicMock(spec=Request)
         request.headers = {}
 
-        with patch("app.services.middleware.rate_limiter.get_remote_address") as mock_get_remote:
+        with patch(
+            "app.services.middleware.rate_limiter.get_remote_address"
+        ) as mock_get_remote:
             mock_get_remote.return_value = "192.168.1.100"
 
             client_ip = get_client_ip(request)
@@ -180,10 +197,14 @@ class TestRateLimitDecorators:
         def dummy_function(request: Request):
             return "success"
 
-        with patch("app.services.middleware.rate_limiter.get_limiter") as mock_get_limiter:
+        with patch(
+            "app.services.middleware.rate_limiter.get_limiter"
+        ) as mock_get_limiter:
             mock_limiter = MagicMock()
             # The limiter.limit(rate) returns a decorator function, which when called with func, returns the decorated function
-            mock_limiter.limit.return_value = lambda f: f  # Mock decorator that just returns the original function
+            mock_limiter.limit.return_value = (
+                lambda f: f
+            )  # Mock decorator that just returns the original function
             mock_get_limiter.return_value = mock_limiter
 
             decorated_func = rate_limit_login(dummy_function)
@@ -200,6 +221,7 @@ class TestRateLimitDecorators:
 
         decorated_func = rate_limit_login(dummy_function)
         from unittest.mock import MagicMock
+
         mock_request = MagicMock()
         result = decorated_func(mock_request)
 
@@ -214,9 +236,13 @@ class TestRateLimitDecorators:
         def dummy_function(request: Request):
             return "registered"
 
-        with patch("app.services.middleware.rate_limiter.get_limiter") as mock_get_limiter:
+        with patch(
+            "app.services.middleware.rate_limiter.get_limiter"
+        ) as mock_get_limiter:
             mock_limiter = MagicMock()
-            mock_limiter.limit.return_value = lambda f: f  # Mock decorator that returns the original function
+            mock_limiter.limit.return_value = (
+                lambda f: f
+            )  # Mock decorator that returns the original function
             mock_get_limiter.return_value = mock_limiter
 
             decorated_func = rate_limit_register(dummy_function)
@@ -226,14 +252,20 @@ class TestRateLimitDecorators:
     def test_rate_limit_email_verification_enabled(self, monkeypatch):
         """Test email verification rate limiting when enabled."""
         monkeypatch.setattr("app.core.config.settings.ENABLE_RATE_LIMITING", True)
-        monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_EMAIL_VERIFICATION", "2/minute")
+        monkeypatch.setattr(
+            "app.core.config.settings.RATE_LIMIT_EMAIL_VERIFICATION", "2/minute"
+        )
 
         def dummy_function(request: Request):
             return "verified"
 
-        with patch("app.services.middleware.rate_limiter.get_limiter") as mock_get_limiter:
+        with patch(
+            "app.services.middleware.rate_limiter.get_limiter"
+        ) as mock_get_limiter:
             mock_limiter = MagicMock()
-            mock_limiter.limit.return_value = lambda f: f  # Mock decorator that returns the original function
+            mock_limiter.limit.return_value = (
+                lambda f: f
+            )  # Mock decorator that returns the original function
             mock_get_limiter.return_value = mock_limiter
 
             decorated_func = rate_limit_email_verification(dummy_function)
@@ -243,14 +275,20 @@ class TestRateLimitDecorators:
     def test_rate_limit_password_reset_enabled(self, monkeypatch):
         """Test password reset rate limiting when enabled."""
         monkeypatch.setattr("app.core.config.settings.ENABLE_RATE_LIMITING", True)
-        monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_PASSWORD_RESET", "1/minute")
+        monkeypatch.setattr(
+            "app.core.config.settings.RATE_LIMIT_PASSWORD_RESET", "1/minute"
+        )
 
         def dummy_function(request: Request):
             return "reset"
 
-        with patch("app.services.middleware.rate_limiter.get_limiter") as mock_get_limiter:
+        with patch(
+            "app.services.middleware.rate_limiter.get_limiter"
+        ) as mock_get_limiter:
             mock_limiter = MagicMock()
-            mock_limiter.limit.return_value = lambda f: f  # Mock decorator that returns the original function
+            mock_limiter.limit.return_value = (
+                lambda f: f
+            )  # Mock decorator that returns the original function
             mock_get_limiter.return_value = mock_limiter
 
             decorated_func = rate_limit_password_reset(dummy_function)
@@ -265,9 +303,13 @@ class TestRateLimitDecorators:
         def dummy_function(request: Request):
             return "oauth_success"
 
-        with patch("app.services.middleware.rate_limiter.get_limiter") as mock_get_limiter:
+        with patch(
+            "app.services.middleware.rate_limiter.get_limiter"
+        ) as mock_get_limiter:
             mock_limiter = MagicMock()
-            mock_limiter.limit.return_value = lambda f: f  # Mock decorator that returns the original function
+            mock_limiter.limit.return_value = (
+                lambda f: f
+            )  # Mock decorator that returns the original function
             mock_get_limiter.return_value = mock_limiter
 
             decorated_func = rate_limit_oauth(dummy_function)
@@ -281,9 +323,13 @@ class TestRateLimitDecorators:
         def dummy_function(request: Request):
             return "custom"
 
-        with patch("app.services.middleware.rate_limiter.get_limiter") as mock_get_limiter:
+        with patch(
+            "app.services.middleware.rate_limiter.get_limiter"
+        ) as mock_get_limiter:
             mock_limiter = MagicMock()
-            mock_limiter.limit.return_value = lambda f: f  # Mock decorator that returns the original function
+            mock_limiter.limit.return_value = (
+                lambda f: f
+            )  # Mock decorator that returns the original function
             mock_get_limiter.return_value = mock_limiter
 
             decorator = rate_limit_custom("5/second")
@@ -339,6 +385,7 @@ class TestRateLimitInfo:
         """Test rate limit info when rate limiting is enabled but there's an error."""
         # Import the settings to patch them correctly
         from app.services.middleware.rate_limiter import settings
+
         monkeypatch.setattr(settings, "ENABLE_RATE_LIMITING", True)
 
         # Mock get_client_ip to raise an exception
@@ -346,6 +393,7 @@ class TestRateLimitInfo:
             raise Exception("Network error")
 
         from app.services.middleware import rate_limiter
+
         monkeypatch.setattr(rate_limiter, "get_client_ip", mock_get_client_ip)
 
         request = MagicMock(spec=Request)
@@ -371,7 +419,9 @@ class TestSetupRateLimiting:
         mock_app = MagicMock()
         mock_app.state = MagicMock()
 
-        with patch("app.services.middleware.rate_limiter.get_limiter") as mock_get_limiter:
+        with patch(
+            "app.services.middleware.rate_limiter.get_limiter"
+        ) as mock_get_limiter:
             mock_limiter = MagicMock()
             mock_get_limiter.return_value = mock_limiter
 
@@ -401,6 +451,7 @@ class TestRateLimitExceptionHandling:
 
         # Create a mock Limit object that RateLimitExceeded expects
         from unittest.mock import MagicMock
+
         mock_limit = MagicMock()
         mock_limit.limit = "5 per 1 minute"
         mock_limit.error_message = "Rate limit exceeded"
@@ -426,6 +477,7 @@ class TestRateLimitExceptionHandling:
         )
 
         from unittest.mock import MagicMock
+
         mock_request = MagicMock()
         result = decorated_func(mock_request)
         assert result == "success"
@@ -461,6 +513,7 @@ class TestRateLimitIntegration:
 
         # Clear limiter to force recreation with new settings
         from app.services.middleware import rate_limiter
+
         rate_limiter.limiter = None
 
         monkeypatch.setattr("app.core.config.settings.ENABLE_RATE_LIMITING", True)
@@ -472,9 +525,13 @@ class TestRateLimitIntegration:
         def dummy_register(request: Request):
             return "register"
 
-        with patch("app.services.middleware.rate_limiter.get_limiter") as mock_get_limiter:
+        with patch(
+            "app.services.middleware.rate_limiter.get_limiter"
+        ) as mock_get_limiter:
             mock_limiter = MagicMock()
-            mock_limiter.limit.return_value = lambda x: x  # Return the original function
+            mock_limiter.limit.return_value = (
+                lambda x: x
+            )  # Return the original function
             mock_get_limiter.return_value = mock_limiter
 
             rate_limit_login(dummy_login)
@@ -484,4 +541,4 @@ class TestRateLimitIntegration:
             calls = mock_limiter.limit.call_args_list
             assert len(calls) == 2
             assert calls[0][0][0] == "10/minute"  # Login rate limit
-            assert calls[1][0][0] == "5/hour"     # Register rate limit
+            assert calls[1][0][0] == "5/hour"  # Register rate limit

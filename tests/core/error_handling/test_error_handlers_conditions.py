@@ -35,4 +35,3 @@ def test_http_exception_mapping(status_code, detail, etype):
     assert r.status_code == status_code
     body = r.json()
     assert body["error"]["type"].startswith(etype)
-

@@ -1,4 +1,5 @@
 """OAuth authentication tests."""
+
 import types
 
 import pytest
@@ -34,9 +35,12 @@ async def test_oauth_google_success(monkeypatch, async_client):
         pass
 
     monkeypatch.setattr(mod, "oauth_service", FakeOAuth())
-    monkeypatch.setattr(mod.crud_user, "get_user_by_oauth_id", fake_get_user_by_oauth_id)
+    monkeypatch.setattr(
+        mod.crud_user, "get_user_by_oauth_id", fake_get_user_by_oauth_id
+    )
 
     from app.services.auth import refresh_token as rt
+
     monkeypatch.setattr(rt, "create_user_session", fake_create_user_session)
     monkeypatch.setattr(rt, "set_refresh_token_cookie", fake_set_refresh_token_cookie)
 
@@ -73,9 +77,12 @@ async def test_oauth_apple_success(monkeypatch, async_client):
         pass
 
     monkeypatch.setattr(mod, "oauth_service", FakeOAuth())
-    monkeypatch.setattr(mod.crud_user, "get_user_by_oauth_id", fake_get_user_by_oauth_id)
+    monkeypatch.setattr(
+        mod.crud_user, "get_user_by_oauth_id", fake_get_user_by_oauth_id
+    )
 
     from app.services.auth import refresh_token as rt
+
     monkeypatch.setattr(rt, "create_user_session", fake_create_user_session)
     monkeypatch.setattr(rt, "set_refresh_token_cookie", fake_set_refresh_token_cookie)
 
@@ -203,9 +210,12 @@ async def test_oauth_unexpected_exception_in_session(monkeypatch):
         raise RuntimeError("session creation failed")
 
     monkeypatch.setattr(mod, "oauth_service", FakeOAuth())
-    monkeypatch.setattr(mod.crud_user, "get_user_by_oauth_id", fake_get_user_by_oauth_id)
+    monkeypatch.setattr(
+        mod.crud_user, "get_user_by_oauth_id", fake_get_user_by_oauth_id
+    )
 
     from app.services.auth import refresh_token as svc
+
     monkeypatch.setattr(svc, "create_user_session", boom)
 
     req = types.SimpleNamespace(headers={})

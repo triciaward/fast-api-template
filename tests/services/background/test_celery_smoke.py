@@ -23,4 +23,3 @@ def test_submit_task_eager_mode(monkeypatch):
     celery_app.conf.task_always_eager = True
     res = celery_service.submit_task("app.services.celery_tasks.cleanup_task")
     assert res is not None
-

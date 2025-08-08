@@ -79,7 +79,9 @@ async def test_confirm_deletion_db_failure(monkeypatch, async_client):
 
     monkeypatch.setattr(ad, "email_service", esvc)
     monkeypatch.setattr(crud_user, "get_user_by_id", fake_get_user_by_id)
-    monkeypatch.setattr(crud_user, "confirm_account_deletion", fake_confirm_account_deletion)
+    monkeypatch.setattr(
+        crud_user, "confirm_account_deletion", fake_confirm_account_deletion
+    )
 
     resp = await async_client.post(
         "/auth/confirm-deletion",
@@ -90,5 +92,3 @@ async def test_confirm_deletion_db_failure(monkeypatch, async_client):
     data = resp.json()
     assert data["deletion_confirmed"] is False
     assert data["message"].startswith("Failed to confirm account deletion")
-
-

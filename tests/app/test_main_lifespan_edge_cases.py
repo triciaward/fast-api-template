@@ -67,6 +67,7 @@ async def test_lifespan_redis_shutdown_when_enabled(monkeypatch):
 
     # Patch services functions
     from app import services as services_mod
+
     monkeypatch.setattr(services_mod, "init_redis", mock_init_redis)
     monkeypatch.setattr(services_mod, "close_redis", fake_close_redis)
 
@@ -108,6 +109,7 @@ async def test_lifespan_disabled_features_skip_initialization(monkeypatch):
 
     # Patch services functions
     from app import services as services_mod
+
     monkeypatch.setattr(services_mod, "init_redis", fake_init_redis)
     monkeypatch.setattr(services_mod, "init_rate_limiter", fake_init_rate_limiter)
     monkeypatch.setattr(services_mod, "close_redis", fake_close_redis)
@@ -157,8 +159,12 @@ def test_production_warnings_secret_key_only(monkeypatch):
 
     # Production mode with only secret key issue
     monkeypatch.setattr(cfg.settings, "ENVIRONMENT", "production", raising=False)
-    monkeypatch.setattr(cfg.settings, "SECRET_KEY", "dev_secret_key_change_in_production", raising=False)
-    monkeypatch.setattr(cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", True, raising=False)  # Secure
+    monkeypatch.setattr(
+        cfg.settings, "SECRET_KEY", "dev_secret_key_change_in_production", raising=False
+    )
+    monkeypatch.setattr(
+        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", True, raising=False
+    )  # Secure
     monkeypatch.setattr(cfg.settings, "ENABLE_HSTS", True, raising=False)  # Secure
 
     # Reload main to trigger warnings
@@ -176,8 +182,12 @@ def test_production_warnings_cookie_secure_only(monkeypatch):
 
     # Production mode with only cookie security issue
     monkeypatch.setattr(cfg.settings, "ENVIRONMENT", "production", raising=False)
-    monkeypatch.setattr(cfg.settings, "SECRET_KEY", "secure_production_key", raising=False)  # Secure
-    monkeypatch.setattr(cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", False, raising=False)  # Insecure
+    monkeypatch.setattr(
+        cfg.settings, "SECRET_KEY", "secure_production_key", raising=False
+    )  # Secure
+    monkeypatch.setattr(
+        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", False, raising=False
+    )  # Insecure
     monkeypatch.setattr(cfg.settings, "ENABLE_HSTS", True, raising=False)  # Secure
 
     # Reload main to trigger warnings
@@ -194,8 +204,12 @@ def test_production_warnings_hsts_only(monkeypatch):
 
     # Production mode with only HSTS issue
     monkeypatch.setattr(cfg.settings, "ENVIRONMENT", "production", raising=False)
-    monkeypatch.setattr(cfg.settings, "SECRET_KEY", "secure_production_key", raising=False)  # Secure
-    monkeypatch.setattr(cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", True, raising=False)  # Secure
+    monkeypatch.setattr(
+        cfg.settings, "SECRET_KEY", "secure_production_key", raising=False
+    )  # Secure
+    monkeypatch.setattr(
+        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", True, raising=False
+    )  # Secure
     monkeypatch.setattr(cfg.settings, "ENABLE_HSTS", False, raising=False)  # Insecure
 
     # Reload main to trigger warnings
@@ -212,8 +226,12 @@ def test_non_production_skips_warnings(monkeypatch):
 
     # Development mode (should skip all warnings)
     monkeypatch.setattr(cfg.settings, "ENVIRONMENT", "development", raising=False)
-    monkeypatch.setattr(cfg.settings, "SECRET_KEY", "dev_secret_key_change_in_production", raising=False)
-    monkeypatch.setattr(cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", False, raising=False)
+    monkeypatch.setattr(
+        cfg.settings, "SECRET_KEY", "dev_secret_key_change_in_production", raising=False
+    )
+    monkeypatch.setattr(
+        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", False, raising=False
+    )
     monkeypatch.setattr(cfg.settings, "ENABLE_HSTS", False, raising=False)
 
     # Reload main - should not trigger any warnings

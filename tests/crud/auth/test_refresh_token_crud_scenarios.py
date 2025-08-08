@@ -21,7 +21,9 @@ async def test_create_refresh_token_refresh_failure(monkeypatch):
             raise RuntimeError("boom")
 
     db = FakeDB()
-    tok = await crud.create_refresh_token(db, "uid", "raw", device_info="d", ip_address="i")
+    tok = await crud.create_refresh_token(
+        db, "uid", "raw", device_info="d", ip_address="i"
+    )
     assert tok.user_id == "uid"
 
 
@@ -259,6 +261,8 @@ async def test_enforce_session_limit_commits(monkeypatch):
     db = DB()
     await crud.enforce_session_limit(db, "uid", max_sessions=2)
     assert db.committed is True
+
+
 import pytest
 
 pytestmark = pytest.mark.unit
@@ -332,5 +336,3 @@ async def test_verify_refresh_token_legacy_record_migrates(monkeypatch):
     # Migrates and returns candidate
     assert out is legacy
     assert db.commits == 1
-
-

@@ -54,5 +54,3 @@ def test_cookie_helpers(monkeypatch):
     assert r.cookies
     clear_refresh_token_cookie(r)
     assert not r.cookies
-
-

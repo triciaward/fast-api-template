@@ -17,7 +17,9 @@ async def test_login_invalid_email_format(async_client):
     assert "invalid email" in r.json()["error"]["message"].lower()
 
 
-@pytest.mark.skipif(not settings.ENABLE_RATE_LIMITING, reason="Rate limiting not enabled")
+@pytest.mark.skipif(
+    not settings.ENABLE_RATE_LIMITING, reason="Rate limiting not enabled"
+)
 @pytest.mark.asyncio
 async def test_login_rate_limited(async_client):
     # If enabled, repeated calls should eventually hit 429
@@ -28,4 +30,3 @@ async def test_login_rate_limited(async_client):
             headers={"user-agent": "pytest"},
         )
     assert resp.status_code in (401, 429)
-

@@ -59,4 +59,6 @@ async def test_admin_user_statistics(monkeypatch):
             return ResultZero()
 
     stats = await AdminUserCRUD().get_user_statistics(SessionZero())
-    assert set(["total_users", "superusers", "verified_users", "oauth_users", "deleted_users"]).issubset(stats.keys())
+    assert set(
+        ["total_users", "superusers", "verified_users", "oauth_users", "deleted_users"]
+    ).issubset(stats.keys())

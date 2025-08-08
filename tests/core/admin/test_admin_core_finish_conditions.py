@@ -82,7 +82,9 @@ async def test_base_admin_update_with_dict_and_missing_fields(monkeypatch):
 
     # create path triggers commit and refresh
     created = await crud.create(db, DummySchema(field=5))
-    assert db.commits >= 1 and db.refreshed >= 1 and getattr(created, "field", None) == 5
+    assert (
+        db.commits >= 1 and db.refreshed >= 1 and getattr(created, "field", None) == 5
+    )
 
     # count returns 0 when scalar is None
     class FakeResultNone(FakeResult):

@@ -23,5 +23,3 @@ def test_get_client_ip_no_headers():
             self.client = None
 
     assert get_client_ip(R()) == "unknown"
-
-

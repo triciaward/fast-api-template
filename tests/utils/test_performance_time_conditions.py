@@ -26,7 +26,19 @@ def test_monitor_request_performance_time_branches(monkeypatch):
     def fake_debug(self, *a, **k):  # type: ignore[no-untyped-def]
         logs["debug"] += 1
 
-    monkeypatch.setattr(perf, "logger", type("L", (), {"warning": fake_warning, "debug": fake_debug, "exception": lambda *a, **k: None})())
+    monkeypatch.setattr(
+        perf,
+        "logger",
+        type(
+            "L",
+            (),
+            {
+                "warning": fake_warning,
+                "debug": fake_debug,
+                "exception": lambda *a, **k: None,
+            },
+        )(),
+    )
 
     @perf.monitor_request_performance()
     async def ffast():  # type: ignore[no-untyped-def]
@@ -62,4 +74,3 @@ def test_cache_result_remaining_paths(monkeypatch):
     assert asyncio.run(fn(1)) == 2
     assert asyncio.run(fn(1)) == 2
     assert calls["n"] == 2
-

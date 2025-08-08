@@ -46,6 +46,7 @@ from app.utils.datetime_utils import utc_now
 
 pytestmark = pytest.mark.template_only
 
+
 def test_utc_now_returns_timezone_aware_datetime() -> None:
     dt = utc_now()
     assert dt.tzinfo is not None

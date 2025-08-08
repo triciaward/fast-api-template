@@ -1,4 +1,5 @@
 """Comprehensive tests for bootstrap superuser script."""
+
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
@@ -24,8 +25,13 @@ class TestCreateSuperuser:
     @pytest.fixture
     def mock_settings(self, monkeypatch):
         """Mock settings for testing."""
-        monkeypatch.setattr("app.bootstrap_superuser.settings.FIRST_SUPERUSER", "admin@example.com")
-        monkeypatch.setattr("app.bootstrap_superuser.settings.FIRST_SUPERUSER_PASSWORD", "SecurePass123!")
+        monkeypatch.setattr(
+            "app.bootstrap_superuser.settings.FIRST_SUPERUSER", "admin@example.com"
+        )
+        monkeypatch.setattr(
+            "app.bootstrap_superuser.settings.FIRST_SUPERUSER_PASSWORD",
+            "SecurePass123!",
+        )
 
     @pytest.mark.asyncio
     async def test_create_superuser_success(self, mock_db, mock_settings):
@@ -43,10 +49,14 @@ class TestCreateSuperuser:
                 mock_create_user.return_value = mock_user
 
                 # Mock validation functions
-                with patch("app.core.security.validate_username") as mock_validate_username:
+                with patch(
+                    "app.core.security.validate_username"
+                ) as mock_validate_username:
                     mock_validate_username.return_value = (True, None)
 
-                    with patch("app.core.security.validate_password") as mock_validate_password:
+                    with patch(
+                        "app.core.security.validate_password"
+                    ) as mock_validate_password:
                         mock_validate_password.return_value = (True, None)
 
                         result = await create_superuser(
@@ -56,7 +66,9 @@ class TestCreateSuperuser:
                         )
 
                         assert result is True
-                        mock_get_user.assert_called_once_with(mock_db, "admin@example.com")
+                        mock_get_user.assert_called_once_with(
+                            mock_db, "admin@example.com"
+                        )
                         mock_create_user.assert_called_once()
 
                         # Verify UserCreate data
@@ -97,10 +109,14 @@ class TestCreateSuperuser:
                 mock_user.username = "admin_example"
                 mock_create_user.return_value = mock_user
 
-                with patch("app.core.security.validate_username") as mock_validate_username:
+                with patch(
+                    "app.core.security.validate_username"
+                ) as mock_validate_username:
                     mock_validate_username.return_value = (True, None)
 
-                    with patch("app.core.security.validate_password") as mock_validate_password:
+                    with patch(
+                        "app.core.security.validate_password"
+                    ) as mock_validate_password:
                         mock_validate_password.return_value = (True, None)
 
                         await create_superuser(
@@ -126,10 +142,14 @@ class TestCreateSuperuser:
                 mock_user.username = "custom_admin"
                 mock_create_user.return_value = mock_user
 
-                with patch("app.core.security.validate_username") as mock_validate_username:
+                with patch(
+                    "app.core.security.validate_username"
+                ) as mock_validate_username:
                     mock_validate_username.return_value = (True, None)
 
-                    with patch("app.core.security.validate_password") as mock_validate_password:
+                    with patch(
+                        "app.core.security.validate_password"
+                    ) as mock_validate_password:
                         mock_validate_password.return_value = (True, None)
 
                         await create_superuser(
@@ -143,7 +163,9 @@ class TestCreateSuperuser:
                         assert user_data.username == "custom_admin"
 
     @pytest.mark.asyncio
-    async def test_create_superuser_invalid_username_fallback(self, mock_db, mock_settings):
+    async def test_create_superuser_invalid_username_fallback(
+        self, mock_db, mock_settings
+    ):
         """Test fallback when generated username is invalid."""
         with patch("app.bootstrap_superuser.get_user_by_email") as mock_get_user:
             mock_get_user.return_value = None
@@ -155,11 +177,18 @@ class TestCreateSuperuser:
                 mock_user.username = "admin_example"
                 mock_create_user.return_value = mock_user
 
-                with patch("app.core.security.validate_username") as mock_validate_username:
+                with patch(
+                    "app.core.security.validate_username"
+                ) as mock_validate_username:
                     # First call (generated username) fails, second call (fallback) succeeds
-                    mock_validate_username.side_effect = [(False, "Too short"), (True, None)]
+                    mock_validate_username.side_effect = [
+                        (False, "Too short"),
+                        (True, None),
+                    ]
 
-                    with patch("app.core.security.validate_password") as mock_validate_password:
+                    with patch(
+                        "app.core.security.validate_password"
+                    ) as mock_validate_password:
                         mock_validate_password.return_value = (True, None)
 
                         result = await create_superuser(
@@ -172,7 +201,9 @@ class TestCreateSuperuser:
                         assert mock_validate_username.call_count == 2
 
     @pytest.mark.asyncio
-    async def test_create_superuser_username_validation_fails(self, mock_db, mock_settings):
+    async def test_create_superuser_username_validation_fails(
+        self, mock_db, mock_settings
+    ):
         """Test when username validation fails completely."""
         with patch("app.bootstrap_superuser.get_user_by_email") as mock_get_user:
             mock_get_user.return_value = None
@@ -190,7 +221,9 @@ class TestCreateSuperuser:
                 assert result is False
 
     @pytest.mark.asyncio
-    async def test_create_superuser_password_validation_fallback(self, mock_db, mock_settings):
+    async def test_create_superuser_password_validation_fallback(
+        self, mock_db, mock_settings
+    ):
         """Test password validation with fallback to default password."""
         with patch("app.bootstrap_superuser.get_user_by_email") as mock_get_user:
             mock_get_user.return_value = None
@@ -202,10 +235,14 @@ class TestCreateSuperuser:
                 mock_user.username = "admin_example"
                 mock_create_user.return_value = mock_user
 
-                with patch("app.core.security.validate_username") as mock_validate_username:
+                with patch(
+                    "app.core.security.validate_username"
+                ) as mock_validate_username:
                     mock_validate_username.return_value = (True, None)
 
-                    with patch("app.core.security.validate_password") as mock_validate_password:
+                    with patch(
+                        "app.core.security.validate_password"
+                    ) as mock_validate_password:
                         mock_validate_password.return_value = (False, "Weak password")
 
                         result = await create_superuser(
@@ -228,10 +265,14 @@ class TestCreateSuperuser:
             with patch("app.crud.auth.user.create_user") as mock_create_user:
                 mock_create_user.side_effect = Exception("Database error")
 
-                with patch("app.core.security.validate_username") as mock_validate_username:
+                with patch(
+                    "app.core.security.validate_username"
+                ) as mock_validate_username:
                     mock_validate_username.return_value = (True, None)
 
-                    with patch("app.core.security.validate_password") as mock_validate_password:
+                    with patch(
+                        "app.core.security.validate_password"
+                    ) as mock_validate_password:
                         mock_validate_password.return_value = (True, None)
 
                         result = await create_superuser(
@@ -249,23 +290,34 @@ class TestBootstrapSuperuser:
     @pytest.fixture
     def mock_settings_configured(self, monkeypatch):
         """Mock configured settings."""
-        monkeypatch.setattr("app.bootstrap_superuser.settings.FIRST_SUPERUSER", "admin@example.com")
-        monkeypatch.setattr("app.bootstrap_superuser.settings.FIRST_SUPERUSER_PASSWORD", "SecurePass123!")
+        monkeypatch.setattr(
+            "app.bootstrap_superuser.settings.FIRST_SUPERUSER", "admin@example.com"
+        )
+        monkeypatch.setattr(
+            "app.bootstrap_superuser.settings.FIRST_SUPERUSER_PASSWORD",
+            "SecurePass123!",
+        )
 
     @pytest.fixture
     def mock_settings_not_configured(self, monkeypatch):
         """Mock unconfigured settings."""
         monkeypatch.setattr("app.bootstrap_superuser.settings.FIRST_SUPERUSER", None)
-        monkeypatch.setattr("app.bootstrap_superuser.settings.FIRST_SUPERUSER_PASSWORD", None)
+        monkeypatch.setattr(
+            "app.bootstrap_superuser.settings.FIRST_SUPERUSER_PASSWORD", None
+        )
 
     @pytest.mark.asyncio
-    async def test_bootstrap_superuser_not_configured(self, mock_settings_not_configured):
+    async def test_bootstrap_superuser_not_configured(
+        self, mock_settings_not_configured
+    ):
         """Test bootstrap when environment variables are not set."""
         await bootstrap_superuser()
         # Should complete without errors, just skip creation
 
     @pytest.mark.asyncio
-    async def test_bootstrap_superuser_existing_superuser(self, mock_settings_configured):
+    async def test_bootstrap_superuser_existing_superuser(
+        self, mock_settings_configured
+    ):
         """Test bootstrap when superuser already exists."""
         mock_db = AsyncMock()
 
@@ -303,7 +355,9 @@ class TestBootstrapSuperuser:
             with patch.object(mock_db, "execute") as mock_execute:
                 mock_execute.return_value = mock_result
 
-                with patch("app.bootstrap_superuser.create_superuser") as mock_create_superuser:
+                with patch(
+                    "app.bootstrap_superuser.create_superuser"
+                ) as mock_create_superuser:
                     mock_create_superuser.return_value = True
 
                     await bootstrap_superuser()
@@ -329,7 +383,9 @@ class TestBootstrapSuperuser:
             with patch.object(mock_db, "execute") as mock_execute:
                 mock_execute.return_value = mock_result
 
-                with patch("app.bootstrap_superuser.create_superuser") as mock_create_superuser:
+                with patch(
+                    "app.bootstrap_superuser.create_superuser"
+                ) as mock_create_superuser:
                     mock_create_superuser.return_value = False
 
                     await bootstrap_superuser()
@@ -338,7 +394,9 @@ class TestBootstrapSuperuser:
                     mock_create_superuser.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_bootstrap_superuser_database_exception(self, mock_settings_configured):
+    async def test_bootstrap_superuser_database_exception(
+        self, mock_settings_configured
+    ):
         """Test bootstrap with database exception."""
         mock_db = AsyncMock()
 

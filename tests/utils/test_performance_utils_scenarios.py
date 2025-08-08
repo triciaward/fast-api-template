@@ -73,5 +73,3 @@ def test_add_performance_headers_sets_values():
     add_performance_headers(r, 0.123)
     assert r.headers["X-Execution-Time"] == "0.123"
     assert r.headers["X-Cache-Status"] == "MISS"
-
-

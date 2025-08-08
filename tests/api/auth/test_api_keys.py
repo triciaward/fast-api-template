@@ -45,6 +45,7 @@ async def test_create_api_key_success(monkeypatch, async_client):
     )
     # generate_api_key is imported inside the function from app.core.security
     import app.core.security as core_security  # type: ignore
+
     monkeypatch.setattr(core_security, "generate_api_key", lambda: "RAWKEY")
 
     resp = await async_client.post(
@@ -67,6 +68,7 @@ async def test_create_api_key_failure(monkeypatch, async_client):
 
     app.dependency_overrides[users_auth.get_current_user] = lambda: _user()
     import app.core.security as core_security  # type: ignore
+
     monkeypatch.setattr(core_security, "generate_api_key", lambda: "RAWKEY")
 
     async def fake_create(*args, **kwargs):
@@ -97,8 +99,12 @@ async def test_list_api_keys_pagination(monkeypatch, async_client):
     async def fake_count_user_api_keys(db, user_id):
         return 10
 
-    monkeypatch.setattr(api_keys_mod.crud_api_key, "get_user_api_keys", fake_get_user_api_keys)
-    monkeypatch.setattr(api_keys_mod.crud_api_key, "count_user_api_keys", fake_count_user_api_keys)
+    monkeypatch.setattr(
+        api_keys_mod.crud_api_key, "get_user_api_keys", fake_get_user_api_keys
+    )
+    monkeypatch.setattr(
+        api_keys_mod.crud_api_key, "count_user_api_keys", fake_count_user_api_keys
+    )
 
     resp = await async_client.get(
         "/auth/api-keys?page=1&size=2",
@@ -119,6 +125,7 @@ async def test_deactivate_api_key_not_found(monkeypatch, async_client):
     from app.main import app
 
     app.dependency_overrides[users_auth.get_current_user] = lambda: _user()
+
     async def fake_deactivate(db, key_id, user_id):
         return False
 
@@ -143,6 +150,7 @@ async def test_deactivate_api_key_success(monkeypatch, async_client):
     from app.main import app
 
     app.dependency_overrides[users_auth.get_current_user] = lambda: _user()
+
     async def fake_deactivate(db, key_id, user_id):
         return True
 
@@ -203,5 +211,3 @@ async def test_rotate_api_key_success(monkeypatch, async_client):
     data = resp.json()
     assert data["new_raw_key"] == "NEWRAW"
     assert data["api_key"]["label"] == "rotated"
-
-

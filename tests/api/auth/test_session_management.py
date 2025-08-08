@@ -136,8 +136,10 @@ async def test_get_sessions_success(monkeypatch, async_client):
         return [Sess()]
 
     monkeypatch.setattr(rt_crud, "get_user_sessions", fake_get_user_sessions)
+
     async def fake_verify(db, tok):
         return FakeToken(user_id=str(_user().id))
+
     monkeypatch.setattr(crud, "verify_refresh_token_in_db", fake_verify)
 
     # Mock auth dependency
@@ -146,7 +148,9 @@ async def test_get_sessions_success(monkeypatch, async_client):
 
     app.dependency_overrides[users_auth.get_current_user] = lambda: _user()
     try:
-        resp = await async_client.get("/auth/sessions", headers={"user-agent": "pytest"})
+        resp = await async_client.get(
+            "/auth/sessions", headers={"user-agent": "pytest"}
+        )
     finally:
         app.dependency_overrides.clear()
     assert resp.status_code == 200
@@ -163,9 +167,9 @@ async def test_revoke_session_invalid_id(monkeypatch, async_client):
     app.dependency_overrides[users_auth.get_current_user] = lambda: _user()
     try:
         resp = await async_client.delete(
-        "/auth/sessions/not-a-uuid",
-        headers={"user-agent": "pytest"},
-    )
+            "/auth/sessions/not-a-uuid",
+            headers={"user-agent": "pytest"},
+        )
     finally:
         app.dependency_overrides.clear()
     assert resp.status_code == 400
@@ -186,9 +190,9 @@ async def test_revoke_session_not_found(monkeypatch, async_client):
 
     try:
         resp = await async_client.delete(
-        "/auth/sessions/00000000-0000-0000-0000-0000000000bb",
-        headers={"user-agent": "pytest"},
-    )
+            "/auth/sessions/00000000-0000-0000-0000-0000000000bb",
+            headers={"user-agent": "pytest"},
+        )
     finally:
         app.dependency_overrides.clear()
     assert resp.status_code == 404
@@ -209,9 +213,9 @@ async def test_revoke_session_success(monkeypatch, async_client):
 
     try:
         resp = await async_client.delete(
-        "/auth/sessions/00000000-0000-0000-0000-0000000000bb",
-        headers={"user-agent": "pytest"},
-    )
+            "/auth/sessions/00000000-0000-0000-0000-0000000000bb",
+            headers={"user-agent": "pytest"},
+        )
     finally:
         app.dependency_overrides.clear()
     assert resp.status_code == 200
@@ -243,9 +247,9 @@ async def test_revoke_all_sessions_success(monkeypatch, async_client):
 
     try:
         resp = await async_client.delete(
-        "/auth/sessions",
-        headers={"user-agent": "pytest"},
-    )
+            "/auth/sessions",
+            headers={"user-agent": "pytest"},
+        )
     finally:
         app.dependency_overrides.clear()
     assert resp.status_code == 200
@@ -334,7 +338,9 @@ async def test_get_sessions_multiple_with_is_current(monkeypatch, async_client):
     monkeypatch.setattr(rt_svc, "get_refresh_token_from_cookie", lambda req: "rtok")
 
     try:
-        resp = await async_client.get("/auth/sessions", headers={"user-agent": "pytest"})
+        resp = await async_client.get(
+            "/auth/sessions", headers={"user-agent": "pytest"}
+        )
     finally:
         app.dependency_overrides.clear()
 
@@ -343,5 +349,3 @@ async def test_get_sessions_multiple_with_is_current(monkeypatch, async_client):
     assert data["total_sessions"] == 2
     assert data["sessions"][0]["is_current"] is False
     assert data["sessions"][1]["is_current"] is True
-
-

@@ -13,7 +13,9 @@ async def test_get_current_user_success_and_invalid(monkeypatch):
     from app.api.users import auth as mod
 
     # Success path: jwt.decode returns payload with sub
-    monkeypatch.setattr(mod.jwt, "decode", lambda token, key, algorithms: {"sub": "user-1"})
+    monkeypatch.setattr(
+        mod.jwt, "decode", lambda token, key, algorithms: {"sub": "user-1"}
+    )
 
     async def get_user_by_id(db, user_id):
         return types.SimpleNamespace(id=user_id, is_superuser=False)
@@ -47,12 +49,16 @@ async def test_get_api_key_user_header_errors(monkeypatch):
 
     # Missing header
     with pytest.raises(Exception) as exc1:
-        await mod.get_api_key_user(request=_request(), authorization=None, db=types.SimpleNamespace())
+        await mod.get_api_key_user(
+            request=_request(), authorization=None, db=types.SimpleNamespace()
+        )
     assert "API key required" in str(exc1.value)
 
     # Bad format
     with pytest.raises(Exception) as exc2:
-        await mod.get_api_key_user(request=_request(), authorization="Token abc", db=types.SimpleNamespace())
+        await mod.get_api_key_user(
+            request=_request(), authorization="Token abc", db=types.SimpleNamespace()
+        )
     assert "Invalid authorization header format" in str(exc2.value)
 
 
@@ -67,7 +73,9 @@ async def test_get_api_key_user_invalid_inactive_expired(monkeypatch):
     monkeypatch.setattr(mod.crud_api_key, "verify_api_key_in_db", verify_none)
 
     with pytest.raises(Exception) as exc:
-        await mod.get_api_key_user(request=_request(), authorization="Bearer key", db=types.SimpleNamespace())
+        await mod.get_api_key_user(
+            request=_request(), authorization="Bearer key", db=types.SimpleNamespace()
+        )
     assert "Invalid API key" in str(exc.value)
 
     # inactive
@@ -77,7 +85,9 @@ async def test_get_api_key_user_invalid_inactive_expired(monkeypatch):
     monkeypatch.setattr(mod.crud_api_key, "verify_api_key_in_db", verify_inactive)
 
     with pytest.raises(Exception) as exc2:
-        await mod.get_api_key_user(request=_request(), authorization="Bearer key", db=types.SimpleNamespace())
+        await mod.get_api_key_user(
+            request=_request(), authorization="Bearer key", db=types.SimpleNamespace()
+        )
     assert "inactive" in str(exc2.value)
 
     # expired
@@ -90,7 +100,9 @@ async def test_get_api_key_user_invalid_inactive_expired(monkeypatch):
     monkeypatch.setattr(mod, "utc_now", lambda: datetime.now(timezone.utc))
 
     with pytest.raises(Exception) as exc3:
-        await mod.get_api_key_user(request=_request(), authorization="Bearer key", db=types.SimpleNamespace())
+        await mod.get_api_key_user(
+            request=_request(), authorization="Bearer key", db=types.SimpleNamespace()
+        )
     assert "has expired" in str(exc3.value)
 
 
@@ -121,7 +133,9 @@ async def test_get_api_key_user_success_and_scope_check(monkeypatch):
 
     monkeypatch.setattr(audit_mod, "log_api_key_usage", log_api_key_usage)
 
-    api_user = await mod.get_api_key_user(request=_request(), authorization="Bearer good", db=types.SimpleNamespace())
+    api_user = await mod.get_api_key_user(
+        request=_request(), authorization="Bearer good", db=types.SimpleNamespace()
+    )
     assert api_user.key_id is not None and "read" in api_user.scopes
 
     # require_api_scope

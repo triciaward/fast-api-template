@@ -55,11 +55,15 @@ async def test_update_password_reset_token_none_and_success():
     from app.crud.auth import user as crud
 
     db = FakeDB(value=None)
-    ok = await crud.update_password_reset_token(db, "u1", "tok", types.SimpleNamespace())
+    ok = await crud.update_password_reset_token(
+        db, "u1", "tok", types.SimpleNamespace()
+    )
     assert ok is False
 
     db = FakeDB(value=_user())
-    ok = await crud.update_password_reset_token(db, "u1", "tok", types.SimpleNamespace())
+    ok = await crud.update_password_reset_token(
+        db, "u1", "tok", types.SimpleNamespace()
+    )
     assert ok is True and db.commit_called >= 1
 
 
@@ -119,4 +123,3 @@ async def test_schedule_confirm_cancel_deletion_none_and_success():
     db = FakeDB(value=_user())
     ok = await crud.cancel_user_deletion(db, "u1")
     assert ok is True
-

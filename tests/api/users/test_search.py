@@ -99,4 +99,3 @@ async def test_search_users_metadata(monkeypatch, async_client):
     assert "verification_status" in data["filters_applied"]
     assert data["sort_field"] == "username"
     assert data["sort_order"] == "asc"
-

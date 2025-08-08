@@ -1,4 +1,5 @@
 """Shared test utilities for authentication tests."""
+
 import types
 
 
@@ -111,10 +112,13 @@ def mock_authentication_success(monkeypatch, user: types.SimpleNamespace | None 
     async def fake_create_user_session(db, user, request):
         return "access_token_123", "refresh_token_123"
 
-    monkeypatch.setattr(login_module.crud_user, "authenticate_user", fake_authenticate_user)
+    monkeypatch.setattr(
+        login_module.crud_user, "authenticate_user", fake_authenticate_user
+    )
     monkeypatch.setattr(login_module, "log_login_attempt", fake_log_login_attempt)
 
     from app.services.auth import refresh_token as rt
+
     monkeypatch.setattr(rt, "create_user_session", fake_create_user_session)
 
     return user
@@ -136,7 +140,9 @@ def mock_authentication_failure(monkeypatch, reason: str = "invalid_credentials"
     async def fake_log_login_attempt(db, request, user=None, success: bool = False):
         return None
 
-    monkeypatch.setattr(login_module.crud_user, "authenticate_user", fake_authenticate_user)
+    monkeypatch.setattr(
+        login_module.crud_user, "authenticate_user", fake_authenticate_user
+    )
     monkeypatch.setattr(login_module, "log_login_attempt", fake_log_login_attempt)
 
 

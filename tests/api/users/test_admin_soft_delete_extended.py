@@ -108,7 +108,9 @@ async def test_permanently_delete_user_failure(monkeypatch, async_client):
 
 
 @pytest.mark.asyncio
-async def test_search_deleted_users_filters_and_pagination_next(monkeypatch, async_client):
+async def test_search_deleted_users_filters_and_pagination_next(
+    monkeypatch, async_client
+):
     from app.api.users import admin as user_admin_module
     from app.main import app
 
@@ -137,8 +139,14 @@ async def test_search_deleted_users_filters_and_pagination_next(monkeypatch, asy
     async def fake_count_deleted_users(db):
         return 4
 
-    monkeypatch.setattr(user_admin_module.admin_user_crud, "get_deleted_users", fake_get_deleted_users)
-    monkeypatch.setattr(user_admin_module.admin_user_crud, "count_deleted_users", fake_count_deleted_users)
+    monkeypatch.setattr(
+        user_admin_module.admin_user_crud, "get_deleted_users", fake_get_deleted_users
+    )
+    monkeypatch.setattr(
+        user_admin_module.admin_user_crud,
+        "count_deleted_users",
+        fake_count_deleted_users,
+    )
 
     # Page 1 of size 2, total 4 -> has_next True, has_prev False
     r = await async_client.get(
@@ -150,7 +158,11 @@ async def test_search_deleted_users_filters_and_pagination_next(monkeypatch, asy
     body = r.json()
     assert body["has_next"] is True
     assert body["has_prev"] is False
-    assert set(body["filters_applied"]) == {"deletion_reason_search", "deleted_by", "deletion_date_range"}
+    assert set(body["filters_applied"]) == {
+        "deletion_reason_search",
+        "deleted_by",
+        "deletion_date_range",
+    }
 
 
 @pytest.mark.asyncio
@@ -161,25 +173,33 @@ async def test_search_deleted_users_pagination_prev_only(monkeypatch, async_clie
     app.dependency_overrides[user_admin_module.get_current_user] = lambda: _admin_user()
 
     async def fake_get_deleted_users(db, skip, limit):
-        return [types.SimpleNamespace(
-            id=uuid.UUID("00000000-0000-0000-0000-0000000000ff"),
-            email="u@example.com",
-            username="userx",
-            is_superuser=False,
-            is_verified=False,
-            created_at="2025-01-01T00:00:00Z",
-            oauth_provider=None,
-            is_deleted=True,
-            deleted_at="2025-01-02T00:00:00Z",
-            deleted_by=_admin_user().id,
-            deletion_reason="cleanup",
-        )]
+        return [
+            types.SimpleNamespace(
+                id=uuid.UUID("00000000-0000-0000-0000-0000000000ff"),
+                email="u@example.com",
+                username="userx",
+                is_superuser=False,
+                is_verified=False,
+                created_at="2025-01-01T00:00:00Z",
+                oauth_provider=None,
+                is_deleted=True,
+                deleted_at="2025-01-02T00:00:00Z",
+                deleted_by=_admin_user().id,
+                deletion_reason="cleanup",
+            )
+        ]
 
     async def fake_count_deleted_users(db):
         return 3
 
-    monkeypatch.setattr(user_admin_module.admin_user_crud, "get_deleted_users", fake_get_deleted_users)
-    monkeypatch.setattr(user_admin_module.admin_user_crud, "count_deleted_users", fake_count_deleted_users)
+    monkeypatch.setattr(
+        user_admin_module.admin_user_crud, "get_deleted_users", fake_get_deleted_users
+    )
+    monkeypatch.setattr(
+        user_admin_module.admin_user_crud,
+        "count_deleted_users",
+        fake_count_deleted_users,
+    )
 
     # Page 2 of size 2, total 3 -> total_pages 2, has_prev True, has_next False
     r = await async_client.get(

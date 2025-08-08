@@ -57,5 +57,3 @@ async def test_revoke_session_missing_token_returns_false(monkeypatch):
     monkeypatch.setattr(svc, "verify_refresh_token_in_db", fake_verify)
     ok = await svc.revoke_session(DB(), "raw")
     assert ok is False
-
-

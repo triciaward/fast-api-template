@@ -21,10 +21,10 @@ def test_admin_bulk_operation_request_validator_allows_and_rejects():
 def test_admin_user_create_validators():
     from app.schemas.admin.admin import AdminUserCreate
 
-    ok = AdminUserCreate(email=" USER@EX.com ", username=" user_name ", password="Password123!")
+    ok = AdminUserCreate(
+        email=" USER@EX.com ", username=" user_name ", password="Password123!"
+    )
     assert ok.email == "user@ex.com"
 
     with pytest.raises(ValueError):
         AdminUserCreate(email="bad", username="user", password="Password123!")
-
-

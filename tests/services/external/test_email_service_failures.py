@@ -44,6 +44,7 @@ async def test_forgot_password_token_creation_failure(monkeypatch, async_client)
         username="u",
         oauth_provider=None,
     )
+
     async def fake_get_user_by_email(db, email):
         return user
 
@@ -53,7 +54,9 @@ async def test_forgot_password_token_creation_failure(monkeypatch, async_client)
     async def fake_create_token(db, user_id):
         return None
 
-    monkeypatch.setattr(pm.email_service, "create_password_reset_token", fake_create_token)
+    monkeypatch.setattr(
+        pm.email_service, "create_password_reset_token", fake_create_token
+    )
 
     resp = await async_client.post(
         "/auth/forgot-password",
@@ -77,6 +80,7 @@ async def test_forgot_password_send_failure(monkeypatch, async_client):
         username="u",
         oauth_provider=None,
     )
+
     async def fake_get_user_by_email(db, email):
         return user
 
@@ -86,8 +90,12 @@ async def test_forgot_password_send_failure(monkeypatch, async_client):
     async def fake_create_token(db, user_id):
         return "tok"
 
-    monkeypatch.setattr(pm.email_service, "create_password_reset_token", fake_create_token)
-    monkeypatch.setattr(pm.email_service, "send_password_reset_email", lambda *a, **k: False)
+    monkeypatch.setattr(
+        pm.email_service, "create_password_reset_token", fake_create_token
+    )
+    monkeypatch.setattr(
+        pm.email_service, "send_password_reset_email", lambda *a, **k: False
+    )
 
     resp = await async_client.post(
         "/auth/forgot-password",
@@ -97,5 +105,3 @@ async def test_forgot_password_send_failure(monkeypatch, async_client):
     assert resp.status_code == 200
     data = resp.json()
     assert data["email_sent"] is False
-
-

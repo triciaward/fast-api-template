@@ -26,7 +26,9 @@ def test_setup_logging_with_file_logging_json(monkeypatch):
 
     # Ensure a RotatingFileHandler was added
     root = logging.getLogger()
-    assert any(isinstance(h, logging.handlers.RotatingFileHandler) for h in root.handlers)
+    assert any(
+        isinstance(h, logging.handlers.RotatingFileHandler) for h in root.handlers
+    )
 
 
 @pytest.mark.unit

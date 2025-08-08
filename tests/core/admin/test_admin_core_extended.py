@@ -77,7 +77,9 @@ async def test_get_multi_with_filters(monkeypatch):
     monkeypatch.setattr(DummySession, "execute", fake_execute, raising=False)
 
     crud = admin_module.BaseAdminCRUD(Model)
-    result = await crud.get_multi(DummySession(), skip=0, limit=10, filters={"field": "x"})
+    result = await crud.get_multi(
+        DummySession(), skip=0, limit=10, filters={"field": "x"}
+    )
     assert len(result) == 2
 
 

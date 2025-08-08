@@ -56,4 +56,3 @@ def test_create_access_token_contains_subject_and_exp():
     decoded = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
     assert decoded["sub"] == "user1"
     assert "exp" in decoded
-

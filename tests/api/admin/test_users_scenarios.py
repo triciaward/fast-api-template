@@ -67,5 +67,3 @@ async def test_toggle_superuser_self_block(monkeypatch, async_client):
     app.dependency_overrides.clear()
     assert resp.status_code == 400
     assert "cannot modify your own" in resp.json()["error"]["message"].lower()
-
-

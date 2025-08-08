@@ -126,7 +126,9 @@ async def test_permanently_delete_user_found_and_none():
         return User(email="e@x.com", username="e")
 
     # Found
-    result = await crud.permanently_delete_user(db, "id1") if False else None  # ensure import
+    result = (
+        await crud.permanently_delete_user(db, "id1") if False else None
+    )  # ensure import
     # Monkeypatch via attribute assignment since module-level function
     crud.get_user_by_id_any_status = fake_get_any  # type: ignore[assignment]
     ok = await crud.permanently_delete_user(db, "id1")
@@ -170,5 +172,3 @@ async def test_get_users_for_deletion_and_counts():
     assert c1 == 3
     c2 = await crud.count_deleted_users(db)
     assert c2 == 3
-
-

@@ -14,7 +14,12 @@ def test_configure_cors_with_origins(monkeypatch):
             self.middlewares.append((mw, opts))
 
     app = App()
-    monkeypatch.setattr(cfg.settings, "BACKEND_CORS_ORIGINS", "https://x.example.com,https://y.example.com", raising=False)
+    monkeypatch.setattr(
+        cfg.settings,
+        "BACKEND_CORS_ORIGINS",
+        "https://x.example.com,https://y.example.com",
+        raising=False,
+    )
 
     cors_mod.configure_cors(app)  # type: ignore[arg-type]
 

@@ -42,7 +42,9 @@ async def test_get_current_user_invalid_token(monkeypatch):
         pass
 
     # Simulate JWTError by raising from decode
-    monkeypatch.setattr(mod.jwt, "decode", lambda *a, **k: (_ for _ in ()).throw(mod.JWTError("bad")))
+    monkeypatch.setattr(
+        mod.jwt, "decode", lambda *a, **k: (_ for _ in ()).throw(mod.JWTError("bad"))
+    )
 
     with pytest.raises(HTTPException) as ei:
         await mod.get_current_user(token="bad", db=DummySession())

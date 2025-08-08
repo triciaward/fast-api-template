@@ -79,5 +79,3 @@ def test_helper_raisers_map_to_exceptions():
     with pytest.raises(Exception) as ei5:
         raise_authorization_error()
     assert ei5.value.status_code == 403
-
-

@@ -1,4 +1,5 @@
 """Comprehensive OAuth service tests for Google and Apple token verification."""
+
 import time
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -21,17 +22,27 @@ def oauth_service():
 @pytest.fixture
 def mock_google_settings(monkeypatch):
     """Mock Google OAuth settings."""
-    monkeypatch.setattr("app.services.auth.oauth.settings.GOOGLE_CLIENT_ID", "test_google_client_id")
-    monkeypatch.setattr("app.services.auth.oauth.settings.GOOGLE_CLIENT_SECRET", "test_google_secret")
+    monkeypatch.setattr(
+        "app.services.auth.oauth.settings.GOOGLE_CLIENT_ID", "test_google_client_id"
+    )
+    monkeypatch.setattr(
+        "app.services.auth.oauth.settings.GOOGLE_CLIENT_SECRET", "test_google_secret"
+    )
 
 
 @pytest.fixture
 def mock_apple_settings(monkeypatch):
     """Mock Apple OAuth settings."""
-    monkeypatch.setattr("app.services.auth.oauth.settings.APPLE_CLIENT_ID", "test_apple_client_id")
-    monkeypatch.setattr("app.services.auth.oauth.settings.APPLE_TEAM_ID", "test_team_id")
+    monkeypatch.setattr(
+        "app.services.auth.oauth.settings.APPLE_CLIENT_ID", "test_apple_client_id"
+    )
+    monkeypatch.setattr(
+        "app.services.auth.oauth.settings.APPLE_TEAM_ID", "test_team_id"
+    )
     monkeypatch.setattr("app.services.auth.oauth.settings.APPLE_KEY_ID", "test_key_id")
-    monkeypatch.setattr("app.services.auth.oauth.settings.APPLE_PRIVATE_KEY", "test_private_key")
+    monkeypatch.setattr(
+        "app.services.auth.oauth.settings.APPLE_PRIVATE_KEY", "test_private_key"
+    )
 
 
 class TestGoogleOAuth:
@@ -55,7 +66,9 @@ class TestGoogleOAuth:
             mock_response.raise_for_status.return_value = None
 
             mock_context_manager = AsyncMock()
-            mock_context_manager.__aenter__.return_value.get = AsyncMock(return_value=mock_response)
+            mock_context_manager.__aenter__.return_value.get = AsyncMock(
+                return_value=mock_response
+            )
             mock_client.return_value = mock_context_manager
 
             result = await oauth_service.get_google_user_info("valid_access_token")
@@ -86,8 +99,12 @@ class TestGoogleOAuth:
 
         with patch("httpx.AsyncClient") as mock_client:
             mock_context_manager = AsyncMock()
-            mock_context_manager.__aenter__.return_value.get.side_effect = httpx.HTTPStatusError(
-                "Bad Request", request=MagicMock(), response=MagicMock(),
+            mock_context_manager.__aenter__.return_value.get.side_effect = (
+                httpx.HTTPStatusError(
+                    "Bad Request",
+                    request=MagicMock(),
+                    response=MagicMock(),
+                )
             )
             mock_client.return_value = mock_context_manager
 
@@ -117,7 +134,9 @@ class TestGoogleOAuth:
             mock_response.raise_for_status.return_value = None
 
             mock_context_manager = AsyncMock()
-            mock_context_manager.__aenter__.return_value.get = AsyncMock(return_value=mock_response)
+            mock_context_manager.__aenter__.return_value.get = AsyncMock(
+                return_value=mock_response
+            )
             mock_client.return_value = mock_context_manager
 
             result = await oauth_service.verify_google_token("valid_id_token")
@@ -144,7 +163,9 @@ class TestGoogleOAuth:
             mock_response.raise_for_status.return_value = None
 
             mock_context_manager = AsyncMock()
-            mock_context_manager.__aenter__.return_value.get = AsyncMock(return_value=mock_response)
+            mock_context_manager.__aenter__.return_value.get = AsyncMock(
+                return_value=mock_response
+            )
             mock_client.return_value = mock_context_manager
 
             with pytest.raises(HTTPException) as exc_info:
@@ -154,7 +175,9 @@ class TestGoogleOAuth:
             assert "Invalid Google token" in exc_info.value.detail
 
     @pytest.mark.asyncio
-    async def test_verify_google_token_success_with_valid_data(self, mock_google_settings):
+    async def test_verify_google_token_success_with_valid_data(
+        self, mock_google_settings
+    ):
         """Test Google token verification with valid token data but checking boundary conditions."""
         oauth_service = OAuthService()
 
@@ -173,7 +196,9 @@ class TestGoogleOAuth:
             mock_response.raise_for_status.return_value = None
 
             mock_context_manager = AsyncMock()
-            mock_context_manager.__aenter__.return_value.get = AsyncMock(return_value=mock_response)
+            mock_context_manager.__aenter__.return_value.get = AsyncMock(
+                return_value=mock_response
+            )
             mock_client.return_value = mock_context_manager
 
             result = await oauth_service.verify_google_token("valid_token")
@@ -187,8 +212,12 @@ class TestGoogleOAuth:
 
         with patch("httpx.AsyncClient") as mock_client:
             mock_context_manager = AsyncMock()
-            mock_context_manager.__aenter__.return_value.get.side_effect = httpx.HTTPStatusError(
-                "Bad Request", request=MagicMock(), response=MagicMock(),
+            mock_context_manager.__aenter__.return_value.get.side_effect = (
+                httpx.HTTPStatusError(
+                    "Bad Request",
+                    request=MagicMock(),
+                    response=MagicMock(),
+                )
             )
             mock_client.return_value = mock_context_manager
 

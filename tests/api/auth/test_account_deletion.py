@@ -25,7 +25,9 @@ async def test_request_account_deletion_unconfigured_email(monkeypatch, async_cl
         return _user(email)
 
     monkeypatch.setattr(crud_user, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(ad, "email_service", types.SimpleNamespace(is_configured=lambda: False))
+    monkeypatch.setattr(
+        ad, "email_service", types.SimpleNamespace(is_configured=lambda: False)
+    )
 
     resp = await async_client.post(
         "/auth/request-deletion",
@@ -72,5 +74,3 @@ async def test_cancel_account_deletion_no_pending(monkeypatch, async_client):
     )
     assert resp.status_code == 200
     assert resp.json()["deletion_cancelled"] is True
-
-

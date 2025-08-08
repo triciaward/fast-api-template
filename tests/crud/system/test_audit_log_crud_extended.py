@@ -69,7 +69,9 @@ async def test_create_audit_log_and_refresh_tolerant(monkeypatch):
 
     monkeypatch.setattr(db, "refresh", bad_refresh)
 
-    log = await mod.create_audit_log(db, "login", user_id="u1", success=True, context={"k": "v"})
+    log = await mod.create_audit_log(
+        db, "login", user_id="u1", success=True, context={"k": "v"}
+    )
     assert db.added and log.event_type == "login"
 
 
@@ -81,7 +83,13 @@ async def test_get_audit_logs_query_helpers(monkeypatch):
     now = datetime(2025, 1, 1, tzinfo=timezone.utc)
     items = [
         _log(event_type="login", user_id="u1", success=True, ts=now, session_id="s1"),
-        _log(event_type="logout", user_id=None, success=False, ts=now - timedelta(days=1), session_id="s2"),
+        _log(
+            event_type="logout",
+            user_id=None,
+            success=False,
+            ts=now - timedelta(days=1),
+            session_id="s2",
+        ),
     ]
 
     db = FakeSession()

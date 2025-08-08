@@ -1,4 +1,5 @@
 """Comprehensive edge case tests for password management to improve coverage."""
+
 import types
 from unittest.mock import AsyncMock
 
@@ -16,7 +17,9 @@ pytestmark = pytest.mark.asyncio
 class TestPasswordResetEdgeCases:
     """Test edge cases for password reset functionality."""
 
-    async def test_forgot_password_email_creation_fails(self, monkeypatch, async_client):
+    async def test_forgot_password_email_creation_fails(
+        self, monkeypatch, async_client
+    ):
         """Test forgot password when email token creation fails."""
         from app.api.auth import password_management as mod
 
@@ -59,7 +62,9 @@ class TestPasswordResetEdgeCases:
 
         # Mock email service that creates token but fails to send
         mock_email_service = MockEmailService(configured=True)
-        mock_email_service.create_password_reset_token = AsyncMock(return_value="token123")
+        mock_email_service.create_password_reset_token = AsyncMock(
+            return_value="token123"
+        )
         mock_email_service.send_password_reset_email = lambda *args: False
 
         async def mock_get_user(db, email):
@@ -97,7 +102,9 @@ class TestPasswordResetEdgeCases:
         assert "failed" in data["message"].lower()
         assert data["email_sent"] is False
 
-    async def test_reset_password_token_validation_fails(self, monkeypatch, async_client):
+    async def test_reset_password_token_validation_fails(
+        self, monkeypatch, async_client
+    ):
         """Test reset password with invalid token format."""
         from app.api.auth import password_management as mod
 
@@ -122,7 +129,9 @@ class TestPasswordResetEdgeCases:
 
         # Mock that token is valid but user is not found
         mock_email_service = MockEmailService(configured=True)
-        mock_email_service.verify_password_reset_token = AsyncMock(return_value="user-id")
+        mock_email_service.verify_password_reset_token = AsyncMock(
+            return_value="user-id"
+        )
         monkeypatch.setattr(mod, "email_service", mock_email_service)
 
         async def mock_get_user_by_id(db, user_id):
@@ -152,10 +161,14 @@ class TestPasswordResetEdgeCases:
 
         # Mock email service to return a valid user ID
         mock_email_service = MockEmailService(configured=True)
-        mock_email_service.verify_password_reset_token = AsyncMock(return_value="user-id")
+        mock_email_service.verify_password_reset_token = AsyncMock(
+            return_value="user-id"
+        )
         monkeypatch.setattr(mod, "email_service", mock_email_service)
+
         async def mock_get_user_by_id(db, user_id):
             return mock_user
+
         monkeypatch.setattr(mod.crud_user, "get_user_by_id", mock_get_user_by_id)
 
         resp = await async_client.post(
@@ -180,7 +193,9 @@ class TestPasswordResetEdgeCases:
         )
 
         mock_email_service = MockEmailService(configured=True)
-        mock_email_service.verify_password_reset_token = AsyncMock(return_value="user-id")
+        mock_email_service.verify_password_reset_token = AsyncMock(
+            return_value="user-id"
+        )
         monkeypatch.setattr(mod, "email_service", mock_email_service)
 
         async def mock_get_user_by_id(db, user_id):
@@ -227,7 +242,9 @@ class TestPasswordResetEdgeCases:
 class TestPasswordChangeEdgeCases:
     """Test edge cases for password change functionality."""
 
-    async def test_change_password_user_not_in_database(self, monkeypatch, async_client):
+    async def test_change_password_user_not_in_database(
+        self, monkeypatch, async_client
+    ):
         """Test password change when user is not found in database."""
         from app.api.auth import password_management as mod
         from app.main import app
@@ -267,7 +284,9 @@ class TestPasswordChangeEdgeCases:
             return current_user
 
         async def fake_get_user_by_email(db, email):
-            return types.SimpleNamespace(hashed_password="hashed_old_password", id=current_user.id)
+            return types.SimpleNamespace(
+                hashed_password="hashed_old_password", id=current_user.id
+            )
 
         # Mock successful password verification but failed update
         async def mock_update_password(db, user_id, password):
@@ -302,7 +321,9 @@ class TestPasswordChangeEdgeCases:
             return current_user
 
         async def fake_get_user_by_email(db, email):
-            return types.SimpleNamespace(hashed_password="hashed_old_password", id=current_user.id)
+            return types.SimpleNamespace(
+                hashed_password="hashed_old_password", id=current_user.id
+            )
 
         async def fake_log_password_change(db, request, user, change_type):
             nonlocal audit_log_called
@@ -363,7 +384,9 @@ class TestPasswordChangeEdgeCases:
 class TestPasswordValidationEdgeCases:
     """Test password validation edge cases."""
 
-    async def test_forgot_password_rate_limiting_integration(self, monkeypatch, async_client):
+    async def test_forgot_password_rate_limiting_integration(
+        self, monkeypatch, async_client
+    ):
         """Test forgot password with rate limiting enabled."""
         from app.api.auth import password_management as mod
 
@@ -419,7 +442,9 @@ class TestPasswordValidationEdgeCases:
         data = resp.json()
         assert "Invalid or expired" in data["message"]
 
-    async def test_password_change_weak_password_handling(self, monkeypatch, async_client):
+    async def test_password_change_weak_password_handling(
+        self, monkeypatch, async_client
+    ):
         """Test password change with weak passwords."""
         from app.api.auth import password_management as mod
         from app.main import app
@@ -443,7 +468,9 @@ class TestPasswordValidationEdgeCases:
         finally:
             cleanup()
 
-    async def test_password_operations_with_deleted_user(self, monkeypatch, async_client):
+    async def test_password_operations_with_deleted_user(
+        self, monkeypatch, async_client
+    ):
         """Test password operations when user is soft-deleted."""
         from app.api.auth import password_management as mod
 

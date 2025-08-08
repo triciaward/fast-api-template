@@ -20,8 +20,12 @@ def test_monitor_request_performance_all_logging_paths(monkeypatch):
     def e(self, *a, **k):  # type: ignore[no-untyped-def]
         logs["exception"] += 1
 
-    monkeypatch.setattr(perf, "time", type("T", (), {"time": staticmethod(fake_time)})())
-    monkeypatch.setattr(perf, "logger", type("L", (), {"debug": d, "warning": w, "exception": e})())
+    monkeypatch.setattr(
+        perf, "time", type("T", (), {"time": staticmethod(fake_time)})()
+    )
+    monkeypatch.setattr(
+        perf, "logger", type("L", (), {"debug": d, "warning": w, "exception": e})()
+    )
 
     @perf.monitor_request_performance()
     async def f1():  # type: ignore[no-untyped-def]
@@ -49,8 +53,22 @@ def test_monitor_request_performance_exception_logs(monkeypatch):
     def e(self, *a, **k):  # type: ignore[no-untyped-def]
         logs["exception"] += 1
 
-    monkeypatch.setattr(perf, "time", type("T", (), {"time": staticmethod(fake_time)})())
-    monkeypatch.setattr(perf, "logger", type("L", (), {"debug": lambda *a, **k: None, "warning": lambda *a, **k: None, "exception": e})())
+    monkeypatch.setattr(
+        perf, "time", type("T", (), {"time": staticmethod(fake_time)})()
+    )
+    monkeypatch.setattr(
+        perf,
+        "logger",
+        type(
+            "L",
+            (),
+            {
+                "debug": lambda *a, **k: None,
+                "warning": lambda *a, **k: None,
+                "exception": e,
+            },
+        )(),
+    )
 
     @perf.monitor_request_performance()
     async def boom():  # type: ignore[no-untyped-def]
@@ -65,6 +83,7 @@ def test_monitor_request_performance_exception_logs(monkeypatch):
 
 def test_add_performance_headers_and_cache_result_edge(monkeypatch):
     from app.utils import performance as perf
+
     resp = type("R", (), {"headers": {}})()
     perf.add_performance_headers(resp, 0.001)
     assert resp.headers["X-Execution-Time"] == "0.001"
@@ -81,4 +100,3 @@ def test_add_performance_headers_and_cache_result_edge(monkeypatch):
 
     assert aio.run(g(1, b=3)) == 4
     assert aio.run(g(1, b=3)) == 4
-

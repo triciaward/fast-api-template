@@ -78,7 +78,14 @@ async def test_verify_api_key_in_db_success(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_deactivate_and_rotate(monkeypatch):
-    key = types.SimpleNamespace(id="k1", is_active=True, user_id="u1", label="L", scopes=["read"], expires_at=None)
+    key = types.SimpleNamespace(
+        id="k1",
+        is_active=True,
+        user_id="u1",
+        label="L",
+        scopes=["read"],
+        expires_at=None,
+    )
 
     async def fake_get_api_key_by_id(db, key_id, user_id=None):
         return key
@@ -101,5 +108,3 @@ async def test_deactivate_and_rotate(monkeypatch):
     new_key, raw = await crud.rotate_api_key(db, "k1")
     assert raw == "NEWRAW"
     assert new_key.key_hash == "NEWHASH"
-
-

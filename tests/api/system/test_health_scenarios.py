@@ -29,10 +29,17 @@ async def test_health_check_db_pool_metrics_success(monkeypatch, async_client):
 
     # Provide engine.pool attributes
     class FakePool:
-        def size(self): return 5
-        def checkedin(self): return 3
-        def checkedout(self): return 2
-        def overflow(self): return 0
+        def size(self):
+            return 5
+
+        def checkedin(self):
+            return 3
+
+        def checkedout(self):
+            return 2
+
+        def overflow(self):
+            return 0
 
     class FakeEngine:
         pool = FakePool()
@@ -120,5 +127,3 @@ async def test_database_health_endpoint_unhealthy(monkeypatch, async_client):
     data = r.json()
     assert data["status"] == "unhealthy"
     assert "error" in data
-
-

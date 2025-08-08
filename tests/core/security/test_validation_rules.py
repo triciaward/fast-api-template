@@ -41,4 +41,3 @@ def test_clean_and_sanitize_empty_inputs():
 
     assert clean_input("") == ""
     assert sanitize_input("") == ""
-

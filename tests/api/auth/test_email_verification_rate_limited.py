@@ -13,7 +13,9 @@ def _user(verified=False):
 
 
 @pytest.mark.asyncio
-async def test_resend_verification_success_with_rate_limit_enabled(monkeypatch, async_client):
+async def test_resend_verification_success_with_rate_limit_enabled(
+    monkeypatch, async_client
+):
     from app.api.auth import email_verification as ev
     from app.core.config import settings
     from app.crud.auth import user as crud_user
@@ -82,7 +84,9 @@ async def test_verify_email_success_with_rate_limit_enabled(monkeypatch, async_c
 
 
 @pytest.mark.asyncio
-async def test_resend_verification_already_verified_with_rate_limit_enabled(monkeypatch, async_client):
+async def test_resend_verification_already_verified_with_rate_limit_enabled(
+    monkeypatch, async_client
+):
     from app.api.auth import email_verification as ev
     from app.core.config import settings
     from app.crud.auth import user as crud_user
@@ -110,7 +114,9 @@ async def test_resend_verification_already_verified_with_rate_limit_enabled(monk
 
 
 @pytest.mark.asyncio
-async def test_verify_email_already_verified_with_rate_limit_enabled(monkeypatch, async_client):
+async def test_verify_email_already_verified_with_rate_limit_enabled(
+    monkeypatch, async_client
+):
     from app.api.auth import email_verification as ev
     from app.core.config import settings
     from app.crud.auth import user as crud_user
@@ -123,7 +129,9 @@ async def test_verify_email_already_verified_with_rate_limit_enabled(monkeypatch
     async def fake_get_user_by_id(db, uid):
         return _user(verified=True)
 
-    esvc = types.SimpleNamespace(is_configured=lambda: True, verify_token=fake_verify_token)
+    esvc = types.SimpleNamespace(
+        is_configured=lambda: True, verify_token=fake_verify_token
+    )
     monkeypatch.setattr(ev, "email_service", esvc)
     monkeypatch.setattr(crud_user, "get_user_by_id", fake_get_user_by_id)
 
@@ -136,5 +144,3 @@ async def test_verify_email_already_verified_with_rate_limit_enabled(monkeypatch
     data = resp.json()
     assert data["verified"] is True
     assert data["message"] == "User is already verified"
-
-

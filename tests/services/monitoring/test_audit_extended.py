@@ -33,7 +33,9 @@ async def test_log_logout_and_password_change(monkeypatch):
     user = types.SimpleNamespace(id="u1")
 
     await mod.log_logout(db=object(), request=req, user=user)
-    await mod.log_password_change(db=object(), request=req, user=user, change_type="password_change")
+    await mod.log_password_change(
+        db=object(), request=req, user=user, change_type="password_change"
+    )
 
     assert len(ids) == 2
 
@@ -53,7 +55,9 @@ async def test_log_account_deletion_and_email_verification(monkeypatch):
     req = DummyRequest(real="1.1.1.1")
     user = types.SimpleNamespace(id="u2")
 
-    await mod.log_account_deletion(db=object(), request=req, user=user, deletion_stage="requested")
+    await mod.log_account_deletion(
+        db=object(), request=req, user=user, deletion_stage="requested"
+    )
     await mod.log_email_verification(db=object(), request=req, user=user, success=False)
 
     assert "account_deletion" in events and "email_verification" in events
@@ -74,7 +78,9 @@ async def test_log_oauth_login(monkeypatch):
     req = DummyRequest()
     user = types.SimpleNamespace(id="u3")
 
-    await mod.log_oauth_login(db=object(), request=req, user=user, oauth_provider="google", success=True)
+    await mod.log_oauth_login(
+        db=object(), request=req, user=user, oauth_provider="google", success=True
+    )
 
     assert captured["event_type"] == "oauth_login"
     assert captured["context"]["oauth_provider"] == "google"

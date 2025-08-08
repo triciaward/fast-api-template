@@ -10,7 +10,12 @@ def _now():
 
 
 class FakeToken:
-    def __init__(self, user_id: str, created_at: datetime | None = None, expires_in_days: int = 30):
+    def __init__(
+        self,
+        user_id: str,
+        created_at: datetime | None = None,
+        expires_in_days: int = 30,
+    ):
         self.id = UUID("00000000-0000-0000-0000-0000000000aa")
         self.user_id = user_id
         self.token_hash = "HASH"
@@ -38,7 +43,9 @@ async def test_create_refresh_token_commits_and_sets_fields(monkeypatch):
             calls["refresh"] += 1
 
     monkeypatch.setattr(rt, "utc_now", lambda: _now())
-    token = await rt.create_refresh_token(DB(), "u1", "rawtoken", device_info="pytest", ip_address="127.0.0.1")
+    token = await rt.create_refresh_token(
+        DB(), "u1", "rawtoken", device_info="pytest", ip_address="127.0.0.1"
+    )
     assert calls["add"] == 1 and calls["commit"] == 1
     assert token.user_id == "u1"
     assert token.device_info == "pytest"
@@ -49,7 +56,9 @@ async def test_create_refresh_token_commits_and_sets_fields(monkeypatch):
 async def test_cleanup_expired_tokens_marks_revoked(monkeypatch):
     from app.crud.auth import refresh_token as rt
 
-    tok_old = FakeToken("u1", created_at=_now() - timedelta(days=40), expires_in_days=30)
+    tok_old = FakeToken(
+        "u1", created_at=_now() - timedelta(days=40), expires_in_days=30
+    )
     tok_new = FakeToken("u1", created_at=_now(), expires_in_days=30)
 
     class Result:
@@ -170,5 +179,3 @@ async def test_enforce_session_limit_revokes_oldest(monkeypatch):
     monkeypatch.setattr(rt, "utc_now", lambda: base)
     await rt.enforce_session_limit(DB(), "u1", max_sessions=1)
     assert older.is_revoked is True and newer.is_revoked is False
-
-

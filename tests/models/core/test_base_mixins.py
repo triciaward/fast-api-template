@@ -40,5 +40,3 @@ def test_soft_delete_restore_and_queries():
     assert isinstance(Dummy.get_active_query(), Select)
     assert isinstance(Dummy.get_deleted_query(), Select)
     assert isinstance(Dummy.get_all_query(), Select)
-
-

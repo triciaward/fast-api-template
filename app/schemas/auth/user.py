@@ -444,6 +444,7 @@ class APIKeyCreate(APIKeyBase):
         """Validate that expiration date is in the future."""
         if v is not None:
             from app.utils.datetime_utils import utc_now
+
             if v <= utc_now():
                 # Keep message short; allow inline exception here
                 raise ValueError("Expiration must be in the future")  # noqa: TRY003

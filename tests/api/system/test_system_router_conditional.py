@@ -15,7 +15,9 @@ def test_system_router_excludes_celery_when_disabled(monkeypatch):
 
     paths = {getattr(r, "path", None) for r in sys_mod.router.routes}
     # Should not include Celery task routes when disabled
-    assert not any("/tasks/" in (p or "") or (p or "").endswith("/status") for p in paths)
+    assert not any(
+        "/tasks/" in (p or "") or (p or "").endswith("/status") for p in paths
+    )
 
 
 @pytest.mark.unit

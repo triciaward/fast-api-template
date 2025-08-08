@@ -20,7 +20,11 @@ async def test_register_integrity_email(monkeypatch, async_client):
 
     r = await async_client.post(
         "/auth/register",
-        json={"email": "e@example.com", "username": "zetauser", "password": "Passw0rd!"},
+        json={
+            "email": "e@example.com",
+            "username": "zetauser",
+            "password": "Passw0rd!",
+        },
         headers={"user-agent": "pytest"},
     )
     assert r.status_code == 400
@@ -43,7 +47,11 @@ async def test_register_integrity_username(monkeypatch, async_client):
 
     r = await async_client.post(
         "/auth/register",
-        json={"email": "e2@example.com", "username": "zetaname", "password": "Passw0rd!"},
+        json={
+            "email": "e2@example.com",
+            "username": "zetaname",
+            "password": "Passw0rd!",
+        },
         headers={"user-agent": "pytest"},
     )
     assert r.status_code == 400
@@ -71,5 +79,3 @@ async def test_register_integrity_general(monkeypatch, async_client):
     )
     assert r.status_code == 400
     assert "constraint" in r.json()["error"]["message"].lower()
-
-

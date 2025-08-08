@@ -21,4 +21,3 @@ def test_http_exception_detail_dict_message_and_code():
     body = r.json()
     assert body["error"]["type"] == "ValidationError"
     assert body["error"]["message"] == "Bad"
-

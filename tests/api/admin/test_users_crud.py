@@ -49,12 +49,16 @@ async def test_admin_create_user_conflict_email(monkeypatch, async_client):
     from app.core.admin import admin as core_admin_module
     from app.main import app
 
-    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(True)
+    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(
+        True
+    )
 
     async def fake_get_user_by_email(db, email):
         return _user(1)
 
-    monkeypatch.setattr(admin_users.admin_user_crud, "get_user_by_email", fake_get_user_by_email)
+    monkeypatch.setattr(
+        admin_users.admin_user_crud, "get_user_by_email", fake_get_user_by_email
+    )
 
     resp = await async_client.post(
         "/admin/users",
@@ -76,7 +80,9 @@ async def test_admin_create_user_success(monkeypatch, async_client):
     from app.core.admin import admin as core_admin_module
     from app.main import app
 
-    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(True)
+    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(
+        True
+    )
 
     async def fake_get_user_by_email(db, email):
         return None
@@ -84,8 +90,12 @@ async def test_admin_create_user_success(monkeypatch, async_client):
     async def fake_get_user_by_username(db, username):
         return None
 
-    monkeypatch.setattr(admin_users.admin_user_crud, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(admin_users.admin_user_crud, "get_user_by_username", fake_get_user_by_username)
+    monkeypatch.setattr(
+        admin_users.admin_user_crud, "get_user_by_email", fake_get_user_by_email
+    )
+    monkeypatch.setattr(
+        admin_users.admin_user_crud, "get_user_by_username", fake_get_user_by_username
+    )
 
     async def fake_create_user(db, user_create):
         return _user(2)
@@ -114,7 +124,9 @@ async def test_admin_update_user_conflict_email(monkeypatch, async_client):
     from app.core.admin import admin as core_admin_module
     from app.main import app
 
-    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(True)
+    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(
+        True
+    )
 
     async def fake_get(db, uid):
         return _user(3)
@@ -123,7 +135,9 @@ async def test_admin_update_user_conflict_email(monkeypatch, async_client):
         return _user(9)
 
     monkeypatch.setattr(admin_users.admin_user_crud, "get", fake_get)
-    monkeypatch.setattr(admin_users.admin_user_crud, "get_user_by_email", fake_get_user_by_email)
+    monkeypatch.setattr(
+        admin_users.admin_user_crud, "get_user_by_email", fake_get_user_by_email
+    )
 
     resp = await async_client.put(
         "/admin/users/00000000-0000-0000-0000-000000000003",
@@ -140,7 +154,9 @@ async def test_admin_update_user_success(monkeypatch, async_client):
     from app.core.admin import admin as core_admin_module
     from app.main import app
 
-    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(True)
+    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(
+        True
+    )
 
     async def fake_get(db, uid):
         return _user(4)
@@ -152,8 +168,12 @@ async def test_admin_update_user_success(monkeypatch, async_client):
         return None
 
     monkeypatch.setattr(admin_users.admin_user_crud, "get", fake_get)
-    monkeypatch.setattr(admin_users.admin_user_crud, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(admin_users.admin_user_crud, "get_user_by_username", fake_get_user_by_username)
+    monkeypatch.setattr(
+        admin_users.admin_user_crud, "get_user_by_email", fake_get_user_by_email
+    )
+    monkeypatch.setattr(
+        admin_users.admin_user_crud, "get_user_by_username", fake_get_user_by_username
+    )
 
     async def fake_update_user(db, uid, user_update):
         u = _user(4)
@@ -194,7 +214,9 @@ async def test_admin_delete_user_success(monkeypatch, async_client):
     from app.core.admin import admin as core_admin_module
     from app.main import app
 
-    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(True)
+    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(
+        True
+    )
 
     async def fake_get(db, uid):
         return _user(5)
@@ -219,7 +241,9 @@ async def test_admin_statistics(monkeypatch, async_client):
     from app.core.admin import admin as core_admin_module
     from app.main import app
 
-    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(True)
+    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(
+        True
+    )
 
     stats = {
         "total_users": 10,
@@ -230,10 +254,13 @@ async def test_admin_statistics(monkeypatch, async_client):
         "regular_users": 9,
         "unverified_users": 2,
     }
+
     async def fake_get_user_statistics(db):
         return stats
 
-    monkeypatch.setattr(admin_users.admin_user_crud, "get_user_statistics", fake_get_user_statistics)
+    monkeypatch.setattr(
+        admin_users.admin_user_crud, "get_user_statistics", fake_get_user_statistics
+    )
 
     resp = await async_client.get(
         "/admin/statistics",
@@ -242,5 +269,3 @@ async def test_admin_statistics(monkeypatch, async_client):
     app.dependency_overrides.clear()
     assert resp.status_code == 200
     assert resp.json()["total_users"] == 10
-
-

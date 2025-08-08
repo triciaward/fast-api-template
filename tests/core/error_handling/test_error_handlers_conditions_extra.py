@@ -107,4 +107,3 @@ def test_validation_exception_bytes_value_gets_decoded(monkeypatch):
     body = r.json()
     assert body["error"]["type"] == "ValidationError"
     assert "errors" in body["error"]["details"]
-

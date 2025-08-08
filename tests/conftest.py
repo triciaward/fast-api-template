@@ -20,6 +20,7 @@ class _NoOpEngine:
     async def dispose(self) -> None:
         return None
 
+
 db_module.engine = _NoOpEngine()  # type: ignore[assignment]
 
 
@@ -39,6 +40,7 @@ def _override_db_dependency():
 
     Tests that need DB should override explicitly per-test.
     """
+
     class _FakeResult:
         def scalar(self):
             return 0

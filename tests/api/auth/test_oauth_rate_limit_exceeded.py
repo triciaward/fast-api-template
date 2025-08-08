@@ -33,5 +33,3 @@ async def test_oauth_rate_limit_exceeded(monkeypatch, async_client):
         headers={"user-agent": "pytest"},
     )
     assert resp.status_code in (429,)
-
-

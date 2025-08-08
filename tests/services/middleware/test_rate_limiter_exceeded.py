@@ -27,7 +27,10 @@ async def test_rate_limit_exceeded_handling(monkeypatch, async_client):
     # Endpoint using login rate limit; ensure DB access doesn't occur
     # by making validate_email_format fail first (invalid email)
     import app.core.security as core_security
-    monkeypatch.setattr(core_security, "validate_email_format", lambda e: (False, "bad"))
+
+    monkeypatch.setattr(
+        core_security, "validate_email_format", lambda e: (False, "bad")
+    )
     resp = await async_client.post(
         "/auth/login",
         data={"username": "user@example.com", "password": "bad"},
@@ -35,4 +38,3 @@ async def test_rate_limit_exceeded_handling(monkeypatch, async_client):
     )
     # Should be handled by slowapi handler (429) or validation (400)
     assert resp.status_code in (429, 400)
-

@@ -1,4 +1,5 @@
 """Login input validation and error handling tests."""
+
 import types
 
 import pytest
@@ -99,7 +100,11 @@ async def test_register_email_already_exists(monkeypatch, async_client):
 
     resp = await async_client.post(
         "/auth/register",
-        json={"email": "existing@example.com", "username": "newuser", "password": "Passw0rd!"},
+        json={
+            "email": "existing@example.com",
+            "username": "newuser",
+            "password": "Passw0rd!",
+        },
         headers={"user-agent": "pytest"},
     )
     assert resp.status_code == 400
@@ -118,11 +123,17 @@ async def test_register_username_already_exists(monkeypatch, async_client):
         return object()  # Username exists
 
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(mod.crud_user, "get_user_by_username", fake_get_user_by_username)
+    monkeypatch.setattr(
+        mod.crud_user, "get_user_by_username", fake_get_user_by_username
+    )
 
     resp = await async_client.post(
         "/auth/register",
-        json={"email": "new@example.com", "username": "existing", "password": "Passw0rd!"},
+        json={
+            "email": "new@example.com",
+            "username": "existing",
+            "password": "Passw0rd!",
+        },
         headers={"user-agent": "pytest"},
     )
     assert resp.status_code == 400
@@ -130,7 +141,9 @@ async def test_register_username_already_exists(monkeypatch, async_client):
 
 
 @pytest.mark.asyncio
-async def test_register_email_service_not_configured_still_succeeds(monkeypatch, async_client):
+async def test_register_email_service_not_configured_still_succeeds(
+    monkeypatch, async_client
+):
     """Test registration succeeds even when email service is not configured."""
     from app.api.auth import login as mod
 
@@ -152,13 +165,19 @@ async def test_register_email_service_not_configured_still_succeeds(monkeypatch,
         )
 
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(mod.crud_user, "get_user_by_username", fake_get_user_by_username)
+    monkeypatch.setattr(
+        mod.crud_user, "get_user_by_username", fake_get_user_by_username
+    )
     monkeypatch.setattr(mod.crud_user, "create_user", fake_create_user)
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=False))
 
     resp = await async_client.post(
         "/auth/register",
-        json={"email": "test@example.com", "username": "testuser", "password": "Passw0rd!"},
+        json={
+            "email": "test@example.com",
+            "username": "testuser",
+            "password": "Passw0rd!",
+        },
         headers={"user-agent": "pytest"},
     )
     assert resp.status_code == 201

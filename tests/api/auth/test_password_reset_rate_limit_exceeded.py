@@ -32,5 +32,3 @@ async def test_password_reset_rate_limit_exceeded(monkeypatch, async_client):
         headers={"user-agent": "pytest"},
     )
     assert resp.status_code in (429,)
-
-

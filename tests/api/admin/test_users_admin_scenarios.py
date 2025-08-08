@@ -21,10 +21,11 @@ async def test_admin_stats_endpoint_success(monkeypatch, async_client):
     # Stub out any DB access if needed by endpoint
     # Call the stats endpoint
     # Stats route path per module is /admin/statistics
-    r = await async_client.get("/admin/statistics", headers={"authorization": "Bearer t", "user-agent": "pytest"})
+    r = await async_client.get(
+        "/admin/statistics",
+        headers={"authorization": "Bearer t", "user-agent": "pytest"},
+    )
     app.dependency_overrides.clear()
 
     # Accept 200 when route exists; if route not present in template, tolerate 404 without failing suite
     assert r.status_code in (200, 404)
-
-

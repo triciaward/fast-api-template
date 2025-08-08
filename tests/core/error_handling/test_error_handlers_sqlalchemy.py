@@ -45,5 +45,3 @@ def test_dbapi_error_mapped_to_500():
     client = TestClient(app, raise_server_exceptions=False)
     r = client.get("/boom")
     assert r.status_code == 500
-
-

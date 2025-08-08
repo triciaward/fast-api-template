@@ -60,7 +60,13 @@ def test_monitor_request_performance_logs(monkeypatch):
     def fake_debug(*args, **kwargs):  # type: ignore[no-untyped-def]
         logs["level"] = "debug"
 
-    monkeypatch.setattr(perf, "logger", types.SimpleNamespace(warning=fake_warning, debug=fake_debug, exception=lambda *a, **k: None))
+    monkeypatch.setattr(
+        perf,
+        "logger",
+        types.SimpleNamespace(
+            warning=fake_warning, debug=fake_debug, exception=lambda *a, **k: None
+        ),
+    )
 
     @perf.monitor_request_performance()
     async def fast():  # type: ignore[no-untyped-def]
@@ -70,4 +76,3 @@ def test_monitor_request_performance_logs(monkeypatch):
     out = asyncio.run(fast())
     assert out == "ok"
     assert logs["level"] in {"debug", "warning"}
-

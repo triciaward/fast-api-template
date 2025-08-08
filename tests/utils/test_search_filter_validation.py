@@ -34,6 +34,3 @@ def test_text_search_fulltext_fallback_no_crash(monkeypatch):
     b = SearchFilterBuilder(User)
     q = b.build_query(cfg)
     assert str(q)  # query built successfully
-
-
-

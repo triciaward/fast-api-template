@@ -50,4 +50,3 @@ def test_generic_exception_mapped_to_500():
     body = r.json()
     # Schema defines InternalServerError as the type name
     assert body["error"]["type"] == "InternalServerError"
-

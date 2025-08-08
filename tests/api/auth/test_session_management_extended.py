@@ -12,7 +12,9 @@ def _auth_ok(monkeypatch):
         return {"sub": "11111111-1111-1111-1111-111111111111"}
 
     async def fake_get_user_by_id(db, user_id):
-        return types.SimpleNamespace(id="11111111-1111-1111-1111-111111111111", email="u@e.com")
+        return types.SimpleNamespace(
+            id="11111111-1111-1111-1111-111111111111", email="u@e.com"
+        )
 
     monkeypatch.setattr(user_auth.jwt, "decode", fake_decode)
     from app.crud.auth import user as crud_user
@@ -76,5 +78,3 @@ async def test_get_user_sessions_happy(monkeypatch, async_client):
     assert resp.status_code == 200
     data = resp.json()
     assert data["total_sessions"] == 2
-
-

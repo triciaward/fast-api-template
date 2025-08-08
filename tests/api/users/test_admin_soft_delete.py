@@ -133,8 +133,14 @@ async def test_list_deleted_users(monkeypatch, async_client):
     async def fake_count_deleted_users(db):
         return 2
 
-    monkeypatch.setattr(user_admin_module.admin_user_crud, "get_deleted_users", fake_get_deleted_users)
-    monkeypatch.setattr(user_admin_module.admin_user_crud, "count_deleted_users", fake_count_deleted_users)
+    monkeypatch.setattr(
+        user_admin_module.admin_user_crud, "get_deleted_users", fake_get_deleted_users
+    )
+    monkeypatch.setattr(
+        user_admin_module.admin_user_crud,
+        "count_deleted_users",
+        fake_count_deleted_users,
+    )
 
     r = await async_client.get(
         "/users/deleted?page=1&size=2",
@@ -160,8 +166,14 @@ async def test_search_deleted_users(monkeypatch, async_client):
     async def fake_count_deleted_users(db):
         return 1
 
-    monkeypatch.setattr(user_admin_module.admin_user_crud, "get_deleted_users", fake_get_deleted_users)
-    monkeypatch.setattr(user_admin_module.admin_user_crud, "count_deleted_users", fake_count_deleted_users)
+    monkeypatch.setattr(
+        user_admin_module.admin_user_crud, "get_deleted_users", fake_get_deleted_users
+    )
+    monkeypatch.setattr(
+        user_admin_module.admin_user_crud,
+        "count_deleted_users",
+        fake_count_deleted_users,
+    )
 
     r = await async_client.get(
         "/users/deleted/search?deletion_reason=cleanup",

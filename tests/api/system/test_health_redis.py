@@ -17,7 +17,9 @@ async def test_detailed_health_with_redis_enabled(monkeypatch, async_client):
     # Inject a fake global Redis client
     monkeypatch.setattr(redis_mod, "redis_client", FakeRedis())
 
-    resp = await async_client.get("/system/health/detailed", headers={"user-agent": "pytest"})
+    resp = await async_client.get(
+        "/system/health/detailed", headers={"user-agent": "pytest"}
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["checks"]["redis"]["status"] == "healthy"
@@ -36,7 +38,9 @@ async def test_detailed_health_redis_unhealthy(monkeypatch, async_client):
 
     monkeypatch.setattr(redis_mod, "redis_client", BadRedis())
 
-    resp = await async_client.get("/system/health/detailed", headers={"user-agent": "pytest"})
+    resp = await async_client.get(
+        "/system/health/detailed", headers={"user-agent": "pytest"}
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["checks"]["redis"]["status"] == "unhealthy"
@@ -66,9 +70,9 @@ async def test_readiness_with_redis_enabled(monkeypatch, async_client):
     # Override FastAPI dependency to avoid real DB access
     app.dependency_overrides[health_mod.get_db] = fake_get_db
 
-    resp = await async_client.get("/system/health/ready", headers={"user-agent": "pytest"})
+    resp = await async_client.get(
+        "/system/health/ready", headers={"user-agent": "pytest"}
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["ready"] is True
-
-

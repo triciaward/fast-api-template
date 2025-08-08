@@ -71,7 +71,11 @@ async def test_search_users_filters_all_and_pagination(monkeypatch, async_client
         assert key in data["filters_applied"]
     # pagination metadata
     assert data["page"] == 2 and data["per_page"] == 3
-    assert data["total_pages"] == 3 and data["has_prev"] is True and data["has_next"] is True
+    assert (
+        data["total_pages"] == 3
+        and data["has_prev"] is True
+        and data["has_next"] is True
+    )
     assert data["sort_field"] == "email" and data["sort_order"] == "desc"
 
 
@@ -108,5 +112,3 @@ async def test_list_users_empty(monkeypatch, async_client):
     data = resp.json()
     assert data["metadata"]["total"] == 0
     assert data["items"] == []
-
-

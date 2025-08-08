@@ -62,4 +62,3 @@ def test_query_analyzer_low_cost_default():
     q = _fake_query("SELECT id FROM users LIMIT 10")
     out = qa.analyze_query(q)
     assert out["estimated_cost"].startswith("LOW")
-

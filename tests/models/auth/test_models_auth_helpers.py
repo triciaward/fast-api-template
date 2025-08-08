@@ -61,5 +61,3 @@ def test_refresh_token_helpers_and_repr(monkeypatch):
     assert t.is_valid is False
     assert isinstance(t.updated_at, dt.datetime)
     assert "RefreshToken(" in repr(t)
-
-

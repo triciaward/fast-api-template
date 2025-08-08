@@ -52,7 +52,15 @@ def test_monitor_request_performance_exception_and_slow(monkeypatch):
     def fake_debug(self, *a, **k):  # type: ignore[no-untyped-def]
         logs["debugs"] += 1
 
-    monkeypatch.setattr(perf, "logger", type("L", (), {"exception": fake_exception, "warning": fake_warning, "debug": fake_debug})())
+    monkeypatch.setattr(
+        perf,
+        "logger",
+        type(
+            "L",
+            (),
+            {"exception": fake_exception, "warning": fake_warning, "debug": fake_debug},
+        )(),
+    )
 
     @perf.monitor_request_performance()
     async def boom():  # type: ignore[no-untyped-def]
@@ -65,6 +73,7 @@ def test_monitor_request_performance_exception_and_slow(monkeypatch):
     @perf.monitor_request_performance()
     async def slow():  # type: ignore[no-untyped-def]
         import time
+
         # Simulate slow path deterministically
         time.sleep(1.05)
         return "ok"
@@ -72,4 +81,3 @@ def test_monitor_request_performance_exception_and_slow(monkeypatch):
     out = asyncio.run(slow())
     assert out == "ok"
     assert logs["warnings"] == 1 or logs["debugs"] >= 1
-

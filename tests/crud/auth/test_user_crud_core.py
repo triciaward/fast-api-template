@@ -72,7 +72,9 @@ async def test_create_and_authenticate_user_success(monkeypatch):
     # Create
     u = await crud.create_user(
         db,
-        types.SimpleNamespace(email="e@x.com", username="e", password="Password123!", is_superuser=False),
+        types.SimpleNamespace(
+            email="e@x.com", username="e", password="Password123!", is_superuser=False
+        ),
     )
     assert db.add_called is True
     assert db.commit_called >= 1
@@ -119,4 +121,3 @@ async def test_soft_restore_permanent_delete(monkeypatch):
     db = FakeDB(value=deleted_user)
     ok = await crud.permanently_delete_user(db, "444")
     assert ok is True
-

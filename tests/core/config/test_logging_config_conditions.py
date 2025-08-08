@@ -37,7 +37,9 @@ def test_setup_logging_json_format_and_file_handler(monkeypatch, tmp_path):
     logger.warning("warn", value=1)
     # Ensure the file handler can be created and used
     root_handlers = logging.getLogger().handlers
-    assert any(isinstance(h, logging.handlers.RotatingFileHandler) for h in root_handlers)
+    assert any(
+        isinstance(h, logging.handlers.RotatingFileHandler) for h in root_handlers
+    )
 
 
 @pytest.mark.unit

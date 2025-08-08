@@ -58,4 +58,3 @@ async def test_get_deleted_users_and_count_deleted():
     db = FakeDB(many=dels)
     n = await crud.count_deleted_users(db)
     assert n == 2
-

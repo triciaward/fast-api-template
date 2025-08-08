@@ -10,7 +10,9 @@ pytestmark = pytest.mark.unit
 
 def test_rate_limit_decorators_noop_when_disabled(monkeypatch) -> None:
     # Force rate limiting disabled
-    monkeypatch.setattr(config_module.settings, "ENABLE_RATE_LIMITING", False, raising=False)
+    monkeypatch.setattr(
+        config_module.settings, "ENABLE_RATE_LIMITING", False, raising=False
+    )
 
     def sample(x: int) -> int:
         return x + 1
@@ -24,8 +26,12 @@ def test_rate_limit_decorators_noop_when_disabled(monkeypatch) -> None:
 
 
 def test_get_rate_limit_info_disabled(monkeypatch) -> None:
-    monkeypatch.setattr(config_module.settings, "ENABLE_RATE_LIMITING", False, raising=False)
+    monkeypatch.setattr(
+        config_module.settings, "ENABLE_RATE_LIMITING", False, raising=False
+    )
 
-    request = types.SimpleNamespace(headers={}, client=types.SimpleNamespace(host="127.0.0.1"))
+    request = types.SimpleNamespace(
+        headers={}, client=types.SimpleNamespace(host="127.0.0.1")
+    )
     info = rl.get_rate_limit_info(request)  # type: ignore[arg-type]
     assert info == {"enabled": False}

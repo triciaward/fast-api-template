@@ -30,7 +30,9 @@ async def test_register_email_exists(monkeypatch, async_client):
     async def fake_get_user_by_email(db, email):
         return _user_obj()
 
-    monkeypatch.setattr(login_module.crud_user, "get_user_by_email", fake_get_user_by_email)
+    monkeypatch.setattr(
+        login_module.crud_user, "get_user_by_email", fake_get_user_by_email
+    )
 
     resp = await async_client.post(
         "/auth/register",
@@ -44,7 +46,9 @@ async def test_register_email_exists(monkeypatch, async_client):
     )
     assert resp.status_code == 400
     body = resp.json()
-    assert body.get("error", {}).get("message", "").startswith("Email already registered")
+    assert (
+        body.get("error", {}).get("message", "").startswith("Email already registered")
+    )
 
 
 @pytest.mark.asyncio
@@ -57,8 +61,12 @@ async def test_register_username_taken(monkeypatch, async_client):
     async def fake_get_user_by_username(db, username):
         return _user_obj()
 
-    monkeypatch.setattr(login_module.crud_user, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(login_module.crud_user, "get_user_by_username", fake_get_user_by_username)
+    monkeypatch.setattr(
+        login_module.crud_user, "get_user_by_email", fake_get_user_by_email
+    )
+    monkeypatch.setattr(
+        login_module.crud_user, "get_user_by_username", fake_get_user_by_username
+    )
 
     resp = await async_client.post(
         "/auth/register",
@@ -89,9 +97,17 @@ async def test_register_success_without_email_service(monkeypatch, async_client)
         return _user_obj()
 
     # email service not configured
-    monkeypatch.setattr(login_module, "email_service", types.SimpleNamespace(is_configured=lambda: False))
-    monkeypatch.setattr(login_module.crud_user, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(login_module.crud_user, "get_user_by_username", fake_get_user_by_username)
+    monkeypatch.setattr(
+        login_module,
+        "email_service",
+        types.SimpleNamespace(is_configured=lambda: False),
+    )
+    monkeypatch.setattr(
+        login_module.crud_user, "get_user_by_email", fake_get_user_by_email
+    )
+    monkeypatch.setattr(
+        login_module.crud_user, "get_user_by_username", fake_get_user_by_username
+    )
     monkeypatch.setattr(login_module.crud_user, "create_user", fake_create_user)
 
     resp = await async_client.post(
@@ -133,8 +149,12 @@ async def test_register_success_with_email_service(monkeypatch, async_client):
     )
 
     monkeypatch.setattr(login_module, "email_service", esvc)
-    monkeypatch.setattr(login_module.crud_user, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(login_module.crud_user, "get_user_by_username", fake_get_user_by_username)
+    monkeypatch.setattr(
+        login_module.crud_user, "get_user_by_email", fake_get_user_by_email
+    )
+    monkeypatch.setattr(
+        login_module.crud_user, "get_user_by_username", fake_get_user_by_username
+    )
     monkeypatch.setattr(login_module.crud_user, "create_user", fake_create_user)
 
     resp = await async_client.post(
@@ -148,4 +168,3 @@ async def test_register_success_with_email_service(monkeypatch, async_client):
         headers={"user-agent": "pytest"},
     )
     assert resp.status_code == 201
-

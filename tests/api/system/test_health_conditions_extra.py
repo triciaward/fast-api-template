@@ -24,10 +24,17 @@ async def test_health_simple_includes_redis_when_enabled(monkeypatch, async_clie
 
     # Provide minimal engine.pool so pool metrics retrieval succeeds
     class FakePool:
-        def size(self): return 1
-        def checkedin(self): return 1
-        def checkedout(self): return 0
-        def overflow(self): return 0
+        def size(self):
+            return 1
+
+        def checkedin(self):
+            return 1
+
+        def checkedout(self):
+            return 0
+
+        def overflow(self):
+            return 0
 
     class FakeEngine:
         pool = FakePool()
@@ -35,6 +42,7 @@ async def test_health_simple_includes_redis_when_enabled(monkeypatch, async_clie
     # Monkeypatch engine at import site
     import sys
     import types
+
     fake_db_module = types.SimpleNamespace(engine=FakeEngine())
     monkeypatch.setitem(sys.modules, "app.database.database", fake_db_module)
 
@@ -91,6 +99,7 @@ async def test_detailed_health_redis_enabled_but_no_client(monkeypatch, async_cl
 
     # Make get_redis_client return None
     import app.services.external.redis as redis_mod
+
     monkeypatch.setattr(redis_mod, "get_redis_client", lambda: None, raising=False)
 
     r = await async_client.get("/system/health/detailed")
@@ -126,6 +135,7 @@ async def test_readiness_with_redis_enabled_no_client(monkeypatch, async_client)
 
     # get_redis_client returns None
     import app.services.external.redis as redis_mod
+
     monkeypatch.setattr(redis_mod, "get_redis_client", lambda: None, raising=False)
 
     r = await async_client.get("/system/health/ready")

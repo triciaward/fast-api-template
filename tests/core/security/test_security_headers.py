@@ -2,6 +2,7 @@ import pytest
 
 pytestmark = pytest.mark.template_only
 
+
 @pytest.mark.asyncio
 async def test_security_headers_present_on_root(async_client):
     resp = await async_client.get("/")

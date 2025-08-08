@@ -50,7 +50,9 @@ async def test_force_delete_user_internal_error(monkeypatch, async_client):
         return False
 
     monkeypatch.setattr(admin_users.admin_user_crud, "get", fake_get)
-    monkeypatch.setattr(admin_users.admin_user_crud, "force_delete_user", fake_force_delete)
+    monkeypatch.setattr(
+        admin_users.admin_user_crud, "force_delete_user", fake_force_delete
+    )
 
     r = await async_client.post(
         "/admin/users/00000000-0000-0000-0000-00000000fff1/force-delete",
@@ -69,12 +71,13 @@ async def test_bulk_operations_invalid_operation(monkeypatch, async_client):
 
     r = await async_client.post(
         "/admin/bulk-operations",
-        json={"operation": "noop", "user_ids": ["00000000-0000-0000-0000-000000000001"]},
+        json={
+            "operation": "noop",
+            "user_ids": ["00000000-0000-0000-0000-000000000001"],
+        },
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
     # Schema should reject invalid operation with a 422 validation error
     assert r.status_code == 422
     assert r.json()["error"]["type"] == "ValidationError"
-
-

@@ -14,6 +14,7 @@ def test_sqlalchemy_listeners_capture_and_invoke(monkeypatch):
             if name == "after_cursor_execute":
                 captured["after"] = fn
             return fn
+
         return decorator
 
     import sqlalchemy.event as event
@@ -29,7 +30,9 @@ def test_sqlalchemy_listeners_capture_and_invoke(monkeypatch):
 
     # Reload module to register listeners with our fake decorator
     m = reload(importlib.import_module("app.utils.performance"))
-    monkeypatch.setattr(m, "logger", type("L", (), {"debug": fake_debug, "warning": fake_warning})())
+    monkeypatch.setattr(
+        m, "logger", type("L", (), {"debug": fake_debug, "warning": fake_warning})()
+    )
 
     # Call captured listeners
     class Conn:
@@ -61,4 +64,3 @@ def test_sqlalchemy_listeners_capture_and_invoke(monkeypatch):
 
     # Ensure warning count did not increase on fast path
     assert captured["warn"] == slow_warns
-

@@ -12,7 +12,9 @@ def test_text_search_case_sensitive_and_equals():
         create_text_search,
     )
 
-    ts = create_text_search("Alpha", ["email"], operator=SearchOperator.EQUALS, case_sensitive=True)
+    ts = create_text_search(
+        "Alpha", ["email"], operator=SearchOperator.EQUALS, case_sensitive=True
+    )
     cfg = SearchFilterConfig(text_search=ts)
     q = SearchFilterBuilder(User).build_query(cfg)
     assert "email" in str(q)
@@ -88,6 +90,7 @@ def test_field_filter_in_not_in_without_values_are_ignored():
 
 def test_user_and_deleted_user_params_to_search_config():
     from app.utils.search_filter import DeletedUserSearchParams, UserSearchParams
+
     usp = UserSearchParams(search="a", is_verified=True)
     cfg1 = usp.to_search_config()
     assert cfg1 is not None
@@ -108,11 +111,21 @@ def test_field_filters_remaining_ops():
 
     cfg = SearchFilterConfig(
         filters=[
-            create_field_filter("created_at", FilterOperator.GREATER_THAN, value="2024-01-01"),
-            create_field_filter("created_at", FilterOperator.GREATER_THAN_EQUAL, value="2024-01-01"),
-            create_field_filter("created_at", FilterOperator.LESS_THAN, value="2024-12-31"),
-            create_field_filter("created_at", FilterOperator.LESS_THAN_EQUAL, value="2024-12-31"),
-            create_field_filter("nonexistent", FilterOperator.EQUALS, value=1),  # ignored
+            create_field_filter(
+                "created_at", FilterOperator.GREATER_THAN, value="2024-01-01"
+            ),
+            create_field_filter(
+                "created_at", FilterOperator.GREATER_THAN_EQUAL, value="2024-01-01"
+            ),
+            create_field_filter(
+                "created_at", FilterOperator.LESS_THAN, value="2024-12-31"
+            ),
+            create_field_filter(
+                "created_at", FilterOperator.LESS_THAN_EQUAL, value="2024-12-31"
+            ),
+            create_field_filter(
+                "nonexistent", FilterOperator.EQUALS, value=1
+            ),  # ignored
         ],
     )
     q = SearchFilterBuilder(User).build_query(cfg)
@@ -130,14 +143,20 @@ def test_text_search_operators_and_fulltext_fallback(monkeypatch):
     )
 
     # STARTS_WITH / ENDS_WITH / NOT_EQUALS branches
-    for op in [SearchOperator.STARTS_WITH, SearchOperator.ENDS_WITH, SearchOperator.NOT_EQUALS]:
+    for op in [
+        SearchOperator.STARTS_WITH,
+        SearchOperator.ENDS_WITH,
+        SearchOperator.NOT_EQUALS,
+    ]:
         ts = create_text_search("test", ["email"], operator=op, case_sensitive=False)
         cfg = SearchFilterConfig(text_search=ts)
         q = SearchFilterBuilder(User).build_query(cfg)
         assert "email" in str(q)
 
     # Case-sensitive equals path
-    ts_cs = create_text_search("Z", ["username"], operator=SearchOperator.EQUALS, case_sensitive=True)
+    ts_cs = create_text_search(
+        "Z", ["username"], operator=SearchOperator.EQUALS, case_sensitive=True
+    )
     cfg_cs = SearchFilterConfig(text_search=ts_cs)
     q_cs = SearchFilterBuilder(User).build_query(cfg_cs)
     assert "username" in str(q_cs)
@@ -218,4 +237,3 @@ def test_deleted_user_filters_tail_blocks():
     # Minimal call to exercise tail return
     cfg = create_deleted_user_search_filters()
     assert cfg is not None
-

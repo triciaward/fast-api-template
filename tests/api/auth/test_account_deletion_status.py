@@ -71,4 +71,3 @@ async def test_deletion_status_confirmed(monkeypatch, async_client):
     data = resp.json()
     assert data["deletion_requested"] is True
     assert data["deletion_confirmed"] is True
-

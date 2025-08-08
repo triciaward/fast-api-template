@@ -44,7 +44,9 @@ async def test_request_account_deletion_success(monkeypatch, async_client):
         return None
 
     monkeypatch.setattr(crud_user, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(crud_user, "request_account_deletion", fake_request_account_deletion)
+    monkeypatch.setattr(
+        crud_user, "request_account_deletion", fake_request_account_deletion
+    )
     monkeypatch.setattr(ad, "email_service", esvc)
     monkeypatch.setattr(ad, "log_account_deletion", fake_log)
 
@@ -85,7 +87,9 @@ async def test_confirm_account_deletion_success(monkeypatch, async_client):
 
     monkeypatch.setattr(ad, "email_service", esvc)
     monkeypatch.setattr(crud_user, "get_user_by_id", fake_get_user_by_id)
-    monkeypatch.setattr(crud_user, "confirm_account_deletion", fake_confirm_account_deletion)
+    monkeypatch.setattr(
+        crud_user, "confirm_account_deletion", fake_confirm_account_deletion
+    )
     monkeypatch.setattr(ad, "log_account_deletion", fake_log)
 
     resp = await async_client.post(
@@ -121,7 +125,9 @@ async def test_cancel_account_deletion_success(monkeypatch, async_client):
         return None
 
     monkeypatch.setattr(crud_user, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(crud_user, "cancel_account_deletion", fake_cancel_account_deletion)
+    monkeypatch.setattr(
+        crud_user, "cancel_account_deletion", fake_cancel_account_deletion
+    )
     monkeypatch.setattr(ad, "log_account_deletion", fake_log)
 
     resp = await async_client.post(
@@ -132,5 +138,3 @@ async def test_cancel_account_deletion_success(monkeypatch, async_client):
     assert resp.status_code == 200
     data = resp.json()
     assert data["deletion_cancelled"] is True
-
-

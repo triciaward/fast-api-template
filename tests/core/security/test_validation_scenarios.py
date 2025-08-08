@@ -28,5 +28,3 @@ def test_clean_and_sanitize_input():
 
     assert clean_input("  a\x00b  ") == "ab"
     assert sanitize_input("  a\x00b  ", max_length=2) == "ab"
-
-

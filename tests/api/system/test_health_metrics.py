@@ -24,4 +24,3 @@ async def test_metrics_endpoint(monkeypatch, async_client):
     assert "system" in data and "application" in data
     assert data["system"]["cpu_percent"] == 5.0
     assert data["application"]["features"]["redis_enabled"] == settings.ENABLE_REDIS
-

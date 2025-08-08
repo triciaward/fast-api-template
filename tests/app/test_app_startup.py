@@ -5,6 +5,7 @@ from app.main import app
 
 pytestmark = pytest.mark.template_only
 
+
 def test_app_title_matches_settings() -> None:
     assert app.title == settings.PROJECT_NAME
 

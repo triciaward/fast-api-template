@@ -57,16 +57,25 @@ def test_integrity_error_mapping_conflict():
     @app.get("/err/integrity")
     def err_integrity():  # type: ignore[no-untyped-def]
         # Simulate duplicate email
-        raise IntegrityError('duplicate key value violates unique constraint "users_email_key"', None, None)
+        raise IntegrityError(
+            'duplicate key value violates unique constraint "users_email_key"',
+            None,
+            None,
+        )
 
     client = TestClient(app)
     r = client.get("/err/integrity")
     assert r.status_code == 409
     body = r.json()
-    assert body["error"]["code"] in {"email_already_exists", "username_already_exists", "conflict"}
+    assert body["error"]["code"] in {
+        "email_already_exists",
+        "username_already_exists",
+        "conflict",
+    }
 
 
 pytestmark = pytest.mark.template_only
+
 
 def test_stub_error_handlers() -> None:
     assert True

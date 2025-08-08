@@ -1,4 +1,5 @@
 """Comprehensive account deletion edge case tests to improve coverage."""
+
 import types
 from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock
@@ -134,7 +135,9 @@ class TestAccountDeletionRequestEdgeCases:
 
         mock_email_service = MockEmailService(configured=True)
         mock_email_service.create_deletion_token = AsyncMock(return_value="token123")
-        mock_email_service.send_account_deletion_email = lambda *args: False  # Fail to send
+        mock_email_service.send_account_deletion_email = (
+            lambda *args: False
+        )  # Fail to send
 
         with pytest.MonkeyPatch().context() as mp:
             mp.setattr(mod.crud_user, "get_user_by_email", mock_get_user)
@@ -399,7 +402,9 @@ class TestAccountDeletionConfirmEdgeCases:
             assert data["deletion_confirmed"] is True
             assert "deletion_scheduled_for" in data
             # Should be 7 days from now
-            scheduled_date = datetime.fromisoformat(data["deletion_scheduled_for"].replace("Z", "+00:00"))
+            scheduled_date = datetime.fromisoformat(
+                data["deletion_scheduled_for"].replace("Z", "+00:00")
+            )
             expected_date = datetime.now(timezone.utc) + timedelta(days=7)
             time_diff = abs((scheduled_date - expected_date).total_seconds())
             assert time_diff < 60  # Within 1 minute
@@ -507,7 +512,9 @@ class TestAccountDeletionSecurityScenarios:
                 "/auth/confirm-deletion",
                 json={"token": ""},
             )
-            assert resp.status_code == 200  # Application handles empty tokens gracefully
+            assert (
+                resp.status_code == 200
+            )  # Application handles empty tokens gracefully
 
             # Test malformed token
             resp = await async_client.post(

@@ -56,10 +56,14 @@ def test_get_device_info_variants():
 
     from app.services.auth.refresh_token import get_device_info
 
-    req = SimpleNamespace(headers={"user-agent": "Mozilla/5.0 (Macintosh) Safari/605.1.15"})
+    req = SimpleNamespace(
+        headers={"user-agent": "Mozilla/5.0 (Macintosh) Safari/605.1.15"}
+    )
     assert get_device_info(req) == "Safari on macOS"
 
-    req2 = SimpleNamespace(headers={"user-agent": "Mozilla/5.0 (Windows NT 10.0) OtherBrowser"})
+    req2 = SimpleNamespace(
+        headers={"user-agent": "Mozilla/5.0 (Windows NT 10.0) OtherBrowser"}
+    )
     assert get_device_info(req2) == "Other on Windows"
 
     req3 = SimpleNamespace(headers={"user-agent": "UnknownUA"})
@@ -74,7 +78,11 @@ def test_get_client_ip_and_cookie_helpers():
         get_refresh_token_from_cookie,
     )
 
-    req = SimpleNamespace(headers={"x-forwarded-for": "1.2.3.4, 5.6.7.8"}, client=SimpleNamespace(host="9.9.9.9"), cookies={})
+    req = SimpleNamespace(
+        headers={"x-forwarded-for": "1.2.3.4, 5.6.7.8"},
+        client=SimpleNamespace(host="9.9.9.9"),
+        cookies={},
+    )
     assert get_client_ip(req) == "1.2.3.4"
 
     req2 = SimpleNamespace(headers={}, client=None, cookies={})
@@ -87,17 +95,25 @@ def test_get_device_info_linux_android_other_monkey():
 
     from app.services.auth.refresh_token import get_device_info
 
-    linux = SimpleNamespace(headers={"user-agent": "Mozilla/5.0 (X11; Linux x86_64) Firefox/120.0"})
+    linux = SimpleNamespace(
+        headers={"user-agent": "Mozilla/5.0 (X11; Linux x86_64) Firefox/120.0"}
+    )
     assert get_device_info(linux) == "Firefox on Linux"
 
     # UA includes Linux, so function classifies as Linux by order
-    android = SimpleNamespace(headers={"user-agent": "Mozilla/5.0 (Linux; Android 14; Pixel) Chrome/120"})
+    android = SimpleNamespace(
+        headers={"user-agent": "Mozilla/5.0 (Linux; Android 14; Pixel) Chrome/120"}
+    )
     assert get_device_info(android) == "Chrome on Linux"
 
-    android2 = SimpleNamespace(headers={"user-agent": "Mozilla/5.0 (Android 14; Pixel) Safari/605"})
+    android2 = SimpleNamespace(
+        headers={"user-agent": "Mozilla/5.0 (Android 14; Pixel) Safari/605"}
+    )
     assert get_device_info(android2) == "Safari on Android"
 
-    other = SimpleNamespace(headers={"user-agent": "Mozilla/5.0 (Something) UnknownBrowser/1.0"})
+    other = SimpleNamespace(
+        headers={"user-agent": "Mozilla/5.0 (Something) UnknownBrowser/1.0"}
+    )
     assert get_device_info(other) == "Other on Other"
 
 
@@ -136,5 +152,3 @@ async def test_revoke_all_sessions_with_except_token_not_found(monkeypatch):
 
     n = await svc.revoke_all_sessions(types.SimpleNamespace(), "11111111-1111-1111-1111-111111111111", except_token_value="raw")  # type: ignore[arg-type]
     assert n == 7
-
-

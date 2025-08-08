@@ -31,12 +31,16 @@ async def test_toggle_superuser_success(monkeypatch, async_client):
     from app.core.admin import admin as core_admin_module
     from app.main import app
 
-    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(True)
+    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(
+        True
+    )
 
     async def fake_toggle(db, uid):
         return _user(2, superuser=True)
 
-    monkeypatch.setattr(admin_users.admin_user_crud, "toggle_superuser_status", fake_toggle)
+    monkeypatch.setattr(
+        admin_users.admin_user_crud, "toggle_superuser_status", fake_toggle
+    )
 
     resp = await async_client.post(
         "/admin/users/00000000-0000-0000-0000-000000000002/toggle-superuser",
@@ -56,12 +60,16 @@ async def test_toggle_superuser_not_found(monkeypatch, async_client):
     from app.core.admin import admin as core_admin_module
     from app.main import app
 
-    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(True)
+    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(
+        True
+    )
 
     async def fake_toggle(db, uid):
         return None
 
-    monkeypatch.setattr(admin_users.admin_user_crud, "toggle_superuser_status", fake_toggle)
+    monkeypatch.setattr(
+        admin_users.admin_user_crud, "toggle_superuser_status", fake_toggle
+    )
 
     resp = await async_client.post(
         "/admin/users/00000000-0000-0000-0000-000000000099/toggle-superuser",
@@ -77,12 +85,16 @@ async def test_toggle_verification_success(monkeypatch, async_client):
     from app.core.admin import admin as core_admin_module
     from app.main import app
 
-    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(True)
+    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(
+        True
+    )
 
     async def fake_toggle(db, uid):
         return _user(3, verified=False)
 
-    monkeypatch.setattr(admin_users.admin_user_crud, "toggle_verification_status", fake_toggle)
+    monkeypatch.setattr(
+        admin_users.admin_user_crud, "toggle_verification_status", fake_toggle
+    )
 
     resp = await async_client.post(
         "/admin/users/00000000-0000-0000-0000-000000000003/toggle-verification",
@@ -102,12 +114,16 @@ async def test_toggle_verification_not_found(monkeypatch, async_client):
     from app.core.admin import admin as core_admin_module
     from app.main import app
 
-    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(True)
+    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(
+        True
+    )
 
     async def fake_toggle(db, uid):
         return None
 
-    monkeypatch.setattr(admin_users.admin_user_crud, "toggle_verification_status", fake_toggle)
+    monkeypatch.setattr(
+        admin_users.admin_user_crud, "toggle_verification_status", fake_toggle
+    )
 
     resp = await async_client.post(
         "/admin/users/00000000-0000-0000-0000-000000000098/toggle-verification",
@@ -123,7 +139,9 @@ async def test_bulk_operations_verify_mixed(monkeypatch, async_client):
     from app.core.admin import admin as core_admin_module
     from app.main import app
 
-    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(True)
+    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(
+        True
+    )
 
     calls = {"count": 0}
 
@@ -135,7 +153,11 @@ async def test_bulk_operations_verify_mixed(monkeypatch, async_client):
         # Simulate that the function toggles but may need a second call; endpoint calls twice in some cases
         return _user(10, verified=False)
 
-    monkeypatch.setattr(admin_users.admin_user_crud, "toggle_verification_status", fake_toggle_verification)
+    monkeypatch.setattr(
+        admin_users.admin_user_crud,
+        "toggle_verification_status",
+        fake_toggle_verification,
+    )
 
     req = {
         "operation": "verify",
@@ -166,13 +188,19 @@ async def test_bulk_operations_unverify_counts(monkeypatch, async_client):
     from app.core.admin import admin as core_admin_module
     from app.main import app
 
-    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(True)
+    app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user(
+        True
+    )
 
     async def fake_toggle_verification(db, uid):
         # Return a user each call; when operation is unverify, endpoint will call twice to flip correctly
         return _user(20, verified=True)
 
-    monkeypatch.setattr(admin_users.admin_user_crud, "toggle_verification_status", fake_toggle_verification)
+    monkeypatch.setattr(
+        admin_users.admin_user_crud,
+        "toggle_verification_status",
+        fake_toggle_verification,
+    )
 
     req = {
         "operation": "unverify",
@@ -193,5 +221,3 @@ async def test_bulk_operations_unverify_counts(monkeypatch, async_client):
     assert data["operation"] == "unverify"
     assert data["total_users"] == 2
     assert data["successful"] + data["failed"] == 2
-
-

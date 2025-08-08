@@ -1,4 +1,5 @@
 """Password management tests (forgot, reset, change password)."""
+
 import types
 
 import pytest
@@ -41,7 +42,9 @@ async def test_forgot_password_existing_user_success(monkeypatch, async_client):
 
 
 @pytest.mark.asyncio
-async def test_forgot_password_nonexistent_user_returns_generic(monkeypatch, async_client):
+async def test_forgot_password_nonexistent_user_returns_generic(
+    monkeypatch, async_client
+):
     """Test forgot password for nonexistent user returns generic success."""
     from app.api.auth import password_management as mod
 
@@ -51,7 +54,9 @@ async def test_forgot_password_nonexistent_user_returns_generic(monkeypatch, asy
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=True))
 
-    resp = await async_client.post("/auth/forgot-password", json={"email": "nope@example.com"})
+    resp = await async_client.post(
+        "/auth/forgot-password", json={"email": "nope@example.com"}
+    )
     assert resp.status_code == 200
     body = resp.json()
     assert body["email_sent"] is True
@@ -70,7 +75,9 @@ async def test_forgot_password_service_unavailable(monkeypatch, async_client):
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=False))
 
-    resp = await async_client.post("/auth/forgot-password", json={"email": "user@example.com"})
+    resp = await async_client.post(
+        "/auth/forgot-password", json={"email": "user@example.com"}
+    )
     assert resp.status_code == 200
     assert resp.json()["email_sent"] is False
 
@@ -88,7 +95,9 @@ async def test_forgot_password_oauth_user_blocked(monkeypatch, async_client):
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=True))
 
-    resp = await async_client.post("/auth/forgot-password", json={"email": "user@example.com"})
+    resp = await async_client.post(
+        "/auth/forgot-password", json={"email": "user@example.com"}
+    )
     assert resp.status_code == 200
     # Should return generic success even for OAuth users for security
     assert resp.json()["email_sent"] is True
@@ -190,7 +199,9 @@ async def test_change_password_success(monkeypatch, async_client):
 
     cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(mod.crud_user, "update_user_password", fake_change_user_password)
+    monkeypatch.setattr(
+        mod.crud_user, "update_user_password", fake_change_user_password
+    )
     monkeypatch.setattr(mod, "verify_password", lambda p, h: True)
 
     try:
@@ -255,6 +266,9 @@ async def test_change_password_oauth_user_denied(monkeypatch, async_client):
             headers={"authorization": "Bearer token", "user-agent": "pytest"},
         )
         assert resp.status_code == 400
-        assert "oauth users cannot change password" in resp.json()["error"]["message"].lower()
+        assert (
+            "oauth users cannot change password"
+            in resp.json()["error"]["message"].lower()
+        )
     finally:
         cleanup()

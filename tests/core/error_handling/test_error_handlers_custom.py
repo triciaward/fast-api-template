@@ -34,6 +34,7 @@ def test_custom_authentication_exception_envelope():
 
 def test_custom_validation_exception_envelope():
     from app.core.error_handling.exceptions import ValidationException
+
     exc = ValidationException(message="Bad thing", field="email", value="x")
     app = _app_with_custom(exc)
     client = TestClient(app, raise_server_exceptions=False)
@@ -42,4 +43,3 @@ def test_custom_validation_exception_envelope():
     body = r.json()
     assert body["error"]["type"] == "ValidationError"
     assert body["error"]["details"]["field"] == "email"
-

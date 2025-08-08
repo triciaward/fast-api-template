@@ -64,4 +64,3 @@ async def test_log_api_key_usage_records_context(monkeypatch):
     assert captured["context"]["endpoint_path"] == "/custom"
     assert captured["context"]["http_method"] == "POST"
     assert captured["success"] is True
-

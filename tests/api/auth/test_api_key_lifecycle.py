@@ -1,4 +1,5 @@
 """Comprehensive API key lifecycle tests to improve coverage."""
+
 import types
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock
@@ -36,7 +37,9 @@ class TestAPIKeyCreation:
         async def mock_create_api_key(db, api_key_data, user_id, raw_key):
             return mock_api_key
 
-        monkeypatch.setattr("app.core.security.generate_api_key", lambda: "test_raw_key_123")
+        monkeypatch.setattr(
+            "app.core.security.generate_api_key", lambda: "test_raw_key_123"
+        )
         monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key)
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
@@ -68,8 +71,12 @@ class TestAPIKeyCreation:
         async def mock_create_api_key_error(db, api_key_data, user_id, raw_key):
             raise Exception("Database connection failed")
 
-        monkeypatch.setattr("app.core.security.generate_api_key", lambda: "test_raw_key_123")
-        monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key_error)
+        monkeypatch.setattr(
+            "app.core.security.generate_api_key", lambda: "test_raw_key_123"
+        )
+        monkeypatch.setattr(
+            mod.crud_api_key, "create_api_key", mock_create_api_key_error
+        )
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
 
@@ -109,7 +116,9 @@ class TestAPIKeyCreation:
             assert api_key_data.expires_at is not None
             return mock_api_key
 
-        monkeypatch.setattr("app.core.security.generate_api_key", lambda: "test_raw_key_123")
+        monkeypatch.setattr(
+            "app.core.security.generate_api_key", lambda: "test_raw_key_123"
+        )
         monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key)
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
@@ -148,8 +157,12 @@ class TestAPIKeyListing:
         async def mock_count_user_api_keys(db, user_id):
             return 0
 
-        monkeypatch.setattr(mod.crud_api_key, "get_user_api_keys", mock_get_user_api_keys)
-        monkeypatch.setattr(mod.crud_api_key, "count_user_api_keys", mock_count_user_api_keys)
+        monkeypatch.setattr(
+            mod.crud_api_key, "get_user_api_keys", mock_get_user_api_keys
+        )
+        monkeypatch.setattr(
+            mod.crud_api_key, "count_user_api_keys", mock_count_user_api_keys
+        )
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
 
@@ -192,13 +205,17 @@ class TestAPIKeyListing:
             mock_api_keys.append(mock_api_key)
 
         async def mock_get_user_api_keys(db, user_id, skip, limit):
-            return mock_api_keys[skip:skip + limit]
+            return mock_api_keys[skip : skip + limit]
 
         async def mock_count_user_api_keys(db, user_id):
             return len(mock_api_keys)
 
-        monkeypatch.setattr(mod.crud_api_key, "get_user_api_keys", mock_get_user_api_keys)
-        monkeypatch.setattr(mod.crud_api_key, "count_user_api_keys", mock_count_user_api_keys)
+        monkeypatch.setattr(
+            mod.crud_api_key, "get_user_api_keys", mock_get_user_api_keys
+        )
+        monkeypatch.setattr(
+            mod.crud_api_key, "count_user_api_keys", mock_count_user_api_keys
+        )
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
 
@@ -235,7 +252,9 @@ class TestAPIKeyDeactivation:
             assert user_id == str(current_user.id)
             return True
 
-        monkeypatch.setattr(mod.crud_api_key, "deactivate_api_key", mock_deactivate_api_key)
+        monkeypatch.setattr(
+            mod.crud_api_key, "deactivate_api_key", mock_deactivate_api_key
+        )
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
 
@@ -262,7 +281,9 @@ class TestAPIKeyDeactivation:
         async def mock_deactivate_api_key(db, key_id, user_id):
             return False  # API key not found or not owned by user
 
-        monkeypatch.setattr(mod.crud_api_key, "deactivate_api_key", mock_deactivate_api_key)
+        monkeypatch.setattr(
+            mod.crud_api_key, "deactivate_api_key", mock_deactivate_api_key
+        )
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
 
@@ -435,7 +456,9 @@ class TestAPIKeyValidation:
         async def mock_create_api_key(db, api_key_data, user_id, raw_key):
             return mock_api_key
 
-        monkeypatch.setattr("app.core.security.generate_api_key", lambda: "test_raw_key_123")
+        monkeypatch.setattr(
+            "app.core.security.generate_api_key", lambda: "test_raw_key_123"
+        )
         monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key)
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
@@ -477,7 +500,9 @@ class TestAPIKeyValidation:
         async def mock_create_api_key(db, api_key_data, user_id, raw_key):
             return mock_api_key
 
-        monkeypatch.setattr("app.core.security.generate_api_key", lambda: "test_raw_key_123")
+        monkeypatch.setattr(
+            "app.core.security.generate_api_key", lambda: "test_raw_key_123"
+        )
         monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key)
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
@@ -520,7 +545,9 @@ class TestAPIKeyValidation:
         async def mock_create_api_key(db, api_key_data, user_id, raw_key):
             return mock_api_key
 
-        monkeypatch.setattr("app.core.security.generate_api_key", lambda: "test_raw_key_123")
+        monkeypatch.setattr(
+            "app.core.security.generate_api_key", lambda: "test_raw_key_123"
+        )
         monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key)
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
@@ -580,7 +607,9 @@ class TestAPIKeySecurityScenarios:
             # Simulate that the API key belongs to another user
             return False
 
-        monkeypatch.setattr(mod.crud_api_key, "deactivate_api_key", mock_deactivate_api_key)
+        monkeypatch.setattr(
+            mod.crud_api_key, "deactivate_api_key", mock_deactivate_api_key
+        )
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
 
@@ -615,7 +644,9 @@ class TestAPIKeySecurityScenarios:
         async def mock_create_api_key(db, api_key_data, user_id, raw_key):
             return mock_api_key
 
-        monkeypatch.setattr("app.core.security.generate_api_key", lambda: f"test_key_{uuid4().hex[:8]}")
+        monkeypatch.setattr(
+            "app.core.security.generate_api_key", lambda: f"test_key_{uuid4().hex[:8]}"
+        )
         monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key)
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)

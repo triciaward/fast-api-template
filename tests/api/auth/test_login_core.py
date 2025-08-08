@@ -12,7 +12,9 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
-async def test_login_success_sets_refresh_cookie_and_returns_token(monkeypatch, async_client):
+async def test_login_success_sets_refresh_cookie_and_returns_token(
+    monkeypatch, async_client
+):
     """Test successful login returns access token and sets refresh cookie."""
     from app.core.config.config import settings
 
@@ -84,13 +86,19 @@ async def test_register_success_returns_user_data(monkeypatch, async_client):
         )
 
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(mod.crud_user, "get_user_by_username", fake_get_user_by_username)
+    monkeypatch.setattr(
+        mod.crud_user, "get_user_by_username", fake_get_user_by_username
+    )
     monkeypatch.setattr(mod.crud_user, "create_user", fake_create_user)
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=False))
 
     resp = await async_client.post(
         "/auth/register",
-        json={"email": "test@example.com", "username": "testuser", "password": "Passw0rd!"},
+        json={
+            "email": "test@example.com",
+            "username": "testuser",
+            "password": "Passw0rd!",
+        },
         headers={"user-agent": "pytest"},
     )
     assert resp.status_code == 201
@@ -100,7 +108,9 @@ async def test_register_success_returns_user_data(monkeypatch, async_client):
 
 
 @pytest.mark.asyncio
-async def test_register_with_email_service_sends_verification(monkeypatch, async_client):
+async def test_register_with_email_service_sends_verification(
+    monkeypatch, async_client
+):
     """Test registration with configured email service sends verification email."""
     from app.api.auth import login as mod
 
@@ -118,13 +128,19 @@ async def test_register_with_email_service_sends_verification(monkeypatch, async
         )
 
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
-    monkeypatch.setattr(mod.crud_user, "get_user_by_username", fake_get_user_by_username)
+    monkeypatch.setattr(
+        mod.crud_user, "get_user_by_username", fake_get_user_by_username
+    )
     monkeypatch.setattr(mod.crud_user, "create_user", fake_create_user)
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=True))
 
     resp = await async_client.post(
         "/auth/register",
-        json={"email": "test@example.com", "username": "testuser", "password": "Passw0rd!"},
+        json={
+            "email": "test@example.com",
+            "username": "testuser",
+            "password": "Passw0rd!",
+        },
         headers={"user-agent": "pytest"},
     )
     assert resp.status_code == 201
