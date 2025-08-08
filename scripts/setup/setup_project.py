@@ -336,7 +336,7 @@ class ProjectSetup:
             env["PYTHONPATH"] = str(self.project_root)
 
             result = subprocess.run(
-                ["alembic", "upgrade", "head"],
+                [str(python_path), "-m", "alembic", "upgrade", "head"],
                 cwd=self.project_root,
                 capture_output=True,
                 text=True,
