@@ -574,26 +574,45 @@ class ProjectSetup:
             sys.exit(1)
 
     def start_services(self) -> bool:
-        """Start Docker services (Postgres and API)."""
+        """Start Docker services (Postgres first, API after migrations)."""
         print()
-        print("🗄️  Starting database and API services...")
+        print("🗄️  Starting database service...")
 
         try:
+            # Start only PostgreSQL first
             subprocess.run(
-                ["docker-compose", "up", "-d", "postgres", "api"],
+                ["docker-compose", "up", "-d", "postgres"],
                 cwd=self.project_root,
                 check=True,
             )
         except subprocess.CalledProcessError as e:
-            print(f"❌ Error starting services: {e}")
-            print("   Continuing with setup, but API may not be available...")
+            print(f"❌ Error starting PostgreSQL: {e}")
             return False
         else:
-            print("✅ Postgres and API containers started")
+            print("✅ PostgreSQL container started")
 
             # Wait for PostgreSQL
             print("⏳ Waiting for PostgreSQL to be ready...")
             self.wait_for_postgres()
+            return True
+
+    def start_api_service(self) -> bool:
+        """Start the API service after migrations are complete."""
+        print()
+        print("🚀 Starting API service...")
+
+        try:
+            subprocess.run(
+                ["docker-compose", "up", "-d", "api"],
+                cwd=self.project_root,
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Error starting API: {e}")
+            print("   Continuing with setup, but API may not be available...")
+            return False
+        else:
+            print("✅ API container started")
 
             # Wait for API to respond on health endpoint
             print("⏳ Waiting for API to be ready...")
@@ -1214,15 +1233,25 @@ def main():
         # Set up environment
         setup.setup_environment()
 
-        # Start services
+        # Start services in the correct order
         setup.check_docker()
         # Detect and resolve host port conflicts before starting containers
         setup.resolve_service_ports()
-        services_success = setup.start_services()
-        migrations_success = setup.run_migrations()
+
+        # 1. Start PostgreSQL first
+        postgres_success = setup.start_services()
+
+        # 2. Run migrations (creates database)
+        migrations_success = setup.run_migrations() if postgres_success else False
+
+        # 3. Create superuser
         superuser_success = (
             setup.create_superuser(details) if migrations_success else False
         )
+
+        # 4. Start API service after database is ready
+        api_success = setup.start_api_service() if migrations_success else False
+        services_success = postgres_success and api_success
 
         # Install git hooks for protection
         setup.install_git_hooks()
