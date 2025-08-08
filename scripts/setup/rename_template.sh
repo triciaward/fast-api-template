@@ -5,11 +5,11 @@
 
 set -e  # Exit on any error
 
-echo "🚀 FastAPI Template - Step 1: Rename Directory"
-echo "=============================================="
+echo "🚀 FastAPI Template - Step 1: Rename Directory (Required)"
+echo "========================================================"
 echo ""
 echo "This script will rename the template directory to your project name."
-echo "This is the FIRST step in customizing your template."
+echo "This is REQUIRED - you must customize the template before starting development."
 echo ""
 
 # Check if we're in the right directory
@@ -21,13 +21,14 @@ fi
 
 # Check if we're still in the template directory
 if [ "$(basename "$PWD")" = "fast-api-template" ]; then
-    echo "✅ You're in the template directory. Let's rename it!"
+    echo "✅ You're in the template directory. Ready to rename!"
 else
     echo "❌ Error: You're not in the 'fast-api-template' directory."
-    echo "   Current directory: $(basename "$PWD")"
+    echo "   Current directory: $(basename "$PWD')"
     echo "   Expected directory: fast-api-template"
     echo ""
     echo "   Please navigate to the template directory and run this script again."
+    echo "   This step is required before you can start development."
     exit 1
 fi
 
@@ -70,34 +71,15 @@ mv "fast-api-template" "$PROJECT_SLUG"
 if [ $? -eq 0 ]; then
     echo "✅ Directory renamed successfully!"
     echo ""
-    echo "🎉 STEP 1 COMPLETE!"
-    echo "=================="
+    echo "🎉 Directory renamed successfully!"
+    echo "================================"
     echo ""
-    echo "🚨 IMPORTANT: You must restart VS Code now!"
+    echo "📝 Next steps (required):"
+    echo "1. Restart VS Code to ensure it recognizes the new directory name"
+    echo "2. Run the customization script: ./scripts/setup/customize_template.sh"
+    echo "3. Then set up your development environment: ./scripts/setup/quick_start.sh"
     echo ""
-    echo "Next steps:"
-    echo "1. Close VS Code completely"
-    echo "2. Open VS Code again"
-    echo "3. Open the folder: $PROJECT_SLUG"
-    echo "4. Copy and paste this message to your AI assistant:"
-    echo ""
-    echo "📋 MESSAGE TO COPY/PASTE TO AI ASSISTANT:"
-    echo "----------------------------------------"
-    echo "I've restarted VS Code and opened the renamed directory: $PROJECT_SLUG"
-    echo ""
-    echo "Please help me continue with the template customization process. I need to:"
-    echo "1. Run the customization script"
-    echo "2. Set up my project environment"
-    echo "3. Get my FastAPI application running"
-    echo ""
-    echo "The directory has been renamed from \"fast-api-template\" to \"$PROJECT_SLUG\" and I'm now in the renamed directory."
-    echo "----------------------------------------"
-    echo ""
-
-    echo ""
-    echo "⚠️  CRITICAL FOR AI ASSISTANTS:"
-    echo "   - STOP here and wait for user to restart VS Code"
-    echo "   - DO NOT continue with next steps automatically"
+    echo "🚨 IMPORTANT: You must complete both customization steps before starting development!"
     echo "   - User must manually restart VS Code and open the renamed directory"
     echo "   - Only continue after user confirms VS Code has been restarted"
     echo "   - Wait for user to copy/paste the message above"

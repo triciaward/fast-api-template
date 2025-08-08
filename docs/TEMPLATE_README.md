@@ -16,24 +16,98 @@ A comprehensive, production-ready FastAPI template with authentication, admin pa
 
 ## 🚀 Getting Started
 
-### ⚠️ CRITICAL: Create a New GitHub Repository First!
+### 🤖 For AI Assistants
 
-**🚨 IMPORTANT:** Before starting the setup process, you MUST create a new GitHub repository for your project. If you don't, you risk accidentally overwriting this template repository!
+If you're helping a user set up this project, please:
+1. **Refer to the setup process below** - it must be followed in exact order
+2. **Do not skip the customization steps** - they are required
+3. **Guide the user through each step** - don't jump ahead to development
+4. **Check that customization is complete** before proceeding to environment setup
 
-**How to create your new repository:**
-1. Go to [GitHub](https://github.com) and sign in
-2. Click the "+" button in the top right corner
-3. Select "New repository"
-4. Name it something like "my-project-backend" or "my-awesome-api"
-5. **DO NOT** initialize with README, .gitignore, or license (we'll add these)
-6. Click "Create repository"
-7. Copy the repository URL (you'll need this later)
+### Step 1: Clone and Customize (Required)
 
-**Why this is critical:**
-- The setup process will rename and customize the template
-- Without a new repo, you might accidentally push changes back to this template
-- Your customized project needs its own repository to track changes
-- This prevents confusion and protects the original template
+**🚨 CRITICAL**: You MUST customize the template before starting development!
+
+```bash
+# Clone the template
+git clone https://github.com/triciaward/fast-api-template.git
+cd fast-api-template
+
+# Step 1: Rename the template directory to your project name
+./scripts/setup/rename_template.sh
+
+# Step 2: Customize the template (updates project name, descriptions, etc.)
+./scripts/setup/customize_template.sh
+```
+
+**Why this is required:**
+- The template contains placeholder names and descriptions
+- Customization updates all project metadata for your specific project
+- This prevents confusion and makes the project truly yours
+- You'll restart VS Code after renaming to ensure everything works correctly
+
+### Step 2: Set Up Your Development Environment
+
+After customizing, set up your development environment:
+
+```bash
+# Run the quick start script (sets up everything automatically)
+./scripts/setup/quick_start.sh
+```
+
+**That's it!** Your FastAPI application is ready to use.
+
+**Alternative manual setup:**
+```bash
+# Set up your development environment
+./scripts/setup/setup.sh
+
+# Start the services
+docker-compose up -d
+
+# Run database migrations
+alembic upgrade head
+```
+
+If you want to customize the template for your specific project:
+
+```bash
+# Rename the template directory to your project name
+./scripts/setup/rename_template.sh
+
+# Customize the template (updates project name, descriptions, etc.)
+./scripts/setup/customize_template.sh
+```
+
+### Setting Up Git Repository (Optional)
+
+If you want to track your changes in Git:
+
+```bash
+# Initialize a new Git repository
+git init
+
+# Add all files
+git add .
+
+# Make your first commit
+git commit -m "Initial commit from FastAPI template"
+
+# Create a new repository on GitHub, then:
+git remote add origin <your-repo-url>
+git push -u origin main
+```
+
+### Alternative: Start with Your Own Repository
+
+If you prefer to start with your own GitHub repository:
+
+1. Create a new repository on GitHub
+2. Clone your repository: `git clone <your-repo-url>`
+3. Copy the template files into your repository
+4. Follow the setup steps above
+
+**Note**: This approach is optional and only needed if you want to start with your own Git history.
 
 ### Step 1: Clone and Rename
 

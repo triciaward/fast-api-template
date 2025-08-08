@@ -13,19 +13,55 @@ Welcome to your new FastAPI project! 🎉
 
 This is your project's main README file - feel free to customize it to describe what your application does, how to use it, and any specific features you've built.
 
+## 🚨 CRITICAL: Setup Process Must Be Followed In Order
+
+**⚠️ IMPORTANT**: This template requires a specific setup process that MUST be followed in the exact order shown below. Do not skip steps or run commands out of order!
+
+**🤖 For AI Assistants**: If you're helping a user set up this project, please refer to `@README.md` and `@docs/TEMPLATE_README.md` for the complete setup directions. The user MUST complete the customization steps before starting development.
+
 ## 🚀 Getting Started
 
 **📖 Complete Setup Guide**: For detailed setup instructions, see [docs/TEMPLATE_README.md](docs/TEMPLATE_README.md)
 
-The setup process involves:
-1. **Create a new GitHub repository** (critical to avoid overwriting the template)
-2. **Clone your new repository** to your local machine
-3. **Rename the template directory** using `./scripts/setup/rename_template.sh`
-4. **Restart VS Code** and open the renamed directory
-5. **Customize the template** using `./scripts/setup/customize_template.sh`
-6. **Set up your project** using `./scripts/setup/setup_project.sh`
+### Step 1: Clone and Customize (Required - Must Be Done First!)
 
-**⚠️ Important**: Always create a new GitHub repository first to avoid accidentally overwriting the template!
+**🚨 CRITICAL**: You MUST complete these customization steps BEFORE starting development!
+
+```bash
+# Clone the template
+git clone https://github.com/triciaward/fast-api-template.git
+cd fast-api-template
+
+# Step 1: Rename the template directory to your project name
+./scripts/setup/rename_template.sh
+
+# Step 2: Customize the template (updates project name, descriptions, etc.)
+./scripts/setup/customize_template.sh
+```
+
+**Why this is required:**
+- The template contains placeholder names and descriptions
+- Customization updates all project metadata for your specific project
+- This prevents confusion and makes the project truly yours
+- **The quick start script will fail if you haven't customized first!**
+
+### Step 2: Set Up Your Development Environment
+
+**ONLY AFTER completing Step 1**, set up your development environment:
+
+```bash
+# Run the quick start script (sets up everything automatically)
+./scripts/setup/quick_start.sh
+```
+
+**That's it!** Your FastAPI application is ready to use.
+
+**🔄 Process Summary**:
+1. ✅ Clone template
+2. ✅ Rename directory (`./scripts/setup/rename_template.sh`)
+3. ✅ Customize project (`./scripts/setup/customize_template.sh`)
+4. ✅ Set up environment (`./scripts/setup/quick_start.sh`)
+5. ✅ Start building!
 
 **🆘 Need Help?**: If you encounter issues during setup, see the [Troubleshooting Guide](docs/troubleshooting/TROUBLESHOOTING_README.md)
 

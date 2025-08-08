@@ -54,23 +54,12 @@ echo
 
 # Check if we're in a renamed project directory (should end with _backend)
 if [[ ! "$(basename "$PWD")" =~ _backend$ ]]; then
-    print_warning "This doesn't appear to be a renamed project directory!"
+    print_error "This doesn't appear to be a renamed project directory!"
     print_info "Current directory: $(basename "$PWD")"
-    print_info "This script should be run from a renamed project directory (ending with _backend)."
-    print_info "If you haven't renamed the template yet, please:"
-    print_info "1. Run the rename script first: ./scripts/setup/rename_template.sh"
-    print_info "2. Restart VS Code and open the renamed directory"
-    print_info "3. Then run this script"
-    echo
-    print_warning "⚠️  CRITICAL: Make sure you have restarted VS Code after renaming!"
-    print_info "   This script should only be run AFTER restarting VS Code and opening the renamed directory."
-    echo
-    confirm=$(read -p "Continue anyway? (y/N): " -n 1 -r)
-    echo
-    if [[ ! $confirm =~ ^[Yy]$ ]]; then
-        print_error "Customization cancelled."
-        exit 1
-    fi
+    print_info "This script must be run from a renamed project directory (ending with _backend)."
+    print_info "Please run the rename script first: ./scripts/setup/rename_template.sh"
+    print_info "Then restart VS Code and open the renamed directory before running this script."
+    exit 1
 fi
 
 # Run the Python customization script
