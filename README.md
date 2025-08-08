@@ -2,6 +2,16 @@
 
 Welcome to your new FastAPI project! 🎉
 
+[![Tests](https://github.com/triciaward/fast-api-template/workflows/Tests/badge.svg)](https://github.com/triciaward/fast-api-template/actions)
+[![Code Quality](https://github.com/triciaward/fast-api-template/workflows/Code%20Quality/badge.svg)](https://github.com/triciaward/fast-api-template/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
+[![Test Coverage](https://img.shields.io/badge/coverage-98.2%25-brightgreen.svg)](https://github.com/triciaward/fast-api-template)
+[![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Type Check: MyPy](https://img.shields.io/badge/type%20check-mypy-blue.svg)](https://mypy-lang.org/)
+[![Lint: Ruff](https://img.shields.io/badge/lint-ruff-red.svg)](https://github.com/astral-sh/ruff)
+
 This is your project's main README file - feel free to customize it to describe what your application does, how to use it, and any specific features you've built.
 
 ## 🚀 Getting Started
