@@ -21,6 +21,7 @@ Designed for GitHub "Use this template" workflow:
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import time
@@ -32,6 +33,169 @@ class ProjectSetup:
         self.project_root = Path.cwd()
         self.current_dir_name = self.project_root.name
         self.replacements: dict[str, str] = {}
+        self.port_overrides: dict[str, int] = {}
+
+    # -------------------------------
+    # Port helpers
+    # -------------------------------
+    def _is_port_in_use(self, port: int, host: str = "127.0.0.1") -> bool:
+        """Return True if the TCP port is already in use on the host."""
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(0.3)
+            result = sock.connect_ex((host, port))
+            return result == 0
+
+    def _find_available_port(
+        self,
+        start_port: int,
+        host: str = "127.0.0.1",
+        max_tries: int = 50,
+    ) -> int:
+        """Find the next available TCP port starting at start_port."""
+        port = start_port
+        tries = 0
+        while tries < max_tries and self._is_port_in_use(port, host=host):
+            port += 1
+            tries += 1
+        return port
+
+    def _read_env_file(self) -> dict[str, str]:
+        """Read .env file into a dict (best-effort)."""
+        env_path = self.project_root / ".env"
+        values: dict[str, str] = {}
+        if not env_path.exists():
+            return values
+        try:
+            for line in env_path.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if "=" in line:
+                    key, val = line.split("=", 1)
+                    values[key.strip()] = val.strip()
+        except Exception:
+            # Ignore parse errors and return whatever we got
+            pass
+        return values
+
+    def _write_env_updates(self, updates: dict[str, str]) -> None:
+        """Update or append keys in .env file with provided values."""
+        env_path = self.project_root / ".env"
+        existing_lines: list[str] = []
+        if env_path.exists():
+            try:
+                existing_lines = env_path.read_text(encoding="utf-8").splitlines()
+            except Exception:
+                existing_lines = []
+
+        # Map of existing keys to their current line index
+        key_to_index: dict[str, int] = {}
+        for idx, line in enumerate(existing_lines):
+            if not line or line.lstrip().startswith("#"):
+                continue
+            if "=" in line:
+                key, _ = line.split("=", 1)
+                key_to_index[key.strip()] = idx
+
+        for key, value in updates.items():
+            if key in key_to_index:
+                existing_lines[key_to_index[key]] = f"{key}={value}"
+            else:
+                existing_lines.append(f"{key}={value}")
+
+        # Ensure newline at end
+        content = "\n".join(existing_lines).rstrip() + "\n"
+        env_path.write_text(content, encoding="utf-8")
+
+    def resolve_service_ports(self) -> None:
+        """Detect host port conflicts and pick alternative ports, updating .env and environment.
+
+        Services and defaults considered:
+        - POSTGRES_PORT (5432)
+        - PGBOUNCER_PORT (5433)
+        - REDIS_PORT (6379)
+        - API_PORT (8000)
+        - FLOWER_PORT (5555)
+        - GLITCHTIP_PORT (8001)
+        """
+        print()
+        print("🔎 Checking for port conflicts...")
+
+        env_values = self._read_env_file()
+
+        desired_ports: dict[str, int] = {
+            "POSTGRES_PORT": int(
+                env_values.get("POSTGRES_PORT")
+                or os.environ.get("POSTGRES_PORT", 5432),
+            ),
+            "PGBOUNCER_PORT": int(
+                env_values.get("PGBOUNCER_PORT")
+                or os.environ.get("PGBOUNCER_PORT", 5433),
+            ),
+            "REDIS_PORT": int(
+                env_values.get("REDIS_PORT") or os.environ.get("REDIS_PORT", 6379),
+            ),
+            "API_PORT": int(
+                env_values.get("API_PORT") or os.environ.get("API_PORT", 8000),
+            ),
+            "FLOWER_PORT": int(
+                env_values.get("FLOWER_PORT") or os.environ.get("FLOWER_PORT", 5555),
+            ),
+            "GLITCHTIP_PORT": int(
+                env_values.get("GLITCHTIP_PORT")
+                or os.environ.get("GLITCHTIP_PORT", 8001),
+            ),
+        }
+
+        updates: dict[str, str] = {}
+        any_conflicts = False
+
+        for key, desired in desired_ports.items():
+            if self._is_port_in_use(desired):
+                any_conflicts = True
+                suggested = self._find_available_port(desired + 1)
+                # If interactive, allow user to accept or provide custom
+                try:
+                    if sys.stdin.isatty():
+                        response = input(
+                            f"   ⚠️  Port {desired} for {key} is in use. Use {suggested} instead? [Y/n/custom]: ",
+                        ).strip()
+                        if response.lower() in ("", "y", "yes"):  # accept suggested
+                            new_port = suggested
+                        elif response.lower() in ("n", "no"):
+                            # Keep original (may fail later)
+                            new_port = desired
+                        else:
+                            try:
+                                new_port = int(response)
+                            except ValueError:
+                                print(
+                                    f"   ⚠️  Invalid custom port '{response}'. Using suggested {suggested}.",
+                                )
+                                new_port = suggested
+                    else:
+                        new_port = suggested
+                except Exception:
+                    new_port = suggested
+
+                if new_port != desired:
+                    print(f"   🔁 Setting {key} to {new_port} (was {desired})")
+                    updates[key] = str(new_port)
+                    self.port_overrides[key] = new_port
+            else:
+                # Ensure the value is present in .env so compose uses it
+                updates[key] = str(desired)
+
+        if updates:
+            self._write_env_updates(updates)
+            # Also set in current env for subprocesses
+            for k, v in updates.items():
+                os.environ[k] = v
+
+        if any_conflicts:
+            print("✅ Port conflicts resolved via .env updates")
+        else:
+            print("✅ No port conflicts detected")
 
     def validate_project_structure(self) -> bool:
         """Validate that this looks like a FastAPI template project."""
@@ -871,6 +1035,8 @@ def main():
 
         # Start services
         setup.check_docker()
+        # Detect and resolve host port conflicts before starting containers
+        setup.resolve_service_ports()
         setup.start_services()
         migrations_success = setup.run_migrations()
         superuser_success = (
