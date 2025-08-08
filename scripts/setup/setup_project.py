@@ -331,6 +331,12 @@ class ProjectSetup:
                 self.project_root / "venv" / "Scripts" / "python.exe"
             )  # Windows
 
+        # Create alembic.ini if it doesn't exist
+        alembic_ini = self.project_root / "alembic.ini"
+        if not alembic_ini.exists():
+            print("   Creating alembic.ini file...")
+            self.create_alembic_ini()
+
         try:
             env = os.environ.copy()
             env["PYTHONPATH"] = str(self.project_root)
@@ -352,6 +358,128 @@ class ProjectSetup:
         except subprocess.CalledProcessError as e:
             print(f"❌ Error running migrations: {e}")
             # Don't exit - migrations might not be critical for initial setup
+
+    def create_alembic_ini(self) -> None:
+        """Create alembic.ini file if it doesn't exist."""
+        alembic_ini = self.project_root / "alembic.ini"
+
+        # Get database name from replacements or use default
+        db_name = "fastapi_template"
+        if hasattr(self, "replacements") and "fastapi_template" in self.replacements:
+            db_name = self.replacements["fastapi_template"]
+
+        content = f"""# A generic, single database configuration.
+
+[alembic]
+# path to migration scripts
+script_location = alembic
+
+# template used to generate migration file names; The default value is %%(rev)s_%%(slug)s
+# Uncomment the line below if you want the files to be prepended with date and time
+# file_template = %%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s
+
+# sys.path path, will be prepended to sys.path if present.
+# defaults to the current working directory.
+prepend_sys_path = .
+
+# timezone to use when rendering the date within the migration file
+# as well as the filename.
+# If specified, requires the python-dateutil library that can be
+# installed by adding `alembic[tz]` to the pip requirements
+# string value is passed to dateutil.tz.gettz()
+# leave blank for localtime
+# timezone =
+
+# max length of characters to apply to the
+# "slug" field
+# truncate_slug_length = 40
+
+# set to 'true' to run the environment during
+# the 'revision' command, regardless of autogenerate
+# revision_environment = false
+
+# set to 'true' to allow .pyc and .pyo files without
+# a source .py file to be detected as revisions in the
+# versions/ directory
+# sourceless = false
+
+# version number format
+version_num_format = %04d
+
+# version path separator; As mentioned above, this is the character used to split
+# version_locations. The default within new alembic.ini files is "os", which uses
+# os.pathsep. If this key is omitted entirely, it falls back to the legacy
+# behavior of splitting on spaces and/or commas.
+# Valid values for version_path_separator are:
+#
+# version_path_separator = :
+# version_path_separator = ;
+# version_path_separator = space
+version_path_separator = os
+
+# the output encoding used when revision files
+# are written from script.py.mako
+# output_encoding = utf-8
+
+sqlalchemy.url = postgresql://postgres:dev_password_123@localhost:5432/{db_name}
+
+
+[post_write_hooks]
+# post_write_hooks defines scripts or Python functions that are run
+# on newly generated revision scripts.  See the documentation for further
+# detail and examples
+
+# format using "black" - use the console_scripts runner, against the "black" entrypoint
+# hooks = black
+# black.type = console_scripts
+# black.entrypoint = black
+# black.options = -l 79 REVISION_SCRIPT_FILENAME
+
+# lint with attempts to fix using "ruff" - use the exec runner, execute a binary
+# hooks = ruff
+# ruff.type = exec
+# ruff.executable = %(here)s/.venv/bin/ruff
+# ruff.options = --fix REVISION_SCRIPT_FILENAME
+
+# Logging configuration
+[loggers]
+keys = root,sqlalchemy,alembic
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARN
+handlers = console
+qualname =
+
+[logger_sqlalchemy]
+level = WARN
+handlers =
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+"""
+
+        with alembic_ini.open("w", encoding="utf-8") as f:
+            f.write(content)
+        print("   ✅ alembic.ini file created")
 
     def create_superuser(self, details: dict[str, str]) -> None:
         """Create a superuser account."""
@@ -388,9 +516,67 @@ class ProjectSetup:
             )
             print("✅ Superuser created successfully")
 
+            # Verify the superuser was created and set is_verified=True
+            self.verify_superuser(superuser_email)
+
         except subprocess.CalledProcessError:
             print("⚠️  Superuser creation failed (this is often normal)")
             print("   You can create one manually later if needed")
+
+    def verify_superuser(self, email: str) -> None:
+        """Verify the superuser account by setting is_verified=True."""
+        print("   Verifying superuser account...")
+
+        python_path = self.project_root / "venv" / "bin" / "python"
+        if not python_path.exists():
+            python_path = (
+                self.project_root / "venv" / "Scripts" / "python.exe"
+            )  # Windows
+
+        # Create a temporary script to verify the user
+        verify_script = self.project_root / "verify_superuser_temp.py"
+        script_content = f"""
+import asyncio
+from sqlalchemy import select, update
+from app.database.database import engine
+from app.models.auth.user import User
+
+async def verify_user():
+    try:
+        async with engine.begin() as conn:
+            # Update user to be verified
+            await conn.execute(
+                update(User).where(User.email == "{email}").values(is_verified=True)
+            )
+            print("✅ Superuser verified successfully")
+    except Exception as e:
+        print(f"⚠️  Could not verify superuser: {{e}}")
+
+if __name__ == "__main__":
+    asyncio.run(verify_user())
+"""
+
+        try:
+            with verify_script.open("w", encoding="utf-8") as f:
+                f.write(script_content)
+
+            env = os.environ.copy()
+            env["PYTHONPATH"] = str(self.project_root)
+
+            subprocess.run(
+                [str(python_path), str(verify_script)],
+                cwd=self.project_root,
+                env=env,
+                check=True,
+                capture_output=True,
+            )
+
+        except subprocess.CalledProcessError:
+            print("   ⚠️  Could not verify superuser (this is often normal)")
+        finally:
+            # Clean up temporary script
+            if verify_script.exists():
+                verify_script.unlink()
 
     def install_git_hooks(self) -> None:
         """Install git hooks for template protection."""
