@@ -2,8 +2,7 @@
 
 Welcome to your new FastAPI project! 🎉
 
-[![Tests](https://github.com/triciaward/fast-api-template/workflows/Tests/badge.svg)](https://github.com/triciaward/fast-api-template/actions)
-[![Code Quality](https://github.com/triciaward/fast-api-template/workflows/Code%20Quality/badge.svg)](https://github.com/triciaward/fast-api-template/actions)
+[![CI](https://github.com/triciaward/fast-api-template/workflows/CI/badge.svg)](https://github.com/triciaward/fast-api-template/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
