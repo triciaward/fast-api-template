@@ -517,6 +517,105 @@ class ProjectSetup:
 
         return False
 
+    def _update_env_file_with_replacements(self, env_file: Path) -> None:
+        """Update .env file with custom replacements."""
+        if not env_file.exists():
+            return
+
+        # Read current .env content
+        content = env_file.read_text()
+
+        # Update database name in environment variables
+        if "fastapi_template" in self.replacements:
+            db_name = self.replacements["fastapi_template"]
+
+            # Replace POSTGRES_DB value
+            content = re.sub(r"POSTGRES_DB=.*", f"POSTGRES_DB={db_name}", content)
+
+            # Replace DATABASE_URL value
+            content = re.sub(
+                r"DATABASE_URL=postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/([^\s]+)",
+                f"DATABASE_URL=postgresql://\\1:\\2@\\3:\\4/{db_name}",
+                content,
+            )
+
+            # Write updated content back
+            env_file.write_text(content)
+
+    def _ensure_database_exists(self) -> bool:
+        """Ensure the target database exists in PostgreSQL."""
+        # Get database name from replacements
+        db_name = "fastapi_template"
+        if hasattr(self, "replacements") and "fastapi_template" in self.replacements:
+            db_name = self.replacements["fastapi_template"]
+
+        print(f"   Checking if database '{db_name}' exists...")
+
+        try:
+            # Check if database exists
+            result = subprocess.run(
+                [
+                    "docker-compose",
+                    "exec",
+                    "-T",
+                    "postgres",
+                    "psql",
+                    "-U",
+                    "postgres",
+                    "-lqt",
+                ],
+                cwd=self.project_root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            if result.returncode != 0:
+                print(f"   ❌ Could not check databases: {result.stderr}")
+                return False
+
+            # Parse database list
+            databases = []
+            for line in result.stdout.split("\n"):
+                if "|" in line:
+                    db_parts = line.split("|")
+                    if len(db_parts) > 0:
+                        databases.append(db_parts[0].strip())
+
+            if db_name in databases:
+                print(f"   ✅ Database '{db_name}' exists")
+                return True
+
+            # Database doesn't exist, create it
+            print(f"   Creating database '{db_name}'...")
+            create_result = subprocess.run(
+                [
+                    "docker-compose",
+                    "exec",
+                    "-T",
+                    "postgres",
+                    "createdb",
+                    "-U",
+                    "postgres",
+                    db_name,
+                ],
+                cwd=self.project_root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            if create_result.returncode == 0:
+                print(f"   ✅ Database '{db_name}' created successfully")
+                return True
+
+            print(f"   ❌ Failed to create database: {create_result.stderr}")
+            return False
+
+        except Exception as e:
+            print(f"   ❌ Error checking/creating database: {e}")
+            return False
+
     def setup_environment(self) -> None:
         """Set up the development environment."""
         print()
@@ -529,6 +628,11 @@ class ProjectSetup:
         if not env_file.exists() and env_example.exists():
             print("   Creating .env file...")
             shutil.copy2(env_example, env_file)
+
+            # Update .env file with custom database name
+            if hasattr(self, "replacements"):
+                self._update_env_file_with_replacements(env_file)
+
             print("   ✅ .env file created")
 
         # Create virtual environment with proper Python version
@@ -720,6 +824,10 @@ class ProjectSetup:
         """Run database migrations."""
         print()
         print("🔄 Running database migrations...")
+
+        # Ensure database exists before running migrations
+        if not self._ensure_database_exists():
+            return False
 
         python_path = self.project_root / "venv" / "bin" / "python"
         if not python_path.exists():
