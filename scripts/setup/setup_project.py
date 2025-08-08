@@ -721,6 +721,7 @@ class ProjectSetup:
 
             # Wait for API to respond on health endpoint
             print("⏳ Waiting for API to be ready...")
+            time.sleep(5)  # Give API container time to fully initialize
             self.wait_for_api()
             return True
 
@@ -769,11 +770,22 @@ class ProjectSetup:
             try:
                 with urllib.request.urlopen(url, timeout=2) as resp:
                     status = resp.getcode()
-                    if 200 <= status < 500:
+                    if status == 200:
                         print(f"✅ API is responding on http://127.0.0.1:{api_port}")
                         return
+                    else:
+                        last_error = f"HTTP {status}"
             except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
                 last_error = e
+                if i < 3:  # Log first few connection attempts for debugging
+                    error_msg = str(e)
+                    if (
+                        "Connection reset by peer" in error_msg
+                        or "Connection refused" in error_msg
+                    ):
+                        print(f"   API still starting up... (attempt {i+1})")
+                    else:
+                        print(f"   Connection attempt failed: {type(e).__name__}: {e}")
 
             if i == 44:
                 print("❌ API failed to become ready. Checking container status...")
