@@ -762,7 +762,7 @@ class ProjectSetup:
         except ValueError:
             api_port = 8000
 
-        url = f"http://127.0.0.1:{api_port}/health"
+        url = f"http://127.0.0.1:{api_port}/system/health"
         last_error = None
 
         for i in range(45):  # ~90 seconds max
