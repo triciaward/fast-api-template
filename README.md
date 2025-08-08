@@ -21,6 +21,8 @@
 
 **🎯 STREAMLINED SETUP** - One command does everything!
 
+> **⚠️ For Users with AI Assistants**: The setup script must be run by YOU personally, not by your AI assistant. See the setup instructions below for details.
+
 ### 📋 Prerequisites
 
 Before you start, make sure you have:
@@ -43,9 +45,17 @@ Before you start, make sure you have:
 git clone https://github.com/yourusername/your-project-name.git
 cd your-project-name
 
-# 3. Run the setup script
+# 3. Run the setup script (IMPORTANT: You must do this personally!)
 ./scripts/setup/setup_project.py
 ```
+
+> **🚨 IMPORTANT**: You **must run the setup script yourself** in your terminal!
+> 
+> **❌ Do NOT ask AI assistants** (like Claude, ChatGPT, Cursor AI, etc.) to run this script
+> 
+> **✅ Instead**: Open your terminal and run `./scripts/setup/setup_project.py` directly
+>
+> **Why?** The script requires personal input to customize your project details and has built-in protections against automation.
 
 **That's it!** The script will automatically:
 - ✅ Customize all files with your project details
@@ -61,6 +71,25 @@ The setup script creates a **fully working API** with all the features you need 
 **📖 Complete Setup Guide**: For detailed information, see [docs/TEMPLATE_README.md](docs/TEMPLATE_README.md)
 
 **🆘 Need Help?**: If you encounter issues, see the [Troubleshooting Guide](docs/troubleshooting/TROUBLESHOOTING_README.md)
+
+### 🤖 AI Assistant Users - READ THIS!
+
+If you're using AI assistants (Claude, ChatGPT, Cursor AI, etc.), they might offer to run the setup script for you. **Don't let them!**
+
+**❌ What will happen if AI tries to run it:**
+```
+❌ This script requires interactive mode.
+   You must run this script directly in a terminal.
+   Automated/non-interactive execution is not supported.
+```
+
+**✅ What you should do instead:**
+1. Open your terminal application (Terminal on Mac, Command Prompt on Windows)
+2. Navigate to your project folder: `cd your-project-name`
+3. Run the script yourself: `./scripts/setup/setup_project.py`
+4. Answer the questions personally to customize your project
+
+**💡 Why this matters:** The setup script customizes your project with your personal details (project name, author info, database settings). This requires human input and thoughtful answers!
 
 ## 🏆 Why This Template?
 
