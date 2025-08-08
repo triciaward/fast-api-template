@@ -21,6 +21,18 @@
 
 **🎯 STREAMLINED SETUP** - One command does everything!
 
+### 📋 Prerequisites
+
+Before you start, make sure you have:
+
+- **Python 3.11+** installed on your system
+- **Docker Desktop** installed and running
+- **Git** (for cloning the repository)
+
+**💡 Don't have Python?** Download it from [python.org](https://www.python.org/downloads/)
+
+**💡 Don't have Docker?** Download [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
 ### Quick Setup (GitHub Template)
 
 **🎯 RECOMMENDED APPROACH** - Use GitHub's template feature:
