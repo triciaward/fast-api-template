@@ -96,6 +96,7 @@ This FastAPI template provides a comprehensive foundation for building productio
 
 ### 📖 All Documentation
 - **[Tutorials Index](docs/tutorials/TUTORIALS.md)** - All tutorials in one place
+- **[Template Assessment](docs/tutorials/template-audit.md)** - Architecture evaluation and production readiness
 - **[Optional Features](docs/tutorials/optional-features.md)** - Advanced features
 
 ## 🎯 Quick Commands

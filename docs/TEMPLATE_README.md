@@ -503,12 +503,14 @@ class Settings(BaseSettings):
 ## 🎯 Next Steps
 
 1. **Explore the API**: Visit http://localhost:8000/docs
-2. **Add your features**: Start building in the domain-based structure
-3. **Read the tutorials**: Check out the other guides in `docs/tutorials/`
-4. **Customize the project**: Update README and project details
+2. **Read the template assessment**: Check out the [architecture evaluation](tutorials/template-audit.md)
+3. **Add your features**: Start building in the domain-based structure
+4. **Read the tutorials**: Check out the other guides in `docs/tutorials/`
+5. **Customize the project**: Update README and project details
 
 ## 🆘 Need Help?
 
+- **Template Assessment**: See [tutorials/template-audit.md](tutorials/template-audit.md) for architecture evaluation
 - **Troubleshooting**: Check `docs/troubleshooting/` for common issues
 - **Tutorials**: See `docs/tutorials/` for detailed guides
 - **API Documentation**: Visit http://localhost:8000/docs for interactive docs
