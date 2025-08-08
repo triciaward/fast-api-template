@@ -35,13 +35,13 @@ async def test_create_user_session_sets_device_ip_and_enforces_limit(monkeypatch
     # Make tokens deterministic
     monkeypatch.setattr(rt, "create_refresh_token_value", lambda: "rawtoken")
     monkeypatch.setattr(
-        rt, "create_access_token", lambda subject, expires_delta: "accesstoken"
+        rt, "create_access_token", lambda subject, expires_delta: "accesstoken",
     )
     monkeypatch.setattr(rt, "crud_create_refresh_token", fake_crud_create)
     monkeypatch.setattr(rt, "enforce_session_limit", fake_enforce_limit)
 
     access, refresh = await rt.create_user_session(
-        db=object(), user=user, request=request
+        db=object(), user=user, request=request,
     )
     assert access == "accesstoken"
     assert refresh == "rawtoken"
@@ -129,10 +129,10 @@ async def test_revoke_all_sessions_calls_crud_with_user(monkeypatch):
     # hash lookup path if except_token provided (no-op for return)
     # Patch the CRUD function used inside revoke_all_sessions
     monkeypatch.setattr(
-        "app.crud.revoke_all_user_sessions", fake_revoke_all, raising=True
+        "app.crud.revoke_all_user_sessions", fake_revoke_all, raising=True,
     )
     count = await rt.revoke_all_sessions(
-        db=object(), user_id=uuid.uuid4(), except_token_value=None
+        db=object(), user_id=uuid.uuid4(), except_token_value=None,
     )
     assert count == 3
     assert isinstance(calls["revoke_all"], str)

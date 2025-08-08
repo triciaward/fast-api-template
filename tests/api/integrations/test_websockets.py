@@ -13,7 +13,7 @@ async def test_websocket_status_endpoint_feature_flag(monkeypatch, async_client)
 
     # Ensure websockets disabled → endpoint not mounted
     monkeypatch.setattr(
-        config_module.settings, "ENABLE_WEBSOCKETS", False, raising=False
+        config_module.settings, "ENABLE_WEBSOCKETS", False, raising=False,
     )
     resp = await async_client.get("/ws/status")
     assert resp.status_code in (404, 200)

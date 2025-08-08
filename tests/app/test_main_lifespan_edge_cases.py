@@ -147,7 +147,6 @@ def test_celery_import_when_enabled(monkeypatch):
             del sys.modules["app.main"]
 
         # Import main module - this should trigger the Celery import
-        import app.main
 
         # Verify Celery tasks were imported
         assert "app.services.background.celery_tasks" in import_calls
@@ -160,10 +159,10 @@ def test_production_warnings_secret_key_only(monkeypatch):
     # Production mode with only secret key issue
     monkeypatch.setattr(cfg.settings, "ENVIRONMENT", "production", raising=False)
     monkeypatch.setattr(
-        cfg.settings, "SECRET_KEY", "dev_secret_key_change_in_production", raising=False
+        cfg.settings, "SECRET_KEY", "dev_secret_key_change_in_production", raising=False,
     )
     monkeypatch.setattr(
-        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", True, raising=False
+        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", True, raising=False,
     )  # Secure
     monkeypatch.setattr(cfg.settings, "ENABLE_HSTS", True, raising=False)  # Secure
 
@@ -183,10 +182,10 @@ def test_production_warnings_cookie_secure_only(monkeypatch):
     # Production mode with only cookie security issue
     monkeypatch.setattr(cfg.settings, "ENVIRONMENT", "production", raising=False)
     monkeypatch.setattr(
-        cfg.settings, "SECRET_KEY", "secure_production_key", raising=False
+        cfg.settings, "SECRET_KEY", "secure_production_key", raising=False,
     )  # Secure
     monkeypatch.setattr(
-        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", False, raising=False
+        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", False, raising=False,
     )  # Insecure
     monkeypatch.setattr(cfg.settings, "ENABLE_HSTS", True, raising=False)  # Secure
 
@@ -205,10 +204,10 @@ def test_production_warnings_hsts_only(monkeypatch):
     # Production mode with only HSTS issue
     monkeypatch.setattr(cfg.settings, "ENVIRONMENT", "production", raising=False)
     monkeypatch.setattr(
-        cfg.settings, "SECRET_KEY", "secure_production_key", raising=False
+        cfg.settings, "SECRET_KEY", "secure_production_key", raising=False,
     )  # Secure
     monkeypatch.setattr(
-        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", True, raising=False
+        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", True, raising=False,
     )  # Secure
     monkeypatch.setattr(cfg.settings, "ENABLE_HSTS", False, raising=False)  # Insecure
 
@@ -227,10 +226,10 @@ def test_non_production_skips_warnings(monkeypatch):
     # Development mode (should skip all warnings)
     monkeypatch.setattr(cfg.settings, "ENVIRONMENT", "development", raising=False)
     monkeypatch.setattr(
-        cfg.settings, "SECRET_KEY", "dev_secret_key_change_in_production", raising=False
+        cfg.settings, "SECRET_KEY", "dev_secret_key_change_in_production", raising=False,
     )
     monkeypatch.setattr(
-        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", False, raising=False
+        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", False, raising=False,
     )
     monkeypatch.setattr(cfg.settings, "ENABLE_HSTS", False, raising=False)
 

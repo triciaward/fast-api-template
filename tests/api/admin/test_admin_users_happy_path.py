@@ -18,7 +18,7 @@ async def test_list_users_with_all_filters(monkeypatch, async_client):
     app.dependency_overrides[mod.require_superuser] = lambda: _admin()
 
     async def fake_get_users(
-        db, skip, limit, is_superuser, is_verified, is_deleted, oauth_provider
+        db, skip, limit, is_superuser, is_verified, is_deleted, oauth_provider,
     ):
         assert is_superuser is True
         assert is_verified is False
@@ -39,7 +39,7 @@ async def test_list_users_with_all_filters(monkeypatch, async_client):
                 deletion_requested_at=None,
                 deletion_confirmed_at=None,
                 deletion_scheduled_for=None,
-            )
+            ),
         ]
 
     async def fake_count(db, filters):
@@ -55,7 +55,7 @@ async def test_list_users_with_all_filters(monkeypatch, async_client):
     monkeypatch.setattr(mod.admin_user_crud, "count", fake_count)
 
     r = await async_client.get(
-        "/admin/users?is_superuser=true&is_verified=false&is_deleted=true&oauth_provider=google"
+        "/admin/users?is_superuser=true&is_verified=false&is_deleted=true&oauth_provider=google",
     )
     app.dependency_overrides.clear()
     assert r.status_code == 200

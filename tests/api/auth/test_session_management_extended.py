@@ -13,7 +13,7 @@ def _auth_ok(monkeypatch):
 
     async def fake_get_user_by_id(db, user_id):
         return types.SimpleNamespace(
-            id="11111111-1111-1111-1111-111111111111", email="u@e.com"
+            id="11111111-1111-1111-1111-111111111111", email="u@e.com",
         )
 
     monkeypatch.setattr(user_auth.jwt, "decode", fake_decode)

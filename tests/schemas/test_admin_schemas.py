@@ -22,7 +22,7 @@ def test_admin_user_create_validators():
     from app.schemas.admin.admin import AdminUserCreate
 
     ok = AdminUserCreate(
-        email=" USER@EX.com ", username=" user_name ", password="Password123!"
+        email=" USER@EX.com ", username=" user_name ", password="Password123!",
     )
     assert ok.email == "user@ex.com"
 

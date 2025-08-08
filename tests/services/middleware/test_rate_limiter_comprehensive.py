@@ -35,7 +35,7 @@ class TestRateLimiterConfiguration:
 
         monkeypatch.setattr("app.core.config.settings.ENABLE_REDIS", False)
         monkeypatch.setattr(
-            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "memory"
+            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "memory",
         )
         monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_DEFAULT", "100/hour")
 
@@ -53,10 +53,10 @@ class TestRateLimiterConfiguration:
 
         monkeypatch.setattr("app.core.config.settings.ENABLE_REDIS", True)
         monkeypatch.setattr(
-            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "redis"
+            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "redis",
         )
         monkeypatch.setattr(
-            "app.core.config.settings.REDIS_URL", "redis://localhost:6379"
+            "app.core.config.settings.REDIS_URL", "redis://localhost:6379",
         )
         monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_DEFAULT", "100/hour")
 
@@ -79,7 +79,7 @@ class TestRateLimiterConfiguration:
 
         monkeypatch.setattr("app.core.config.settings.ENABLE_REDIS", True)
         monkeypatch.setattr(
-            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "redis"
+            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "redis",
         )
         monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_DEFAULT", "100/hour")
 
@@ -148,7 +148,7 @@ class TestClientIPExtraction:
         request.headers = {}
 
         with patch(
-            "app.services.middleware.rate_limiter.get_remote_address"
+            "app.services.middleware.rate_limiter.get_remote_address",
         ) as mock_get_remote:
             mock_get_remote.return_value = "203.0.113.1"
 
@@ -176,7 +176,7 @@ class TestClientIPExtraction:
         request.headers = {}
 
         with patch(
-            "app.services.middleware.rate_limiter.get_remote_address"
+            "app.services.middleware.rate_limiter.get_remote_address",
         ) as mock_get_remote:
             mock_get_remote.return_value = "192.168.1.100"
 
@@ -198,7 +198,7 @@ class TestRateLimitDecorators:
             return "success"
 
         with patch(
-            "app.services.middleware.rate_limiter.get_limiter"
+            "app.services.middleware.rate_limiter.get_limiter",
         ) as mock_get_limiter:
             mock_limiter = MagicMock()
             # The limiter.limit(rate) returns a decorator function, which when called with func, returns the decorated function
@@ -237,7 +237,7 @@ class TestRateLimitDecorators:
             return "registered"
 
         with patch(
-            "app.services.middleware.rate_limiter.get_limiter"
+            "app.services.middleware.rate_limiter.get_limiter",
         ) as mock_get_limiter:
             mock_limiter = MagicMock()
             mock_limiter.limit.return_value = (
@@ -253,14 +253,14 @@ class TestRateLimitDecorators:
         """Test email verification rate limiting when enabled."""
         monkeypatch.setattr("app.core.config.settings.ENABLE_RATE_LIMITING", True)
         monkeypatch.setattr(
-            "app.core.config.settings.RATE_LIMIT_EMAIL_VERIFICATION", "2/minute"
+            "app.core.config.settings.RATE_LIMIT_EMAIL_VERIFICATION", "2/minute",
         )
 
         def dummy_function(request: Request):
             return "verified"
 
         with patch(
-            "app.services.middleware.rate_limiter.get_limiter"
+            "app.services.middleware.rate_limiter.get_limiter",
         ) as mock_get_limiter:
             mock_limiter = MagicMock()
             mock_limiter.limit.return_value = (
@@ -276,14 +276,14 @@ class TestRateLimitDecorators:
         """Test password reset rate limiting when enabled."""
         monkeypatch.setattr("app.core.config.settings.ENABLE_RATE_LIMITING", True)
         monkeypatch.setattr(
-            "app.core.config.settings.RATE_LIMIT_PASSWORD_RESET", "1/minute"
+            "app.core.config.settings.RATE_LIMIT_PASSWORD_RESET", "1/minute",
         )
 
         def dummy_function(request: Request):
             return "reset"
 
         with patch(
-            "app.services.middleware.rate_limiter.get_limiter"
+            "app.services.middleware.rate_limiter.get_limiter",
         ) as mock_get_limiter:
             mock_limiter = MagicMock()
             mock_limiter.limit.return_value = (
@@ -304,7 +304,7 @@ class TestRateLimitDecorators:
             return "oauth_success"
 
         with patch(
-            "app.services.middleware.rate_limiter.get_limiter"
+            "app.services.middleware.rate_limiter.get_limiter",
         ) as mock_get_limiter:
             mock_limiter = MagicMock()
             mock_limiter.limit.return_value = (
@@ -324,7 +324,7 @@ class TestRateLimitDecorators:
             return "custom"
 
         with patch(
-            "app.services.middleware.rate_limiter.get_limiter"
+            "app.services.middleware.rate_limiter.get_limiter",
         ) as mock_get_limiter:
             mock_limiter = MagicMock()
             mock_limiter.limit.return_value = (
@@ -420,7 +420,7 @@ class TestSetupRateLimiting:
         mock_app.state = MagicMock()
 
         with patch(
-            "app.services.middleware.rate_limiter.get_limiter"
+            "app.services.middleware.rate_limiter.get_limiter",
         ) as mock_get_limiter:
             mock_limiter = MagicMock()
             mock_get_limiter.return_value = mock_limiter
@@ -526,7 +526,7 @@ class TestRateLimitIntegration:
             return "register"
 
         with patch(
-            "app.services.middleware.rate_limiter.get_limiter"
+            "app.services.middleware.rate_limiter.get_limiter",
         ) as mock_get_limiter:
             mock_limiter = MagicMock()
             mock_limiter.limit.return_value = (

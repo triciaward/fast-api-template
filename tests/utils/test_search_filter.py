@@ -34,7 +34,7 @@ def test_text_search_contains_case_insensitive():
 
     builder = SearchFilterBuilder(Dummy)
     config = SearchFilterConfig(
-        text_search=create_text_search("Alice", ["username", "email"])
+        text_search=create_text_search("Alice", ["username", "email"]),
     )
     query = builder.build_query(config)
     sql = str(query)

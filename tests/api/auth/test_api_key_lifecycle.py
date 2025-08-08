@@ -38,7 +38,7 @@ class TestAPIKeyCreation:
             return mock_api_key
 
         monkeypatch.setattr(
-            "app.core.security.generate_api_key", lambda: "test_raw_key_123"
+            "app.core.security.generate_api_key", lambda: "test_raw_key_123",
         )
         monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key)
 
@@ -72,10 +72,10 @@ class TestAPIKeyCreation:
             raise Exception("Database connection failed")
 
         monkeypatch.setattr(
-            "app.core.security.generate_api_key", lambda: "test_raw_key_123"
+            "app.core.security.generate_api_key", lambda: "test_raw_key_123",
         )
         monkeypatch.setattr(
-            mod.crud_api_key, "create_api_key", mock_create_api_key_error
+            mod.crud_api_key, "create_api_key", mock_create_api_key_error,
         )
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
@@ -117,7 +117,7 @@ class TestAPIKeyCreation:
             return mock_api_key
 
         monkeypatch.setattr(
-            "app.core.security.generate_api_key", lambda: "test_raw_key_123"
+            "app.core.security.generate_api_key", lambda: "test_raw_key_123",
         )
         monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key)
 
@@ -158,10 +158,10 @@ class TestAPIKeyListing:
             return 0
 
         monkeypatch.setattr(
-            mod.crud_api_key, "get_user_api_keys", mock_get_user_api_keys
+            mod.crud_api_key, "get_user_api_keys", mock_get_user_api_keys,
         )
         monkeypatch.setattr(
-            mod.crud_api_key, "count_user_api_keys", mock_count_user_api_keys
+            mod.crud_api_key, "count_user_api_keys", mock_count_user_api_keys,
         )
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
@@ -211,10 +211,10 @@ class TestAPIKeyListing:
             return len(mock_api_keys)
 
         monkeypatch.setattr(
-            mod.crud_api_key, "get_user_api_keys", mock_get_user_api_keys
+            mod.crud_api_key, "get_user_api_keys", mock_get_user_api_keys,
         )
         monkeypatch.setattr(
-            mod.crud_api_key, "count_user_api_keys", mock_count_user_api_keys
+            mod.crud_api_key, "count_user_api_keys", mock_count_user_api_keys,
         )
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
@@ -253,7 +253,7 @@ class TestAPIKeyDeactivation:
             return True
 
         monkeypatch.setattr(
-            mod.crud_api_key, "deactivate_api_key", mock_deactivate_api_key
+            mod.crud_api_key, "deactivate_api_key", mock_deactivate_api_key,
         )
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
@@ -282,7 +282,7 @@ class TestAPIKeyDeactivation:
             return False  # API key not found or not owned by user
 
         monkeypatch.setattr(
-            mod.crud_api_key, "deactivate_api_key", mock_deactivate_api_key
+            mod.crud_api_key, "deactivate_api_key", mock_deactivate_api_key,
         )
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
@@ -457,7 +457,7 @@ class TestAPIKeyValidation:
             return mock_api_key
 
         monkeypatch.setattr(
-            "app.core.security.generate_api_key", lambda: "test_raw_key_123"
+            "app.core.security.generate_api_key", lambda: "test_raw_key_123",
         )
         monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key)
 
@@ -501,7 +501,7 @@ class TestAPIKeyValidation:
             return mock_api_key
 
         monkeypatch.setattr(
-            "app.core.security.generate_api_key", lambda: "test_raw_key_123"
+            "app.core.security.generate_api_key", lambda: "test_raw_key_123",
         )
         monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key)
 
@@ -546,7 +546,7 @@ class TestAPIKeyValidation:
             return mock_api_key
 
         monkeypatch.setattr(
-            "app.core.security.generate_api_key", lambda: "test_raw_key_123"
+            "app.core.security.generate_api_key", lambda: "test_raw_key_123",
         )
         monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key)
 
@@ -608,7 +608,7 @@ class TestAPIKeySecurityScenarios:
             return False
 
         monkeypatch.setattr(
-            mod.crud_api_key, "deactivate_api_key", mock_deactivate_api_key
+            mod.crud_api_key, "deactivate_api_key", mock_deactivate_api_key,
         )
 
         cleanup = override_dependency(app, mod.get_current_user, fake_get_current_user)
@@ -645,7 +645,7 @@ class TestAPIKeySecurityScenarios:
             return mock_api_key
 
         monkeypatch.setattr(
-            "app.core.security.generate_api_key", lambda: f"test_key_{uuid4().hex[:8]}"
+            "app.core.security.generate_api_key", lambda: f"test_key_{uuid4().hex[:8]}",
         )
         monkeypatch.setattr(mod.crud_api_key, "create_api_key", mock_create_api_key)
 

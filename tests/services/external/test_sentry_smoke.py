@@ -16,7 +16,7 @@ def test_sentry_disabled_path(monkeypatch):
 
 
 @pytest.mark.skip(
-    reason="Sentry DSN not configured in template; enable to test init path"
+    reason="Sentry DSN not configured in template; enable to test init path",
 )
 def test_sentry_init_when_enabled(monkeypatch):
     from app.services.external import sentry as sentry_service
@@ -58,7 +58,7 @@ def test_sentry_init_when_enabled(monkeypatch):
                 "init": staticmethod(fake_init),
                 "set_tag": staticmethod(lambda *args, **kwargs: None),
                 "Hub": type(
-                    "H", (), {"current": type("C", (), {"client": FakeClient()})}
+                    "H", (), {"current": type("C", (), {"client": FakeClient()})},
                 ),
             },
         ),

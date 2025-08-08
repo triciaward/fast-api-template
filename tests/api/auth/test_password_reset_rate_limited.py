@@ -14,7 +14,7 @@ def _user():
 
 @pytest.mark.asyncio
 async def test_forgot_password_success_with_rate_limit_enabled(
-    monkeypatch, async_client
+    monkeypatch, async_client,
 ):
     from app.api.auth import password_management as pm
     from app.core.config import settings
@@ -48,7 +48,7 @@ async def test_forgot_password_success_with_rate_limit_enabled(
 
 @pytest.mark.asyncio
 async def test_reset_password_success_with_rate_limit_enabled(
-    monkeypatch, async_client
+    monkeypatch, async_client,
 ):
     from app.api.auth import password_management as pm
     from app.core.config import settings

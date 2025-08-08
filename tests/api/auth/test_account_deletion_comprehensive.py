@@ -403,7 +403,7 @@ class TestAccountDeletionConfirmEdgeCases:
             assert "deletion_scheduled_for" in data
             # Should be 7 days from now
             scheduled_date = datetime.fromisoformat(
-                data["deletion_scheduled_for"].replace("Z", "+00:00")
+                data["deletion_scheduled_for"].replace("Z", "+00:00"),
             )
             expected_date = datetime.now(timezone.utc) + timedelta(days=7)
             time_diff = abs((scheduled_date - expected_date).total_seconds())

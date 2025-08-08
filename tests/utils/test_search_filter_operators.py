@@ -18,7 +18,7 @@ def test_field_filter_operators_basic():
             create_field_filter("is_superuser", FilterOperator.EQUALS, True),
             create_field_filter("is_verified", FilterOperator.NOT_EQUALS, False),
             create_field_filter(
-                "email", FilterOperator.IN, values=["a@example.com", "b@example.com"]
+                "email", FilterOperator.IN, values=["a@example.com", "b@example.com"],
             ),
             create_field_filter("username", FilterOperator.NOT_IN, values=["bad"]),
             create_field_filter("deleted_at", FilterOperator.IS_NULL),

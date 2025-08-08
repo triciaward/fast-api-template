@@ -23,7 +23,7 @@ async def test_resend_verification_user_not_found(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
     resp = await async_client.post(
-        "/auth/resend-verification", json={"email": "u@example.com"}
+        "/auth/resend-verification", json={"email": "u@example.com"},
     )
     assert resp.status_code == 404
     assert resp.json()["error"]["code"] in {"user_not_found", "resource_not_found"}
@@ -39,10 +39,10 @@ async def test_resend_verification_already_verified(monkeypatch, async_client):
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
     # Simulate email service configured; it won't be used
     monkeypatch.setattr(
-        mod, "email_service", types.SimpleNamespace(is_configured=lambda: True)
+        mod, "email_service", types.SimpleNamespace(is_configured=lambda: True),
     )
     resp = await async_client.post(
-        "/auth/resend-verification", json={"email": "u@example.com"}
+        "/auth/resend-verification", json={"email": "u@example.com"},
     )
     assert resp.status_code == 200
     body = resp.json()
@@ -69,7 +69,7 @@ async def test_resend_verification_sends_email(monkeypatch, async_client):
     monkeypatch.setattr(mod, "email_service", email_service)
 
     resp = await async_client.post(
-        "/auth/resend-verification", json={"email": "u@example.com"}
+        "/auth/resend-verification", json={"email": "u@example.com"},
     )
     assert resp.status_code == 200
     body = resp.json()

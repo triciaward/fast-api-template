@@ -23,10 +23,10 @@ def oauth_service():
 def mock_google_settings(monkeypatch):
     """Mock Google OAuth settings."""
     monkeypatch.setattr(
-        "app.services.auth.oauth.settings.GOOGLE_CLIENT_ID", "test_google_client_id"
+        "app.services.auth.oauth.settings.GOOGLE_CLIENT_ID", "test_google_client_id",
     )
     monkeypatch.setattr(
-        "app.services.auth.oauth.settings.GOOGLE_CLIENT_SECRET", "test_google_secret"
+        "app.services.auth.oauth.settings.GOOGLE_CLIENT_SECRET", "test_google_secret",
     )
 
 
@@ -34,14 +34,14 @@ def mock_google_settings(monkeypatch):
 def mock_apple_settings(monkeypatch):
     """Mock Apple OAuth settings."""
     monkeypatch.setattr(
-        "app.services.auth.oauth.settings.APPLE_CLIENT_ID", "test_apple_client_id"
+        "app.services.auth.oauth.settings.APPLE_CLIENT_ID", "test_apple_client_id",
     )
     monkeypatch.setattr(
-        "app.services.auth.oauth.settings.APPLE_TEAM_ID", "test_team_id"
+        "app.services.auth.oauth.settings.APPLE_TEAM_ID", "test_team_id",
     )
     monkeypatch.setattr("app.services.auth.oauth.settings.APPLE_KEY_ID", "test_key_id")
     monkeypatch.setattr(
-        "app.services.auth.oauth.settings.APPLE_PRIVATE_KEY", "test_private_key"
+        "app.services.auth.oauth.settings.APPLE_PRIVATE_KEY", "test_private_key",
     )
 
 
@@ -67,7 +67,7 @@ class TestGoogleOAuth:
 
             mock_context_manager = AsyncMock()
             mock_context_manager.__aenter__.return_value.get = AsyncMock(
-                return_value=mock_response
+                return_value=mock_response,
             )
             mock_client.return_value = mock_context_manager
 
@@ -135,7 +135,7 @@ class TestGoogleOAuth:
 
             mock_context_manager = AsyncMock()
             mock_context_manager.__aenter__.return_value.get = AsyncMock(
-                return_value=mock_response
+                return_value=mock_response,
             )
             mock_client.return_value = mock_context_manager
 
@@ -164,7 +164,7 @@ class TestGoogleOAuth:
 
             mock_context_manager = AsyncMock()
             mock_context_manager.__aenter__.return_value.get = AsyncMock(
-                return_value=mock_response
+                return_value=mock_response,
             )
             mock_client.return_value = mock_context_manager
 
@@ -176,7 +176,7 @@ class TestGoogleOAuth:
 
     @pytest.mark.asyncio
     async def test_verify_google_token_success_with_valid_data(
-        self, mock_google_settings
+        self, mock_google_settings,
     ):
         """Test Google token verification with valid token data but checking boundary conditions."""
         oauth_service = OAuthService()
@@ -197,7 +197,7 @@ class TestGoogleOAuth:
 
             mock_context_manager = AsyncMock()
             mock_context_manager.__aenter__.return_value.get = AsyncMock(
-                return_value=mock_response
+                return_value=mock_response,
             )
             mock_client.return_value = mock_context_manager
 

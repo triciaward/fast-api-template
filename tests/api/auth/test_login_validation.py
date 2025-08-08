@@ -124,7 +124,7 @@ async def test_register_username_already_exists(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
     monkeypatch.setattr(
-        mod.crud_user, "get_user_by_username", fake_get_user_by_username
+        mod.crud_user, "get_user_by_username", fake_get_user_by_username,
     )
 
     resp = await async_client.post(
@@ -142,7 +142,7 @@ async def test_register_username_already_exists(monkeypatch, async_client):
 
 @pytest.mark.asyncio
 async def test_register_email_service_not_configured_still_succeeds(
-    monkeypatch, async_client
+    monkeypatch, async_client,
 ):
     """Test registration succeeds even when email service is not configured."""
     from app.api.auth import login as mod
@@ -166,7 +166,7 @@ async def test_register_email_service_not_configured_still_succeeds(
 
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
     monkeypatch.setattr(
-        mod.crud_user, "get_user_by_username", fake_get_user_by_username
+        mod.crud_user, "get_user_by_username", fake_get_user_by_username,
     )
     monkeypatch.setattr(mod.crud_user, "create_user", fake_create_user)
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=False))

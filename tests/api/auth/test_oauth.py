@@ -36,7 +36,7 @@ async def test_oauth_google_success(monkeypatch, async_client):
 
     monkeypatch.setattr(mod, "oauth_service", FakeOAuth())
     monkeypatch.setattr(
-        mod.crud_user, "get_user_by_oauth_id", fake_get_user_by_oauth_id
+        mod.crud_user, "get_user_by_oauth_id", fake_get_user_by_oauth_id,
     )
 
     from app.services.auth import refresh_token as rt
@@ -78,7 +78,7 @@ async def test_oauth_apple_success(monkeypatch, async_client):
 
     monkeypatch.setattr(mod, "oauth_service", FakeOAuth())
     monkeypatch.setattr(
-        mod.crud_user, "get_user_by_oauth_id", fake_get_user_by_oauth_id
+        mod.crud_user, "get_user_by_oauth_id", fake_get_user_by_oauth_id,
     )
 
     from app.services.auth import refresh_token as rt
@@ -211,7 +211,7 @@ async def test_oauth_unexpected_exception_in_session(monkeypatch):
 
     monkeypatch.setattr(mod, "oauth_service", FakeOAuth())
     monkeypatch.setattr(
-        mod.crud_user, "get_user_by_oauth_id", fake_get_user_by_oauth_id
+        mod.crud_user, "get_user_by_oauth_id", fake_get_user_by_oauth_id,
     )
 
     from app.services.auth import refresh_token as svc

@@ -31,7 +31,7 @@ def test_sqlalchemy_listeners_capture_and_invoke(monkeypatch):
     # Reload module to register listeners with our fake decorator
     m = reload(importlib.import_module("app.utils.performance"))
     monkeypatch.setattr(
-        m, "logger", type("L", (), {"debug": fake_debug, "warning": fake_warning})()
+        m, "logger", type("L", (), {"debug": fake_debug, "warning": fake_warning})(),
     )
 
     # Call captured listeners

@@ -73,7 +73,7 @@ async def test_create_and_authenticate_user_success(monkeypatch):
     u = await crud.create_user(
         db,
         types.SimpleNamespace(
-            email="e@x.com", username="e", password="Password123!", is_superuser=False
+            email="e@x.com", username="e", password="Password123!", is_superuser=False,
         ),
     )
     assert db.add_called is True

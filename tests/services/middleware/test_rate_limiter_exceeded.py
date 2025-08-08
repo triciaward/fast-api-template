@@ -29,7 +29,7 @@ async def test_rate_limit_exceeded_handling(monkeypatch, async_client):
     import app.core.security as core_security
 
     monkeypatch.setattr(
-        core_security, "validate_email_format", lambda e: (False, "bad")
+        core_security, "validate_email_format", lambda e: (False, "bad"),
     )
     resp = await async_client.post(
         "/auth/login",

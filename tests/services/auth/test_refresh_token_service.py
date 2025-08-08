@@ -37,6 +37,6 @@ def test_get_client_ip_headers_precedence() -> None:
     assert rt.get_client_ip(request2) == "9.9.9.9"  # type: ignore[arg-type]
 
     request3 = types.SimpleNamespace(
-        headers={}, client=types.SimpleNamespace(host="10.0.0.1")
+        headers={}, client=types.SimpleNamespace(host="10.0.0.1"),
     )
     assert rt.get_client_ip(request3) == "10.0.0.1"  # type: ignore[arg-type]
