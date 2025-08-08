@@ -172,10 +172,11 @@ def get_rate_limit_info(request: Request) -> dict[str, Any]:
 
     except Exception:
         # Return a fallback response if there's an error
+        safe_client_ip = getattr(getattr(request, "client", None), "host", "unknown")
         return {
             "enabled": True,
             "error": "Failed to get rate limit information",
-            "client_ip": get_client_ip(request),
+            "client_ip": safe_client_ip,
             "remaining": 0,
             "reset_time": 0,
             "limit": 0,

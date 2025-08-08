@@ -5,6 +5,7 @@ This module provides admin-only schemas for user management and admin operations
 """
 
 from datetime import datetime
+from typing import ClassVar
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -202,8 +203,8 @@ class AdminBulkOperationRequest(BaseModel):
         max_length=50,
     )
 
-    # Error message for operation validation
-    _INVALID_OPERATION_ERROR = "Invalid operation. Allowed: {allowed_ops}"
+    # Error message for operation validation (avoid leading underscore to prevent PrivateAttr wrapping)
+    INVALID_OPERATION_ERROR: ClassVar[str] = "Invalid operation. Allowed: {allowed_ops}"
 
     @field_validator("operation")
     @classmethod
@@ -223,7 +224,7 @@ class AdminBulkOperationRequest(BaseModel):
         if v.lower() not in allowed_operations:
             allowed_ops = ", ".join(allowed_operations)
             raise ValueError(
-                cls._INVALID_OPERATION_ERROR.format(allowed_ops=allowed_ops),
+                cls.INVALID_OPERATION_ERROR.format(allowed_ops=allowed_ops),
             )
         return v.lower()
 

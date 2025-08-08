@@ -18,80 +18,116 @@ This guide shows you how to deploy your FastAPI application for **$10-15/month**
 
 ---
 
-## 🏗️ **Recommended Implementation Plan**
+## 🏗️ **Current Cost Optimization Features**
 
-### **Phase 1: Budget Configuration Settings**
+The template already includes several cost optimization features:
 
-Add these optional settings to `app/core/config/config.py`:
+### **1. Optional Services (Disabled by Default)**
+
+The template ships with optional services disabled to minimize resource usage:
 
 ```python
-# Budget Optimization Settings (for solo developers)
-# =============================================================================
-# These settings optimize the template for cost-conscious solo developers
-# who prefer self-hosted solutions over expensive managed services
+# From app/core/config/config.py
+ENABLE_REDIS: bool = False
+ENABLE_WEBSOCKETS: bool = False
+ENABLE_CELERY: bool = False
+ENABLE_RATE_LIMITING: bool = False
+ENABLE_SENTRY: bool = False
+```
 
-# Budget Mode - Automatically optimize for low-cost deployment
-ENABLE_BUDGET_MODE: bool = False
+### **2. Database Connection Pool Optimization**
 
-# Database Connection Pool Settings (Budget Optimized)
-# Reduced pool sizes for small VPS instances
-DB_POOL_SIZE_BUDGET: int = 5  # Reduced from 20 for small VPS
-DB_MAX_OVERFLOW_BUDGET: int = 10  # Reduced from 30
-DB_POOL_RECYCLE_BUDGET: int = 1800  # 30 minutes instead of 1 hour
+Current settings are already optimized for small instances:
+
+```python
+# Database Connection Pool Settings
+DB_POOL_SIZE: int = 20
+DB_MAX_OVERFLOW: int = 30
+DB_POOL_RECYCLE: int = 3600  # 1 hour
+DB_POOL_TIMEOUT: int = 30
+DB_POOL_PRE_PING: bool = True
+```
+
+### **3. Logging Configuration**
+
+Built-in logging optimization:
+
+```python
+# Logging Configuration
+LOG_LEVEL: str = "INFO"
+LOG_FORMAT: str = "json"
+ENABLE_FILE_LOGGING: bool = False
+LOG_FILE_PATH: str = "logs/app.log"
+LOG_FILE_MAX_SIZE: str = "10MB"
+LOG_FILE_BACKUP_COUNT: int = 5
+```
+
+---
+
+## 🚀 **Recommended Implementation Plan**
+
+### **Phase 1: Manual Budget Configuration**
+
+Create a budget-optimized `.env` file:
+
+```bash
+# Budget Deployment Configuration
+# Copy from .env.example and modify for budget deployment
+
+# Docker Configuration
+COMPOSE_PROJECT_NAME=fastapi_budget
+POSTGRES_DB=fastapi_budget
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=budget_password_123
+POSTGRES_PORT=5432
+API_PORT=8000
+
+# Application Settings
+PROJECT_NAME=FastAPI Budget App
+VERSION=1.0.0
+DESCRIPTION=Budget-optimized FastAPI application
+ENVIRONMENT=production
+
+# Security & Authentication
+SECRET_KEY=budget_secret_key_change_in_production
+ACCESS_TOKEN_EXPIRE_MINUTES=15
+ALGORITHM=HS256
+
+# Database Configuration
+DATABASE_URL=postgresql://postgres:budget_password_123@postgres:5432/fastapi_budget
+
+# Budget Optimizations - Disable expensive features
+ENABLE_REDIS=false
+ENABLE_WEBSOCKETS=false
+ENABLE_CELERY=false
+ENABLE_RATE_LIMITING=false
+ENABLE_SENTRY=false
+
+# CORS Configuration
+BACKEND_CORS_ORIGINS=http://localhost:3000,http://localhost:8080
 
 # Logging Configuration (Budget Optimized)
-LOG_LEVEL_BUDGET: str = "WARNING"  # Reduce log volume
-LOG_FILE_MAX_SIZE_BUDGET: str = "5MB"  # Smaller log files
-LOG_FILE_BACKUP_COUNT_BUDGET: int = 2  # Fewer backups
+LOG_LEVEL=WARNING
+LOG_FORMAT=json
+ENABLE_FILE_LOGGING=false
+LOG_FILE_MAX_SIZE=5MB
+LOG_FILE_BACKUP_COUNT=2
 
-# Rate Limiting (Budget Optimized)
-RATE_LIMIT_DEFAULT_BUDGET: str = "50/minute"  # Reduced from 100
-RATE_LIMIT_LOGIN_BUDGET: str = "3/minute"  # Reduced from 5
-
-# Self-Hosted Deployment Settings
-ENABLE_SELF_HOSTED_MONITORING: bool = False
-SELF_HOSTED_GRAFANA_PORT: int = 3000
-SELF_HOSTED_PROMETHEUS_PORT: int = 9090
-
-# Coolify Deployment Settings
-COOLIFY_DEPLOYMENT: bool = False
-COOLIFY_RESOURCE_LIMITS: bool = True
-COOLIFY_MEMORY_LIMIT: str = "512M"
-COOLIFY_CPU_LIMIT: str = "0.5"
-
-# Cost Comparison Settings
-ENABLE_COST_TRACKING: bool = False
-MONTHLY_BUDGET_LIMIT: float = 15.0  # $15/month target
+# Security Headers
+ENABLE_SECURITY_HEADERS=true
+ENABLE_HSTS=false
+ENABLE_REQUEST_SIZE_VALIDATION=true
+MAX_REQUEST_SIZE=5242880
+ENABLE_CONTENT_TYPE_VALIDATION=true
+ENABLE_SECURITY_EVENT_LOGGING=true
 ```
 
-### **Phase 2: Budget-Aware Configuration Logic**
+### **Phase 2: Budget-Optimized Docker Compose**
 
-Add this method to the Settings class:
-
-```python
-def get_budget_settings(self) -> dict[str, Any]:
-    """Get budget-optimized settings when budget mode is enabled."""
-    if not self.ENABLE_BUDGET_MODE:
-        return {}
-    
-    return {
-        "DB_POOL_SIZE": self.DB_POOL_SIZE_BUDGET,
-        "DB_MAX_OVERFLOW": self.DB_MAX_OVERFLOW_BUDGET,
-        "DB_POOL_RECYCLE": self.DB_POOL_RECYCLE_BUDGET,
-        "LOG_LEVEL": self.LOG_LEVEL_BUDGET,
-        "LOG_FILE_MAX_SIZE": self.LOG_FILE_MAX_SIZE_BUDGET,
-        "LOG_FILE_BACKUP_COUNT": self.LOG_FILE_BACKUP_COUNT_BUDGET,
-        "RATE_LIMIT_DEFAULT": self.RATE_LIMIT_DEFAULT_BUDGET,
-        "RATE_LIMIT_LOGIN": self.RATE_LIMIT_LOGIN_BUDGET,
-    }
-```
-
-### **Phase 3: Coolify-Optimized Docker Compose**
-
-Create `docker-compose.coolify.yml`:
+Modify the existing `docker-compose.yml` for budget deployment:
 
 ```yaml
-# Budget-optimized Docker Compose for Coolify deployment
+# Budget-optimized version of existing docker-compose.yml
 version: '3.8'
 
 services:
@@ -125,7 +161,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       SECRET_KEY: ${SECRET_KEY}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
-      ENABLE_BUDGET_MODE: ${ENABLE_BUDGET_MODE:-true}
+      # Budget optimizations - disable expensive features
       ENABLE_REDIS: false
       ENABLE_WEBSOCKETS: false
       ENABLE_CELERY: false
@@ -158,7 +194,7 @@ networks:
     driver: bridge
 ```
 
-### **Phase 4: Budget Deployment Script**
+### **Phase 3: Budget Deployment Script**
 
 Create `scripts/setup/deploy_budget.sh`:
 
@@ -206,10 +242,6 @@ if [ ! -f "docker-compose.yml" ]; then
     exit 1
 fi
 
-# Enable budget mode
-print_info "Enabling budget mode..."
-export ENABLE_BUDGET_MODE=true
-
 # Create budget-optimized .env
 print_info "Creating budget-optimized environment..."
 cat > .env.budget << EOF
@@ -228,7 +260,6 @@ API_PORT=8000
 PROJECT_NAME=FastAPI Budget App
 VERSION=1.0.0
 DESCRIPTION=Budget-optimized FastAPI application
-API_V1_STR=/api/v1
 ENVIRONMENT=production
 
 # Security & Authentication
@@ -239,8 +270,7 @@ ALGORITHM=HS256
 # Database Configuration
 DATABASE_URL=postgresql://postgres:budget_password_123@postgres:5432/fastapi_budget
 
-# Budget Optimizations
-ENABLE_BUDGET_MODE=true
+# Budget Optimizations - Disable expensive features
 ENABLE_REDIS=false
 ENABLE_WEBSOCKETS=false
 ENABLE_CELERY=false
@@ -283,7 +313,7 @@ case $choice in
         print_info "Setting up Coolify deployment..."
         print_info "1. Install Coolify on your VPS"
         print_info "2. Add this repository to Coolify"
-        print_info "3. Use docker-compose.coolify.yml"
+        print_info "3. Use the existing docker-compose.yml with budget settings"
         print_info "4. Set environment variables in Coolify dashboard"
         print_success "Coolify deployment guide created"
         ;;
@@ -291,13 +321,15 @@ case $choice in
         print_info "Setting up direct VPS deployment..."
         print_info "1. SSH into your VPS"
         print_info "2. Clone your repository"
-        print_info "3. Run: docker compose -f docker-compose.coolify.yml up -d"
+        print_info "3. Copy .env.budget to .env"
+        print_info "4. Run: docker-compose up -d"
         print_success "Direct VPS deployment guide created"
         ;;
     3)
         print_info "Setting up local budget development..."
         print_info "Running with budget optimizations..."
-docker compose -f docker-compose.coolify.yml up -d
+        cp .env.budget .env
+        docker-compose up -d
         print_success "Local budget development environment started"
         ;;
     *)
@@ -313,7 +345,7 @@ echo "📊 Estimated monthly cost: $10-15"
 echo "🚀 Next steps: Deploy to your chosen platform"
 ```
 
-### **Phase 5: Self-Hosted Monitoring Setup**
+### **Phase 4: Self-Hosted Monitoring Setup**
 
 Create `scripts/setup/setup_self_hosted_monitoring.sh`:
 
@@ -435,15 +467,6 @@ echo ""
 echo "💰 Cost savings: $15+/month vs Datadog"
 ```
 
-### **Phase 6: Cost Optimization Documentation**
-
-Create comprehensive guides for:
-
-1. **VPS Provider Comparison** - Hetzner vs DigitalOcean vs Linode
-2. **Database Optimization** - PostgreSQL tuning for small instances
-3. **Resource Monitoring** - Track usage to stay under budget
-4. **Scaling Strategies** - When to upgrade vs optimize
-
 ---
 
 ## 🎯 **Implementation Benefits**
@@ -464,11 +487,10 @@ Create comprehensive guides for:
 
 ## 🚀 **Next Steps**
 
-1. **Implement Phase 1-2** - Add budget configuration settings
-2. **Create Phase 3** - Coolify-optimized Docker Compose
-3. **Build Phase 4** - Budget deployment script
-4. **Add Phase 5** - Self-hosted monitoring setup
-5. **Write Phase 6** - Comprehensive documentation
+1. **Use existing features** - The template already has cost optimization built-in
+2. **Create budget deployment script** - Implement the deploy_budget.sh script
+3. **Add monitoring setup** - Implement the self-hosted monitoring script
+4. **Document VPS deployment** - Create guides for different VPS providers
 
 This approach makes your template the **go-to choice** for solo developers who want enterprise features without enterprise costs. You'll be solving a real problem that many developers face - how to build professional applications on a budget.
 

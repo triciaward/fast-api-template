@@ -16,9 +16,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config.config import settings
-
-# Removed circular import - using local import in function instead
+from app.core.config import settings
 from app.database.database import get_db
 
 # Removed schemas import to avoid circular dependency - using local imports
@@ -41,7 +39,7 @@ ResponseSchemaType = TypeVar("ResponseSchemaType", bound=BaseModel)
 # Type alias for database sessions (now async only)
 DBSession: TypeAlias = AsyncSession
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 async def get_current_user(

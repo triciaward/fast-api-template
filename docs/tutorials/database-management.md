@@ -108,7 +108,7 @@ alembic current
 All database operations use **async sessions** for optimal performance:
 
 ```python
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy import create_async_engine
 
 # Create async engine
@@ -231,7 +231,26 @@ from app.crud.auth.user import (
     count_users,
     soft_delete_user,
     restore_user,
-    permanently_delete_user
+    permanently_delete_user,
+    get_user_by_oauth_id,
+    create_oauth_user,
+    verify_user,
+    update_verification_token,
+    get_user_by_verification_token,
+    update_password_reset_token,
+    get_user_by_password_reset_token,
+    reset_user_password,
+    update_user_password,
+    update_deletion_token,
+    get_user_by_deletion_token,
+    schedule_user_deletion,
+    confirm_user_deletion,
+    cancel_user_deletion,
+    get_users_for_deletion_reminder,
+    get_users_for_permanent_deletion,
+    get_deleted_users,
+    count_deleted_users,
+    get_user_by_id_any_status
 )
 
 # Get user by email
@@ -268,6 +287,30 @@ await restore_user(db, user.id)
 
 # Permanently delete user
 await permanently_delete_user(db, user.id)
+
+# OAuth operations
+oauth_user = await get_user_by_oauth_id(db, "google", "oauth_id_here")
+new_oauth_user = await create_oauth_user(
+    db, 
+    email="oauth@example.com", 
+    username="oauth_user",
+    oauth_provider="google",
+    oauth_id="oauth_id",
+    oauth_email="oauth@example.com"
+)
+
+# Account deletion operations
+await schedule_user_deletion(db, user.id, scheduled_date)
+await confirm_user_deletion(db, user.id)
+await cancel_user_deletion(db, user.id)
+
+# Get users for deletion processing
+reminder_users = await get_users_for_deletion_reminder(db)
+permanent_deletion_users = await get_users_for_permanent_deletion(db)
+
+# Get deleted users
+deleted_users = await get_deleted_users(db, skip=0, limit=10)
+deleted_count = await count_deleted_users(db)
 ```
 
 ### **API Key Operations**
@@ -279,26 +322,40 @@ from app.crud.auth.api_key import (
     get_api_key_by_id,
     deactivate_api_key,
     rotate_api_key,
-    verify_api_key_in_db
+    verify_api_key_in_db,
+    get_api_key_by_hash,
+    count_user_api_keys,
+    get_all_api_keys,
+    count_all_api_keys
 )
 
 # Create API key
-api_key = await create_api_key(db, user_id=user.id, name="My API Key")
+api_key = await create_api_key(db, api_key_data, user_id=user.id, raw_key="raw_key")
 
 # Get user's API keys
 api_keys = await get_user_api_keys(db, user_id=user.id)
 
 # Get API key by ID
-api_key = await get_api_key_by_id(db, api_key_id=api_key.id)
+api_key = await get_api_key_by_id(db, key_id=api_key.id)
 
 # Deactivate API key
-await deactivate_api_key(db, api_key_id=api_key.id)
+await deactivate_api_key(db, key_id=api_key.id)
 
 # Rotate API key
-new_api_key = await rotate_api_key(db, api_key_id=api_key.id)
+new_api_key, new_raw_key = await rotate_api_key(db, key_id=api_key.id)
 
 # Verify API key
 user = await verify_api_key_in_db(db, api_key="sk_abc123...")
+
+# Get API key by hash
+api_key = await get_api_key_by_hash(db, key_hash="hash_here")
+
+# Count user API keys
+count = await count_user_api_keys(db, user_id=user.id)
+
+# Get all API keys (admin)
+all_keys = await get_all_api_keys(db, skip=0, limit=100)
+total_count = await count_all_api_keys(db)
 ```
 
 ### **Session Management**
@@ -310,11 +367,21 @@ from app.crud.auth.refresh_token import (
     revoke_refresh_token,
     get_user_sessions,
     revoke_all_user_sessions,
-    cleanup_expired_tokens
+    cleanup_expired_tokens,
+    revoke_refresh_token_by_id,
+    get_user_session_count,
+    verify_refresh_token_in_db,
+    enforce_session_limit
 )
 
 # Create refresh token
-refresh_token = await create_refresh_token(db, user_id=user.id)
+refresh_token = await create_refresh_token(
+    db, 
+    user_id=user.id, 
+    token_hash="token_hash_here",
+    device_info="device_info",
+    ip_address="192.168.1.1"
+)
 
 # Get refresh token by hash
 token = await get_refresh_token_by_hash(db, token_hash="token_hash_here")
@@ -330,12 +397,29 @@ revoked_count = await revoke_all_user_sessions(db, user_id=user.id)
 
 # Cleanup expired tokens
 cleaned_count = await cleanup_expired_tokens(db)
+
+# Get user session count
+session_count = await get_user_session_count(db, user_id=user.id)
+
+# Verify refresh token in database
+token = await verify_refresh_token_in_db(db, token_hash="token_hash_here")
+
+# Enforce session limits
+await enforce_session_limit(db, user_id=user.id, max_sessions=5)
 ```
 
 ### **Audit Logging**
 
 ```python
-from app.crud.system.audit_log import create_audit_log
+from app.crud.system.audit_log import (
+    create_audit_log,
+    get_audit_logs_by_user,
+    get_audit_logs_by_event_type,
+    get_audit_logs_by_session,
+    get_recent_audit_logs,
+    get_failed_audit_logs,
+    cleanup_old_audit_logs
+)
 
 # Log user action
 await create_audit_log(
@@ -355,6 +439,24 @@ await create_audit_log(
     success=True,
     context={"api_key_id": api_key.id}
 )
+
+# Get audit logs by user
+user_logs = await get_audit_logs_by_user(db, user_id=user.id, limit=100, offset=0)
+
+# Get audit logs by event type
+login_logs = await get_audit_logs_by_event_type(db, event_type="user_login", limit=100, offset=0)
+
+# Get audit logs by session
+session_logs = await get_audit_logs_by_session(db, session_id="session_id", limit=100, offset=0)
+
+# Get recent audit logs
+recent_logs = await get_recent_audit_logs(db, limit=100, offset=0)
+
+# Get failed audit logs
+failed_logs = await get_failed_audit_logs(db, limit=100, offset=0)
+
+# Cleanup old audit logs
+cleaned_count = await cleanup_old_audit_logs(db, days_to_keep=90)
 ```
 
 ## 🗄️ Database Migrations
@@ -469,8 +571,6 @@ DB_POOL_RECYCLE=3600
 DB_POOL_TIMEOUT=30
 DB_POOL_PRE_PING=true
 ```
-
-
 
 ## 🚀 Advanced Features
 
@@ -596,10 +696,10 @@ async def check_database_health(db: AsyncSession) -> dict[str, Any]:
 
 ```bash
 # Check database connection
-docker compose exec postgres psql -U postgres -d your_db -c "SELECT 1;"
+docker-compose exec postgres psql -U postgres -d your_db -c "SELECT 1;"
 
 # Check tables
-docker compose exec postgres psql -U postgres -d your_db -c "\dt"
+docker-compose exec postgres psql -U postgres -d your_db -c "\dt"
 
 # Check migration status
 alembic current

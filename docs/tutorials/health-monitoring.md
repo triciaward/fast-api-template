@@ -313,13 +313,21 @@ ENABLE_REDIS=true
 ENABLE_CELERY=false
 ENABLE_WEBSOCKETS=false
 
-# Health check timeouts
-HEALTH_CHECK_TIMEOUT=5
-DATABASE_HEALTH_TIMEOUT=3
+# Database connection pool settings
+DB_POOL_SIZE=20
+DB_MAX_OVERFLOW=30
+DB_POOL_RECYCLE=3600
 
-# Metrics collection
-ENABLE_METRICS=true
-METRICS_INTERVAL=60
+# Rate limiting configuration
+ENABLE_RATE_LIMITING=true
+RATE_LIMIT_DEFAULT=100/minute
+RATE_LIMIT_LOGIN=5/minute
+RATE_LIMIT_REGISTER=3/minute
+
+# Error monitoring
+ENABLE_SENTRY=true
+SENTRY_DSN=your-sentry-dsn
+SENTRY_ENVIRONMENT=production
 ```
 
 ### Custom Health Checks

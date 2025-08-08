@@ -35,7 +35,7 @@ GLITCHTIP_PORT=8001
 PROJECT_NAME=FastAPI Template
 VERSION=1.0.0
 DESCRIPTION=FastAPI Template with Authentication
-API_V1_STR=/api/v1
+API_V1_STR=/api
 ENVIRONMENT=development
 
 # =============================================================================

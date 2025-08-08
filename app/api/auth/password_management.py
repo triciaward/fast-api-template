@@ -143,7 +143,11 @@ async def reset_password(
             )
 
         # Verify the reset token
-        user_id = await email_service.verify_password_reset_token(db, request.token)
+        try:
+            user_id = await email_service.verify_password_reset_token(db, request.token)
+        except Exception:
+            logger.warning("Invalid or expired password reset token")
+            user_id = None
         if not user_id:
             logger.warning("Invalid or expired password reset token")
             return PasswordResetConfirmResponse(

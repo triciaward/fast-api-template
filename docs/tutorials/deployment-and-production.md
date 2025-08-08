@@ -87,6 +87,32 @@ services:
       - app-network
     restart: unless-stopped
 
+  # pgBouncer for connection pooling (optional)
+  pgbouncer:
+    image: edoburu/pgbouncer:1.18.0
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-pgbouncer-1
+    environment:
+      DATABASES_HOST: postgres
+      DATABASES_PORT: 5432
+      DATABASES_DBNAME: ${POSTGRES_DB}
+      DATABASES_USER: ${POSTGRES_USER}
+      DATABASES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGBOUNCER_PORT: 5432
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_MAX_CLIENT_CONN: 1000
+      PGBOUNCER_DEFAULT_POOL_SIZE: 20
+      PGBOUNCER_MAX_DB_CONNECTIONS: 50
+      PGBOUNCER_MAX_USER_CONNECTIONS: 50
+    ports:
+      - "${PGBOUNCER_PORT:-5433}:5432"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    restart: unless-stopped
+    profiles:
+      - pgbouncer  # Only start when explicitly requested
+
   # Optional Redis service - only used when ENABLE_REDIS=true
   redis:
     image: redis:7-alpine
@@ -118,7 +144,7 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/1
       ENABLE_SENTRY: ${ENABLE_SENTRY:-false}
       SENTRY_DSN: ${SENTRY_DSN:-}
-      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-development}
     ports:
       - "${API_PORT}:8000"
     depends_on:
@@ -146,9 +172,65 @@ services:
       ENABLE_CELERY: ${ENABLE_CELERY:-false}
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/1
-      ENABLE_SENTRY: ${ENABLE_SENTRY:-false}
-      SENTRY_DSN: ${SENTRY_DSN:-}
-      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+    restart: unless-stopped
+    volumes:
+      - .:/code
+    command: celery -A app.services.celery worker --loglevel=info
+    profiles:
+      - celery  # Only start when explicitly requested
+
+  # Optional Flower monitoring service - only used when ENABLE_CELERY=true
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-flower-1
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      ENABLE_REDIS: ${ENABLE_REDIS:-false}
+      ENABLE_WEBSOCKETS: ${ENABLE_WEBSOCKETS:-false}
+      ENABLE_CELERY: ${ENABLE_CELERY:-false}
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    ports:
+      - "${FLOWER_PORT:-5555}:5555"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+    restart: unless-stopped
+    volumes:
+      - .:/code
+    command: celery -A app.services.celery flower --port=5555
+    profiles:
+      - celery  # Only start when explicitly requested
+
+  # Optional GlitchTip error monitoring service
+  glitchtip:
+    image: glitchtip/glitchtip:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-fast-api-template}-glitchtip-1
+    environment:
+      - DJANGO_SETTINGS_MODULE=glitchtip.settings.production
+      - GLITCHTIP_SECRET_KEY=${GLITCHTIP_SECRET_KEY:-your-secret-key-here}
+      - GLITCHTIP_DB_ENGINE=django.db.backends.postgresql
+      - GLITCHTIP_DB_NAME=${POSTGRES_DB}
+      - GLITCHTIP_DB_USER=${POSTGRES_USER}
+      - GLITCHTIP_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - GLITCHTIP_DB_HOST=postgres
+      - GLITCHTIP_DB_PORT=5432
+      - GLITCHTIP_REDIS_URL=redis://redis:6379/0
+      - GLITCHTIP_EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+    ports:
+      - "${GLITCHTIP_PORT:-8001}:8000"
     depends_on:
       - postgres
       - redis
@@ -156,7 +238,7 @@ services:
       - app-network
     restart: unless-stopped
     profiles:
-      - celery  # Only start when explicitly requested
+      - monitoring  # Only start when explicitly requested
 
 volumes:
   postgres_data:
@@ -207,7 +289,7 @@ flowchart TD
 2. **Log in to your Coolify dashboard**
 3. **Click "Add New App"**
 4. **Select your GitHub repo**
-5. **Set build and run commands** (e.g., `docker compose up -d` or `uvicorn app.main:app --host 0.0.0.0 --port 8000`)
+5. **Set build and run commands** (e.g., `docker-compose up -d` or `uvicorn app.main:app --host 0.0.0.0 --port 8000`)
 6. **Add environment variables** (copy from `.env.production`)
 7. **Deploy!**
 
@@ -265,18 +347,46 @@ graph TD
 
 1. **Build and run Docker containers:**
     ```bash
-    docker compose -f docker-compose.yml up -d
+    docker-compose -f docker-compose.yml up -d
     ```
 2. **Run migrations:**
     ```bash
-    docker compose exec api alembic upgrade head
+    docker-compose exec api alembic upgrade head
     ```
 3. **Create a superuser:**
     ```bash
-    docker compose exec api python app/bootstrap_superuser.py
+    docker-compose exec api python app/bootstrap_superuser.py
     ```
 4. **Set up Caddy for HTTPS**
 5. **Point your domain to your server's IP in Cloudflare**
+
+---
+
+## Optional Services
+
+### **pgBouncer (Connection Pooling)**
+```bash
+# Start with pgBouncer
+docker-compose --profile pgbouncer up -d
+```
+
+### **Redis (Caching & Sessions)**
+```bash
+# Start with Redis
+docker-compose --profile redis up -d
+```
+
+### **Celery (Background Tasks)**
+```bash
+# Start with Celery worker and Flower monitoring
+docker-compose --profile celery up -d
+```
+
+### **GlitchTip (Error Monitoring)**
+```bash
+# Start with GlitchTip monitoring
+docker-compose --profile monitoring up -d
+```
 
 ---
 

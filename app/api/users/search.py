@@ -74,7 +74,7 @@ async def list_users(
             username=user.username,  # type: ignore
             is_superuser=user.is_superuser,  # type: ignore
             is_verified=user.is_verified,  # type: ignore
-            date_created=user.date_created,
+            created_at=user.created_at,  # type: ignore
             oauth_provider=user.oauth_provider,  # type: ignore
             is_deleted=user.is_deleted,  # type: ignore
             deleted_at=user.deleted_at,  # type: ignore
@@ -134,7 +134,7 @@ async def search_users(
             username=user.username,  # type: ignore
             is_superuser=user.is_superuser,  # type: ignore
             is_verified=user.is_verified,  # type: ignore
-            date_created=user.date_created,
+            created_at=user.created_at,  # type: ignore
             oauth_provider=user.oauth_provider,  # type: ignore
             is_deleted=user.is_deleted,  # type: ignore
             deleted_at=user.deleted_at,  # type: ignore

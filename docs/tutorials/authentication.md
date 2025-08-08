@@ -59,17 +59,14 @@ app/
 ### **2. User Login**
 
 ```python
-# POST /auth/login
-{
-    "username": "user@example.com",
-    "password": "securepassword123"
-}
+# POST /auth/login (Content-Type: application/x-www-form-urlencoded)
+# Fields: username, password
+# Example body: username=user@example.com&password=securepassword123
 
 # Response
 {
     "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-    "token_type": "bearer",
-    "expires_in": 900
+    "token_type": "bearer"
 }
 ```
 
@@ -89,6 +86,7 @@ All authentication operations use **async database sessions**:
 ```python
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.auth.user import get_user_by_email, create_user
+from app.core.security.security import verify_password
 
 # Async user authentication
 async def authenticate_user(db: AsyncSession, email: str, password: str) -> User | None:
@@ -99,8 +97,7 @@ async def authenticate_user(db: AsyncSession, email: str, password: str) -> User
 
 # Async user creation
 async def register_user(db: AsyncSession, user_data: UserCreate) -> User:
-    user = await create_user(db, user_data)
-    return user
+    return await create_user(db, user_data)
 ```
 
 ### **JWT Token Management**
@@ -108,33 +105,41 @@ async def register_user(db: AsyncSession, user_data: UserCreate) -> User:
 Secure token-based authentication with refresh tokens:
 
 ```python
-from app.core.security.security import create_access_token, create_refresh_token
+from datetime import timedelta
+from fastapi import Depends, HTTPException, status
+from jose import JWTError, jwt
+from sqlalchemy.ext.asyncio import AsyncSession
 
-# Create access token
-access_token = create_access_token(data={"sub": user.email})
+from app.core.config import settings
+from app.core.security.security import create_access_token
+from app.database.database import get_db
+from app.crud.auth.user import get_user_by_id
 
-# Create refresh token
-refresh_token = create_refresh_token(data={"sub": user.email})
+# Create access token (subject is user ID)
+access_token = create_access_token(
+    subject=user.id,
+    expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+)
 
-# Verify token
+# Verify token (used by dependencies in the app)
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials"
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
     )
-    
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        email = payload.get("sub")
-        if email is None:
+        user_id = payload.get("sub")
+        if user_id is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    
-    user = await get_user_by_email(db, email=email)
+
+    user = await get_user_by_id(db, user_id=str(user_id))
     if user is None:
         raise credentials_exception
     return user
@@ -145,24 +150,21 @@ async def get_current_user(
 Secure API keys for service-to-service communication:
 
 ```python
-from app.crud.auth.api_key import create_api_key, get_api_keys_by_user
+# Endpoints:
+# - POST /auth/api-keys        (create; returns { api_key: {...}, raw_key: "..." })
+# - GET /auth/api-keys         (list)
+# - DELETE /auth/api-keys/{id} (deactivate)
+# - POST /auth/api-keys/{id}/rotate (rotate; returns new_raw_key once)
 
-# Create API key
-async def create_api_key_for_user(
-    db: AsyncSession, 
-    user_id: str, 
-    name: str
-) -> ApiKey:
-    api_key = await create_api_key(db, user_id=user_id, name=name)
-    return api_key
+# Create payload example:
+{
+    "label": "My API Key",
+    "scopes": ["read", "write"],
+    "expires_at": "2025-01-01T00:00:00Z"  # optional
+}
 
-# Verify API key
-async def get_user_by_api_key(
-    db: AsyncSession, 
-    api_key: str
-) -> User | None:
-    user = await get_user_by_api_key(db, api_key)
-    return user
+# Use API keys via Authorization header:
+# Authorization: Bearer <raw_api_key>
 ```
 
 ## 📋 Available Endpoints
@@ -226,7 +228,9 @@ Authorization: Bearer <access_token>
 ```python
 # Request Email Verification
 POST /auth/resend-verification
-Authorization: Bearer <access_token>
+{
+    "email": "user@example.com"
+}
 
 # Verify Email
 POST /auth/verify-email
@@ -242,7 +246,9 @@ POST /auth/verify-email
 POST /auth/api-keys
 Authorization: Bearer <access_token>
 {
-    "name": "My API Key"
+    "label": "My API Key",
+    "scopes": ["read"],
+    "expires_at": null
 }
 
 # List API Keys
@@ -261,15 +267,12 @@ Authorization: Bearer <access_token>
 ### **Session Management**
 
 ```python
-# Refresh Token
+# Refresh Token (uses HttpOnly cookie set during login)
 POST /auth/refresh
-{
-    "refresh_token": "refresh_token_here"
-}
 
 # User Logout
 POST /auth/logout
-Authorization: Bearer <access_token>
+# (no Authorization header required; revokes session via refresh cookie)
 
 # List Active Sessions
 GET /auth/sessions
@@ -289,7 +292,9 @@ Authorization: Bearer <access_token>
 ```python
 # Request Account Deletion
 POST /auth/request-deletion
-Authorization: Bearer <access_token>
+{
+    "email": "user@example.com"
+}
 
 # Confirm Account Deletion
 POST /auth/confirm-deletion
@@ -299,11 +304,13 @@ POST /auth/confirm-deletion
 
 # Cancel Account Deletion
 POST /auth/cancel-deletion
-Authorization: Bearer <access_token>
+{
+    "email": "user@example.com"
+}
 
 # Check Deletion Status
 GET /auth/deletion-status
-Authorization: Bearer <access_token>
+# query param: ?email=user@example.com
 ```
 
 ## 🔒 Security Features
@@ -325,11 +332,15 @@ is_valid = verify_password("plaintext_password", hashed_password)
 Built-in rate limiting for authentication endpoints:
 
 ```python
-# Rate limiting is automatically applied to:
-# - /auth/login (5 attempts per minute)
-# - /auth/register (3 attempts per minute)
-# - /auth/forgot-password (3 attempts per minute)
-# - /auth/oauth/login (5 attempts per minute)
+# Disabled by default (ENABLE_RATE_LIMITING = False). When enabled:
+# - /auth/login                5/minute
+# - /auth/register             3/minute
+# - /auth/resend-verification  3/minute
+# - /auth/forgot-password      3/minute
+# - /auth/oauth/login          10/minute
+# - /auth/request-deletion     3/minute
+# - /auth/confirm-deletion     3/minute
+# - /auth/cancel-deletion      3/minute
 ```
 
 ### **Session Management**
@@ -342,6 +353,13 @@ MAX_SESSIONS_PER_USER = 5
 
 # Session cleanup interval
 SESSION_CLEANUP_INTERVAL_HOURS = 24
+
+# Refresh token cookie settings
+REFRESH_TOKEN_COOKIE_NAME = "refresh_token"
+REFRESH_TOKEN_COOKIE_HTTPONLY = True
+REFRESH_TOKEN_COOKIE_SECURE = False  # set True in production
+REFRESH_TOKEN_COOKIE_SAMESITE = "lax"
+REFRESH_TOKEN_COOKIE_PATH = "/auth"
 ```
 
 ### **Audit Logging**
@@ -349,16 +367,14 @@ SESSION_CLEANUP_INTERVAL_HOURS = 24
 All authentication events are logged:
 
 ```python
-from app.services.monitoring.audit import log_login, log_logout
+from app.services.monitoring.audit import log_login_attempt, log_logout
 
 # Log successful login
-await log_login(db, user_id=user.id, ip_address=request.client.host)
+await log_login_attempt(db, request, user=user, success=True)
 
 # Log logout
-await log_logout(db, user_id=user.id, ip_address=request.client.host)
+await log_logout(db, request, user=user)
 ```
-
-
 
 ## 🔧 Configuration
 
@@ -375,6 +391,7 @@ REFRESH_TOKEN_EXPIRE_DAYS=30
 REFRESH_TOKEN_COOKIE_NAME=refresh_token
 REFRESH_TOKEN_COOKIE_SECURE=false
 REFRESH_TOKEN_COOKIE_HTTPONLY=true
+REFRESH_TOKEN_COOKIE_PATH=/auth
 
 # Session Management
 MAX_SESSIONS_PER_USER=5
@@ -383,7 +400,7 @@ SESSION_CLEANUP_INTERVAL_HOURS=24
 # Email Configuration (for password reset, verification)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
+SMTP_USERNAME=your-email@gmail.com
 SMTP_PASSWORD=your-app-password
 ```
 
@@ -396,7 +413,9 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 
 # Apple OAuth
 APPLE_CLIENT_ID=your-apple-client-id
-APPLE_CLIENT_SECRET=your-apple-client-secret
+APPLE_TEAM_ID=your-apple-team-id
+APPLE_KEY_ID=your-apple-key-id
+APPLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
 ## 🚀 Advanced Features
@@ -404,18 +423,15 @@ APPLE_CLIENT_SECRET=your-apple-client-secret
 ### **OAuth Integration**
 
 ```python
-from app.services.auth.oauth import google_oauth, apple_oauth
+# Client obtains an ID/access token from the provider and posts it
+POST /auth/oauth/login
+{
+  "provider": "google" | "apple",
+  "access_token": "<id_or_access_token_here>"
+}
 
-# Google OAuth
-@router.get("/auth/google")
-async def google_login():
-    return {"url": google_oauth.get_authorization_url()}
-
-@router.get("/auth/google/callback")
-async def google_callback(code: str, db: AsyncSession = Depends(get_db)):
-    user_info = await google_oauth.get_user_info(code)
-    user = await get_or_create_oauth_user(db, user_info)
-    return create_token_response(user)
+# List configured providers
+GET /auth/oauth/providers
 ```
 
 ### **Custom Authentication**
@@ -444,25 +460,14 @@ async def get_all_users(
 ### **API Key Authentication**
 
 ```python
-# API key authentication dependency
-async def get_user_by_api_key(
-    api_key: str = Depends(api_key_header),
-    db: AsyncSession = Depends(get_db)
-) -> User:
-    user = await get_user_by_api_key(db, api_key)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid API key"
-        )
-    return user
+# Send Authorization: Bearer <raw_api_key>
+from app.api.users.auth import get_api_key_user
 
-# Use in endpoints
-@router.get("/api/data")
-async def get_data(
-    current_user: User = Depends(get_user_by_api_key)
+@router.get("/users/me/api-key")
+async def read_current_user_api_key(
+    api_key_user: APIKeyUser = Depends(get_api_key_user),
 ):
-    return {"data": "your data here"}
+    return api_key_user
 ```
 
 ## 🛠️ Troubleshooting
@@ -490,13 +495,13 @@ async def get_data(
 
 ```bash
 # Check user in database
-docker compose exec postgres psql -U postgres -d your_db -c "SELECT * FROM users WHERE email = 'user@example.com';"
+docker-compose exec postgres psql -U postgres -d your_db -c "SELECT * FROM users WHERE email = 'user@example.com';"
 
 # Check API keys
-docker compose exec postgres psql -U postgres -d your_db -c "SELECT * FROM api_keys;"
+docker-compose exec postgres psql -U postgres -d your_db -c "SELECT * FROM api_keys;"
 
 # Check audit logs
-docker compose exec postgres psql -U postgres -d your_db -c "SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 10;"
+docker-compose exec postgres psql -U postgres -d your_db -c "SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 10;"
 ```
 
 ## 📚 Next Steps

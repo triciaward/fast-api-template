@@ -91,7 +91,7 @@ async def list_users(
             is_superuser=user.is_superuser,  # type: ignore
             is_verified=user.is_verified,  # type: ignore
             is_deleted=user.is_deleted,  # type: ignore
-            date_created=user.date_created,
+            created_at=user.created_at,  # type: ignore
             oauth_provider=user.oauth_provider,  # type: ignore
             oauth_id=user.oauth_id,  # type: ignore
             oauth_email=user.oauth_email,  # type: ignore
@@ -140,7 +140,7 @@ async def get_user(
         is_superuser=user.is_superuser,  # type: ignore
         is_verified=user.is_verified,  # type: ignore
         is_deleted=user.is_deleted,  # type: ignore
-        date_created=user.date_created,
+        created_at=user.created_at,  # type: ignore
         oauth_provider=user.oauth_provider,  # type: ignore
         oauth_id=user.oauth_id,  # type: ignore
         oauth_email=user.oauth_email,  # type: ignore
@@ -216,7 +216,7 @@ async def create_user(
         is_superuser=user.is_superuser,  # type: ignore
         is_verified=user.is_verified,  # type: ignore
         is_deleted=user.is_deleted,  # type: ignore
-        date_created=user.date_created,
+        created_at=user.created_at,  # type: ignore
         oauth_provider=user.oauth_provider,  # type: ignore
         oauth_id=user.oauth_id,  # type: ignore
         oauth_email=user.oauth_email,  # type: ignore
@@ -286,7 +286,7 @@ async def update_user(
         is_superuser=user.is_superuser,  # type: ignore
         is_verified=user.is_verified,  # type: ignore
         is_deleted=user.is_deleted,  # type: ignore
-        date_created=user.date_created,
+        created_at=user.created_at,  # type: ignore
         oauth_provider=user.oauth_provider,  # type: ignore
         oauth_id=user.oauth_id,  # type: ignore
         oauth_email=user.oauth_email,  # type: ignore

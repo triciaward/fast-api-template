@@ -433,17 +433,21 @@ class APIKeyBase(BaseModel):
         return validated_scopes
 
 
-class APIKeyCreate(BaseModel):
+class APIKeyCreate(APIKeyBase):
     """Schema for creating an API key."""
 
     model_config = ConfigDict(from_attributes=True)
 
-    label: str = Field(..., description="Human-readable label for the API key")
-    scopes: list[str] = Field(
-        default_factory=list,
-        description="List of scopes for the API key",
-    )
-    expires_at: datetime | None = Field(None, description="Optional expiration date")
+    @field_validator("expires_at")
+    @classmethod
+    def validate_expires_at(cls, v: datetime | None) -> datetime | None:
+        """Validate that expiration date is in the future."""
+        if v is not None:
+            from app.utils.datetime_utils import utc_now
+            if v <= utc_now():
+                # Keep message short; allow inline exception here
+                raise ValueError("Expiration must be in the future")  # noqa: TRY003
+        return v
 
 
 class APIKeyResponse(BaseModel):

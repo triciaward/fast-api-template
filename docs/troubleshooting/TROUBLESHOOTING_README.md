@@ -55,7 +55,7 @@ ls -la | grep -E "\.env"
 cat .env
 
 # Test database connection
-docker compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
+docker-compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
 ```
 
 ### Testing & CI Issues
@@ -97,26 +97,26 @@ ls -la | grep -E "\.env"
 grep -E "^(POSTGRES_DB|POSTGRES_USER|POSTGRES_PASSWORD|DATABASE_URL|SECRET_KEY)=" .env
 
 # Test Docker Compose
-docker compose config
+docker-compose config
 
 # Check services
-docker compose ps
+docker-compose ps
 ```
 
 ### API Health Check
 ```bash
 # Test API health
-curl http://localhost:8000/api/v1/health
+curl http://localhost:8000/health
 
 # Check logs
-docker compose logs api
-docker compose logs postgres
+docker-compose logs api
+docker-compose logs postgres
 ```
 
 ### Database Check
 ```bash
 # Test database connection
-docker compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
+docker-compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
 
 # Check Alembic
 alembic current

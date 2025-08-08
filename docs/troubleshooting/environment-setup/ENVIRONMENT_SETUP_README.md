@@ -37,7 +37,7 @@ ls -la | grep -E "\.env"
 cat .env
 
 # Test database connection
-docker compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
+docker-compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
 ```
 
 ### Most Common Setup Issues:

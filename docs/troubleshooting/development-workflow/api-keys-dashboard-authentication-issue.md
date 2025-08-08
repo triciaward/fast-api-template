@@ -31,7 +31,7 @@ The fundamental problem is that users are trying to access an API endpoint desig
 ### 1. Verify Server and Database Status
 ```bash
 # Check if server is running
-curl -X GET "http://localhost:8000/api/v1/health"
+curl -X GET "http://localhost:8000/health"
 
 # Check if superuser exists
 docker exec ${COMPOSE_PROJECT_NAME:-fast-api-template}-postgres-1 psql -U postgres -d fastapi_template -c "SELECT email, is_superuser, is_verified FROM users WHERE is_superuser = true;"
@@ -40,7 +40,7 @@ docker exec ${COMPOSE_PROJECT_NAME:-fast-api-template}-postgres-1 psql -U postgr
 ### 2. Get JWT Token via API Login
 ```bash
 # Login to get JWT token
-curl -X POST "http://localhost:8000/api/v1/auth/login" \
+curl -X POST "http://localhost:8000/auth/login" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=admin@example.com&password=Admin123!"
 ```
@@ -92,7 +92,7 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
 ### 2. Proper Authentication Testing
 ```bash
 # Test login first
-curl -X POST "http://localhost:8000/api/v1/auth/login" \
+curl -X POST "http://localhost:8000/auth/login" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=admin@example.com&password=Admin123!"
 
@@ -119,7 +119,7 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
 ### Method 1: Browser with Authorization Header (Recommended)
 1. **Get JWT token:**
    ```bash
-   curl -X POST "http://localhost:8000/api/v1/auth/login" \
+   curl -X POST "http://localhost:8000/auth/login" \
      -H "Content-Type: application/x-www-form-urlencoded" \
      -d "username=admin@example.com&password=Admin123!"
    ```
@@ -142,7 +142,7 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
 4. **Visit**: `http://localhost:8000/admin/api-keys`
 
 ### Method 3: Programmatic Access (curl)
-1. **Get JWT token** via `/api/v1/auth/login`
+1. **Get JWT token** via `/auth/login`
 2. **Use Bearer token** in Authorization header
 3. **Access dashboard** with proper authentication
 

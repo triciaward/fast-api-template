@@ -515,7 +515,6 @@ async def get_cache_metrics():
 
 ### 4. Production Considerations
 
-
 - **Monitor resource usage** of monitoring tools themselves
 - **Set up proper logging** for performance data
 - **Implement performance budgets** for critical endpoints

@@ -208,8 +208,8 @@ async def enforce_session_limit(
 
         sessions.sort(key=get_sort_key)
 
-        # Revoke oldest sessions to stay under limit
-        sessions_to_revoke = sessions[: -max_sessions + 1]
+        # Revoke oldest sessions to reduce to max_sessions
+        sessions_to_revoke = sessions[: len(sessions) - max_sessions]
 
         for session in sessions_to_revoke:
             session.is_revoked = True  # type: ignore

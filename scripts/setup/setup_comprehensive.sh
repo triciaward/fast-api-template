@@ -108,10 +108,9 @@ fi
 # Check Docker Compose
 if command_exists docker-compose; then
     print_success "Docker Compose found"
-elif command_exists docker && docker compose version >/dev/null 2>&1; then
-    print_success "Docker Compose (v2) found"
 else
-    print_warning "Docker Compose not found. You'll need it for running services."
+    print_warning "Docker Compose not found. This template requires the 'docker-compose' CLI."
+    print_status "Install the docker-compose CLI or add a local compatibility shim so 'docker-compose' is available on PATH."
 fi
 
 # =============================================================================
@@ -229,7 +228,7 @@ REFRESH_TOKEN_COOKIE_NAME=refresh_token
 REFRESH_TOKEN_COOKIE_SECURE=false
 REFRESH_TOKEN_COOKIE_HTTPONLY=true
 REFRESH_TOKEN_COOKIE_SAMESITE=lax
-REFRESH_TOKEN_COOKIE_PATH=/api/v1/auth
+REFRESH_TOKEN_COOKIE_PATH=/auth
 
 # Session Management
 MAX_SESSIONS_PER_USER=5

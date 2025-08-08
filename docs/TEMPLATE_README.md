@@ -94,7 +94,7 @@ Next steps:
 
 ```bash
 # Customize the template for your project
-./scripts/setup/customize_template.sh
+python scripts/setup/customize_template.py
 ```
 
 **What this does:**
@@ -106,7 +106,7 @@ Next steps:
 
 **Example:**
 ```bash
-$ ./scripts/setup/customize_template.sh
+$ python scripts/setup/customize_template.py
 🚀 FastAPI Template Customization - Step 2
 ==========================================
 This script will transform the template into your custom project.
@@ -218,9 +218,9 @@ Running superuser creation script...
 3. Start developing!
 
 💡 Useful Commands:
-  docker compose up -d          # Start all services
-  docker compose logs -f        # View logs
-  docker compose down           # Stop all services
+  docker-compose up -d          # Start all services
+  docker-compose logs -f        # View logs
+  docker-compose down           # Stop all services
   
   alembic revision --autogenerate -m 'description'  # Create migration
   alembic upgrade head          # Apply migrations
@@ -232,21 +232,19 @@ Once your project is set up, you can use these commands:
 
 ```bash
 # Start the application
-docker compose up -d
+docker-compose up -d
 
 # View API documentation
 open http://localhost:8000/docs
-
-
 
 # Check code quality
 ./scripts/development/validate_ci.sh
 
 # View logs
-docker compose logs -f api
+docker-compose logs -f api
 
 # Stop services
-docker compose down
+docker-compose down
 ```
 
 ## 🛠️ What's Included
@@ -288,13 +286,11 @@ This FastAPI template provides a comprehensive foundation for building productio
 - Soft delete support
 
 ### 🚀 Performance & Monitoring
-- Redis caching
-- Celery task queue
+- Redis caching (optional)
+- Celery task queue (optional)
 - Comprehensive health check endpoints
 - Performance monitoring utilities
-- Error tracking with Sentry
-
-
+- Error tracking with Sentry (optional)
 
 ### 🛠️ Development Tools
 - Pre-commit hooks for code quality
@@ -384,21 +380,19 @@ async def create_user(
     pass
 ```
 
-
-
 ## 🚀 Development Workflow
 
 ### **Local Development**
 ```bash
 # Start services
-docker compose up -d
+docker-compose up -d
 
 # Run development tools
 ruff format .
 ruff check .
 
 # View logs
-docker compose logs -f api
+docker-compose logs -f api
 ```
 
 > Note: The backend (`api`) and database (`postgres`) run inside Docker. Use the Python virtual environment only for developer tooling (formatting, linting, Alembic command generation), not for running the server.
@@ -429,6 +423,12 @@ mypy app/
 # Run all quality checks
 ./scripts/development/validate_ci.sh
 ```
+
+## 🧪 Testing
+
+- Run tests: `pytest -q`
+- With coverage: `pytest --cov=app --cov-report=term-missing -q`
+- Skipped, feature-flagged tests and how to enable them are documented in [`docs/testing/skipped-tests.md`](docs/testing/skipped-tests.md).
 
 ## 📊 Monitoring and Health
 

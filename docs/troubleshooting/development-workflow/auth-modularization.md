@@ -113,10 +113,10 @@ app/api/api_v1/endpoints/auth/
 - No test failures related to modularization
 
 ### ✅ **Endpoint Verification**
-- Registration endpoint: `POST /api/v1/auth/register` ✅
-- Login endpoint: `POST /api/v1/auth/login` ✅
-- Password reset: `POST /api/v1/auth/forgot-password` ✅
-- OAuth providers: `GET /api/v1/auth/oauth/providers` ✅
+- Registration endpoint: `POST /auth/register` ✅
+- Login endpoint: `POST /auth/login` ✅
+- Password reset: `POST /auth/forgot-password` ✅
+- OAuth providers: `GET /auth/oauth/providers` ✅
 - All 24 auth endpoints properly registered ✅
 
 ## Database Session Fixes
@@ -172,17 +172,17 @@ To verify the modularization is working correctly:
 
 ```bash
 # Test auth endpoints
-curl -X POST http://localhost:8000/api/v1/auth/register \
+curl -X POST http://localhost:8000/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","username":"testuser","password":"TestPassword123!"}'
 
 # Test login endpoint
-curl -X POST http://localhost:8000/api/v1/auth/login \
+curl -X POST http://localhost:8000/auth/login \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=test@example.com&password=TestPassword123!"
 
 # Test OAuth providers
-curl http://localhost:8000/api/v1/auth/oauth/providers
+curl http://localhost:8000/auth/oauth/providers
 
 # Run auth tests
 pytest tests/template_tests/test_auth_*.py -v

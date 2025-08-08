@@ -1,15 +1,8 @@
 """Core application functionality organized by category."""
 
 # Import from organized subfolders for backward compatibility
-# Also provide category-specific access
-from . import admin, config, error_handling, security
-from .admin import (
-    BaseAdminCRUD,
-    DBSession,
-    admin_only_endpoint,
-    get_current_user,
-    require_superuser,
-)
+# Keep imports lightweight to avoid circular dependencies during package init
+from . import config, error_handling, security
 from .config import (
     Settings,
     configure_cors,
@@ -73,15 +66,8 @@ __all__ = [
     "AuthenticationException",
     "AuthorizationException",
     "ValidationException",
-    # Admin
-    "BaseAdminCRUD",
-    "DBSession",
-    "require_superuser",
-    "get_current_user",
-    "admin_only_endpoint",
     # Category modules
     "config",
     "security",
     "error_handling",
-    "admin",
 ]

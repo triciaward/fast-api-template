@@ -79,7 +79,11 @@ async def verify_email(
         )
 
     # Verify the token
-    user_id = await email_service.verify_token(db, request.token)
+    try:
+        user_id = await email_service.verify_token(db, request.token)
+    except Exception:
+        # Treat verification errors as invalid tokens rather than surfacing exceptions
+        user_id = None
     if not user_id:
         return VerifyEmailResponse(
             message="Invalid or expired verification token",

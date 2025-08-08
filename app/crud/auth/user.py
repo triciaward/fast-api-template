@@ -272,8 +272,8 @@ async def get_users_for_deletion_reminder(db: DBSession) -> list[User]:
     reminder_date = utc_now() + timedelta(days=7)
     result = await db.execute(
         select(User).filter(
-            User.is_deletion_requested.is_(True),
-            User.deletion_scheduled_date <= reminder_date,
+            User.deletion_requested_at.is_not(None),
+            User.deletion_scheduled_for <= reminder_date,
             User.is_deleted.is_(False),
         ),
     )

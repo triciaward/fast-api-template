@@ -138,13 +138,13 @@ analysis = analyzer.analyze_query(my_query)
 - ✅ **Kubernetes Ready**: Readiness and liveness probes
 
 **Health Check Endpoints:**
-- `GET /api/v1/health` - Basic application health
-- `GET /api/v1/health/simple` - Simple load balancer check
-- `GET /api/v1/health/ready` - Kubernetes readiness probe
-- `GET /api/v1/health/live` - Kubernetes liveness probe
-- `GET /api/v1/health/detailed` - Comprehensive health status
-- `GET /api/v1/health/database` - Database-specific health
-- `GET /api/v1/health/metrics` - Application metrics
+- `GET /health` - Basic application health
+- `GET /health/simple` - Simple load balancer check
+- `GET /health/ready` - Kubernetes readiness probe
+- `GET /health/live` - Kubernetes liveness probe
+- `GET /health/detailed` - Comprehensive health status
+- `GET /health/database` - Database-specific health
+- `GET /health/metrics` - Application metrics
 
 **Backup System Features:**
 - ✅ **Compressed Backups**: Automatic compression to save space
@@ -176,13 +176,13 @@ analysis = analyzer.analyze_query(my_query)
 ### Health Monitoring
 ```bash
 # Check basic health
-curl http://localhost:8000/api/v1/health
+curl http://localhost:8000/health
 
 # Check readiness for Kubernetes
-curl http://localhost:8000/api/v1/health/ready
+curl http://localhost:8000/health/ready
 
 # Get detailed health status
-curl http://localhost:8000/api/v1/health/detailed
+curl http://localhost:8000/health/detailed
 ```
 
 ### Performance Monitoring

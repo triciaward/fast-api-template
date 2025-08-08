@@ -53,6 +53,25 @@ def get_request_id(request: Request) -> str:
     return request_id
 
 
+def safe_serialize_value(value: Any) -> Any:
+    """Safely serialize a value for JSON response."""
+    if value is None:
+        return None
+    if isinstance(value, str | int | float | bool):
+        return value
+    if isinstance(value, bytes):
+        try:
+            return value.decode("utf-8")
+        except UnicodeDecodeError:
+            return str(value)
+    if hasattr(value, "__str__"):
+        try:
+            return str(value)
+        except Exception:
+            return f"<{type(value).__name__}>"
+    return f"<{type(value).__name__}>"
+
+
 async def validation_exception_handler(
     request: Request,
     exc: RequestValidationError | ValidationError,
@@ -68,17 +87,13 @@ async def validation_exception_handler(
             value = error.get("input")
             message = error.get("msg", "Validation error")
 
-            # Handle bytes values by converting to string
-            if isinstance(value, bytes):
-                try:
-                    value = value.decode("utf-8")
-                except UnicodeDecodeError:
-                    value = str(value)
+            # Safely serialize the value
+            safe_value = safe_serialize_value(value)
 
             errors.append(
                 {
                     "field": field,
-                    "value": value,
+                    "value": safe_value,
                     "message": message,
                     "type": error.get("type", "value_error"),
                 },
@@ -90,7 +105,7 @@ async def validation_exception_handler(
         code=ErrorCode.INVALID_REQUEST,
         details={"errors": errors},
         field=errors[0]["field"] if errors else None,
-        value=errors[0]["value"] if errors else None,
+        value=safe_serialize_value(errors[0]["value"]) if errors else None,
     )
 
     logger.warning(

@@ -44,7 +44,7 @@ This folder contains troubleshooting guides for development workflow and authent
 ### Authentication Testing:
 ```bash
 # Test login
-curl -X POST "http://localhost:8000/api/v1/auth/login" \
+curl -X POST "http://localhost:8000/auth/login" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=admin@example.com&password=Admin123!"
 
@@ -56,10 +56,10 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
 ### Auth System Verification:
 ```bash
 # Check auth endpoints
-curl http://localhost:8000/api/v1/auth/oauth/providers
+curl http://localhost:8000/auth/oauth/providers
 
 # Test registration
-curl -X POST http://localhost:8000/api/v1/auth/register \
+curl -X POST http://localhost:8000/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","username":"testuser","password":"TestPassword123!"}'
 ```

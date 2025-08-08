@@ -26,13 +26,12 @@ Welcome to the tutorials section! Here you'll find comprehensive guides for ever
 ## 🚀 Start Here - Quick Navigation
 
 **New to FastAPI?** Follow this path:
-1. **📖 [Getting Started Guide](getting-started.md)** - Set up your development environment
+1. **📖 [Getting Started Guide](../TEMPLATE_README.md)** - Set up your development environment
 2. **🎯 [Next Steps & Development Tips](next-steps-and-tips.md)** - What to build first and common mistakes to avoid
 3. **🔐 [Authentication System](authentication.md)** - Learn user login and registration
 4. **🗄️ [Database Management](database-management.md)** - Work with data, migrations, and CRUD operations
-
-6. **🌐 [Deployment and Production](deployment-and-production.md)** - Deploy to production
-7. **🔧 [Optional Features](optional-features.md)** - Add advanced features as needed
+5. **🌐 [Deployment and Production](deployment-and-production.md)** - Deploy to production
+6. **🔧 [Optional Features](optional-features.md)** - Add advanced features as needed
 
 **Experienced developer?** Jump to any tutorial or use the [Quick Reference](#️-quick-reference) section below.
 
@@ -97,7 +96,7 @@ flowchart TD
     end
     
     subgraph "Testing & Quality"
-        
+        V[Pytest Tests]
         W[Template Tests]
         X[Code Quality]
         Y[CI/CD Pipeline]
@@ -113,10 +112,10 @@ flowchart TD
     P --> X
     Q --> A
     
-    V --> B
+    V --> N
     W --> N
     X --> B
-    Y --> V
+    Y --> X
 ```
 
 ---
@@ -137,8 +136,7 @@ fast-api-template/
 │   │   └── 📁 error_handling/ # Error handling
 │   ├── 📁 crud/              # Database operations (domain-based)
 │   │   ├── 📁 auth/          # Authentication CRUD
-│   │   ├── 📁 system/        # System CRUD
-│   │   └── 📁 user.py        # User CRUD operations
+│   │   └── 📁 system/        # System CRUD
 │   ├── 📁 models/            # Database models (domain-based)
 │   │   ├── 📁 auth/          # Authentication models
 │   │   ├── 📁 system/        # System models
@@ -171,7 +169,7 @@ fast-api-template/
 ## 📚 Tutorial Index
 
 ### 🚀 Getting Started
-- **[Getting Started Guide](getting-started.md)** - Complete setup guide for creating a new app from this template
+- **[Getting Started Guide](../TEMPLATE_README.md)** - Complete setup guide for creating a new app from this template
 - **[Next Steps & Development Tips](next-steps-and-tips.md)** - What to build first, common commands, and mistakes to avoid
 
 ### 🎯 Template Customization
@@ -196,7 +194,7 @@ cd fast-api-template
 code your_project_name
 
 # Step 3: Customize for your project
-./scripts/setup/customize_template.sh
+python scripts/setup/customize_template.py
 
 # Follow the prompts and start developing!
 ```
@@ -208,12 +206,6 @@ code your_project_name
 - Documentation and README files
 - Configuration files and scripts
 - Git remote setup guidance
-
-**Demo:**
-```bash
-# See the customization process in action
-python3 scripts/setup/demo_customization.py
-```
 
 ### 🔧 Core Features
 
@@ -248,9 +240,7 @@ Explore advanced features that can enhance your application:
 
 ### 🛠️ Development & Testing
 
-
 Learn best practices for development:
-
 - Debugging techniques and tools
 - Code quality tools (linting, formatting)
 - Pre-commit hooks and CI/CD setup
@@ -305,13 +295,12 @@ Deploy your FastAPI app on a budget for solo developers:
 ## 🎯 How to Use These Tutorials
 
 ### For Beginners
-1. Start with the **[Getting Started Guide](getting-started.md)**
+1. Start with the **[Getting Started Guide](../TEMPLATE_README.md)**
 2. **Customize the template** for your project (see Template Customization section above)
 3. Read the **[Authentication System](authentication.md)** tutorial
 4. Learn about **[Database Management](database-management.md)**
 5. Explore **[Optional Features](optional-features.md)** as needed
-
-7. Read **[Deployment and Production](deployment-and-production.md)** when ready to deploy
+6. Read **[Deployment and Production](deployment-and-production.md)** when ready to deploy
 
 ### For Experienced Developers
 - Jump directly to the tutorials you need
@@ -363,15 +352,13 @@ Each tutorial includes:
 ### Essential Commands
 ```bash
 # Start all services with Docker (recommended)
-docker compose up -d
-
-
+docker-compose up -d
 
 # Run database migrations
 alembic upgrade head
 
 # View Docker logs
-docker compose logs -f
+docker-compose logs -f
 
 # Check application health
 curl http://localhost:8000/system/health
@@ -389,7 +376,9 @@ curl http://localhost:8000/system/health
 python scripts/setup/verify_setup.py
 
 # Install pre-commit hooks
-./scripts/setup/install_precommit.sh
+./scripts/git-hooks/install_precommit.sh
+# or
+pre-commit install && pre-commit run --all-files
 
 # Run code quality checks
 ./scripts/development/validate_ci.sh
@@ -420,16 +409,15 @@ python scripts/setup/verify_setup.py
 ## 🎯 Learning Paths
 
 ### 🚀 **Quick Start Path** (1-2 hours)
-1. [Getting Started Guide](getting-started.md)
+1. [Getting Started Guide](../TEMPLATE_README.md)
 2. [Authentication System](authentication.md) - Basic setup
 3. Test the API at http://localhost:8000/docs
 
 ### 🔧 **Full Feature Path** (4-6 hours)
-1. [Getting Started Guide](getting-started.md)
+1. [Getting Started Guide](../TEMPLATE_README.md)
 2. [Authentication System](authentication.md) - Complete
 3. [Database Management](database-management.md) - Core features and CRUD operations
 4. [Optional Features](optional-features.md) - Choose what you need
-
 
 ### 🌐 **Production Ready Path** (6-8 hours)
 1. Complete the Full Feature Path

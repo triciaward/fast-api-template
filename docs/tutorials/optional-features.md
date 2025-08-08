@@ -47,12 +47,12 @@ Think of optional features like add-ons for your car. The basic car works great,
 
 2. **Start Redis with Docker:**
    ```bash
-   docker compose up -d redis
+   docker-compose up -d redis
    ```
 
 3. **Restart your FastAPI server:**
    ```bash
-   docker compose restart api
+   docker-compose restart api
    ```
 
 ### Redis Lifecycle Flow
@@ -114,7 +114,7 @@ curl http://localhost:8000/system/health
 
 2. **Restart your FastAPI server:**
    ```bash
-   docker compose restart api
+   docker-compose restart api
    ```
 
 3. **Connect to WebSocket endpoint:**
@@ -172,7 +172,7 @@ websocat ws://localhost:8000/integrations/ws/demo
 
 2. **Start Redis (if not already running):**
    ```bash
-   docker compose up -d redis
+   docker-compose up -d redis
    ```
 
 3. **Start Celery worker:**
@@ -182,7 +182,7 @@ websocat ws://localhost:8000/integrations/ws/demo
 
 4. **Restart your FastAPI server:**
    ```bash
-   docker compose restart api
+   docker-compose restart api
    ```
 
 ### Celery Task Lifecycle
@@ -197,34 +197,28 @@ flowchart TD
   F --> G[User Notified (Optional)]
 ```
 
-### Example Celery Task
+### Example Celery Tasks
 
-See [`send_email()` in app/services/external/email.py`](../../app/services/external/email.py) for the full implementation. Example Celery tasks are provided in [`app/services/background/celery_tasks.py`](../../app/services/background/celery_tasks.py).
+The template includes several example tasks in [`app/services/background/celery_tasks.py`](../../app/services/background/celery_tasks.py):
 
 ```python
-@shared_task
-def send_welcome_email(user_email: str, username: str):
-    """Send welcome email to new user."""
-    subject = f"Welcome to our app, {username}!"
-    message = f"""
-    Hi {username},
-    
-    Welcome to our FastAPI application! We're excited to have you on board.
-    
-    Best regards,
-    The Team
-    """
-    
-    send_email(user_email, subject, message)
-    return f"Welcome email sent to {username}"
+@celery_app.task(name="app.services.celery_tasks.send_email_task")
+def send_email_task(to_email: str, subject: str, body: str) -> dict[str, Any]:
+    """Send email via Celery task."""
+    time.sleep(1)
+    return {"status": "sent", "to": to_email, "subject": subject}
 
-@shared_task
-def process_user_data(user_id: int):
-    """Process user data in the background."""
-    # Simulate heavy processing
-    import time
-    time.sleep(10)
-    return f"Processed data for user {user_id}"
+@celery_app.task(name="app.services.celery_tasks.process_data_task")
+def process_data_task(data: list[dict[str, Any]]) -> dict[str, Any]:
+    """Process data in background."""
+    time.sleep(1)
+    return {"status": "processed", "count": len(data)}
+
+@celery_app.task(name="app.services.celery_tasks.permanently_delete_accounts_task")
+def permanently_delete_accounts_task() -> dict[str, Any]:
+    """Permanently delete accounts that have passed their grace period."""
+    # Complex account deletion logic
+    return {"status": "completed", "accounts_deleted": count}
 ```
 
 ### Test Celery
@@ -263,7 +257,7 @@ curl -X GET "http://localhost:8000/system/background-tasks/task-status/{task_id}
 
 2. **Restart your FastAPI server:**
    ```bash
-   docker compose restart api
+   docker-compose restart api
    ```
 
 ### Email Features
@@ -349,7 +343,7 @@ python scripts/admin/admin_cli.py stats
 
 | Feature | Environment Variable | Dependencies | Command to Start |
 |---------|---------------------|--------------|------------------|
-| **Redis** | `ENABLE_REDIS=true` | Docker | `docker compose up -d redis` |
+| **Redis** | `ENABLE_REDIS=true` | Docker | `docker-compose up -d redis` |
 | **WebSockets** | `ENABLE_WEBSOCKETS=true` | None | Restart server |
 | **Celery** | `ENABLE_CELERY=true` | Redis | `celery -A app.services.background.celery_app worker` |
 | **Email** | SMTP settings | None | Restart server |
@@ -405,7 +399,7 @@ curl -I http://localhost:8000/
 ## 🚨 Troubleshooting
 
 ### Redis Issues
-- **Connection refused**: Make sure Redis is running (`docker compose up -d redis`)
+- **Connection refused**: Make sure Redis is running (`docker-compose up -d redis`)
 - **Authentication error**: Check `REDIS_URL` in `.env`
 
 ### WebSocket Issues

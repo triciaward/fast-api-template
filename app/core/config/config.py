@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "FastAPI Template"
     VERSION: str = "1.0.0"
     DESCRIPTION: str = "FastAPI Template with Authentication"
-    API_V1_STR: str = "/api/v1"
+    API_V1_STR: str = "/api"
     ENVIRONMENT: str = "development"
 
     # JWT - CRITICAL: Must be set in production via environment variable
@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_COOKIE_SECURE: bool = False  # Set to True in production
     REFRESH_TOKEN_COOKIE_HTTPONLY: bool = True
     REFRESH_TOKEN_COOKIE_SAMESITE: str = "lax"
-    REFRESH_TOKEN_COOKIE_PATH: str = "/api/v1/auth"
+    REFRESH_TOKEN_COOKIE_PATH: str = "/auth"
 
     # Session Management
     MAX_SESSIONS_PER_USER: int = 5  # Limit concurrent sessions

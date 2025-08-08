@@ -15,6 +15,7 @@ warn_unreachable = true
 strict_equality = true
 # Allow some flexibility for FastAPI
 disallow_any_generics = false
+packages = ["app"]
 # Ignore missing imports for some packages
 [[tool.mypy.overrides]]
 module = [
@@ -79,6 +80,25 @@ ignore = [
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
 
+[tool.ruff.lint.per-file-ignores]
+# Tests intentionally bend some style rules (e.g., env setup before imports, broad
+# exception assertions, dummy lambdas with unused params, naive datetimes).
+"tests/**/*.py" = [
+    "ARG005", # unused lambda args in test helpers
+    "TRY002", # create your own exception (acceptable in tests)
+    "TRY003", # long messages outside exception class
+    "E402",   # module import not at top of file (env setup first)
+    "E401",   # multiple imports on one line (test-only convenience)
+    "B017",   # pytest.raises(Exception) considered evil
+    "SIM117", # nested with statements
+    "SIM300", # Yoda conditions (allowed in tests)
+    "DTZ001", # datetime without tz in test data
+    "C405",   # unnecessary list literal (test data)
+    "C408",   # unnecessary dict() call (test data)
+    "PTH118", # prefer Path over os.path.join (not required in tests)
+    "F841",   # assigned but unused (intentional in some tests)
+]
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
@@ -91,4 +111,18 @@ target-version = ['py311']
 extend-exclude = """
 /alembic/versions/
 """
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+omit = [
+    "app/api/integrations/*",
+    "app/services/external/*",
+    "app/services/background/*",
+    "app/services/middleware/websockets.py",
+    "app/api/system/background_tasks.py",
+]
+
+[tool.coverage.report]
+show_missing = true
  

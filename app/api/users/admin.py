@@ -174,23 +174,29 @@ async def list_deleted_users(
         db=db,
     )
 
-    # Convert to response models
-    user_responses = [
-        DeletedUserResponse(
-            id=user.id,  # type: ignore
-            email=user.email,  # type: ignore
-            username=user.username,  # type: ignore
-            is_superuser=user.is_superuser,  # type: ignore
-            is_verified=user.is_verified,  # type: ignore
-            date_created=user.date_created,
-            oauth_provider=user.oauth_provider,  # type: ignore
-            is_deleted=user.is_deleted,  # type: ignore
-            deleted_at=user.deleted_at,  # type: ignore
-            deleted_by=user.deleted_by,  # type: ignore
-            deletion_reason=user.deletion_reason,  # type: ignore
+    # Convert to response models ensuring required fields have correct types
+    user_responses: list[DeletedUserResponse] = []
+    for user in users:
+        created_at_value = getattr(user, "created_at", None) or getattr(user, "date_created", None)
+        if created_at_value is None:
+            # Fallback to now to satisfy non-optional schema field
+            created_at_value = utc_now()
+
+        user_responses.append(
+            DeletedUserResponse(
+                id=user.id,  # type: ignore
+                email=user.email,  # type: ignore
+                username=user.username,  # type: ignore
+                is_superuser=user.is_superuser,  # type: ignore
+                is_verified=user.is_verified,  # type: ignore
+                created_at=created_at_value,  # type: ignore[arg-type]
+                oauth_provider=user.oauth_provider,  # type: ignore
+                is_deleted=user.is_deleted,  # type: ignore
+                deleted_at=user.deleted_at,  # type: ignore
+                deleted_by=user.deleted_by,  # type: ignore
+                deletion_reason=user.deletion_reason,  # type: ignore
+            ),
         )
-        for user in users
-    ]
 
     return DeletedUserListResponse.create(
         items=user_responses,
@@ -234,22 +240,27 @@ async def search_deleted_users(
     )
 
     # Convert to response models
-    user_responses = [
-        DeletedUserResponse(
-            id=user.id,  # type: ignore
-            email=user.email,  # type: ignore
-            username=user.username,  # type: ignore
-            is_superuser=user.is_superuser,  # type: ignore
-            is_verified=user.is_verified,  # type: ignore
-            date_created=user.date_created,
-            oauth_provider=user.oauth_provider,  # type: ignore
-            is_deleted=user.is_deleted,  # type: ignore
-            deleted_at=user.deleted_at,  # type: ignore
-            deleted_by=user.deleted_by,  # type: ignore
-            deletion_reason=user.deletion_reason,  # type: ignore
+    user_responses = []
+    for user in users:
+        created_at_value = getattr(user, "created_at", None) or getattr(user, "date_created", None)
+        if created_at_value is None:
+            created_at_value = utc_now()
+
+        user_responses.append(
+            DeletedUserResponse(
+                id=user.id,  # type: ignore
+                email=user.email,  # type: ignore
+                username=user.username,  # type: ignore
+                is_superuser=user.is_superuser,  # type: ignore
+                is_verified=user.is_verified,  # type: ignore
+                created_at=created_at_value,  # type: ignore[arg-type]
+                oauth_provider=user.oauth_provider,  # type: ignore
+                is_deleted=user.is_deleted,  # type: ignore
+                deleted_at=user.deleted_at,  # type: ignore
+                deleted_by=user.deleted_by,  # type: ignore
+                deletion_reason=user.deletion_reason,  # type: ignore
+            ),
         )
-        for user in users
-    ]
 
     # Determine which filters were applied
     filters_applied = []

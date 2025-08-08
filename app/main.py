@@ -25,7 +25,7 @@ if settings.ENABLE_CELERY:
     # Use a different approach to avoid naming conflicts
     import importlib
 
-    importlib.import_module("app.services.celery_tasks")
+    importlib.import_module("app.services.background.celery_tasks")
 
 # Setup logging
 setup_logging()

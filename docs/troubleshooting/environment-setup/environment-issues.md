@@ -67,16 +67,16 @@ psycopg2.OperationalError: connection to server at "localhost" (::1), port 5432 
 **Solution:**
 ```bash
 # Check if containers are running
-docker compose ps
+docker-compose ps
 
 # Start services if not running
-docker compose up -d
+docker-compose up -d
 
 # Wait for services to be ready
 sleep 10
 
 # Test database connection
-docker compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
+docker-compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
 ```
 
 ### 4. Alembic Configuration Errors
@@ -110,7 +110,7 @@ grep "sqlalchemy.url" alembic.ini
 **Solution:**
 ```bash
 # Ensure services are running
-docker compose up -d
+docker-compose up -d
 
 # Wait for services to be ready
 sleep 10
@@ -153,20 +153,20 @@ grep -E "^(POSTGRES_DB|POSTGRES_USER|POSTGRES_PASSWORD|DATABASE_URL|SECRET_KEY)=
 ### Docker Services Check
 ```bash
 # Check service status
-docker compose ps
+docker-compose ps
 
 # Check logs
-docker compose logs api
-docker compose logs postgres
+docker-compose logs api
+docker-compose logs postgres
 
 # Test database connection
-docker compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
+docker-compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
 ```
 
 ### API Health Check
 ```bash
 # Test API health endpoint
-curl http://localhost:8000/api/v1/health
+curl http://localhost:8000/health
 
 # Expected response:
 # {
@@ -181,7 +181,7 @@ curl http://localhost:8000/api/v1/health
 ### Configuration Validation
 ```bash
 # Test Docker Compose configuration
-docker compose config
+docker-compose config
 
 # Test Alembic configuration
 alembic current
@@ -266,7 +266,7 @@ services:
 
 If you're still experiencing problems after trying these solutions:
 
-1. **Check the logs**: `docker compose logs`
+1. **Check the logs**: `docker-compose logs`
 2. **Verify file permissions**: `ls -la`
 3. **Test individual components**: Use the diagnostic commands above
 4. **Check for port conflicts**: `lsof -i :8000` and `lsof -i :5432`
