@@ -25,6 +25,8 @@ import socket
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 
@@ -34,6 +36,20 @@ class ProjectSetup:
         self.current_dir_name = self.project_root.name
         self.replacements: dict[str, str] = {}
         self.port_overrides: dict[str, int] = {}
+
+    def ensure_interactive(self) -> None:
+        """Require interactive TTY unless explicitly overridden.
+
+        Prevents non-interactive tools from answering prompts on behalf of the user.
+        Set ALLOW_NON_INTERACTIVE=1 to override (not recommended).
+        """
+        if not sys.stdin.isatty() and not os.environ.get("ALLOW_NON_INTERACTIVE"):
+            print("❌ Interactive mode required.")
+            print(
+                "   Please run this script in a terminal and answer prompts directly.",
+            )
+            print("   To override (not recommended), set ALLOW_NON_INTERACTIVE=1.")
+            sys.exit(1)
 
     # -------------------------------
     # Port helpers
@@ -489,21 +505,25 @@ class ProjectSetup:
             sys.exit(1)
 
     def start_services(self) -> None:
-        """Start Docker services."""
+        """Start Docker services (Postgres and API)."""
         print()
-        print("🗄️  Starting database services...")
+        print("🗄️  Starting database and API services...")
 
         try:
             subprocess.run(
-                ["docker-compose", "up", "-d", "postgres"],
+                ["docker-compose", "up", "-d", "postgres", "api"],
                 cwd=self.project_root,
                 check=True,
             )
-            print("✅ Database service started")
+            print("✅ Postgres and API containers started")
 
             # Wait for PostgreSQL
             print("⏳ Waiting for PostgreSQL to be ready...")
             self.wait_for_postgres()
+
+            # Wait for API to respond on health endpoint
+            print("⏳ Waiting for API to be ready...")
+            self.wait_for_api()
 
         except subprocess.CalledProcessError as e:
             print(f"❌ Error starting services: {e}")
@@ -537,6 +557,30 @@ class ProjectSetup:
                 sys.exit(1)
 
             print(f"   Waiting... ({i+1}/30)")
+            time.sleep(2)
+
+    def wait_for_api(self) -> None:
+        """Wait for the API health endpoint to respond."""
+        api_port_str = os.environ.get("API_PORT", "8000")
+        try:
+            api_port = int(api_port_str)
+        except ValueError:
+            api_port = 8000
+
+        url = f"http://127.0.0.1:{api_port}/health"
+        for i in range(45):  # ~90 seconds max
+            try:
+                with urllib.request.urlopen(url, timeout=2) as resp:
+                    status = resp.getcode()
+                    if 200 <= status < 500:
+                        print(f"✅ API is responding on http://127.0.0.1:{api_port}")
+                        return
+            except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError):
+                pass
+
+            if i == 44:
+                print("⚠️  API did not become ready within timeout. Continuing...")
+                return
             time.sleep(2)
 
     def run_migrations(self) -> bool:
@@ -1016,6 +1060,9 @@ def main():
         print("   Make sure you're in the correct project folder.")
         print("   Expected files: app/main.py, requirements.txt, docker-compose.yml")
         sys.exit(1)
+
+    # Require interactive terminal to prevent automation from answering prompts
+    setup.ensure_interactive()
 
     # Get project details
     details = setup.get_project_details()
