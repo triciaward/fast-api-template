@@ -13,57 +13,38 @@ Welcome to your new FastAPI project! 🎉
 
 This is your project's main README file - feel free to customize it to describe what your application does, how to use it, and any specific features you've built.
 
-## 🚨 CRITICAL: Setup Process Must Be Followed In Order
-
-**⚠️ IMPORTANT**: This template requires a specific setup process that MUST be followed in the exact order shown below. Do not skip steps or run commands out of order!
-
-**🤖 For AI Assistants**: If you're helping a user set up this project, please refer to `@README.md` and `@docs/TEMPLATE_README.md` for the complete setup directions. The user MUST complete the customization steps before starting development.
-
 ## 🚀 Getting Started
 
-**📖 Complete Setup Guide**: For detailed setup instructions, see [docs/TEMPLATE_README.md](docs/TEMPLATE_README.md)
+**🎯 NEW STREAMLINED SETUP** - One command does everything!
 
-### Step 1: Clone and Customize (Required - Must Be Done First!)
+### Quick Setup (GitHub Template)
 
-**🚨 CRITICAL**: You MUST complete these customization steps BEFORE starting development!
-
-```bash
-# Clone the template
-git clone https://github.com/triciaward/fast-api-template.git
-cd fast-api-template
-
-# Step 1: Rename the template directory to your project name
-./scripts/setup/rename_template.sh
-
-# Step 2: Customize the template (updates project name, descriptions, etc.)
-./scripts/setup/customize_template.sh
-```
-
-**Why this is required:**
-- The template contains placeholder names and descriptions
-- Customization updates all project metadata for your specific project
-- This prevents confusion and makes the project truly yours
-- **The quick start script will fail if you haven't customized first!**
-
-### Step 2: Set Up Your Development Environment
-
-**ONLY AFTER completing Step 1**, set up your development environment:
+**🎯 RECOMMENDED APPROACH** - Use GitHub's template feature:
 
 ```bash
-# Run the quick start script (sets up everything automatically)
-./scripts/setup/quick_start.sh
+# 1. Click "Use this template" button above to create your repo
+# 2. Clone YOUR new repository
+git clone https://github.com/yourusername/your-project-name.git
+cd your-project-name
+
+# 3. Run the setup script
+./scripts/setup/setup_project.py
 ```
 
-**That's it!** Your FastAPI application is ready to use.
+**That's it!** The script will automatically:
+- ✅ Customize all files with your project details
+- ✅ Set up Python environment and dependencies
+- ✅ Start database services
+- ✅ Run migrations and create superuser
+- ✅ Install git protection hooks
+- ✅ Verify everything works
 
-**🔄 Process Summary**:
-1. ✅ Clone template
-2. ✅ Rename directory (`./scripts/setup/rename_template.sh`)
-3. ✅ Customize project (`./scripts/setup/customize_template.sh`)
-4. ✅ Set up environment (`./scripts/setup/quick_start.sh`)
-5. ✅ Start building!
+### What You Get
+The setup script creates a fully working FastAPI application with authentication, database, API documentation, and more. You'll be coding in minutes, not hours.
 
-**🆘 Need Help?**: If you encounter issues during setup, see the [Troubleshooting Guide](docs/troubleshooting/TROUBLESHOOTING_README.md)
+**📖 Complete Setup Guide**: For detailed information, see [docs/TEMPLATE_README.md](docs/TEMPLATE_README.md)
+
+**🆘 Need Help?**: If you encounter issues, see the [Troubleshooting Guide](docs/troubleshooting/TROUBLESHOOTING_README.md)
 
 ## 🛠️ What's Included
 

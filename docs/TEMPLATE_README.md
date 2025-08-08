@@ -18,292 +18,159 @@ A comprehensive, production-ready FastAPI template with authentication, admin pa
 
 ### 🤖 For AI Assistants
 
-If you're helping a user set up this project, please:
-1. **Refer to the setup process below** - it must be followed in exact order
-2. **Do not skip the customization steps** - they are required
-3. **Guide the user through each step** - don't jump ahead to development
-4. **Check that customization is complete** before proceeding to environment setup
+If you're helping a user set up this project:
+1. **Use the streamlined setup process below** - one command does everything
+2. **No manual steps required** - the script handles all customization automatically
+3. **GitHub template approach recommended** - click "Use this template" for best experience
 
-### Step 1: Clone and Customize (Required)
+### Quick Start (GitHub Template)
 
-**🚨 CRITICAL**: You MUST customize the template before starting development!
+**🎯 ONE COMMAND SETUP** - Use GitHub's template feature:
 
 ```bash
-# Clone the template
-git clone https://github.com/triciaward/fast-api-template.git
-cd fast-api-template
+# 1. Click "Use this template" button above to create your repo
+# 2. Clone YOUR new repository
+git clone https://github.com/yourusername/your-project-name.git
+cd your-project-name
 
-# Step 1: Rename the template directory to your project name
-./scripts/setup/rename_template.sh
-
-# Step 2: Customize the template (updates project name, descriptions, etc.)
-./scripts/setup/customize_template.sh
+# 3. Run the setup script
+./scripts/setup/setup_project.py
 ```
 
-**Why this is required:**
-- The template contains placeholder names and descriptions
-- Customization updates all project metadata for your specific project
-- This prevents confusion and makes the project truly yours
-- You'll restart VS Code after renaming to ensure everything works correctly
+**That's it!** The script will:
+- ✅ Customize all files with your project details
+- ✅ Set up Python virtual environment
+- ✅ Install all dependencies
+- ✅ Start PostgreSQL database
+- ✅ Run database migrations
+- ✅ Create superuser account
+- ✅ Install git protection hooks
+- ✅ Verify everything works
 
-### Step 2: Set Up Your Development Environment
+### What the Setup Script Does
 
-After customizing, set up your development environment:
+The `setup_project.py` script is an intelligent, all-in-one solution:
 
-```bash
-# Run the quick start script (sets up everything automatically)
-./scripts/setup/quick_start.sh
-```
+1. **Interactive Setup**: Prompts for your project details
+2. **File Customization**: Replaces all template placeholders with your details
+3. **Environment Setup**: Creates virtual environment and installs dependencies
+4. **Service Management**: Starts Docker services and waits for readiness
+5. **Database Setup**: Runs migrations and creates superuser
+6. **Git Protection**: Installs hooks to prevent pushing to template repository
+7. **Validation**: Tests that everything is working correctly
 
-**That's it!** Your FastAPI application is ready to use.
-
-**Alternative manual setup:**
-```bash
-# Set up your development environment
-./scripts/setup/setup.sh
-
-# Start the services
-docker-compose up -d
-
-# Run database migrations
-alembic upgrade head
-```
-
-If you want to customize the template for your specific project:
+### Example Setup Flow
 
 ```bash
-# Rename the template directory to your project name
-./scripts/setup/rename_template.sh
+$ ./scripts/setup/setup_project.py
+🚀 FastAPI Project Setup
+==========================
 
-# Customize the template (updates project name, descriptions, etc.)
-./scripts/setup/customize_template.sh
-```
+Setting up your FastAPI project...
 
-### Setting Up Git Repository (Optional)
+Project name [My Awesome API]: Todo App Backend
+Author name: John Doe
+Author email: john@example.com
+Database name [todo_app_backend]: 
+Project description [A FastAPI backend for Todo App Backend]: 
 
-If you want to track your changes in Git:
+📋 Setup Summary:
+=============================
+  Project Name: Todo App Backend
+  Project Folder: todo_app_backend
+  Database Name: todo_app_backend
+  Description: A FastAPI backend for Todo App Backend
+  Author: John Doe <john@example.com>
+  Action: Customize files in current directory
 
-```bash
-# Initialize a new Git repository
-git init
+Proceed with setup? (y/N): y
 
-# Add all files
-git add .
-
-# Make your first commit
-git commit -m "Initial commit from FastAPI template"
-
-# Create a new repository on GitHub, then:
-git remote add origin <your-repo-url>
-git push -u origin main
-```
-
-### Alternative: Start with Your Own Repository
-
-If you prefer to start with your own GitHub repository:
-
-1. Create a new repository on GitHub
-2. Clone your repository: `git clone <your-repo-url>`
-3. Copy the template files into your repository
-4. Follow the setup steps above
-
-**Note**: This approach is optional and only needed if you want to start with your own Git history.
-
-### Step 1: Clone and Rename
-
-```bash
-# Clone your new repository
-git clone <your-repo-url>
-cd your-project-backend
-
-# Rename the template directory to your project name
-./scripts/setup/rename_template.sh
-```
-
-**What this does:**
-- Renames the template directory to your project name with "_backend" suffix
-- Prevents configuration conflicts
-- Sets up the foundation for customization
-
-**Example:**
-```bash
-$ ./scripts/setup/rename_template.sh
-🚀 FastAPI Template - Step 1: Rename Directory
-==============================================
-
-Please enter your project name:
-  Examples: 'My Awesome Project', 'Todo App Backend', 'E-commerce API'
-
-Project name: My Awesome Project
-
-📋 Summary:
-  Project Name: My Awesome Project
-  Directory Name: myawesomeproject_backend
-
-Continue with renaming? (y/N): y
-
-🔄 Renaming directory...
-✅ Directory renamed successfully!
-
-🎉 STEP 1 COMPLETE!
-==================
-
-🚨 CRITICAL: You must restart VS Code now!
-
-Next steps:
-1. Close VS Code completely
-2. Open VS Code again
-3. Open the folder: myawesomeproject_backend
-4. Run the next script: ./scripts/setup/customize_template.sh
-```
-
-### Step 2: Restart VS Code
-
-**Why this is important:**
-- VS Code needs to recognize the new directory name
-- Prevents path conflicts and configuration issues
-- Ensures all tools work correctly
-
-**How to do it:**
-1. **Close VS Code completely** (not just the window)
-2. **Open VS Code again**
-3. **Open the renamed folder**: `myawesomeproject_backend`
-
-### Step 3: Customize the Template
-
-```bash
-# Customize the template for your project
-python scripts/setup/customize_template.py
-```
-
-**What this does:**
-- Replaces all template references with your project details
-- Updates database names and connection strings
-- Changes import statements throughout the code
-- Updates documentation and configuration files
-- Modifies Docker setup to prevent conflicts
-
-**Example:**
-```bash
-$ python scripts/setup/customize_template.py
-🚀 FastAPI Template Customization - Step 2
-==========================================
-This script will transform the template into your custom project.
-
-Project name (e.g., 'My Awesome Project'): My Awesome Project
-Project slug (e.g., 'myawesomeproject_backend'): myawesomeproject_backend
-Database name (e.g., 'myawesomeproject_backend', default: myawesomeproject_backend): 
-Project description (e.g., 'A FastAPI backend for my awesome project'): A FastAPI backend for my awesome project
-Author name (e.g., 'Your Name'): Your Name
-Author email (e.g., 'your.email@example.com'): your.email@example.com
-
-📋 Customization Summary:
-  Project Name: My Awesome Project
-  Project Slug: myawesomeproject_backend
-  Database Name: myawesomeproject_backend
-  Docker Name: myawesomeproject_backend
-  Description: A FastAPI backend for my awesome project
-  Author: Your Name <your.email@example.com>
-
-Proceed with customization? (y/N): y
-
-🚀 Starting template customization...
-📁 Scanning files for template references...
-🔄 Processing files...
+🔄 Customizing project files...
    ✅ Updated: README.md
    ✅ Updated: docker-compose.yml
    ✅ Updated: app/main.py
-   ✅ Updated: .env
-   ... (more files)
+   (... more files ...)
+✅ Customization complete: 42/45 files updated
 
-📊 Customization Summary:
-   Files processed: 45
-   Files updated: 42
-
-🎉 STEP 2 COMPLETE!
-==================
-
-📋 Next Steps:
-1. **🚨 CRITICAL:** Update your git remote to point to your new repository:
-   ```bash
-   git remote set-url origin https://github.com/yourusername/your-new-repo-name.git
-   ```
-2. Run the setup script: ./scripts/setup/setup_project.sh
-3. Start developing your application!
-```
-
-### Step 4: Set Up Your Project
-
-```bash
-# Set up your project environment
-./scripts/setup/setup_project.sh
-```
-
-**What this does:**
-- Creates Python virtual environment
-- Installs all dependencies
-- Starts PostgreSQL and FastAPI
-- Runs database migrations
-- Sets up everything you need to start developing
-
-**Example:**
-```bash
-$ ./scripts/setup/setup_project.sh
-🚀 FastAPI Template - Step 3: Project Setup
-===========================================
-
-✅ You're in a renamed project directory: myawesomeproject_backend
-
-📦 Installing Python dependencies...
-✅ Dependencies installed
+🔧 Setting up development environment...
+   Creating .env file...
+   ✅ .env file created
+   Creating Python virtual environment...
+   ✅ Virtual environment created
+   Installing Python dependencies...
+   ✅ Dependencies installed
 
 🐳 Checking Docker...
 ✅ Docker is running
 
 🗄️  Starting database services...
-✅ Database services started
-
+✅ Database service started
 ⏳ Waiting for PostgreSQL to be ready...
 ✅ PostgreSQL is ready
 
 🔄 Running database migrations...
 ✅ Database migrations completed
 
-👤 Create a superuser account (optional):
-Create superuser? (y/N): y
-
-Running superuser creation script...
-✅ Superuser creation completed
+👤 Creating superuser account...
+   Email: admin@todoapp.com
+   Password: Admin123!
+✅ Superuser created successfully
 
 🔍 Running final checks...
-   
+   ✅ API imports successfully
+   ✅ Configuration loads successfully
 
-🎉 STEP 3 COMPLETE!
-==================
+🎉 PROJECT SETUP COMPLETE!
+==========================
 
-🚀 Your project is ready!
+🚀 Your FastAPI project is ready!
 
 📋 What's been set up:
-  ✅ Python virtual environment
-  ✅ All dependencies installed
+  ✅ Project files customized
+  ✅ Python virtual environment created
+  ✅ Dependencies installed
   ✅ PostgreSQL database running
-  ✅ FastAPI application running
   ✅ Database migrations applied
-  ✅ Environment variables configured
+  ✅ Superuser account created
 
 🎯 Next Steps:
-1. View API docs: http://localhost:8000/docs
+1. Start the API server:
+   docker-compose up -d api
 
-3. Start developing!
+2. View API documentation:
+   http://localhost:8000/docs
+
+3. Update your git remote (if needed):
+   git remote set-url origin https://github.com/yourusername/todo_app_backend.git
+
+4. Start developing your application!
 
 💡 Useful Commands:
   docker-compose up -d          # Start all services
-  docker-compose logs -f        # View logs
-  docker-compose down           # Stop all services
-  
-  alembic revision --autogenerate -m 'description'  # Create migration
-  alembic upgrade head          # Apply migrations
+  docker-compose logs -f api    # View API logs
+  docker-compose down           # Stop services
+  source venv/bin/activate      # Activate virtual environment
+  pytest                        # Run tests
+
+✨ Happy coding! 🚀
 ```
+
+### Legacy Setup (Old Method)
+
+<details>
+<summary>Click to see the old multi-step process (not recommended)</summary>
+
+The old process required multiple manual steps:
+
+1. Clone repository
+2. Run rename script
+3. Close and reopen VS Code
+4. Run customization script
+5. Run environment setup script
+
+This has been replaced by the single `setup_project.py` script above.
+
+</details>
 
 ## 🎯 Quick Commands (After Setup)
 
