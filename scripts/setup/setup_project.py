@@ -517,7 +517,7 @@ class ProjectSetup:
             print("   Please start Docker and run this script again.")
             sys.exit(1)
 
-    def start_services(self) -> None:
+    def start_services(self) -> bool:
         """Start Docker services (Postgres and API)."""
         print()
         print("🗄️  Starting database and API services...")
@@ -528,6 +528,11 @@ class ProjectSetup:
                 cwd=self.project_root,
                 check=True,
             )
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Error starting services: {e}")
+            print("   Continuing with setup, but API may not be available...")
+            return False
+        else:
             print("✅ Postgres and API containers started")
 
             # Wait for PostgreSQL
@@ -537,10 +542,7 @@ class ProjectSetup:
             # Wait for API to respond on health endpoint
             print("⏳ Waiting for API to be ready...")
             self.wait_for_api()
-
-        except subprocess.CalledProcessError as e:
-            print(f"❌ Error starting services: {e}")
-            sys.exit(1)
+            return True
 
     def wait_for_postgres(self) -> None:
         """Wait for PostgreSQL to be ready."""
@@ -581,6 +583,8 @@ class ProjectSetup:
             api_port = 8000
 
         url = f"http://127.0.0.1:{api_port}/health"
+        last_error = None
+
         for i in range(45):  # ~90 seconds max
             try:
                 with urllib.request.urlopen(url, timeout=2) as resp:
@@ -588,13 +592,54 @@ class ProjectSetup:
                     if 200 <= status < 500:
                         print(f"✅ API is responding on http://127.0.0.1:{api_port}")
                         return
-            except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError):
-                pass
+            except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
+                last_error = e
 
             if i == 44:
-                print("⚠️  API did not become ready within timeout. Continuing...")
+                print("❌ API failed to become ready. Checking container status...")
+                self._diagnose_api_failure(last_error)
                 return
+
+            if i % 10 == 0 and i > 0:  # Every 20 seconds
+                print(f"   Still waiting for API... ({i+1}/45)")
             time.sleep(2)
+
+    def _diagnose_api_failure(self, last_error) -> None:
+        """Diagnose why the API container failed to start."""
+        print(f"   Last connection error: {last_error}")
+        print("   Running diagnostics...")
+
+        try:
+            # Check if API container is running
+            result = subprocess.run(
+                ["docker-compose", "ps", "api"],
+                cwd=self.project_root,
+                capture_output=True,
+                text=True,
+            )
+            print(f"   Container status:\n{result.stdout}")
+
+            # Get API container logs
+            result = subprocess.run(
+                ["docker-compose", "logs", "--tail=20", "api"],
+                cwd=self.project_root,
+                capture_output=True,
+                text=True,
+            )
+            if result.stdout:
+                print(f"   Recent API logs:\n{result.stdout}")
+            if result.stderr:
+                print(f"   API error logs:\n{result.stderr}")
+
+        except subprocess.CalledProcessError as e:
+            print(f"   Could not get diagnostics: {e}")
+
+        print()
+        print("🔧 Common fixes:")
+        print("   1. Check the API logs: docker-compose logs api")
+        print("   2. Restart containers: docker-compose restart")
+        print("   3. Rebuild API: docker-compose build api")
+        print("   4. Check database connection in .env file")
 
     def run_migrations(self) -> bool:
         """Run database migrations."""
@@ -998,6 +1043,7 @@ if __name__ == "__main__":
     def show_completion_message(
         self,
         details: dict[str, str],
+        services_success: bool,
         migrations_success: bool,
         superuser_success: bool,
         validation_success: bool,
@@ -1013,7 +1059,9 @@ if __name__ == "__main__":
         print("  ✅ Project files customized")
         print("  ✅ Python virtual environment created")
         print("  ✅ Dependencies installed")
-        print("  ✅ PostgreSQL database running")
+        print(
+            f"  {'✅' if services_success else '❌'} Docker services {'started successfully' if services_success else 'started with issues'}",
+        )
         print(
             f"  {'✅' if migrations_success else '❌'} Database migrations {'applied' if migrations_success else 'failed'}",
         )
@@ -1025,9 +1073,18 @@ if __name__ == "__main__":
             f"  {'✅' if validation_success else '❌'} Final validation checks {'passed' if validation_success else 'failed'}",
         )
 
-        if not migrations_success or not superuser_success or not validation_success:
+        if (
+            not services_success
+            or not migrations_success
+            or not superuser_success
+            or not validation_success
+        ):
             print()
             print("⚠️  Some setup steps failed. You may need to:")
+            if not services_success:
+                print("   - Check API container logs: docker-compose logs api")
+                print("   - Restart services: docker-compose restart")
+                print("   - Rebuild API container: docker-compose build api")
             if not migrations_success:
                 print("   - Check your database configuration")
                 print("   - Run migrations manually: python -m alembic upgrade head")
@@ -1097,7 +1154,7 @@ def main():
         setup.check_docker()
         # Detect and resolve host port conflicts before starting containers
         setup.resolve_service_ports()
-        setup.start_services()
+        services_success = setup.start_services()
         migrations_success = setup.run_migrations()
         superuser_success = (
             setup.create_superuser(details) if migrations_success else False
@@ -1112,6 +1169,7 @@ def main():
         # Show completion message
         setup.show_completion_message(
             details,
+            services_success,
             migrations_success,
             superuser_success,
             validation_success,
