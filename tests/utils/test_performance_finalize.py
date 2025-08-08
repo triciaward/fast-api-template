@@ -21,10 +21,14 @@ def test_monitor_request_performance_all_logging_paths(monkeypatch):
         logs["exception"] += 1
 
     monkeypatch.setattr(
-        perf, "time", type("T", (), {"time": staticmethod(fake_time)})(),
+        perf,
+        "time",
+        type("T", (), {"time": staticmethod(fake_time)})(),
     )
     monkeypatch.setattr(
-        perf, "logger", type("L", (), {"debug": d, "warning": w, "exception": e})(),
+        perf,
+        "logger",
+        type("L", (), {"debug": d, "warning": w, "exception": e})(),
     )
 
     @perf.monitor_request_performance()
@@ -54,7 +58,9 @@ def test_monitor_request_performance_exception_logs(monkeypatch):
         logs["exception"] += 1
 
     monkeypatch.setattr(
-        perf, "time", type("T", (), {"time": staticmethod(fake_time)})(),
+        perf,
+        "time",
+        type("T", (), {"time": staticmethod(fake_time)})(),
     )
     monkeypatch.setattr(
         perf,

@@ -149,7 +149,8 @@ async def test_get_sessions_success(monkeypatch, async_client):
     app.dependency_overrides[users_auth.get_current_user] = lambda: _user()
     try:
         resp = await async_client.get(
-            "/auth/sessions", headers={"user-agent": "pytest"},
+            "/auth/sessions",
+            headers={"user-agent": "pytest"},
         )
     finally:
         app.dependency_overrides.clear()
@@ -339,7 +340,8 @@ async def test_get_sessions_multiple_with_is_current(monkeypatch, async_client):
 
     try:
         resp = await async_client.get(
-            "/auth/sessions", headers={"user-agent": "pytest"},
+            "/auth/sessions",
+            headers={"user-agent": "pytest"},
         )
     finally:
         app.dependency_overrides.clear()

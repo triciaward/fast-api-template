@@ -18,7 +18,13 @@ async def test_list_users_with_filters(monkeypatch, async_client):
     app.dependency_overrides[mod.require_superuser] = lambda: _admin()
 
     async def fake_get_users(
-        db, skip, limit, is_superuser, is_verified, is_deleted, oauth_provider,
+        db,
+        skip,
+        limit,
+        is_superuser,
+        is_verified,
+        is_deleted,
+        oauth_provider,
     ):
         return [
             types.SimpleNamespace(
@@ -311,7 +317,8 @@ async def test_bulk_operations_variants(monkeypatch, async_client):
     monkeypatch.setattr(mod.admin_user_crud, "toggle_verification_status", toggle_ver)
 
     r = await async_client.post(
-        "/admin/bulk-operations", json={"operation": "verify", "user_ids": [str(uid)]},
+        "/admin/bulk-operations",
+        json={"operation": "verify", "user_ids": [str(uid)]},
     )
     assert r.status_code == 200 and r.json()["successful"] == 1
 
@@ -325,7 +332,8 @@ async def test_bulk_operations_variants(monkeypatch, async_client):
     monkeypatch.setattr(mod.admin_user_crud, "toggle_verification_status", toggle_ver2)
 
     r = await async_client.post(
-        "/admin/bulk-operations", json={"operation": "unverify", "user_ids": [str(uid)]},
+        "/admin/bulk-operations",
+        json={"operation": "unverify", "user_ids": [str(uid)]},
     )
     assert r.status_code == 200 and r.json()["successful"] == 1
 
@@ -335,7 +343,8 @@ async def test_bulk_operations_variants(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.admin_user_crud, "toggle_verification_status", toggle_raise)
     r = await async_client.post(
-        "/admin/bulk-operations", json={"operation": "verify", "user_ids": [str(uid)]},
+        "/admin/bulk-operations",
+        json={"operation": "verify", "user_ids": [str(uid)]},
     )
     app.dependency_overrides.clear()
     assert r.status_code == 200

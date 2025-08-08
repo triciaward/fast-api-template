@@ -58,7 +58,9 @@ def test_sentry_init_when_enabled(monkeypatch):
                 "init": staticmethod(fake_init),
                 "set_tag": staticmethod(lambda *args, **kwargs: None),
                 "Hub": type(
-                    "H", (), {"current": type("C", (), {"client": FakeClient()})},
+                    "H",
+                    (),
+                    {"current": type("C", (), {"client": FakeClient()})},
                 ),
             },
         ),

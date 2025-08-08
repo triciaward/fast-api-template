@@ -25,7 +25,10 @@ def test_text_search_case_sensitive_variants():
 def test_text_search_equals_insensitive_and_not_equals_sensitive():
     # equals, case-insensitive path
     ts_eq = create_text_search(
-        "alpha", ["username"], operator=SearchOperator.EQUALS, case_sensitive=False,
+        "alpha",
+        ["username"],
+        operator=SearchOperator.EQUALS,
+        case_sensitive=False,
     )
     cfg_eq = SearchFilterConfig(text_search=ts_eq)
     q_eq = SearchFilterBuilder(User).build_query(cfg_eq)
@@ -33,7 +36,10 @@ def test_text_search_equals_insensitive_and_not_equals_sensitive():
 
     # not_equals, case-sensitive path
     ts_ne = create_text_search(
-        "alpha", ["username"], operator=SearchOperator.NOT_EQUALS, case_sensitive=True,
+        "alpha",
+        ["username"],
+        operator=SearchOperator.NOT_EQUALS,
+        case_sensitive=True,
     )
     cfg_ne = SearchFilterConfig(text_search=ts_ne)
     q_ne = SearchFilterBuilder(User).build_query(cfg_ne)
@@ -44,7 +50,9 @@ def test_field_filter_not_in_and_in_with_values():
     cfg = SearchFilterConfig(
         filters=[
             create_field_filter(
-                "email", FilterOperator.IN, values=["a@b.com", "c@d.com"],
+                "email",
+                FilterOperator.IN,
+                values=["a@b.com", "c@d.com"],
             ),
             create_field_filter("email", FilterOperator.NOT_IN, values=["x@y.com"]),
         ],

@@ -55,7 +55,9 @@ async def test_forgot_password_token_creation_failure(monkeypatch, async_client)
         return None
 
     monkeypatch.setattr(
-        pm.email_service, "create_password_reset_token", fake_create_token,
+        pm.email_service,
+        "create_password_reset_token",
+        fake_create_token,
     )
 
     resp = await async_client.post(
@@ -91,10 +93,14 @@ async def test_forgot_password_send_failure(monkeypatch, async_client):
         return "tok"
 
     monkeypatch.setattr(
-        pm.email_service, "create_password_reset_token", fake_create_token,
+        pm.email_service,
+        "create_password_reset_token",
+        fake_create_token,
     )
     monkeypatch.setattr(
-        pm.email_service, "send_password_reset_email", lambda *a, **k: False,
+        pm.email_service,
+        "send_password_reset_email",
+        lambda *a, **k: False,
     )
 
     resp = await async_client.post(

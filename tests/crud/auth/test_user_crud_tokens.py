@@ -56,13 +56,19 @@ async def test_update_password_reset_token_none_and_success():
 
     db = FakeDB(value=None)
     ok = await crud.update_password_reset_token(
-        db, "u1", "tok", types.SimpleNamespace(),
+        db,
+        "u1",
+        "tok",
+        types.SimpleNamespace(),
     )
     assert ok is False
 
     db = FakeDB(value=_user())
     ok = await crud.update_password_reset_token(
-        db, "u1", "tok", types.SimpleNamespace(),
+        db,
+        "u1",
+        "tok",
+        types.SimpleNamespace(),
     )
     assert ok is True and db.commit_called >= 1
 

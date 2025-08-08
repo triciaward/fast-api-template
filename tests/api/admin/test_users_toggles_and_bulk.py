@@ -39,7 +39,9 @@ async def test_toggle_superuser_success(monkeypatch, async_client):
         return _user(2, superuser=True)
 
     monkeypatch.setattr(
-        admin_users.admin_user_crud, "toggle_superuser_status", fake_toggle,
+        admin_users.admin_user_crud,
+        "toggle_superuser_status",
+        fake_toggle,
     )
 
     resp = await async_client.post(
@@ -68,7 +70,9 @@ async def test_toggle_superuser_not_found(monkeypatch, async_client):
         return None
 
     monkeypatch.setattr(
-        admin_users.admin_user_crud, "toggle_superuser_status", fake_toggle,
+        admin_users.admin_user_crud,
+        "toggle_superuser_status",
+        fake_toggle,
     )
 
     resp = await async_client.post(
@@ -93,7 +97,9 @@ async def test_toggle_verification_success(monkeypatch, async_client):
         return _user(3, verified=False)
 
     monkeypatch.setattr(
-        admin_users.admin_user_crud, "toggle_verification_status", fake_toggle,
+        admin_users.admin_user_crud,
+        "toggle_verification_status",
+        fake_toggle,
     )
 
     resp = await async_client.post(
@@ -122,7 +128,9 @@ async def test_toggle_verification_not_found(monkeypatch, async_client):
         return None
 
     monkeypatch.setattr(
-        admin_users.admin_user_crud, "toggle_verification_status", fake_toggle,
+        admin_users.admin_user_crud,
+        "toggle_verification_status",
+        fake_toggle,
     )
 
     resp = await async_client.post(

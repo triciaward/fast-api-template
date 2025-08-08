@@ -11,10 +11,16 @@ def test_main_production_warnings(monkeypatch):
 
     monkeypatch.setattr(cfg.settings, "ENVIRONMENT", "production", raising=False)
     monkeypatch.setattr(
-        cfg.settings, "SECRET_KEY", "dev_secret_key_change_in_production", raising=False,
+        cfg.settings,
+        "SECRET_KEY",
+        "dev_secret_key_change_in_production",
+        raising=False,
     )
     monkeypatch.setattr(
-        cfg.settings, "REFRESH_TOKEN_COOKIE_SECURE", False, raising=False,
+        cfg.settings,
+        "REFRESH_TOKEN_COOKIE_SECURE",
+        False,
+        raising=False,
     )
     monkeypatch.setattr(cfg.settings, "ENABLE_HSTS", False, raising=False)
 

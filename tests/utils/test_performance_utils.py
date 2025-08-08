@@ -64,7 +64,9 @@ def test_monitor_request_performance_logs(monkeypatch):
         perf,
         "logger",
         types.SimpleNamespace(
-            warning=fake_warning, debug=fake_debug, exception=lambda *a, **k: None,
+            warning=fake_warning,
+            debug=fake_debug,
+            exception=lambda *a, **k: None,
         ),
     )
 

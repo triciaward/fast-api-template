@@ -40,7 +40,10 @@ async def test_create_audit_log_smoke():
 
     db = DummySession()
     log = await create_audit_log(
-        db, event_type="login_success", user_id=None, success=True,
+        db,
+        event_type="login_success",
+        user_id=None,
+        success=True,
     )
     assert db.added and log is not None
 

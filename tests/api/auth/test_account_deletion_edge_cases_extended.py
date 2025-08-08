@@ -50,7 +50,8 @@ async def test_request_deletion_token_creation_failure(monkeypatch, async_client
         return None
 
     esvc = types.SimpleNamespace(
-        is_configured=lambda: True, create_deletion_token=fake_create_deletion_token,
+        is_configured=lambda: True,
+        create_deletion_token=fake_create_deletion_token,
     )
 
     monkeypatch.setattr(crud_user, "get_user_by_email", fake_get_user_by_email)
@@ -86,12 +87,15 @@ async def test_request_deletion_mark_failure(monkeypatch, async_client):
         return False
 
     esvc = types.SimpleNamespace(
-        is_configured=lambda: True, create_deletion_token=fake_create_deletion_token,
+        is_configured=lambda: True,
+        create_deletion_token=fake_create_deletion_token,
     )
 
     monkeypatch.setattr(crud_user, "get_user_by_email", fake_get_user_by_email)
     monkeypatch.setattr(
-        crud_user, "request_account_deletion", fake_request_account_deletion,
+        crud_user,
+        "request_account_deletion",
+        fake_request_account_deletion,
     )
     monkeypatch.setattr(ad, "email_service", esvc)
 
@@ -132,7 +136,9 @@ async def test_request_deletion_email_send_failure(monkeypatch, async_client):
 
     monkeypatch.setattr(crud_user, "get_user_by_email", fake_get_user_by_email)
     monkeypatch.setattr(
-        crud_user, "request_account_deletion", fake_request_account_deletion,
+        crud_user,
+        "request_account_deletion",
+        fake_request_account_deletion,
     )
     monkeypatch.setattr(ad, "email_service", esvc)
 
@@ -167,7 +173,8 @@ async def test_confirm_deletion_invalid_token(monkeypatch, async_client):
         return None
 
     esvc = types.SimpleNamespace(
-        is_configured=lambda: True, verify_deletion_token=fake_verify_deletion_token,
+        is_configured=lambda: True,
+        verify_deletion_token=fake_verify_deletion_token,
     )
     monkeypatch.setattr(ad, "email_service", esvc)
 
@@ -198,7 +205,9 @@ async def test_cancel_deletion_fail_cancel(monkeypatch, async_client):
 
     monkeypatch.setattr(crud_user, "get_user_by_email", fake_get_user_by_email)
     monkeypatch.setattr(
-        crud_user, "cancel_account_deletion", fake_cancel_account_deletion,
+        crud_user,
+        "cancel_account_deletion",
+        fake_cancel_account_deletion,
     )
 
     resp = await async_client.post(

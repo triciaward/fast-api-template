@@ -18,7 +18,8 @@ async def test_login_invalid_email_format(async_client):
 
 
 @pytest.mark.skipif(
-    not settings.ENABLE_RATE_LIMITING, reason="Rate limiting not enabled",
+    not settings.ENABLE_RATE_LIMITING,
+    reason="Rate limiting not enabled",
 )
 @pytest.mark.asyncio
 async def test_login_rate_limited(async_client):

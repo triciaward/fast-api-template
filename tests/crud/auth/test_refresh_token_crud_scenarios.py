@@ -22,7 +22,11 @@ async def test_create_refresh_token_refresh_failure(monkeypatch):
 
     db = FakeDB()
     tok = await crud.create_refresh_token(
-        db, "uid", "raw", device_info="d", ip_address="i",
+        db,
+        "uid",
+        "raw",
+        device_info="d",
+        ip_address="i",
     )
     assert tok.user_id == "uid"
 

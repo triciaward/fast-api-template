@@ -109,7 +109,8 @@ async def test_permanently_delete_user_failure(monkeypatch, async_client):
 
 @pytest.mark.asyncio
 async def test_search_deleted_users_filters_and_pagination_next(
-    monkeypatch, async_client,
+    monkeypatch,
+    async_client,
 ):
     from app.api.users import admin as user_admin_module
     from app.main import app
@@ -140,7 +141,9 @@ async def test_search_deleted_users_filters_and_pagination_next(
         return 4
 
     monkeypatch.setattr(
-        user_admin_module.admin_user_crud, "get_deleted_users", fake_get_deleted_users,
+        user_admin_module.admin_user_crud,
+        "get_deleted_users",
+        fake_get_deleted_users,
     )
     monkeypatch.setattr(
         user_admin_module.admin_user_crud,
@@ -193,7 +196,9 @@ async def test_search_deleted_users_pagination_prev_only(monkeypatch, async_clie
         return 3
 
     monkeypatch.setattr(
-        user_admin_module.admin_user_crud, "get_deleted_users", fake_get_deleted_users,
+        user_admin_module.admin_user_crud,
+        "get_deleted_users",
+        fake_get_deleted_users,
     )
     monkeypatch.setattr(
         user_admin_module.admin_user_crud,

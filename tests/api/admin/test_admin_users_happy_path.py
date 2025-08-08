@@ -18,7 +18,13 @@ async def test_list_users_with_all_filters(monkeypatch, async_client):
     app.dependency_overrides[mod.require_superuser] = lambda: _admin()
 
     async def fake_get_users(
-        db, skip, limit, is_superuser, is_verified, is_deleted, oauth_provider,
+        db,
+        skip,
+        limit,
+        is_superuser,
+        is_verified,
+        is_deleted,
+        oauth_provider,
     ):
         assert is_superuser is True
         assert is_verified is False

@@ -18,7 +18,9 @@ class TestPasswordResetEdgeCases:
     """Test edge cases for password reset functionality."""
 
     async def test_forgot_password_email_creation_fails(
-        self, monkeypatch, async_client,
+        self,
+        monkeypatch,
+        async_client,
     ):
         """Test forgot password when email token creation fails."""
         from app.api.auth import password_management as mod
@@ -103,7 +105,9 @@ class TestPasswordResetEdgeCases:
         assert data["email_sent"] is False
 
     async def test_reset_password_token_validation_fails(
-        self, monkeypatch, async_client,
+        self,
+        monkeypatch,
+        async_client,
     ):
         """Test reset password with invalid token format."""
         from app.api.auth import password_management as mod
@@ -243,7 +247,9 @@ class TestPasswordChangeEdgeCases:
     """Test edge cases for password change functionality."""
 
     async def test_change_password_user_not_in_database(
-        self, monkeypatch, async_client,
+        self,
+        monkeypatch,
+        async_client,
     ):
         """Test password change when user is not found in database."""
         from app.api.auth import password_management as mod
@@ -285,7 +291,8 @@ class TestPasswordChangeEdgeCases:
 
         async def fake_get_user_by_email(db, email):
             return types.SimpleNamespace(
-                hashed_password="hashed_old_password", id=current_user.id,
+                hashed_password="hashed_old_password",
+                id=current_user.id,
             )
 
         # Mock successful password verification but failed update
@@ -322,7 +329,8 @@ class TestPasswordChangeEdgeCases:
 
         async def fake_get_user_by_email(db, email):
             return types.SimpleNamespace(
-                hashed_password="hashed_old_password", id=current_user.id,
+                hashed_password="hashed_old_password",
+                id=current_user.id,
             )
 
         async def fake_log_password_change(db, request, user, change_type):
@@ -385,7 +393,9 @@ class TestPasswordValidationEdgeCases:
     """Test password validation edge cases."""
 
     async def test_forgot_password_rate_limiting_integration(
-        self, monkeypatch, async_client,
+        self,
+        monkeypatch,
+        async_client,
     ):
         """Test forgot password with rate limiting enabled."""
         from app.api.auth import password_management as mod
@@ -443,7 +453,9 @@ class TestPasswordValidationEdgeCases:
         assert "Invalid or expired" in data["message"]
 
     async def test_password_change_weak_password_handling(
-        self, monkeypatch, async_client,
+        self,
+        monkeypatch,
+        async_client,
     ):
         """Test password change with weak passwords."""
         from app.api.auth import password_management as mod
@@ -469,7 +481,9 @@ class TestPasswordValidationEdgeCases:
             cleanup()
 
     async def test_password_operations_with_deleted_user(
-        self, monkeypatch, async_client,
+        self,
+        monkeypatch,
+        async_client,
     ):
         """Test password operations when user is soft-deleted."""
         from app.api.auth import password_management as mod

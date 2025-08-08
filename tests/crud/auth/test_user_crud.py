@@ -99,7 +99,9 @@ async def test_authenticate_user_success_and_failure(monkeypatch):
     # Failure
     monkeypatch.setattr(crud_user, "verify_password", lambda p, h: False)
     user_fail = await crud_user.authenticate_user(
-        _FakeSession(), "e@example.com", "bad",
+        _FakeSession(),
+        "e@example.com",
+        "bad",
     )
     assert user_fail is None
 
@@ -140,7 +142,9 @@ async def test_soft_delete_and_restore_user(monkeypatch):
         return user_obj
 
     monkeypatch.setattr(
-        crud_user, "get_user_by_id_any_status", fake_get_user_by_id_any_status,
+        crud_user,
+        "get_user_by_id_any_status",
+        fake_get_user_by_id_any_status,
     )
     ok2 = await crud_user.restore_user(db, "u1")
     assert ok2 is True and user_obj.is_deleted is False and user_obj.deleted_at is None
@@ -154,7 +158,9 @@ async def test_permanently_delete_user(monkeypatch):
         return user_obj
 
     monkeypatch.setattr(
-        crud_user, "get_user_by_id_any_status", fake_get_user_by_id_any_status,
+        crud_user,
+        "get_user_by_id_any_status",
+        fake_get_user_by_id_any_status,
     )
     db = _FakeSession()
     ok = await crud_user.permanently_delete_user(db, "u1")

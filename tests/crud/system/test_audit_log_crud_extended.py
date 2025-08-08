@@ -70,7 +70,11 @@ async def test_create_audit_log_and_refresh_tolerant(monkeypatch):
     monkeypatch.setattr(db, "refresh", bad_refresh)
 
     log = await mod.create_audit_log(
-        db, "login", user_id="u1", success=True, context={"k": "v"},
+        db,
+        "login",
+        user_id="u1",
+        success=True,
+        context={"k": "v"},
     )
     assert db.added and log.event_type == "login"
 

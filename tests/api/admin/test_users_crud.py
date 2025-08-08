@@ -57,7 +57,9 @@ async def test_admin_create_user_conflict_email(monkeypatch, async_client):
         return _user(1)
 
     monkeypatch.setattr(
-        admin_users.admin_user_crud, "get_user_by_email", fake_get_user_by_email,
+        admin_users.admin_user_crud,
+        "get_user_by_email",
+        fake_get_user_by_email,
     )
 
     resp = await async_client.post(
@@ -91,10 +93,14 @@ async def test_admin_create_user_success(monkeypatch, async_client):
         return None
 
     monkeypatch.setattr(
-        admin_users.admin_user_crud, "get_user_by_email", fake_get_user_by_email,
+        admin_users.admin_user_crud,
+        "get_user_by_email",
+        fake_get_user_by_email,
     )
     monkeypatch.setattr(
-        admin_users.admin_user_crud, "get_user_by_username", fake_get_user_by_username,
+        admin_users.admin_user_crud,
+        "get_user_by_username",
+        fake_get_user_by_username,
     )
 
     async def fake_create_user(db, user_create):
@@ -136,7 +142,9 @@ async def test_admin_update_user_conflict_email(monkeypatch, async_client):
 
     monkeypatch.setattr(admin_users.admin_user_crud, "get", fake_get)
     monkeypatch.setattr(
-        admin_users.admin_user_crud, "get_user_by_email", fake_get_user_by_email,
+        admin_users.admin_user_crud,
+        "get_user_by_email",
+        fake_get_user_by_email,
     )
 
     resp = await async_client.put(
@@ -169,10 +177,14 @@ async def test_admin_update_user_success(monkeypatch, async_client):
 
     monkeypatch.setattr(admin_users.admin_user_crud, "get", fake_get)
     monkeypatch.setattr(
-        admin_users.admin_user_crud, "get_user_by_email", fake_get_user_by_email,
+        admin_users.admin_user_crud,
+        "get_user_by_email",
+        fake_get_user_by_email,
     )
     monkeypatch.setattr(
-        admin_users.admin_user_crud, "get_user_by_username", fake_get_user_by_username,
+        admin_users.admin_user_crud,
+        "get_user_by_username",
+        fake_get_user_by_username,
     )
 
     async def fake_update_user(db, uid, user_update):
@@ -259,7 +271,9 @@ async def test_admin_statistics(monkeypatch, async_client):
         return stats
 
     monkeypatch.setattr(
-        admin_users.admin_user_crud, "get_user_statistics", fake_get_user_statistics,
+        admin_users.admin_user_crud,
+        "get_user_statistics",
+        fake_get_user_statistics,
     )
 
     resp = await async_client.get(

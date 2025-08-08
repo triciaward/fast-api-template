@@ -147,7 +147,10 @@ async def test_force_delete_user_calls_soft_delete(monkeypatch):
         return True
 
     monkeypatch.setattr(
-        crud_user, "soft_delete_user", fake_soft_delete_user, raising=False,
+        crud_user,
+        "soft_delete_user",
+        fake_soft_delete_user,
+        raising=False,
     )
     ok = await AdminUserCRUD().force_delete_user(DummySession(), "u1")
     assert ok is True and called["n"] == 1

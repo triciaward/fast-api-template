@@ -31,7 +31,8 @@ async def test_login_unexpected_error_returns_500(monkeypatch, async_client):
 
 @pytest.mark.asyncio
 async def test_login_unexpected_error_maps_to_500_with_validation_bypass(
-    monkeypatch, async_client,
+    monkeypatch,
+    async_client,
 ):
     """Test login error handling with email validation bypassed."""
     from app.api.auth import login as mod
@@ -75,7 +76,9 @@ async def test_register_general_exception_handling(monkeypatch):
         raise RuntimeError("boom")
 
     user = types.SimpleNamespace(
-        email="e@example.com", username="zetatest", password="Passw0rd!",
+        email="e@example.com",
+        username="zetatest",
+        password="Passw0rd!",
     )
 
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", lambda *a, **k: None)
@@ -89,7 +92,8 @@ async def test_register_general_exception_handling(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_register_verification_token_none_still_succeeds(
-    monkeypatch, async_client,
+    monkeypatch,
+    async_client,
 ):
     """Test registration succeeds even if verification token creation fails."""
     from app.api.auth import login as mod

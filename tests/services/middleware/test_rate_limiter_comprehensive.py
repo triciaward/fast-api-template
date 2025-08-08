@@ -35,7 +35,8 @@ class TestRateLimiterConfiguration:
 
         monkeypatch.setattr("app.core.config.settings.ENABLE_REDIS", False)
         monkeypatch.setattr(
-            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "memory",
+            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND",
+            "memory",
         )
         monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_DEFAULT", "100/hour")
 
@@ -53,10 +54,12 @@ class TestRateLimiterConfiguration:
 
         monkeypatch.setattr("app.core.config.settings.ENABLE_REDIS", True)
         monkeypatch.setattr(
-            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "redis",
+            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND",
+            "redis",
         )
         monkeypatch.setattr(
-            "app.core.config.settings.REDIS_URL", "redis://localhost:6379",
+            "app.core.config.settings.REDIS_URL",
+            "redis://localhost:6379",
         )
         monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_DEFAULT", "100/hour")
 
@@ -79,7 +82,8 @@ class TestRateLimiterConfiguration:
 
         monkeypatch.setattr("app.core.config.settings.ENABLE_REDIS", True)
         monkeypatch.setattr(
-            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND", "redis",
+            "app.core.config.settings.RATE_LIMIT_STORAGE_BACKEND",
+            "redis",
         )
         monkeypatch.setattr("app.core.config.settings.RATE_LIMIT_DEFAULT", "100/hour")
 
@@ -253,7 +257,8 @@ class TestRateLimitDecorators:
         """Test email verification rate limiting when enabled."""
         monkeypatch.setattr("app.core.config.settings.ENABLE_RATE_LIMITING", True)
         monkeypatch.setattr(
-            "app.core.config.settings.RATE_LIMIT_EMAIL_VERIFICATION", "2/minute",
+            "app.core.config.settings.RATE_LIMIT_EMAIL_VERIFICATION",
+            "2/minute",
         )
 
         def dummy_function(request: Request):
@@ -276,7 +281,8 @@ class TestRateLimitDecorators:
         """Test password reset rate limiting when enabled."""
         monkeypatch.setattr("app.core.config.settings.ENABLE_RATE_LIMITING", True)
         monkeypatch.setattr(
-            "app.core.config.settings.RATE_LIMIT_PASSWORD_RESET", "1/minute",
+            "app.core.config.settings.RATE_LIMIT_PASSWORD_RESET",
+            "1/minute",
         )
 
         def dummy_function(request: Request):

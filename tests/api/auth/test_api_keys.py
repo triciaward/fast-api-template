@@ -100,10 +100,14 @@ async def test_list_api_keys_pagination(monkeypatch, async_client):
         return 10
 
     monkeypatch.setattr(
-        api_keys_mod.crud_api_key, "get_user_api_keys", fake_get_user_api_keys,
+        api_keys_mod.crud_api_key,
+        "get_user_api_keys",
+        fake_get_user_api_keys,
     )
     monkeypatch.setattr(
-        api_keys_mod.crud_api_key, "count_user_api_keys", fake_count_user_api_keys,
+        api_keys_mod.crud_api_key,
+        "count_user_api_keys",
+        fake_count_user_api_keys,
     )
 
     resp = await async_client.get(

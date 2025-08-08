@@ -31,7 +31,9 @@ async def test_register_email_exists(monkeypatch, async_client):
         return _user_obj()
 
     monkeypatch.setattr(
-        login_module.crud_user, "get_user_by_email", fake_get_user_by_email,
+        login_module.crud_user,
+        "get_user_by_email",
+        fake_get_user_by_email,
     )
 
     resp = await async_client.post(
@@ -62,10 +64,14 @@ async def test_register_username_taken(monkeypatch, async_client):
         return _user_obj()
 
     monkeypatch.setattr(
-        login_module.crud_user, "get_user_by_email", fake_get_user_by_email,
+        login_module.crud_user,
+        "get_user_by_email",
+        fake_get_user_by_email,
     )
     monkeypatch.setattr(
-        login_module.crud_user, "get_user_by_username", fake_get_user_by_username,
+        login_module.crud_user,
+        "get_user_by_username",
+        fake_get_user_by_username,
     )
 
     resp = await async_client.post(
@@ -103,10 +109,14 @@ async def test_register_success_without_email_service(monkeypatch, async_client)
         types.SimpleNamespace(is_configured=lambda: False),
     )
     monkeypatch.setattr(
-        login_module.crud_user, "get_user_by_email", fake_get_user_by_email,
+        login_module.crud_user,
+        "get_user_by_email",
+        fake_get_user_by_email,
     )
     monkeypatch.setattr(
-        login_module.crud_user, "get_user_by_username", fake_get_user_by_username,
+        login_module.crud_user,
+        "get_user_by_username",
+        fake_get_user_by_username,
     )
     monkeypatch.setattr(login_module.crud_user, "create_user", fake_create_user)
 
@@ -150,10 +160,14 @@ async def test_register_success_with_email_service(monkeypatch, async_client):
 
     monkeypatch.setattr(login_module, "email_service", esvc)
     monkeypatch.setattr(
-        login_module.crud_user, "get_user_by_email", fake_get_user_by_email,
+        login_module.crud_user,
+        "get_user_by_email",
+        fake_get_user_by_email,
     )
     monkeypatch.setattr(
-        login_module.crud_user, "get_user_by_username", fake_get_user_by_username,
+        login_module.crud_user,
+        "get_user_by_username",
+        fake_get_user_by_username,
     )
     monkeypatch.setattr(login_module.crud_user, "create_user", fake_create_user)
 

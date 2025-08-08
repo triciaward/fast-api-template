@@ -80,7 +80,9 @@ async def test_confirm_deletion_db_failure(monkeypatch, async_client):
     monkeypatch.setattr(ad, "email_service", esvc)
     monkeypatch.setattr(crud_user, "get_user_by_id", fake_get_user_by_id)
     monkeypatch.setattr(
-        crud_user, "confirm_account_deletion", fake_confirm_account_deletion,
+        crud_user,
+        "confirm_account_deletion",
+        fake_confirm_account_deletion,
     )
 
     resp = await async_client.post(

@@ -26,31 +26,48 @@ def test_create_helpers_cover_variants():
     assert ed.code == ErrorCode.INTERNAL_ERROR
 
     ed2, sc2 = create_validation_error(
-        "bad", ErrorCode.INVALID_REQUEST, "field", "v", {"x": 1},
+        "bad",
+        ErrorCode.INVALID_REQUEST,
+        "field",
+        "v",
+        {"x": 1},
     )
     assert sc2 == 422
     assert ed2.type == ErrorType.VALIDATION_ERROR
 
     ed3, sc3 = create_authentication_error(
-        "nope", ErrorCode.INVALID_CREDENTIALS, {"y": 2},
+        "nope",
+        ErrorCode.INVALID_CREDENTIALS,
+        {"y": 2},
     )
     assert sc3 == 401
     assert ed3.type == ErrorType.AUTHENTICATION_ERROR
 
     ed4, sc4 = create_authorization_error(
-        "denied", ErrorCode.INSUFFICIENT_PERMISSIONS, ["admin"], {"z": 3},
+        "denied",
+        ErrorCode.INSUFFICIENT_PERMISSIONS,
+        ["admin"],
+        {"z": 3},
     )
     assert sc4 == 403
     assert ed4.type == ErrorType.AUTHORIZATION_ERROR
 
     ed5, sc5 = create_not_found_error(
-        "missing", ErrorCode.RESOURCE_NOT_FOUND, "user", "1", {"q": 4},
+        "missing",
+        ErrorCode.RESOURCE_NOT_FOUND,
+        "user",
+        "1",
+        {"q": 4},
     )
     assert sc5 == 404
     assert ed5.type == ErrorType.NOT_FOUND
 
     ed6, sc6 = create_conflict_error(
-        "dup", ErrorCode.CONFLICT, "email", "e@x.com", {"w": 5},
+        "dup",
+        ErrorCode.CONFLICT,
+        "email",
+        "e@x.com",
+        {"w": 5},
     )
     assert sc6 == 409
     assert ed6.type == ErrorType.CONFLICT

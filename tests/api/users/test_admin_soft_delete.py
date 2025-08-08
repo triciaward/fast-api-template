@@ -134,7 +134,9 @@ async def test_list_deleted_users(monkeypatch, async_client):
         return 2
 
     monkeypatch.setattr(
-        user_admin_module.admin_user_crud, "get_deleted_users", fake_get_deleted_users,
+        user_admin_module.admin_user_crud,
+        "get_deleted_users",
+        fake_get_deleted_users,
     )
     monkeypatch.setattr(
         user_admin_module.admin_user_crud,
@@ -167,7 +169,9 @@ async def test_search_deleted_users(monkeypatch, async_client):
         return 1
 
     monkeypatch.setattr(
-        user_admin_module.admin_user_crud, "get_deleted_users", fake_get_deleted_users,
+        user_admin_module.admin_user_crud,
+        "get_deleted_users",
+        fake_get_deleted_users,
     )
     monkeypatch.setattr(
         user_admin_module.admin_user_crud,

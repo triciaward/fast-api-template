@@ -37,7 +37,8 @@ async def test_create_user_hashes_password(monkeypatch):
 
     db = DummySession()
     user = await AdminUserCRUD().create_user(
-        db, UserCreate(email="a@b.com", username="alice", password="Password123!"),
+        db,
+        UserCreate(email="a@b.com", username="alice", password="Password123!"),
     )
     # ensure object was added and has hashed_password assigned
     assert db.added and getattr(user, "hashed_password", None) == "hashed"
@@ -60,6 +61,8 @@ async def test_update_user_password_hashes_when_included(monkeypatch):
 
     db = DummySession()
     updated = await AdminUserCRUD().update_user(
-        db, "u1", AdminUserUpdate(password="NewPassword456!"),
+        db,
+        "u1",
+        AdminUserUpdate(password="NewPassword456!"),
     )
     assert getattr(updated, "hashed_password", None) == "hashed2"

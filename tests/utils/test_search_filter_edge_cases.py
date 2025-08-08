@@ -13,7 +13,10 @@ def test_text_search_case_sensitive_and_equals():
     )
 
     ts = create_text_search(
-        "Alpha", ["email"], operator=SearchOperator.EQUALS, case_sensitive=True,
+        "Alpha",
+        ["email"],
+        operator=SearchOperator.EQUALS,
+        case_sensitive=True,
     )
     cfg = SearchFilterConfig(text_search=ts)
     q = SearchFilterBuilder(User).build_query(cfg)
@@ -112,19 +115,29 @@ def test_field_filters_remaining_ops():
     cfg = SearchFilterConfig(
         filters=[
             create_field_filter(
-                "created_at", FilterOperator.GREATER_THAN, value="2024-01-01",
+                "created_at",
+                FilterOperator.GREATER_THAN,
+                value="2024-01-01",
             ),
             create_field_filter(
-                "created_at", FilterOperator.GREATER_THAN_EQUAL, value="2024-01-01",
+                "created_at",
+                FilterOperator.GREATER_THAN_EQUAL,
+                value="2024-01-01",
             ),
             create_field_filter(
-                "created_at", FilterOperator.LESS_THAN, value="2024-12-31",
+                "created_at",
+                FilterOperator.LESS_THAN,
+                value="2024-12-31",
             ),
             create_field_filter(
-                "created_at", FilterOperator.LESS_THAN_EQUAL, value="2024-12-31",
+                "created_at",
+                FilterOperator.LESS_THAN_EQUAL,
+                value="2024-12-31",
             ),
             create_field_filter(
-                "nonexistent", FilterOperator.EQUALS, value=1,
+                "nonexistent",
+                FilterOperator.EQUALS,
+                value=1,
             ),  # ignored
         ],
     )
@@ -155,7 +168,10 @@ def test_text_search_operators_and_fulltext_fallback(monkeypatch):
 
     # Case-sensitive equals path
     ts_cs = create_text_search(
-        "Z", ["username"], operator=SearchOperator.EQUALS, case_sensitive=True,
+        "Z",
+        ["username"],
+        operator=SearchOperator.EQUALS,
+        case_sensitive=True,
     )
     cfg_cs = SearchFilterConfig(text_search=ts_cs)
     q_cs = SearchFilterBuilder(User).build_query(cfg_cs)

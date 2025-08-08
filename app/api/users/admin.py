@@ -178,7 +178,9 @@ async def list_deleted_users(
     user_responses: list[DeletedUserResponse] = []
     for user in users:
         created_at_value = getattr(user, "created_at", None) or getattr(
-            user, "date_created", None,
+            user,
+            "date_created",
+            None,
         )
         if created_at_value is None:
             # Fallback to now to satisfy non-optional schema field
@@ -245,7 +247,9 @@ async def search_deleted_users(
     user_responses = []
     for user in users:
         created_at_value = getattr(user, "created_at", None) or getattr(
-            user, "date_created", None,
+            user,
+            "date_created",
+            None,
         )
         if created_at_value is None:
             created_at_value = utc_now()

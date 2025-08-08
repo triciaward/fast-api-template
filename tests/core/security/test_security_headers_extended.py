@@ -25,7 +25,9 @@ def test_security_headers_request_size_and_content_type(monkeypatch):
 
     # Unsupported content-type
     r2 = client.post(
-        "/api/v1/test", content=b"{}", headers={"content-type": "text/plain"},
+        "/api/v1/test",
+        content=b"{}",
+        headers={"content-type": "text/plain"},
     )
     assert r2.status_code in (200, 415)
 
@@ -88,10 +90,16 @@ def test_validations_disabled_allow_requests(monkeypatch):
 
     # Disable both validations
     monkeypatch.setattr(
-        cfg.settings, "ENABLE_REQUEST_SIZE_VALIDATION", False, raising=False,
+        cfg.settings,
+        "ENABLE_REQUEST_SIZE_VALIDATION",
+        False,
+        raising=False,
     )
     monkeypatch.setattr(
-        cfg.settings, "ENABLE_CONTENT_TYPE_VALIDATION", False, raising=False,
+        cfg.settings,
+        "ENABLE_CONTENT_TYPE_VALIDATION",
+        False,
+        raising=False,
     )
 
     app = FastAPI()
@@ -103,7 +111,9 @@ def test_validations_disabled_allow_requests(monkeypatch):
 
     client = TestClient(app)
     r = client.post(
-        "/api/v1/any", content=b"payload", headers={"content-type": "text/plain"},
+        "/api/v1/any",
+        content=b"payload",
+        headers={"content-type": "text/plain"},
     )
     assert r.status_code == 200
 
@@ -174,7 +184,10 @@ def test_security_event_logging_disabled(monkeypatch):
     from app.core.security.security_headers import configure_security_headers
 
     monkeypatch.setattr(
-        cfg.settings, "ENABLE_SECURITY_EVENT_LOGGING", False, raising=False,
+        cfg.settings,
+        "ENABLE_SECURITY_EVENT_LOGGING",
+        False,
+        raising=False,
     )
 
     app = FastAPI()
@@ -200,7 +213,10 @@ def test_request_size_too_large(monkeypatch):
 
     # Enable size validation and set small limit
     monkeypatch.setattr(
-        cfg.settings, "ENABLE_REQUEST_SIZE_VALIDATION", True, raising=False,
+        cfg.settings,
+        "ENABLE_REQUEST_SIZE_VALIDATION",
+        True,
+        raising=False,
     )
     monkeypatch.setattr(cfg.settings, "MAX_REQUEST_SIZE", 1, raising=False)
 

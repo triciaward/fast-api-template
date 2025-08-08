@@ -51,7 +51,9 @@ async def test_force_delete_user_internal_error(monkeypatch, async_client):
 
     monkeypatch.setattr(admin_users.admin_user_crud, "get", fake_get)
     monkeypatch.setattr(
-        admin_users.admin_user_crud, "force_delete_user", fake_force_delete,
+        admin_users.admin_user_crud,
+        "force_delete_user",
+        fake_force_delete,
     )
 
     r = await async_client.post(
