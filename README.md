@@ -10,8 +10,7 @@
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Type Check: MyPy](https://img.shields.io/badge/type%20check-mypy-blue.svg)](https://mypy-lang.org/)
 [![Lint: Ruff](https://img.shields.io/badge/lint-ruff-red.svg)](https://github.com/astral-sh/ruff)
-[![Template Grade: A+](https://img.shields.io/badge/template%20grade-A%2B-brightgreen.svg)](https://github.com/triciaward/fast-api-template)
-[![Test Files: 173](https://img.shields.io/badge/test%20files-173-blue.svg)](https://github.com/triciaward/fast-api-template)
+
 
 **🎯 Perfect for:** Solo developers building their own projects, side hustles, and apps that might grow into something bigger.
 
@@ -64,6 +63,21 @@ cd your-project-name
 - ✅ Run migrations and create superuser
 - ✅ Install git protection hooks
 - ✅ Verify everything works
+
+### 🔍 Verify It's Working
+
+```bash
+# Check the API is running
+curl http://localhost:8000/system/health
+# Expected: {"status": "healthy", "timestamp": "..."}
+
+# View the interactive API docs
+open http://localhost:8000/docs
+
+# Run the test suite
+pytest
+# Expected: 173 files, 561 passed, 98% coverage
+```
 
 ### What You Get
 The setup script creates a **fully working API** with all the features you need to build cool stuff. You'll be coding in minutes, not hours.
