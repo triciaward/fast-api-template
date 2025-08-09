@@ -10,7 +10,9 @@ from typing import Any, NoReturn
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from app.api.users.auth import require_api_scope
 from app.core.config.logging_config import get_app_logger
+from app.schemas.auth.user import APIKeyUser
 from app.services.background.celery import (
     cancel_task,
     get_active_tasks,
@@ -97,7 +99,9 @@ def check_celery_enabled() -> None:
 
 
 @router.get("/status", response_model=CeleryStatsResponse)
-async def get_celery_status() -> CeleryStatsResponse:
+async def get_celery_status(
+    __: APIKeyUser = Depends(require_api_scope("tasks:read")),
+) -> CeleryStatsResponse:
     """
     Get Celery service status and statistics.
 
@@ -119,6 +123,7 @@ async def get_celery_status() -> CeleryStatsResponse:
 async def submit_celery_task(
     request: TaskSubmitRequest,
     _: None = Depends(check_celery_enabled),
+    __: APIKeyUser = Depends(require_api_scope("tasks:write")),
 ) -> TaskSubmitResponse:
     """
     Submit a new Celery task.
@@ -182,6 +187,7 @@ async def submit_celery_task(
 async def get_celery_task_status(
     task_id: str,
     _: None = Depends(check_celery_enabled),
+    __: APIKeyUser = Depends(require_api_scope("tasks:read")),
 ) -> TaskStatusResponse:
     """
     Get the status of a Celery task.
@@ -228,6 +234,7 @@ async def get_celery_task_status(
 async def cancel_celery_task(
     task_id: str,
     _: None = Depends(check_celery_enabled),
+    __: APIKeyUser = Depends(require_api_scope("tasks:write")),
 ) -> TaskCancelResponse:
     """
     Cancel a running Celery task.
@@ -278,6 +285,7 @@ async def cancel_celery_task(
 @router.get("/tasks/active", response_model=list[ActiveTaskResponse])
 async def get_active_celery_tasks(
     _: None = Depends(check_celery_enabled),
+    __: APIKeyUser = Depends(require_api_scope("tasks:read")),
 ) -> list[ActiveTaskResponse]:
     """
     Get list of currently active Celery tasks.
@@ -310,6 +318,7 @@ async def submit_email_task(
     subject: str,
     body: str,
     _: None = Depends(check_celery_enabled),
+    __: APIKeyUser = Depends(require_api_scope("tasks:write")),
 ) -> TaskSubmitResponse:
     """
     Submit an email sending task.
@@ -368,6 +377,7 @@ async def submit_email_task(
 async def submit_data_processing_task(
     data: list[dict[str, Any]],
     _: None = Depends(check_celery_enabled),
+    __: APIKeyUser = Depends(require_api_scope("tasks:write")),
 ) -> TaskSubmitResponse:
     """
     Submit a data processing task.
@@ -421,6 +431,7 @@ async def submit_data_processing_task(
 @router.post("/tasks/cleanup", response_model=TaskSubmitResponse)
 async def submit_cleanup_task(
     _: None = Depends(check_celery_enabled),
+    __: APIKeyUser = Depends(require_api_scope("tasks:write")),
 ) -> TaskSubmitResponse:
     """
     Submit a cleanup task.
@@ -464,6 +475,7 @@ async def submit_cleanup_task(
 async def submit_long_running_task(
     duration: int = 60,
     _: None = Depends(check_celery_enabled),
+    __: APIKeyUser = Depends(require_api_scope("tasks:write")),
 ) -> TaskSubmitResponse:
     """
     Submit a long-running task for testing purposes.
@@ -517,6 +529,7 @@ async def submit_long_running_task(
 @router.post("/tasks/permanently-delete-accounts", response_model=TaskSubmitResponse)
 async def submit_permanently_delete_accounts_task(
     _: None = Depends(check_celery_enabled),
+    __: APIKeyUser = Depends(require_api_scope("tasks:write")),
 ) -> TaskSubmitResponse:
     """
     Submit a task to permanently delete accounts that have passed their grace period.

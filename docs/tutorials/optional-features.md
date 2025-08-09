@@ -221,6 +221,23 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
     return {"status": "completed", "accounts_deleted": count}
 ```
 
+### Authentication for Celery endpoints
+
+When enabled, Celery management routes require scoped API keys:
+
+- `tasks:read` → `GET /system/status`, `GET /system/tasks/active`, `GET /system/tasks/{task_id}/status`
+- `tasks:write` → `POST /system/tasks/submit`, `DELETE /system/tasks/{task_id}/cancel` and task-submission helpers
+
+Example:
+
+```http
+POST /system/tasks/submit
+Authorization: Bearer <api_key_with_tasks:write>
+Content-Type: application/json
+
+{"task_name": "app.services.celery_tasks.process_data_task", "args": [], "kwargs": {}}
+```
+
 ### Test Celery
 
 ```bash

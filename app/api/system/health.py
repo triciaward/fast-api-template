@@ -17,9 +17,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.users.auth import require_api_scope
 from app.core.config import settings
 from app.core.config.logging_config import get_app_logger
 from app.database.database import get_db
+from app.schemas.auth.user import APIKeyUser
 
 router = APIRouter()
 logger = get_app_logger()
@@ -108,7 +110,10 @@ async def simple_health_check() -> dict[str, Any]:
 
 
 @router.get("/health/detailed")
-async def detailed_health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
+async def detailed_health_check(
+    db: AsyncSession = Depends(get_db),
+    _: APIKeyUser = Depends(require_api_scope("system:read")),
+) -> dict[str, Any]:
     """
     Detailed health check with database connectivity test.
 
@@ -266,7 +271,10 @@ async def liveness_check() -> dict[str, Any]:
 
 
 @router.get("/health/database")
-async def database_health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
+async def database_health_check(
+    db: AsyncSession = Depends(get_db),
+    _: APIKeyUser = Depends(require_api_scope("system:read")),
+) -> dict[str, Any]:
     """
     Detailed database health check with performance metrics.
 
@@ -334,7 +342,9 @@ async def rate_limit_info() -> dict[str, Any]:
 
 
 @router.get("/health/test-sentry")
-async def test_sentry_endpoint() -> dict[str, Any]:
+async def test_sentry_endpoint(
+    _: APIKeyUser = Depends(require_api_scope("system:read")),
+) -> dict[str, Any]:
     """
     Test endpoint for Sentry error monitoring.
 
@@ -349,7 +359,9 @@ async def test_sentry_endpoint() -> dict[str, Any]:
 
 
 @router.get("/health/metrics")
-async def metrics_endpoint() -> dict[str, Any]:
+async def metrics_endpoint(
+    _: APIKeyUser = Depends(require_api_scope("system:read")),
+) -> dict[str, Any]:
     """
     Application metrics endpoint for monitoring.
 

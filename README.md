@@ -122,6 +122,7 @@ If you're using AI assistants (Claude, ChatGPT, Cursor AI, etc.), they might off
 - **Password reset** and email verification workflows
 - **Soft delete** with audit trails
 - **API key management** for your users
+  - Sensitive system endpoints protected by scoped API keys (`system:read`, `tasks:read`, `tasks:write`)
 
 ### 🗄️ **Database & Data Management**
 - **PostgreSQL** with async operations

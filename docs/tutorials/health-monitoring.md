@@ -97,7 +97,7 @@ The template includes a complete health monitoring system with 8 different endpo
 }
 ```
 
-### 5. Detailed Health Check
+### 5. Detailed Health Check (API key required)
 **Endpoint**: `GET /system/health/detailed`
 
 **Purpose**: Comprehensive system status with all component checks
@@ -129,7 +129,7 @@ The template includes a complete health monitoring system with 8 different endpo
 }
 ```
 
-### 6. Database Health Check
+### 6. Database Health Check (API key required)
 **Endpoint**: `GET /system/health/database`
 
 **Purpose**: Database-specific health and performance metrics
@@ -168,7 +168,7 @@ The template includes a complete health monitoring system with 8 different endpo
 }
 ```
 
-### 8. Metrics Endpoint
+### 8. Metrics Endpoint (API key required)
 **Endpoint**: `GET /system/health/metrics`
 
 **Purpose**: Application metrics and performance data
@@ -197,6 +197,22 @@ The template includes a complete health monitoring system with 8 different endpo
   "timestamp": 1691352306.289177
 }
 ```
+
+## 🔐 Authentication for Sensitive Health Endpoints
+
+Sensitive health endpoints require an API key with the `system:read` scope:
+
+```http
+GET /system/health/detailed
+Authorization: Bearer <api_key_with_system:read>
+```
+
+Public endpoints remain unauthenticated and safe for load balancers and probes:
+
+- `GET /system/health`
+- `GET /system/health/simple`
+- `GET /system/health/ready`
+- `GET /system/health/live`
 
 ## 🚀 Usage Examples
 

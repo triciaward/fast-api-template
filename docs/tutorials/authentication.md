@@ -167,6 +167,29 @@ Secure API keys for service-to-service communication:
 # Authorization: Bearer <raw_api_key>
 ```
 
+### Scoped API keys on system endpoints
+
+The template secures sensitive system endpoints with scoped API keys:
+
+- Required scopes
+  - `system:read` for detailed health and metrics
+  - `tasks:read` / `tasks:write` for Celery task routes
+
+- Protected routes
+  - `GET /system/health/detailed`, `GET /system/health/database`, `GET /system/health/metrics`, `GET /system/health/test-sentry` → `system:read`
+  - `GET /system/status`, `GET /system/tasks/active`, `GET /system/tasks/{task_id}/status` → `tasks:read`
+  - `POST /system/tasks/submit`, `DELETE /system/tasks/{task_id}/cancel`, and other task-submission routes → `tasks:write`
+
+- Public routes remain unauthenticated
+  - `GET /system/health`, `GET /system/health/simple`, `GET /system/health/ready`, `GET /system/health/live`
+
+Usage:
+
+```http
+GET /system/health/detailed
+Authorization: Bearer <api_key_with_system:read>
+```
+
 ## 📋 Available Endpoints
 
 ### **Authentication Endpoints**
@@ -468,6 +491,19 @@ async def read_current_user_api_key(
     api_key_user: APIKeyUser = Depends(get_api_key_user),
 ):
     return api_key_user
+```
+
+To require a specific scope within an endpoint, use:
+
+```python
+from app.api.users.auth import require_api_scope
+from app.schemas.auth.user import APIKeyUser
+
+@router.get("/system/health/detailed")
+async def detailed_health_check(
+    _: APIKeyUser = Depends(require_api_scope("system:read")),
+):
+    ...
 ```
 
 ## 🛠️ Troubleshooting
