@@ -21,7 +21,9 @@ async def test_sensitive_health_endpoints_require_api_key(async_client):
 
 
 @pytest.mark.asyncio
-async def test_sensitive_health_endpoints_forbidden_without_scope(async_client, monkeypatch):
+async def test_sensitive_health_endpoints_forbidden_without_scope(
+    async_client, monkeypatch
+):
     # Monkeypatch API key auth to return a user without required scope
     from app.api.users import auth as auth_mod
     from app.main import app
@@ -58,6 +60,7 @@ async def test_sensitive_health_endpoints_allow_with_scope(async_client, monkeyp
             user_id=None,
             key_id=uuid.uuid4(),
         )
+
     app.dependency_overrides[auth_mod.get_api_key_user] = fake_get_api_key_user
 
     # detailed/database/metrics should succeed
@@ -167,5 +170,3 @@ async def test_deactivation_immediate_rejection(async_client, monkeypatch):
         headers={"Authorization": "Bearer any"},
     )
     assert r.status_code == 401
-
-
