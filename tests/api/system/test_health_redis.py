@@ -1,6 +1,29 @@
 import pytest
 
 
+@pytest.fixture(autouse=True)
+async def _override_health_api_key_dependency():
+    from uuid import uuid4
+
+    from app.api.users import auth as auth_mod
+    from app.main import app
+    from app.schemas.auth.user import APIKeyUser
+
+    async def fake_get_api_key_user():  # type: ignore[no-untyped-def]
+        return APIKeyUser(
+            id=uuid4(),
+            scopes=["system:read"],
+            user_id=None,
+            key_id=uuid4(),
+        )
+
+    app.dependency_overrides[auth_mod.get_api_key_user] = fake_get_api_key_user
+    try:
+        yield
+    finally:
+        app.dependency_overrides.pop(auth_mod.get_api_key_user, None)
+
+
 class FakeRedis:
     async def ping(self):
         return True

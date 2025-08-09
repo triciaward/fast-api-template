@@ -22,7 +22,7 @@ async def test_sensitive_health_endpoints_require_api_key(async_client):
 
 @pytest.mark.asyncio
 async def test_sensitive_health_endpoints_forbidden_without_scope(
-    async_client, monkeypatch
+    async_client, monkeypatch,
 ):
     # Monkeypatch API key auth to return a user without required scope
     from app.api.users import auth as auth_mod
