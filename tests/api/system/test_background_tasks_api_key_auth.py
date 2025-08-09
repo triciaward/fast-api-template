@@ -55,7 +55,9 @@ async def test_background_tasks_forbidden_without_scope(async_client, monkeypatc
     ]
     for method, path in read_paths:
         r = await async_client.request(
-            method, path, headers={"Authorization": "Bearer x"},
+            method,
+            path,
+            headers={"Authorization": "Bearer x"},
         )
         # If Celery routes aren't mounted (disabled), we get 404 at routing level before auth
         if settings_mod.ENABLE_CELERY:
@@ -74,7 +76,9 @@ async def test_background_tasks_forbidden_without_scope(async_client, monkeypatc
     ]
     for method, path in write_paths:
         r = await async_client.request(
-            method, path, headers={"Authorization": "Bearer x"},
+            method,
+            path,
+            headers={"Authorization": "Bearer x"},
         )
         if settings_mod.ENABLE_CELERY:
             assert r.status_code == 403
@@ -84,7 +88,8 @@ async def test_background_tasks_forbidden_without_scope(async_client, monkeypatc
 
 @pytest.mark.asyncio
 async def test_background_tasks_pass_auth_then_celery_guard_kicks_in(
-    async_client, monkeypatch,
+    async_client,
+    monkeypatch,
 ):
     """
     With correct scopes, auth passes, then since Celery is disabled by default in tests,
@@ -111,7 +116,9 @@ async def test_background_tasks_pass_auth_then_celery_guard_kicks_in(
         ("GET", "/system/tasks/123/status"),
     ]:
         r = await async_client.request(
-            method, path, headers={"Authorization": "Bearer ok"},
+            method,
+            path,
+            headers={"Authorization": "Bearer ok"},
         )
         if settings_mod.ENABLE_CELERY:
             assert r.status_code in {200, 503}
