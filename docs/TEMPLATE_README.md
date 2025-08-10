@@ -228,7 +228,6 @@ This FastAPI template provides a comprehensive foundation for building productio
 
 ### 🛠️ Development Tools
 - Pre-commit hooks for code quality
-- Code generation and CRUD scaffolding
 - Automated setup scripts
 - Fix scripts for common issues
 - Verification tools
