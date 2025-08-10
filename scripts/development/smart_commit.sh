@@ -12,24 +12,24 @@ COMMIT_MSG="$1"
 # Stage everything by default
 git add -A
 
-# If pre-commit is available, run it first so fixes land in the same commit
+# If pre-commit is available, run fixers first so auto-fixes are included
 if command -v pre-commit >/dev/null 2>&1; then
-  echo "🔍 Running pre-commit hooks (first pass)..."
-  if ! pre-commit run --all-files --hook-stage commit; then
-    echo "⚠️  Hooks reported issues; attempting to stage auto-fixes and retry once..."
-    git add -A
-    # Retry hooks once to catch formatting/auto-fixers on the second pass
-    pre-commit run --all-files --hook-stage commit || {
-      echo "❌ Pre-commit hooks still failing. Please fix remaining issues and retry."
-      exit 1
-    }
-  fi
-  # Commit without re-running hooks to avoid duplicate runs
-  echo "✅ Hooks passed. Creating commit without re-running hooks..."
-  git commit -m "$COMMIT_MSG" --no-verify
-else
-  echo "ℹ️  pre-commit not found. Creating commit directly..."
-  git commit -m "$COMMIT_MSG"
+  echo "🔧 Running formatter/linter fixers before commit..."
+  # Run only fixer hooks; ignore their exit codes, then re-stage
+  pre-commit run --hook-stage commit ruff || true
+  pre-commit run --hook-stage commit black || true
+  git add -A
+fi
+
+# Now do a normal commit so full hooks (incl. mypy) run on staged files only
+set +e
+git commit -m "$COMMIT_MSG"
+COMMIT_EXIT=$?
+set -e
+
+if [ $COMMIT_EXIT -ne 0 ]; then
+  echo "❌ Commit failed (likely due to non-fixable hook errors). Please address and re-run."
+  exit $COMMIT_EXIT
 fi
 
 echo "✅ Commit created with preserved message."
