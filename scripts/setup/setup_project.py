@@ -692,7 +692,9 @@ class ProjectSetup:
                 if not started:
                     print("   ⚠️  Timed out waiting for Docker Desktop to start")
             elif system == "Linux":
-                print("   Attempting to start Docker service via systemd (may require sudo)...")
+                print(
+                    "   Attempting to start Docker service via systemd (may require sudo)..."
+                )
                 subprocess.run(["systemctl", "start", "docker"], check=False)
                 started = self._wait_for_docker_ready(90)
                 if not started:
@@ -783,12 +785,16 @@ class ProjectSetup:
                     if self._docker_is_running():
                         print("✅ Docker is running")
                         return True
-                    print("   ⚠️  Still not running. You can start Docker or choose another option.")
+                    print(
+                        "   ⚠️  Still not running. You can start Docker or choose another option."
+                    )
                     continue
                 if choice == "3":
-                    print("   ➜ Continuing without Docker. You can start Docker later and run:\n"
-                          "      docker-compose up -d\n"
-                          "      alembic upgrade head")
+                    print(
+                        "   ➜ Continuing without Docker. You can start Docker later and run:\n"
+                        "      docker-compose up -d\n"
+                        "      alembic upgrade head"
+                    )
                     return False
                 if choice == "4":
                     print("   Exiting setup as requested.")
@@ -1497,7 +1503,9 @@ def main():
             api_success = setup.start_api_service() if migrations_success else False
             services_success = postgres_success and api_success
         else:
-            print("\nℹ️  Skipping Docker-dependent steps. You can start Docker later and run:")
+            print(
+                "\nℹ️  Skipping Docker-dependent steps. You can start Docker later and run:"
+            )
             print("   docker-compose up -d postgres")
             print("   python -m alembic upgrade head")
             print("   docker-compose up -d api")
