@@ -139,6 +139,8 @@ Proceed with setup? (y/N): y
 
 2. View API documentation:
    http://localhost:8000/docs
+   
+   Tip: The template ships with a custom docs page and safe CSP for `/docs`. If it appears blank on first load, refresh once. If your network blocks CDNs, allowlist `unpkg.com` and `cdnjs.cloudflare.com` or serve Swagger UI assets locally.
 
 3. Update your git remote (if needed):
    git remote set-url origin https://github.com/yourusername/todo_app_backend.git
@@ -167,6 +169,7 @@ docker-compose up -d
 
 # View API documentation
 open http://localhost:8000/docs
+# If blank on first load, refresh once. In locked-down networks, allowlist `unpkg.com`/`cdnjs.cloudflare.com` for `/docs` or serve assets locally.
 
 # Check code quality
 ./scripts/development/validate_ci.sh
@@ -434,6 +437,7 @@ class Settings(BaseSettings):
 ## 🎯 Next Steps
 
 1. **Explore the API**: Visit http://localhost:8000/docs
+   - If blank, refresh once. See note above regarding CSP/CDN.
 2. **Read the template assessment**: Check out the [architecture evaluation](tutorials/template-audit.md)
 3. **Add your features**: Start building in the domain-based structure
 4. **Read the tutorials**: Check out the other guides in `docs/tutorials/`
@@ -444,7 +448,7 @@ class Settings(BaseSettings):
 - **Template Assessment**: See [tutorials/template-audit.md](tutorials/template-audit.md) for architecture evaluation
 - **Troubleshooting**: Check `docs/troubleshooting/` for common issues
 - **Tutorials**: See `docs/tutorials/` for detailed guides
-- **API Documentation**: Visit http://localhost:8000/docs for interactive docs
+- **API Documentation**: Visit http://localhost:8000/docs for interactive docs (uses a custom docs page with CDN fallbacks)
 
 ---
 

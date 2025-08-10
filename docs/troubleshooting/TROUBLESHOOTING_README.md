@@ -58,6 +58,11 @@ cat .env
 docker-compose exec postgres psql -U postgres -d fastapi_template -c "SELECT 1;"
 ```
 
+### Docs Page Appears Blank at /docs
+- The template serves a custom Swagger UI with CDN fallbacks and a CSP relaxed only for docs.
+- Refresh the page once after start; if still blank, check browser console for CSP errors.
+- In restricted networks, allowlist `unpkg.com` and `cdnjs.cloudflare.com`, or host Swagger UI assets locally by editing `app/main.py`.
+
 ### Testing & CI Issues
 ```bash
 # Run validation before pushing

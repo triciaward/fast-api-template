@@ -22,6 +22,7 @@ Designed for GitHub "Use this template" workflow:
 """
 
 import os
+import platform
 import re
 import shutil
 import socket
@@ -666,17 +667,133 @@ class ProjectSetup:
         )
         print("   ✅ Dependencies installed")
 
-    def check_docker(self) -> None:
-        """Check if Docker is running."""
-        print()
-        print("🐳 Checking Docker...")
+    def _wait_for_docker_ready(self, timeout_seconds: int = 120) -> bool:
+        """Wait until Docker responds to 'docker info' or timeout."""
+        start = time.time()
+        while time.time() - start < timeout_seconds:
+            try:
+                subprocess.run(["docker", "info"], capture_output=True, check=True)
+            except Exception:
+                time.sleep(2)
+                continue
+            else:
+                return True
+        return False
+
+    def _attempt_start_docker(self) -> bool:
+        """Try to start Docker automatically based on OS."""
+        system = platform.system()
+        started = False
+        try:
+            if system == "Darwin":  # macOS
+                print("   Launching Docker Desktop...")
+                subprocess.run(["open", "-a", "Docker"], check=False)
+                started = self._wait_for_docker_ready(180)
+                if not started:
+                    print("   ⚠️  Timed out waiting for Docker Desktop to start")
+            elif system == "Linux":
+                print("   Attempting to start Docker service via systemd (may require sudo)...")
+                subprocess.run(["systemctl", "start", "docker"], check=False)
+                started = self._wait_for_docker_ready(90)
+                if not started:
+                    print("   ⚠️  Could not start Docker service or timed out")
+            elif system == "Windows":
+                from pathlib import Path as SysPath
+
+                print("   Launching Docker Desktop...")
+                candidates = [
+                    r"C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe",
+                    r"C:\\Program Files (x86)\\Docker\\Docker\\Docker Desktop.exe",
+                ]
+                launched = False
+
+                # Try starting Docker Windows service first (may require admin)
+                subprocess.run(["sc", "start", "com.docker.service"], check=False)
+
+                for exe in candidates:
+                    if SysPath(exe).exists():
+                        # Prefer PowerShell Start-Process (handles spaces/quoting)
+                        subprocess.run(
+                            [
+                                "powershell",
+                                "-NoProfile",
+                                "-Command",
+                                f"Start-Process -FilePath '{exe}'",
+                            ],
+                            check=False,
+                        )
+                        # Fallback to cmd start
+                        subprocess.run(["cmd", "/c", "start", "", exe], check=False)
+                        launched = True
+                        break
+
+                if not launched:
+                    print(
+                        "   ⚠️  Could not find Docker Desktop in default locations. "
+                        "Please start it manually from the Start Menu.",
+                    )
+                else:
+                    started = self._wait_for_docker_ready(180)
+                    if not started:
+                        print("   ⚠️  Timed out waiting for Docker Desktop to start")
+            else:
+                print(
+                    "   ⚠️  Automatic start is not supported on this OS. Please start Docker manually.",
+                )
+                started = False
+        except Exception:
+            started = False
+
+        if started:
+            print("✅ Docker is running")
+        return started
+
+    def _docker_is_running(self) -> bool:
+        """Return True if Docker responds to 'docker info'."""
         try:
             subprocess.run(["docker", "info"], capture_output=True, check=True)
-            print("✅ Docker is running")
         except (subprocess.CalledProcessError, FileNotFoundError):
-            print("❌ Error: Docker is not running!")
-            print("   Please start Docker and run this script again.")
-            sys.exit(1)
+            return False
+        return True
+
+    def check_docker(self) -> bool:
+        """Check if Docker is running; offer friendly recovery options."""
+        print()
+        print("🐳 Checking Docker...")
+        if self._docker_is_running():
+            print("✅ Docker is running")
+            return True
+        else:
+            print("❌ Docker is not running or not installed.")
+            print("   What would you like to do?")
+            print("   1) Try to start Docker now (recommended on macOS/Linux)")
+            print("   2) Retry detection")
+            print("   3) Continue without Docker (skip databases/containers)")
+            print("   4) Exit setup")
+
+            while True:
+                choice = self._safe_input("Select an option [1/2/3/4]: ").strip() or "1"
+                if choice == "1":
+                    if self._attempt_start_docker():
+                        return True
+                    # If start failed, ask again
+                    print("   ⚠️  Docker still not available.")
+                    continue
+                if choice == "2":
+                    if self._docker_is_running():
+                        print("✅ Docker is running")
+                        return True
+                    print("   ⚠️  Still not running. You can start Docker or choose another option.")
+                    continue
+                if choice == "3":
+                    print("   ➜ Continuing without Docker. You can start Docker later and run:\n"
+                          "      docker-compose up -d\n"
+                          "      alembic upgrade head")
+                    return False
+                if choice == "4":
+                    print("   Exiting setup as requested.")
+                    sys.exit(1)
+                print("   Please enter 1, 2, 3, or 4.")
 
     def start_services(self) -> bool:
         """Start Docker services (Postgres first, API after migrations)."""
@@ -1355,24 +1472,35 @@ def main():
         setup.setup_environment()
 
         # Start services in the correct order
-        setup.check_docker()
-        # Detect and resolve host port conflicts before starting containers
-        setup.resolve_service_ports()
+        docker_available = setup.check_docker()
+        services_success = False
+        migrations_success = False
+        superuser_success = False
+        api_success = False
 
-        # 1. Start PostgreSQL first
-        postgres_success = setup.start_services()
+        if docker_available:
+            # Detect and resolve host port conflicts before starting containers
+            setup.resolve_service_ports()
 
-        # 2. Run migrations (creates database)
-        migrations_success = setup.run_migrations() if postgres_success else False
+            # 1. Start PostgreSQL first
+            postgres_success = setup.start_services()
 
-        # 3. Create superuser
-        superuser_success = (
-            setup.create_superuser(details) if migrations_success else False
-        )
+            # 2. Run migrations (creates database)
+            migrations_success = setup.run_migrations() if postgres_success else False
 
-        # 4. Start API service after database is ready
-        api_success = setup.start_api_service() if migrations_success else False
-        services_success = postgres_success and api_success
+            # 3. Create superuser
+            superuser_success = (
+                setup.create_superuser(details) if migrations_success else False
+            )
+
+            # 4. Start API service after database is ready
+            api_success = setup.start_api_service() if migrations_success else False
+            services_success = postgres_success and api_success
+        else:
+            print("\nℹ️  Skipping Docker-dependent steps. You can start Docker later and run:")
+            print("   docker-compose up -d postgres")
+            print("   python -m alembic upgrade head")
+            print("   docker-compose up -d api")
 
         # Install git hooks for protection
         setup.install_git_hooks()

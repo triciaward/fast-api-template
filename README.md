@@ -5,7 +5,7 @@
 [![CI](https://github.com/triciaward/fast-api-template/workflows/CI/badge.svg)](https://github.com/triciaward/fast-api-template/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109.2-green.svg)](https://fastapi.tiangolo.com/)
 [![Test Coverage](https://img.shields.io/badge/coverage-98.2%25-brightgreen.svg)](https://github.com/triciaward/fast-api-template)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Type Check: MyPy](https://img.shields.io/badge/type%20check-mypy-blue.svg)](https://mypy-lang.org/)
@@ -27,7 +27,7 @@
 Before you start, make sure you have:
 
 - **Python 3.11+** installed on your system
-- **Docker Desktop** installed and running
+- **Docker Desktop** installed (the setup script will help you start it if needed)
 - **Git** (for cloning the repository)
 
 **💡 Don't have Python?** Download it from [python.org](https://www.python.org/downloads/)
@@ -64,7 +64,7 @@ cd your-project-name
 - ✅ Install git protection hooks
 - ✅ Verify everything works
 
-### 🔍 Verify It's Working
+### 🔍 Verify It's Working (v1.1.1)
 
 ```bash
 # Check the API is running
@@ -78,6 +78,8 @@ open http://localhost:8000/docs
 pytest
 # Expected: 173 files, 561 passed, 98% coverage
 ```
+
+> Docs page tip: If `/docs` appears blank, just refresh once after startup. The template ships with a custom docs page and a relaxed CSP for docs only. If your network blocks CDNs, allowlist `unpkg.com` and `cdnjs.cloudflare.com` or serve Swagger UI assets locally.
 
 ### What You Get
 The setup script creates a **fully working API** with all the features you need to build cool stuff. You'll be coding in minutes, not hours.

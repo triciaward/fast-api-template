@@ -52,6 +52,20 @@ python scripts/verify_setup.py
 alembic current
 ```
 
+### Docker not running / Docker Desktop closed
+
+If the setup script reports Docker is not running, it now offers options to:
+- Attempt to start Docker Desktop automatically (macOS/Windows) or the Docker service (Linux)
+- Retry detection
+- Continue without Docker (skips containers) and shows follow-up commands
+
+You can always start Docker later and run:
+```bash
+docker-compose up -d postgres
+alembic upgrade head
+docker-compose up -d api
+```
+
 ## 📞 Getting Help
 
 If you encounter issues not covered in these guides:

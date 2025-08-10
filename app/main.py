@@ -3,6 +3,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from starlette.responses import HTMLResponse
 
 from app.api import api_router
 
@@ -102,6 +103,8 @@ app = FastAPI(
     version=settings.VERSION,
     description=settings.DESCRIPTION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    docs_url=None,
+    redoc_url=None,
     lifespan=lifespan,
 )
 
@@ -160,3 +163,100 @@ async def get_features() -> dict[str, bool]:
         "rate_limiting": settings.ENABLE_RATE_LIMITING,
         "celery": settings.ENABLE_CELERY,
     }
+
+
+# Custom Swagger UI with CDN fallbacks and CSP-friendly setup
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui() -> HTMLResponse:
+    """Serve Swagger UI with robust CDN fallbacks.
+
+    This avoids upstream template issues and works with our CSP by allowing
+    specific CDNs for scripts and styles.
+    """
+    openapi_url = f"{settings.API_V1_STR}/openapi.json"
+    # Pin to a known-good Swagger UI version for stability
+    swagger_version = "5.11.0"
+
+    html = f"""
+<!DOCTYPE html>
+<html lang=\"en\">
+  <head>
+    <meta charset=\"UTF-8\" />
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+    <title>{settings.PROJECT_NAME} — API Docs</title>
+
+    <!-- Primary CSS with non-blocking fallback -->
+    <link rel=\"stylesheet\" href=\"https://unpkg.com/swagger-ui-dist@{swagger_version}/swagger-ui.css\" />
+    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/{swagger_version}/swagger-ui.min.css\" media=\"print\" onload=\"this.media='all'\" />
+
+    <style>
+      html {{ box-sizing: border-box; overflow-y: scroll; }}
+      *, *:before, *:after {{ box-sizing: inherit; }}
+      body {{ margin: 0; background: #fafafa; }}
+    </style>
+  </head>
+  <body>
+    <div id=\"swagger-ui\"></div>
+    <script>
+      (function() {{
+        function loadScript(src, onload, onerror) {{
+          var s = document.createElement('script');
+          s.src = src;
+          s.async = true;
+          s.onload = onload;
+          s.onerror = onerror || function(){{}};
+          document.head.appendChild(s);
+        }}
+
+        function initUI() {{
+          if (!window.SwaggerUIBundle || !window.SwaggerUIStandalonePreset) {{
+            console.error('Swagger UI assets missing');
+            var c = document.getElementById('swagger-ui');
+            c.innerHTML = '<p style="padding:16px;color:#b00">Failed to load Swagger UI assets.</p>';
+            return;
+          }}
+          window.ui = SwaggerUIBundle({{
+            url: '{openapi_url}',
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+            layout: 'StandaloneLayout'
+          }});
+        }}
+
+        // Try unpkg first, then fall back to cdnjs
+        loadScript(
+          'https://unpkg.com/swagger-ui-dist@{swagger_version}/swagger-ui-bundle.js',
+          function() {{
+            loadScript(
+              'https://unpkg.com/swagger-ui-dist@{swagger_version}/swagger-ui-standalone-preset.js',
+              initUI,
+              function() {{
+                loadScript(
+                  'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/{swagger_version}/swagger-ui-standalone-preset.min.js',
+                  initUI,
+                  function() {{ initUI(); }}
+                );
+              }}
+            );
+          }},
+          function() {{
+            loadScript(
+              'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/{swagger_version}/swagger-ui-bundle.min.js',
+              function() {{
+                loadScript(
+                  'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/{swagger_version}/swagger-ui-standalone-preset.min.js',
+                  initUI,
+                  function() {{ initUI(); }}
+                );
+              }},
+              function() {{ initUI(); }}
+            );
+          }}
+        );
+      }})();
+    </script>
+  </body>
+</html>
+    """
+    return HTMLResponse(content=html)

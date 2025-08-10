@@ -530,6 +530,7 @@ docker compose logs -f api
 - **Database connection errors?** Check `DATABASE_URL` and DB status
 - **HTTPS not working?** Check Caddy and Cloudflare DNS settings
 - **Email not sending?** Check SMTP credentials
+- **Docs page blank?** The template serves a custom Swagger UI at `/docs` with CDN fallbacks and a CSP relaxed only for docs. If your network blocks CDNs, either allowlist `unpkg.com` and `cdnjs.cloudflare.com` for the `/docs` route, or host Swagger UI assets locally by editing `app/main.py`. A quick refresh after startup often resolves initial load timing.
 
 ---
 
