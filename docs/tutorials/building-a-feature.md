@@ -4,6 +4,46 @@ This step-by-step guide shows how to add a new feature to the template: database
 
 We’ll create a simple "Note" feature where authenticated users can create and list their own notes.
 
+## ELI5: How this guide works
+
+Think of adding a feature like adding a new "Notes" room to your house (the app). You do it in small, safe steps:
+
+- **Blueprint (database model)**: the structure of a Note
+  - File: `app/models/core/note.py`
+  - Fields: `id`, `user_id`, `title`, `body`
+  - Uses timestamp/soft-delete mixins and is auto-discovered by the app
+
+- **Shapes (schemas)**: what requests and responses look like
+  - File: `app/schemas/note.py`
+  - `NoteCreate` = what the user must send
+  - `NoteResponse` = what the API returns
+
+- **Store/fetch (CRUD)**: save and list notes
+  - File: `app/crud/core/note.py`
+  - `create_note` saves a note; `list_notes_for_user` fetches your notes
+
+- **Doors (API routes)**: URLs people use
+  - File: `app/api/notes/routes.py`
+  - POST `/notes/` creates your note; GET `/notes/` lists your notes
+  - Both require login via `get_current_user` and a DB session
+
+- **Hook into the main hallway (router)**: make routes visible
+  - File: `app/api/__init__.py`
+  - Include the notes router under `settings.API_V1_STR` so endpoints appear at `/api/notes`
+
+- **Update the building plan (migrations) and check the lock (tests)**
+  - Run: `alembic revision --autogenerate` then `alembic upgrade head`
+  - Minimal test ensures unauthenticated access returns 401 on `/api/notes`
+
+### Quick security notes
+- Routes require JWT via `get_current_user`
+- Keep endpoints under `/api` to inherit stricter cache-control
+- Add API key scopes only for system automation
+- Validate inputs with Pydantic and return schema objects, not ORM models
+
+### What you end up with
+- A working "Notes" feature: model, schemas, CRUD, secured routes under `/api/notes`, a migration, and a starter test
+
 ## 1) Create the model
 Create `app/models/core/note.py`:
 ```python
