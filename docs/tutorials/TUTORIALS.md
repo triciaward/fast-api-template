@@ -227,6 +227,11 @@ Master database operations and management:
 - Soft delete functionality
 - **Domain-Based Organization**: CRUD operations organized by business domains
 
+### 🧩 Adding Features
+
+#### 🔒 [Adding Secure Features](adding-secure-features.md)
+Short ELI5 guide to add new endpoints with JWT auth or API key scopes, plus rate limiting and test pointers.
+
 ### ⚡ Optional Features
 
 #### 🔧 [Optional Features](optional-features.md)
