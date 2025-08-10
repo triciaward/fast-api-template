@@ -440,6 +440,13 @@ class ProjectSetup:
         print()
         print("🔄 Customizing project files...")
 
+        # Avoid self-modification of this setup script to prevent issues such as
+        # duplicate dictionary keys after replacements when the project slug
+        # contains underscores (which would cause Ruff F601 in downstream repos).
+        setup_script_path = (
+            self.project_root / "scripts" / "setup" / "setup_project.py"
+        ).resolve()
+
         # Files to process
         patterns_to_include = [
             "*.py",
@@ -475,6 +482,16 @@ class ProjectSetup:
                 # Skip files in excluded directories
                 if any(part in dirs_to_skip for part in file_path.parts):
                     continue
+
+                # Explicitly skip this setup script to avoid rewriting its own
+                # replacement dictionary keys, which can create duplicate keys
+                # after slug substitutions.
+                try:
+                    if file_path.resolve() == setup_script_path:
+                        continue
+                except Exception:
+                    # If resolution fails for any reason, proceed normally
+                    pass
 
                 # Skip binary files and very large files
                 if file_path.stat().st_size > 1024 * 1024:  # 1MB
