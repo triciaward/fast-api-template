@@ -41,6 +41,17 @@ This folder contains troubleshooting guides for development workflow and authent
 ./scripts/setup_project.sh
 ```
 
+### Commit & Push Workflow
+
+Use the smart commit script to run hooks and keep your intended message:
+
+```bash
+./scripts/development/smart_commit.sh "feat: your message here"
+git push origin main
+```
+
+This runs pre-commit hooks first (format, lint, type checks), stages auto-fixes, and then creates a commit with your original message. Avoids follow-up "chore: fix formatting" commits.
+
 ### Authentication Testing:
 ```bash
 # Test login
