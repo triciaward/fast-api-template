@@ -144,3 +144,4 @@ Later, add tests for authorized create/list using a token.
 - Validate inputs with Pydantic and return schema objects, not ORM models.
 
 You now have a full feature from DB to API. Add editing/deleting later following the same patterns.
+
