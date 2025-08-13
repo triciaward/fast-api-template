@@ -2,7 +2,7 @@
 
 **The perfect starter for building your own projects that can scale. Built for vibe-coding with AI.**
 
-> 🆕 **NEW IN v1.2.0**: AI-optimized development with 60%+ cost savings! [See what's new →](RELEASE_1.2.0.md)
+> 🆕 **NEW IN v1.2.0**: AI-optimized development with 60%+ cost savings! [See what's new →](docs/releases/RELEASE_1.2.0.md)
 
 [![CI](https://github.com/triciaward/fast-api-template/workflows/CI/badge.svg)](https://github.com/triciaward/fast-api-template/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -90,6 +90,8 @@ pytest
 The setup script creates a **fully working API** with all the features you need to build cool stuff. You'll be coding in minutes, not hours.
 
 **📖 Complete Setup Guide**: For detailed information, see [docs/TEMPLATE_README.md](docs/TEMPLATE_README.md)
+
+**📚 Release Notes**: See what's new in [v1.2.0](docs/releases/RELEASE_1.2.0.md) and [all releases](docs/releases/)
 
 **🆘 Need Help?**: If you encounter issues, see the [Troubleshooting Guide](docs/troubleshooting/TROUBLESHOOTING_README.md)
 
