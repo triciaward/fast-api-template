@@ -288,7 +288,7 @@ curl -X GET "http://localhost:8000/system/background-tasks/task-status/{task_id}
 
 ```bash
 # Register a new user (should trigger verification email)
-curl -X POST "http://localhost:8000/auth/register" \
+curl -X POST "http://localhost:8000/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",
@@ -400,7 +400,7 @@ curl -X POST "http://localhost:8000/system/background-tasks/test-task" \
   -H "Authorization: Bearer YOUR_TOKEN"
 
 # Test Email
-curl -X POST "http://localhost:8000/auth/register" \
+curl -X POST "http://localhost:8000/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{"email": "test@example.com", "username": "test", "password": "Test123!"}'
 
@@ -641,7 +641,7 @@ curl -I http://localhost:8000/
 curl -I http://localhost:8000/system/health
 
 # Check headers on auth endpoint (should have cache control)
-curl -I http://localhost:8000/auth/login
+curl -I http://localhost:8000/api/auth/login
 ```
 
 ---

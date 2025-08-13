@@ -23,7 +23,7 @@ async def test_forgot_password_email_service_unconfigured(monkeypatch, async_cli
     monkeypatch.setattr(pm.email_service, "is_configured", lambda: False)
 
     resp = await async_client.post(
-        "/auth/forgot-password",
+        "/api/auth/forgot-password",
         json={"email": "nobody@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -61,7 +61,7 @@ async def test_forgot_password_token_creation_failure(monkeypatch, async_client)
     )
 
     resp = await async_client.post(
-        "/auth/forgot-password",
+        "/api/auth/forgot-password",
         json={"email": "u@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -104,7 +104,7 @@ async def test_forgot_password_send_failure(monkeypatch, async_client):
     )
 
     resp = await async_client.post(
-        "/auth/forgot-password",
+        "/api/auth/forgot-password",
         json={"email": "u@example.com"},
         headers={"user-agent": "pytest"},
     )

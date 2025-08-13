@@ -22,7 +22,7 @@ async def test_deletion_status_user_not_found(monkeypatch, async_client):
     monkeypatch.setattr(crud_user, "get_user_by_email", fake_get_user_by_email)
 
     resp = await async_client.get(
-        "/auth/deletion-status",
+        "/api/auth/deletion-status",
         params={"email": "nobody@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -43,7 +43,7 @@ async def test_deletion_status_pending(monkeypatch, async_client):
     monkeypatch.setattr(crud_user, "get_user_by_email", fake_get_user_by_email)
 
     resp = await async_client.get(
-        "/auth/deletion-status",
+        "/api/auth/deletion-status",
         params={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -63,7 +63,7 @@ async def test_deletion_status_confirmed(monkeypatch, async_client):
     monkeypatch.setattr(crud_user, "get_user_by_email", fake_get_user_by_email)
 
     resp = await async_client.get(
-        "/auth/deletion-status",
+        "/api/auth/deletion-status",
         params={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )

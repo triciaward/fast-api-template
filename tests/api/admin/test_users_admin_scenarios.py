@@ -22,7 +22,7 @@ async def test_admin_stats_endpoint_success(monkeypatch, async_client):
     # Call the stats endpoint
     # Stats route path per module is /admin/statistics
     r = await async_client.get(
-        "/admin/statistics",
+        "/api/admin/statistics",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()

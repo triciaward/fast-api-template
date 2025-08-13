@@ -51,7 +51,7 @@ async def test_search_users_filters_all_and_pagination(monkeypatch, async_client
 
     # Provide all filters to populate filters_applied list and pagination state
     resp = await async_client.get(
-        "/users/search?search=abc&is_verified=true&oauth_provider=google&is_superuser=true"
+        "/api/users/search?search=abc&is_verified=true&oauth_provider=google&is_superuser=true"
         "&is_deleted=false&date_created_after=2024-01-01T00:00:00Z&date_created_before=2025-01-01T00:00:00Z"
         "&sort_by=email&sort_order=desc&page=2&size=3",
         headers={"authorization": "Bearer dummy", "user-agent": "pytest"},
@@ -105,7 +105,7 @@ async def test_list_users_empty(monkeypatch, async_client):
     monkeypatch.setattr(search_module.admin_user_crud, "count", fake_count)
 
     resp = await async_client.get(
-        "/users/",
+        "/api/users/",
         headers={"authorization": "Bearer dummy", "user-agent": "pytest"},
     )
     assert resp.status_code == 200

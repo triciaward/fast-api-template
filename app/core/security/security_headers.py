@@ -25,20 +25,20 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         # Define allowed content types for different endpoints
         self.allowed_content_types = {
-            "/auth/login": ["application/x-www-form-urlencoded"],
-            "/auth/register": ["application/json"],
-            "/auth/refresh": ["application/json"],
-            "/auth/verify-email": ["application/json"],
-            "/auth/reset-password": ["application/json"],
-            "/auth/change-password": ["application/json"],
-            "/auth/delete-account": ["application/json"],
-            "/users": ["application/json"],
-            "/admin": ["application/json"],
-            "/health": ["application/json"],
+            "/api/auth/login": ["application/x-www-form-urlencoded"],
+            "/api/auth/register": ["application/json"],
+            "/api/auth/refresh": ["application/json"],
+            "/api/auth/verify-email": ["application/json"],
+            "/api/auth/reset-password": ["application/json"],
+            "/api/auth/change-password": ["application/json"],
+            "/api/auth/delete-account": ["application/json"],
+            "/api/users": ["application/json"],
+            "/api/admin": ["application/json"],
+            "/api/system/health": ["application/json"],
             "/": ["text/html", "application/json"],
             "/docs": ["text/html"],
             "/redoc": ["text/html"],
-            "/openapi.json": ["application/json"],
+            "/api/openapi.json": ["application/json"],
         }
 
     async def dispatch(

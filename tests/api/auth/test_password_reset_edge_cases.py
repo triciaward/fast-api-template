@@ -38,7 +38,7 @@ class TestPasswordResetEdgeCases:
         monkeypatch.setattr(mod, "email_service", mock_email_service)
 
         resp = await async_client.post(
-            "/auth/forgot-password",
+            "/api/auth/forgot-password",
             json={"email": "test@example.com"},
         )
 
@@ -72,7 +72,7 @@ class TestPasswordResetEdgeCases:
         monkeypatch.setattr(mod, "email_service", mock_email_service)
 
         resp = await async_client.post(
-            "/auth/forgot-password",
+            "/api/auth/forgot-password",
             json={"email": "test@example.com"},
         )
 
@@ -91,7 +91,7 @@ class TestPasswordResetEdgeCases:
         monkeypatch.setattr(mod.crud_user, "get_user_by_email", error_function)
 
         resp = await async_client.post(
-            "/auth/forgot-password",
+            "/api/auth/forgot-password",
             json={"email": "test@example.com"},
         )
 
@@ -114,7 +114,7 @@ class TestPasswordResetEdgeCases:
         monkeypatch.setattr(mod, "email_service", mock_email_service)
 
         resp = await async_client.post(
-            "/auth/reset-password",
+            "/api/auth/reset-password",
             json={"token": "invalid-token", "new_password": "NewPassword123!"},
         )
 
@@ -140,7 +140,7 @@ class TestPasswordResetEdgeCases:
         monkeypatch.setattr(mod.crud_user, "get_user_by_id", mock_get_user_by_id)
 
         resp = await async_client.post(
-            "/auth/reset-password",
+            "/api/auth/reset-password",
             json={"token": "valid-token", "new_password": "NewPassword123!"},
         )
 
@@ -172,7 +172,7 @@ class TestPasswordResetEdgeCases:
         monkeypatch.setattr(mod.crud_user, "get_user_by_id", mock_get_user_by_id)
 
         resp = await async_client.post(
-            "/auth/reset-password",
+            "/api/auth/reset-password",
             json={"token": "valid-token", "new_password": "NewPassword123!"},
         )
 
@@ -208,7 +208,7 @@ class TestPasswordResetEdgeCases:
         monkeypatch.setattr(mod.crud_user, "reset_user_password", mock_reset_password)
 
         resp = await async_client.post(
-            "/auth/reset-password",
+            "/api/auth/reset-password",
             json={"token": "valid-token", "new_password": "NewPassword123!"},
         )
 
@@ -229,7 +229,7 @@ class TestPasswordResetEdgeCases:
         monkeypatch.setattr(mod, "email_service", mock_email_service)
 
         resp = await async_client.post(
-            "/auth/reset-password",
+            "/api/auth/reset-password",
             json={"token": "valid-token", "new_password": "NewPassword123!"},
         )
 

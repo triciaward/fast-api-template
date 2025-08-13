@@ -9,7 +9,7 @@ pytestmark = pytest.mark.unit
 async def test_login_invalid_email_format(async_client):
     # Invalid email format should return 400
     r = await async_client.post(
-        "/auth/login",
+        "/api/auth/login",
         data={"username": "not-an-email", "password": "x"},
         headers={"user-agent": "pytest"},
     )
@@ -26,7 +26,7 @@ async def test_login_rate_limited(async_client):
     # If enabled, repeated calls should eventually hit 429
     for _ in range(10):
         resp = await async_client.post(
-            "/auth/login",
+            "/api/auth/login",
             data={"username": "user@example.com", "password": "wrong"},
             headers={"user-agent": "pytest"},
         )

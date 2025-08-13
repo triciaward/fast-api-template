@@ -47,7 +47,7 @@ class TestAPIKeyValidation:
 
         try:
             resp = await async_client.post(
-                "/auth/api-keys",
+                "/api/auth/api-keys",
                 json={
                     "label": "Test API Key",
                     "scopes": ["invalid_scope"],  # Assuming this is invalid
@@ -92,7 +92,7 @@ class TestAPIKeyValidation:
 
         try:
             resp = await async_client.post(
-                "/auth/api-keys",
+                "/api/auth/api-keys",
                 json={
                     "label": "",  # Empty label
                     "scopes": ["read"],
@@ -138,7 +138,7 @@ class TestAPIKeyValidation:
 
         try:
             resp = await async_client.post(
-                "/auth/api-keys",
+                "/api/auth/api-keys",
                 json={
                     "label": "Past Expiration Key",
                     "scopes": ["read"],

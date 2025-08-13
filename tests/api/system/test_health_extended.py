@@ -38,7 +38,7 @@ async def test_health_check_database_failure(monkeypatch, async_client):
 
     app.dependency_overrides[mod.get_db] = fake_get_db
 
-    r = await async_client.get("/system/health")
+    r = await async_client.get("/api/system/health")
     app.dependency_overrides.clear()
     assert r.status_code == 500
 
@@ -57,7 +57,7 @@ async def test_readiness_check_failure(monkeypatch, async_client):
 
     app.dependency_overrides[mod.get_db] = fake_get_db
 
-    r = await async_client.get("/system/health/ready")
+    r = await async_client.get("/api/system/health/ready")
     app.dependency_overrides.clear()
     assert r.status_code == 503
 
@@ -90,7 +90,7 @@ async def test_database_health_success(monkeypatch, async_client):
 
     app.dependency_overrides[mod.get_db] = fake_get_db
 
-    r = await async_client.get("/system/health/database")
+    r = await async_client.get("/api/system/health/database")
     app.dependency_overrides.clear()
     assert r.status_code == 200
     data = r.json()

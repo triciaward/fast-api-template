@@ -16,7 +16,7 @@ def test_api_router_includes_websockets_when_enabled(monkeypatch):
 
     paths = {getattr(r, "path", None) for r in api_mod.api_router.routes}
     # The websockets router is mounted under /integrations
-    assert "/integrations/ws/status" in paths
+    assert "/api/integrations/ws/status" in paths
 
 
 @pytest.mark.unit
@@ -30,4 +30,4 @@ def test_api_router_excludes_websockets_when_disabled(monkeypatch):
     api_mod = importlib.import_module("app.api")
 
     paths = {getattr(r, "path", None) for r in api_mod.api_router.routes}
-    assert "/integrations/ws/status" not in paths
+    assert "/api/integrations/ws/status" not in paths

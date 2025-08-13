@@ -61,7 +61,7 @@ async def test_soft_delete_user_happy(monkeypatch, async_client):
 
     r = await async_client.request(
         "DELETE",
-        "/users/00000000-0000-0000-0000-000000000001/soft",
+        "/api/users/00000000-0000-0000-0000-000000000001/soft",
         json={"reason": "testing"},
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
@@ -86,7 +86,7 @@ async def test_soft_delete_user_not_found(monkeypatch, async_client):
 
     r = await async_client.request(
         "DELETE",
-        "/users/00000000-0000-0000-0000-000000000002/soft",
+        "/api/users/00000000-0000-0000-0000-000000000002/soft",
         json={"reason": "nope"},
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
@@ -112,7 +112,7 @@ async def test_restore_user_flow(monkeypatch, async_client):
     monkeypatch.setattr(crud_user, "restore_user", fake_restore_user)
 
     r = await async_client.post(
-        "/users/00000000-0000-0000-0000-000000000003/restore",
+        "/api/users/00000000-0000-0000-0000-000000000003/restore",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -145,7 +145,7 @@ async def test_list_deleted_users(monkeypatch, async_client):
     )
 
     r = await async_client.get(
-        "/users/deleted?page=1&size=2",
+        "/api/users/deleted?page=1&size=2",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -180,7 +180,7 @@ async def test_search_deleted_users(monkeypatch, async_client):
     )
 
     r = await async_client.get(
-        "/users/deleted/search?deletion_reason=cleanup",
+        "/api/users/deleted/search?deletion_reason=cleanup",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -208,7 +208,7 @@ async def test_permanently_delete_user_success(monkeypatch, async_client):
 
     r = await async_client.request(
         "DELETE",
-        "/users/00000000-0000-0000-0000-000000000004/permanent",
+        "/api/users/00000000-0000-0000-0000-000000000004/permanent",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()

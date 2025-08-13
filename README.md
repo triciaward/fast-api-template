@@ -1,8 +1,8 @@
-# 🚀 FastAPI Template v1.2.0 for Solo Developers
+# 🚀 FastAPI Template v1.2.1 for Solo Developers
 
 **The perfect starter for building your own projects that can scale. Built for vibe-coding with AI.**
 
-> 🆕 **NEW IN v1.2.0**: AI-optimized development with 60%+ cost savings! [See what's new →](docs/releases/RELEASE_1.2.0.md)
+> 🆕 **NEW IN v1.2.1**: Critical API routing fix + AI-optimized development with 60%+ cost savings! [See what's new →](docs/releases/RELEASE_1.2.1.md)
 
 [![CI](https://github.com/triciaward/fast-api-template/workflows/CI/badge.svg)](https://github.com/triciaward/fast-api-template/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -81,7 +81,7 @@ open http://localhost:8000/docs
 
 # Run the test suite
 pytest
-# Expected: 173 files, 561 passed, 98% coverage
+# Expected: 173 files, 570 passed, 98% coverage
 ```
 
 > Docs page tip: If `/docs` appears blank, just refresh once after startup. The template ships with a custom docs page and a relaxed CSP for docs only. If your network blocks CDNs, allowlist `unpkg.com` and `cdnjs.cloudflare.com` or serve Swagger UI assets locally.
@@ -122,6 +122,12 @@ If you're using AI assistants (Claude, ChatGPT, Cursor AI, etc.), they might off
 - **Async-first design** for good performance
 - **Type-safe** with full MyPy integration
 - **Code quality** tools (Black, Ruff) keep things clean
+
+### 🔧 **Professional API Structure**
+- **Consistent `/api` prefix** for all endpoints (e.g., `/api/admin/users`, `/api/auth/login`)
+- **Modern routing patterns** following industry best practices
+- **No more confusion** about endpoint paths - everything is clearly organized
+- **Professional-grade** foundation that scales with your project
 
 ### 🔐 **User Authentication & Security**
 - **JWT authentication** with refresh tokens
@@ -270,7 +276,7 @@ The template includes pre-configured Cursor rules that:
 
 ### **Everything is Tested**
 - **173 test files** with **98.2% coverage**
-- **561 passing tests** covering all core functionality
+- **570 passing tests** covering all core functionality
 - **10 optional feature tests** (skipped by default, can be enabled)
 
 ### **Optional Features**

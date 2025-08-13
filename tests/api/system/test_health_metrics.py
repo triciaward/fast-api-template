@@ -41,7 +41,7 @@ async def test_metrics_endpoint(monkeypatch, async_client):
     # Ensure our fake psutil is used when the endpoint imports it
     monkeypatch.setitem(sys.modules, "psutil", ps)
 
-    r = await async_client.get("/system/health/metrics")
+    r = await async_client.get("/api/system/health/metrics")
     assert r.status_code == 200
     data = r.json()
     assert "system" in data and "application" in data

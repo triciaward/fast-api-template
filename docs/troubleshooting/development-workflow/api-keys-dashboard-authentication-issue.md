@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-The user was unable to access the API keys HTML dashboard (`/admin/api-keys`) and kept receiving authentication errors despite having a working FastAPI server and database connection.
+The user was unable to access the API keys HTML dashboard (`/api/admin/api-keys`) and kept receiving authentication errors despite having a working FastAPI server and database connection.
 
 **Error Messages:**
 - `{"error":{"type":"AuthenticationError","message":"Not authenticated","code":"token_invalid","details":{}}}`
@@ -56,14 +56,14 @@ curl -X POST "http://localhost:8000/auth/login" \
 ### 3. Access Dashboard with JWT Token
 ```bash
 # Use the access_token from step 2
-curl -X GET "http://localhost:8000/admin/api-keys" \
+curl -X GET "http://localhost:8000/api/admin/api-keys" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN_HERE"
 ```
 
 ### 4. Alternative: Use Browser Extension
 1. **Install "ModHeader"** (Chrome) or "Header Editor" (Firefox)
 2. **Add Authorization header** with your JWT token
-3. **Visit**: `http://localhost:8000/admin/api-keys`
+3. **Visit**: `http://localhost:8000/api/admin/api-keys`
 
 ## Key Learnings
 
@@ -92,12 +92,12 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
 ### 2. Proper Authentication Testing
 ```bash
 # Test login first
-curl -X POST "http://localhost:8000/auth/login" \
+curl -X POST "http://localhost:8000/api/auth/login" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=admin@example.com&password=Admin123!"
 
 # Test protected endpoint with token
-curl -X GET "http://localhost:8000/admin/api-keys" \
+curl -X GET "http://localhost:8000/api/admin/api-keys" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -119,7 +119,7 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
 ### Method 1: Browser with Authorization Header (Recommended)
 1. **Get JWT token:**
    ```bash
-   curl -X POST "http://localhost:8000/auth/login" \
+   curl -X POST "http://localhost:8000/api/auth/login" \
      -H "Content-Type: application/x-www-form-urlencoded" \
      -d "username=admin@example.com&password=Admin123!"
    ```
@@ -130,7 +130,7 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
    - Header Name: `Authorization`
    - Header Value: `Bearer YOUR_ACCESS_TOKEN_HERE`
 
-4. **Visit dashboard**: `http://localhost:8000/admin/api-keys`
+4. **Visit dashboard**: `http://localhost:8000/api/admin/api-keys`
 
 ### Method 2: Browser Developer Tools
 1. **Open browser developer tools** (F12)
@@ -139,10 +139,10 @@ curl -X GET "http://localhost:8000/admin/api-keys" \
    - Right-click on any request → "Add request header"
    - Name: `Authorization`
    - Value: `Bearer YOUR_JWT_TOKEN`
-4. **Visit**: `http://localhost:8000/admin/api-keys`
+4. **Visit**: `http://localhost:8000/api/admin/api-keys`
 
 ### Method 3: Programmatic Access (curl)
-1. **Get JWT token** via `/auth/login`
+1. **Get JWT token** via `/api/auth/login`
 2. **Use Bearer token** in Authorization header
 3. **Access dashboard** with proper authentication
 

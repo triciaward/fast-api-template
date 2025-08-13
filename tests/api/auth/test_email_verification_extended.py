@@ -17,7 +17,7 @@ async def test_resend_verification_branches(monkeypatch, async_client):
 
     monkeypatch.setattr(crud_user, "get_user_by_email", none_user)
     r = await async_client.post(
-        "/auth/resend-verification",
+        "/api/auth/resend-verification",
         json={"email": "nobody@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -34,7 +34,7 @@ async def test_resend_verification_branches(monkeypatch, async_client):
 
     monkeypatch.setattr(crud_user, "get_user_by_email", verified_user)
     r2 = await async_client.post(
-        "/auth/resend-verification",
+        "/api/auth/resend-verification",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -52,7 +52,7 @@ async def test_resend_verification_branches(monkeypatch, async_client):
     monkeypatch.setattr(crud_user, "get_user_by_email", unverified_user)
     monkeypatch.setattr(ev, "email_service", None)
     r3 = await async_client.post(
-        "/auth/resend-verification",
+        "/api/auth/resend-verification",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -69,7 +69,7 @@ async def test_resend_verification_branches(monkeypatch, async_client):
     )
     monkeypatch.setattr(ev, "email_service", esvc)
     r4 = await async_client.post(
-        "/auth/resend-verification",
+        "/api/auth/resend-verification",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -86,7 +86,7 @@ async def test_resend_verification_branches(monkeypatch, async_client):
     )
     monkeypatch.setattr(ev, "email_service", esvc_ok)
     r5 = await async_client.post(
-        "/auth/resend-verification",
+        "/api/auth/resend-verification",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -101,7 +101,7 @@ async def test_verify_email_branches(monkeypatch, async_client):
     # Not configured -> verified False
     monkeypatch.setattr(ev, "email_service", None)
     r = await async_client.post(
-        "/auth/verify-email",
+        "/api/auth/verify-email",
         json={"token": "tok"},
         headers={"user-agent": "pytest"},
     )
@@ -117,7 +117,7 @@ async def test_verify_email_branches(monkeypatch, async_client):
     )
     monkeypatch.setattr(ev, "email_service", esvc)
     r2 = await async_client.post(
-        "/auth/verify-email",
+        "/api/auth/verify-email",
         json={"token": "tok"},
         headers={"user-agent": "pytest"},
     )
@@ -137,7 +137,7 @@ async def test_verify_email_branches(monkeypatch, async_client):
     monkeypatch.setattr(ev, "email_service", esvc2)
     monkeypatch.setattr(crud_user, "get_user_by_id", get_user_none)
     r3 = await async_client.post(
-        "/auth/verify-email",
+        "/api/auth/verify-email",
         json={"token": "tok"},
         headers={"user-agent": "pytest"},
     )
@@ -149,7 +149,7 @@ async def test_verify_email_branches(monkeypatch, async_client):
 
     monkeypatch.setattr(crud_user, "get_user_by_id", get_user_verified)
     r4 = await async_client.post(
-        "/auth/verify-email",
+        "/api/auth/verify-email",
         json={"token": "tok"},
         headers={"user-agent": "pytest"},
     )
@@ -165,7 +165,7 @@ async def test_verify_email_branches(monkeypatch, async_client):
     monkeypatch.setattr(crud_user, "get_user_by_id", get_user_unverified)
     monkeypatch.setattr(crud_user, "verify_user", verify_user_fail)
     r5 = await async_client.post(
-        "/auth/verify-email",
+        "/api/auth/verify-email",
         json={"token": "tok"},
         headers={"user-agent": "pytest"},
     )

@@ -47,7 +47,7 @@ async def test_oauth_google_success(monkeypatch, async_client):
     monkeypatch.setattr(rt, "set_refresh_token_cookie", fake_set_refresh_token_cookie)
 
     resp = await async_client.post(
-        "/auth/oauth/login",
+        "/api/auth/oauth/login",
         json={"provider": "google", "access_token": "valid_token"},
         headers={"user-agent": "pytest"},
     )
@@ -91,7 +91,7 @@ async def test_oauth_apple_success(monkeypatch, async_client):
     monkeypatch.setattr(rt, "set_refresh_token_cookie", fake_set_refresh_token_cookie)
 
     resp = await async_client.post(
-        "/auth/oauth/login",
+        "/api/auth/oauth/login",
         json={"provider": "apple", "access_token": "valid_token"},
         headers={"user-agent": "pytest"},
     )
@@ -113,7 +113,7 @@ async def test_oauth_provider_not_configured(monkeypatch, async_client):
     monkeypatch.setattr(mod, "oauth_service", FakeOAuth())
 
     resp = await async_client.post(
-        "/auth/oauth/login",
+        "/api/auth/oauth/login",
         json={"provider": "google", "access_token": "token"},
         headers={"user-agent": "pytest"},
     )

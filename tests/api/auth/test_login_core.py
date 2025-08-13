@@ -22,7 +22,7 @@ async def test_login_success_sets_refresh_cookie_and_returns_token(
     user = mock_authentication_success(monkeypatch)
 
     resp = await async_client.post(
-        "/auth/login",
+        "/api/auth/login",
         data={"username": "test@example.com", "password": "secret"},
         headers={
             "content-type": "application/x-www-form-urlencoded",
@@ -57,7 +57,7 @@ async def test_login_oauth_user_bypasses_verification_check(monkeypatch, async_c
     mock_authentication_success(monkeypatch, user)
 
     resp = await async_client.post(
-        "/auth/login",
+        "/api/auth/login",
         data={"username": "test@example.com", "password": "secret"},
         headers={
             "content-type": "application/x-www-form-urlencoded",
@@ -96,7 +96,7 @@ async def test_register_success_returns_user_data(monkeypatch, async_client):
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=False))
 
     resp = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "test@example.com",
             "username": "testuser",
@@ -141,7 +141,7 @@ async def test_register_with_email_service_sends_verification(
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=True))
 
     resp = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "test@example.com",
             "username": "testuser",

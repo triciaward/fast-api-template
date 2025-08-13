@@ -34,7 +34,10 @@ async def test_refresh_token_no_cookie(monkeypatch, async_client):
 
     monkeypatch.setattr(rt_svc, "get_refresh_token_from_cookie", lambda req: None)
 
-    resp = await async_client.post("/auth/refresh", headers={"user-agent": "pytest"})
+    resp = await async_client.post(
+        "/api/auth/refresh",
+        headers={"user-agent": "pytest"},
+    )
     assert resp.status_code == 401
 
 
@@ -49,7 +52,10 @@ async def test_refresh_token_success(monkeypatch, async_client):
 
     monkeypatch.setattr(rt_svc, "refresh_access_token", fake_refresh_access_token)
 
-    resp = await async_client.post("/auth/refresh", headers={"user-agent": "pytest"})
+    resp = await async_client.post(
+        "/api/auth/refresh",
+        headers={"user-agent": "pytest"},
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["access_token"] == "new_access"
@@ -67,7 +73,10 @@ async def test_refresh_token_invalid_token(monkeypatch, async_client):
 
     monkeypatch.setattr(rt_svc, "refresh_access_token", fake_refresh_access_token)
 
-    resp = await async_client.post("/auth/refresh", headers={"user-agent": "pytest"})
+    resp = await async_client.post(
+        "/api/auth/refresh",
+        headers={"user-agent": "pytest"},
+    )
     assert resp.status_code == 401
 
 
@@ -78,7 +87,7 @@ async def test_logout_no_cookie(monkeypatch, async_client):
     monkeypatch.setattr(rt_svc, "get_refresh_token_from_cookie", lambda req: None)
     monkeypatch.setattr(rt_svc, "clear_refresh_token_cookie", lambda resp: None)
 
-    resp = await async_client.post("/auth/logout", headers={"user-agent": "pytest"})
+    resp = await async_client.post("/api/auth/logout", headers={"user-agent": "pytest"})
     assert resp.status_code == 200
     assert resp.json()["message"].startswith("Successfully logged out")
 
@@ -110,7 +119,7 @@ async def test_logout_clears_cookie_and_revokes(monkeypatch, async_client):
     monkeypatch.setattr(rt_svc, "revoke_session", fake_revoke)
     monkeypatch.setattr(sm, "log_logout", fake_log)
 
-    resp = await async_client.post("/auth/logout", headers={"user-agent": "pytest"})
+    resp = await async_client.post("/api/auth/logout", headers={"user-agent": "pytest"})
     assert resp.status_code == 200
     assert resp.json()["message"].startswith("Successfully logged out")
 
@@ -149,7 +158,7 @@ async def test_get_sessions_success(monkeypatch, async_client):
     app.dependency_overrides[users_auth.get_current_user] = lambda: _user()
     try:
         resp = await async_client.get(
-            "/auth/sessions",
+            "/api/auth/sessions",
             headers={"user-agent": "pytest"},
         )
     finally:
@@ -168,7 +177,7 @@ async def test_revoke_session_invalid_id(monkeypatch, async_client):
     app.dependency_overrides[users_auth.get_current_user] = lambda: _user()
     try:
         resp = await async_client.delete(
-            "/auth/sessions/not-a-uuid",
+            "/api/auth/sessions/not-a-uuid",
             headers={"user-agent": "pytest"},
         )
     finally:
@@ -191,7 +200,7 @@ async def test_revoke_session_not_found(monkeypatch, async_client):
 
     try:
         resp = await async_client.delete(
-            "/auth/sessions/00000000-0000-0000-0000-0000000000bb",
+            "/api/auth/sessions/00000000-0000-0000-0000-0000000000bb",
             headers={"user-agent": "pytest"},
         )
     finally:
@@ -214,7 +223,7 @@ async def test_revoke_session_success(monkeypatch, async_client):
 
     try:
         resp = await async_client.delete(
-            "/auth/sessions/00000000-0000-0000-0000-0000000000bb",
+            "/api/auth/sessions/00000000-0000-0000-0000-0000000000bb",
             headers={"user-agent": "pytest"},
         )
     finally:
@@ -248,7 +257,7 @@ async def test_revoke_all_sessions_success(monkeypatch, async_client):
 
     try:
         resp = await async_client.delete(
-            "/auth/sessions",
+            "/api/auth/sessions",
             headers={"user-agent": "pytest"},
         )
     finally:
@@ -272,7 +281,7 @@ async def test_revoke_all_sessions_user_not_found(monkeypatch, async_client):
 
     try:
         resp = await async_client.delete(
-            "/auth/sessions",
+            "/api/auth/sessions",
             headers={"user-agent": "pytest"},
         )
     finally:
@@ -299,7 +308,10 @@ async def test_refresh_token_expires_in_calculation(monkeypatch, async_client):
 
     monkeypatch.setattr(rt_svc, "refresh_access_token", fake_refresh_access_token)
 
-    resp = await async_client.post("/auth/refresh", headers={"user-agent": "pytest"})
+    resp = await async_client.post(
+        "/api/auth/refresh",
+        headers={"user-agent": "pytest"},
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["expires_in"] == 42
@@ -340,7 +352,7 @@ async def test_get_sessions_multiple_with_is_current(monkeypatch, async_client):
 
     try:
         resp = await async_client.get(
-            "/auth/sessions",
+            "/api/auth/sessions",
             headers={"user-agent": "pytest"},
         )
     finally:

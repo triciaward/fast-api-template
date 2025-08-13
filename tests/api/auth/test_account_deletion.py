@@ -32,7 +32,7 @@ async def test_request_account_deletion_unconfigured_email(monkeypatch, async_cl
     )
 
     resp = await async_client.post(
-        "/auth/request-deletion",
+        "/api/auth/request-deletion",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -51,7 +51,7 @@ async def test_confirm_account_deletion_invalid_token(monkeypatch, async_client)
     monkeypatch.setattr(ad, "email_service", esvc)
 
     resp = await async_client.post(
-        "/auth/confirm-deletion",
+        "/api/auth/confirm-deletion",
         json={"token": "bad"},
         headers={"user-agent": "pytest"},
     )
@@ -70,7 +70,7 @@ async def test_cancel_account_deletion_no_pending(monkeypatch, async_client):
     monkeypatch.setattr(crud_user, "get_user_by_email", fake_get_user_by_email)
 
     resp = await async_client.post(
-        "/auth/cancel-deletion",
+        "/api/auth/cancel-deletion",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )

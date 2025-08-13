@@ -36,7 +36,7 @@ class TestPasswordChangeEdgeCases:
 
         try:
             resp = await async_client.post(
-                "/auth/change-password",
+                "/api/auth/change-password",
                 json={"current_password": "OldPass123!", "new_password": "NewPass123!"},
                 headers={"authorization": "Bearer token", "user-agent": "pytest"},
             )
@@ -73,7 +73,7 @@ class TestPasswordChangeEdgeCases:
 
         try:
             resp = await async_client.post(
-                "/auth/change-password",
+                "/api/auth/change-password",
                 json={"current_password": "OldPass123!", "new_password": "NewPass123!"},
                 headers={"authorization": "Bearer token", "user-agent": "pytest"},
             )
@@ -116,7 +116,7 @@ class TestPasswordChangeEdgeCases:
 
         try:
             resp = await async_client.post(
-                "/auth/change-password",
+                "/api/auth/change-password",
                 json={"current_password": "OldPass123!", "new_password": "NewPass123!"},
                 headers={"authorization": "Bearer token", "user-agent": "pytest"},
             )
@@ -145,7 +145,7 @@ class TestPasswordChangeEdgeCases:
 
         try:
             resp = await async_client.post(
-                "/auth/change-password",
+                "/api/auth/change-password",
                 json={"current_password": "OldPass123!", "new_password": "NewPass123!"},
                 headers={"authorization": "Bearer token", "user-agent": "pytest"},
             )

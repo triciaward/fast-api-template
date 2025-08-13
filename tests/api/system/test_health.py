@@ -36,7 +36,7 @@ async def test_root_endpoint(async_client):
 
 @pytest.mark.asyncio
 async def test_simple_health(async_client):
-    resp = await async_client.get("/system/health/simple")
+    resp = await async_client.get("/api/system/health/simple")
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "healthy"
@@ -45,7 +45,7 @@ async def test_simple_health(async_client):
 
 @pytest.mark.asyncio
 async def test_liveness(async_client):
-    resp = await async_client.get("/system/health/live")
+    resp = await async_client.get("/api/system/health/live")
     assert resp.status_code == 200
     data = resp.json()
     assert data["alive"] == "true"
@@ -54,7 +54,7 @@ async def test_liveness(async_client):
 
 @pytest.mark.asyncio
 async def test_metrics(async_client):
-    resp = await async_client.get("/system/health/metrics")
+    resp = await async_client.get("/api/system/health/metrics")
     assert resp.status_code == 200
     data = resp.json()
     assert "system" in data and "application" in data
@@ -62,7 +62,7 @@ async def test_metrics(async_client):
 
 @pytest.mark.asyncio
 async def test_rate_limit_info(async_client):
-    resp = await async_client.get("/system/health/rate-limit")
+    resp = await async_client.get("/api/system/health/rate-limit")
     assert resp.status_code == 200
     data = resp.json()
     assert "enabled" in data and "configuration" in data

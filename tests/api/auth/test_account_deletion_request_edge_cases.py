@@ -36,7 +36,7 @@ class TestAccountDeletionRequestEdgeCases:
             mp.setattr(mod, "email_service", mock_email_service)
 
             resp = await async_client.post(
-                "/auth/request-deletion",
+                "/api/auth/request-deletion",
                 json={"email": "test@example.com"},
             )
 
@@ -68,7 +68,7 @@ class TestAccountDeletionRequestEdgeCases:
             mp.setattr(mod, "email_service", mock_email_service)
 
             resp = await async_client.post(
-                "/auth/request-deletion",
+                "/api/auth/request-deletion",
                 json={"email": "test@example.com"},
             )
 
@@ -103,7 +103,7 @@ class TestAccountDeletionRequestEdgeCases:
             mp.setattr(mod, "email_service", mock_email_service)
 
             resp = await async_client.post(
-                "/auth/request-deletion",
+                "/api/auth/request-deletion",
                 json={"email": "test@example.com"},
             )
 
@@ -146,7 +146,7 @@ class TestAccountDeletionRequestEdgeCases:
             mp.setattr(mod, "log_account_deletion", mock_log_deletion)
 
             resp = await async_client.post(
-                "/auth/request-deletion",
+                "/api/auth/request-deletion",
                 json={"email": "test@example.com"},
             )
 
@@ -173,7 +173,7 @@ class TestAccountDeletionRequestEdgeCases:
             mp.setattr(mod.crud_user, "get_user_by_email", mock_get_user)
 
             resp = await async_client.post(
-                "/auth/request-deletion",
+                "/api/auth/request-deletion",
                 json={"email": "test@example.com"},
             )
 
@@ -200,7 +200,7 @@ class TestAccountDeletionRequestEdgeCases:
             mp.setattr(mod.crud_user, "get_user_by_email", mock_get_user)
 
             resp = await async_client.post(
-                "/auth/request-deletion",
+                "/api/auth/request-deletion",
                 json={"email": "test@example.com"},
             )
 
@@ -220,7 +220,7 @@ class TestAccountDeletionRequestEdgeCases:
             mp.setattr(mod.crud_user, "get_user_by_email", error_function)
 
             resp = await async_client.post(
-                "/auth/request-deletion",
+                "/api/auth/request-deletion",
                 json={"email": "test@example.com"},
             )
 

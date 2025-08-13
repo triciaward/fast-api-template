@@ -53,7 +53,7 @@ async def test_request_account_deletion_success(monkeypatch, async_client):
     monkeypatch.setattr(ad, "log_account_deletion", fake_log)
 
     resp = await async_client.post(
-        "/auth/request-deletion",
+        "/api/auth/request-deletion",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -97,7 +97,7 @@ async def test_confirm_account_deletion_success(monkeypatch, async_client):
     monkeypatch.setattr(ad, "log_account_deletion", fake_log)
 
     resp = await async_client.post(
-        "/auth/confirm-deletion",
+        "/api/auth/confirm-deletion",
         json={"token": "good-token"},
         headers={"user-agent": "pytest"},
     )
@@ -137,7 +137,7 @@ async def test_cancel_account_deletion_success(monkeypatch, async_client):
     monkeypatch.setattr(ad, "log_account_deletion", fake_log)
 
     resp = await async_client.post(
-        "/auth/cancel-deletion",
+        "/api/auth/cancel-deletion",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )

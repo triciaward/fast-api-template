@@ -28,7 +28,7 @@ async def test_soft_delete_failure_returns_500(monkeypatch, async_client):
 
     r = await async_client.request(
         "DELETE",
-        f"/users/{uuid.uuid4()}/soft",
+        f"/api/users/{uuid.uuid4()}/soft",
         json={"reason": "cleanup"},
     )
     app.dependency_overrides.clear()
@@ -47,7 +47,7 @@ async def test_restore_user_not_found_returns_404(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.crud_user, "get_user_by_id", get_user_by_id_none)
 
-    r = await async_client.post(f"/users/{uuid.uuid4()}/restore")
+    r = await async_client.post(f"/api/users/{uuid.uuid4()}/restore")
     app.dependency_overrides.clear()
     assert r.status_code == 404
 
@@ -68,7 +68,7 @@ async def test_restore_user_failure_returns_500(monkeypatch, async_client):
     monkeypatch.setattr(mod.crud_user, "get_user_by_id", get_user_by_id_deleted)
     monkeypatch.setattr(mod.crud_user, "restore_user", restore_user_fail)
 
-    r = await async_client.post(f"/users/{uuid.uuid4()}/restore")
+    r = await async_client.post(f"/api/users/{uuid.uuid4()}/restore")
     app.dependency_overrides.clear()
     assert r.status_code == 500
 
@@ -89,6 +89,6 @@ async def test_permanently_delete_user_failure_returns_500(monkeypatch, async_cl
     monkeypatch.setattr(mod.crud_user, "get_user_by_id", get_user_by_id_ok)
     monkeypatch.setattr(mod.crud_user, "permanently_delete_user", permanent_fail)
 
-    r = await async_client.delete(f"/users/{uuid.uuid4()}/permanent")
+    r = await async_client.delete(f"/api/users/{uuid.uuid4()}/permanent")
     app.dependency_overrides.clear()
     assert r.status_code == 500

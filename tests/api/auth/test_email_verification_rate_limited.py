@@ -40,7 +40,7 @@ async def test_resend_verification_success_with_rate_limit_enabled(
     monkeypatch.setattr(ev, "email_service", esvc)
 
     resp = await async_client.post(
-        "/auth/resend-verification",
+        "/api/auth/resend-verification",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -76,7 +76,7 @@ async def test_verify_email_success_with_rate_limit_enabled(monkeypatch, async_c
     monkeypatch.setattr(crud_user, "verify_user", fake_verify_user)
 
     resp = await async_client.post(
-        "/auth/verify-email",
+        "/api/auth/verify-email",
         json={"token": "tok"},
         headers={"user-agent": "pytest"},
     )
@@ -105,7 +105,7 @@ async def test_resend_verification_already_verified_with_rate_limit_enabled(
     monkeypatch.setattr(ev, "email_service", esvc)
 
     resp = await async_client.post(
-        "/auth/resend-verification",
+        "/api/auth/resend-verification",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -140,7 +140,7 @@ async def test_verify_email_already_verified_with_rate_limit_enabled(
     monkeypatch.setattr(crud_user, "get_user_by_id", fake_get_user_by_id)
 
     resp = await async_client.post(
-        "/auth/verify-email",
+        "/api/auth/verify-email",
         json={"token": "tok"},
         headers={"user-agent": "pytest"},
     )

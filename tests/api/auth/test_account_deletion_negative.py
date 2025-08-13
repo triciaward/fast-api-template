@@ -48,7 +48,7 @@ async def test_confirm_deletion_already_deleted(monkeypatch, async_client):
     monkeypatch.setattr(crud_user, "get_user_by_id", fake_get_user_by_id)
 
     resp = await async_client.post(
-        "/auth/confirm-deletion",
+        "/api/auth/confirm-deletion",
         json={"token": "tok"},
         headers={"user-agent": "pytest"},
     )
@@ -86,7 +86,7 @@ async def test_confirm_deletion_db_failure(monkeypatch, async_client):
     )
 
     resp = await async_client.post(
-        "/auth/confirm-deletion",
+        "/api/auth/confirm-deletion",
         json={"token": "tok"},
         headers={"user-agent": "pytest"},
     )

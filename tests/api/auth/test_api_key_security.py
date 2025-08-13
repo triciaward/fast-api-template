@@ -18,21 +18,21 @@ class TestAPIKeySecurityScenarios:
         """Test API key operations without authentication."""
         # Test create without auth
         resp = await async_client.post(
-            "/auth/api-keys",
+            "/api/auth/api-keys",
             json={"label": "Test API Key", "scopes": ["read"]},
         )
         assert resp.status_code == 401
 
         # Test list without auth
-        resp = await async_client.get("/auth/api-keys")
+        resp = await async_client.get("/api/auth/api-keys")
         assert resp.status_code == 401
 
         # Test delete without auth
-        resp = await async_client.delete(f"/auth/api-keys/{uuid4()}")
+        resp = await async_client.delete(f"/api/auth/api-keys/{uuid4()}")
         assert resp.status_code == 401
 
         # Test rotate without auth
-        resp = await async_client.post(f"/auth/api-keys/{uuid4()}/rotate")
+        resp = await async_client.post(f"/api/auth/api-keys/{uuid4()}/rotate")
         assert resp.status_code == 401
 
     async def test_api_key_cross_user_access(self, monkeypatch, async_client):
@@ -60,7 +60,7 @@ class TestAPIKeySecurityScenarios:
 
         try:
             resp = await async_client.delete(
-                f"/auth/api-keys/{other_user_api_key_id}",
+                f"/api/auth/api-keys/{other_user_api_key_id}",
                 headers={"authorization": "Bearer token"},
             )
             assert resp.status_code == 404  # Should not reveal existence
@@ -101,7 +101,7 @@ class TestAPIKeySecurityScenarios:
             # Create multiple API keys to test potential rate limiting
             for i in range(3):
                 resp = await async_client.post(
-                    "/auth/api-keys",
+                    "/api/auth/api-keys",
                     json={"label": f"Rate Test Key {i}", "scopes": ["read"]},
                     headers={"authorization": "Bearer token"},
                 )

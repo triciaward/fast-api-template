@@ -33,7 +33,7 @@ async def test_forgot_password_existing_user_success(monkeypatch, async_client):
     monkeypatch.setattr(mod, "email_service", email_service)
 
     resp = await async_client.post(
-        "/auth/forgot-password",
+        "/api/auth/forgot-password",
         json={"email": "user@example.com"},
     )
     assert resp.status_code == 200
@@ -56,7 +56,7 @@ async def test_forgot_password_nonexistent_user_returns_generic(
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=True))
 
     resp = await async_client.post(
-        "/auth/forgot-password",
+        "/api/auth/forgot-password",
         json={"email": "nope@example.com"},
     )
     assert resp.status_code == 200
@@ -78,7 +78,7 @@ async def test_forgot_password_service_unavailable(monkeypatch, async_client):
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=False))
 
     resp = await async_client.post(
-        "/auth/forgot-password",
+        "/api/auth/forgot-password",
         json={"email": "user@example.com"},
     )
     assert resp.status_code == 200
@@ -99,7 +99,7 @@ async def test_forgot_password_oauth_user_blocked(monkeypatch, async_client):
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=True))
 
     resp = await async_client.post(
-        "/auth/forgot-password",
+        "/api/auth/forgot-password",
         json={"email": "user@example.com"},
     )
     assert resp.status_code == 200
@@ -131,7 +131,7 @@ async def test_reset_password_happy_path(monkeypatch, async_client):
     monkeypatch.setattr(mod.crud_user, "reset_user_password", fake_reset_user_password)
 
     resp = await async_client.post(
-        "/auth/reset-password",
+        "/api/auth/reset-password",
         json={"token": "valid_token", "new_password": "Password123!"},
     )
     assert resp.status_code == 200
@@ -152,7 +152,7 @@ async def test_reset_password_invalid_token(monkeypatch, async_client):
     monkeypatch.setattr(mod, "email_service", email_service)
 
     resp = await async_client.post(
-        "/auth/reset-password",
+        "/api/auth/reset-password",
         json={"token": "invalid_token", "new_password": "Password123!"},
     )
     assert resp.status_code == 200
@@ -175,7 +175,7 @@ async def test_reset_password_tampered_token(monkeypatch, async_client):
     monkeypatch.setattr(mod, "email_service", email_service)
 
     resp = await async_client.post(
-        "/auth/reset-password",
+        "/api/auth/reset-password",
         json={"token": "tampered_token", "new_password": "Password123!"},
     )
     assert resp.status_code == 200
@@ -212,7 +212,7 @@ async def test_change_password_success(monkeypatch, async_client):
 
     try:
         resp = await async_client.post(
-            "/auth/change-password",
+            "/api/auth/change-password",
             json={"current_password": "old_password", "new_password": "Password123!"},
             headers={"authorization": "Bearer token", "user-agent": "pytest"},
         )
@@ -242,7 +242,7 @@ async def test_change_password_incorrect_current(monkeypatch, async_client):
 
     try:
         resp = await async_client.post(
-            "/auth/change-password",
+            "/api/auth/change-password",
             json={"current_password": "wrong", "new_password": "Password123!"},
             headers={"authorization": "Bearer token", "user-agent": "pytest"},
         )
@@ -267,7 +267,7 @@ async def test_change_password_oauth_user_denied(monkeypatch, async_client):
 
     try:
         resp = await async_client.post(
-            "/auth/change-password",
+            "/api/auth/change-password",
             json={"current_password": "old", "new_password": "Password123!"},
             headers={"authorization": "Bearer token", "user-agent": "pytest"},
         )

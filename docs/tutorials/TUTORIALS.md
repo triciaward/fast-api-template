@@ -400,7 +400,7 @@ pre-commit install && pre-commit run --all-files
 ### Important URLs
 - **API Documentation**: http://localhost:8000/docs
 - **Health Check**: http://localhost:8000/system/health
-- **Admin API**: http://localhost:8000/admin/users
+- **Admin API**: http://localhost:8000/api/admin/users
 
 ### 🔧 Useful External Tools
 - **[pgAdmin](https://www.pgadmin.org/)**: PostgreSQL database management

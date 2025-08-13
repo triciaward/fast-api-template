@@ -34,7 +34,7 @@ async def test_rate_limit_exceeded_handling(monkeypatch, async_client):
         lambda e: (False, "bad"),
     )
     resp = await async_client.post(
-        "/auth/login",
+        "/api/auth/login",
         data={"username": "user@example.com", "password": "bad"},
         headers={"user-agent": "pytest"},
     )

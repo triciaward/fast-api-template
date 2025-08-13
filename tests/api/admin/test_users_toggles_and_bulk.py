@@ -45,7 +45,7 @@ async def test_toggle_superuser_success(monkeypatch, async_client):
     )
 
     resp = await async_client.post(
-        "/admin/users/00000000-0000-0000-0000-000000000002/toggle-superuser",
+        "/api/admin/users/00000000-0000-0000-0000-000000000002/toggle-superuser",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -76,7 +76,7 @@ async def test_toggle_superuser_not_found(monkeypatch, async_client):
     )
 
     resp = await async_client.post(
-        "/admin/users/00000000-0000-0000-0000-000000000099/toggle-superuser",
+        "/api/admin/users/00000000-0000-0000-0000-000000000099/toggle-superuser",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -103,7 +103,7 @@ async def test_toggle_verification_success(monkeypatch, async_client):
     )
 
     resp = await async_client.post(
-        "/admin/users/00000000-0000-0000-0000-000000000003/toggle-verification",
+        "/api/admin/users/00000000-0000-0000-0000-000000000003/toggle-verification",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -134,7 +134,7 @@ async def test_toggle_verification_not_found(monkeypatch, async_client):
     )
 
     resp = await async_client.post(
-        "/admin/users/00000000-0000-0000-0000-000000000098/toggle-verification",
+        "/api/admin/users/00000000-0000-0000-0000-000000000098/toggle-verification",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -178,7 +178,7 @@ async def test_bulk_operations_verify_mixed(monkeypatch, async_client):
     }
 
     resp = await async_client.post(
-        "/admin/bulk-operations",
+        "/api/admin/bulk-operations",
         json=req,
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
@@ -219,7 +219,7 @@ async def test_bulk_operations_unverify_counts(monkeypatch, async_client):
     }
 
     resp = await async_client.post(
-        "/admin/bulk-operations",
+        "/api/admin/bulk-operations",
         json=req,
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )

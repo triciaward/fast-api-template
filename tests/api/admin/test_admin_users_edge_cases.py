@@ -52,7 +52,7 @@ async def test_list_users_with_filters(monkeypatch, async_client):
     monkeypatch.setattr(mod.admin_user_crud, "get_users", fake_get_users)
     monkeypatch.setattr(mod.admin_user_crud, "count", fake_count)
 
-    r = await async_client.get("/admin/users?is_verified=true&is_deleted=false")
+    r = await async_client.get("/api/admin/users?is_verified=true&is_deleted=false")
     app.dependency_overrides.clear()
     assert r.status_code == 200
     assert r.json()["metadata"]["total"] == 1
@@ -70,7 +70,7 @@ async def test_get_user_not_found(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.admin_user_crud, "get", fake_get)
 
-    r = await async_client.get(f"/admin/users/{uuid.uuid4()}")
+    r = await async_client.get(f"/api/admin/users/{uuid.uuid4()}")
     app.dependency_overrides.clear()
     assert r.status_code == 404
 
@@ -88,7 +88,7 @@ async def test_create_user_conflicts_and_failure(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_email", email_conflict)
     r = await async_client.post(
-        "/admin/users",
+        "/api/admin/users",
         json={
             "email": "x@example.com",
             "username": "userxxx",
@@ -108,7 +108,7 @@ async def test_create_user_conflicts_and_failure(monkeypatch, async_client):
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_email", none_email)
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_username", username_conflict)
     r = await async_client.post(
-        "/admin/users",
+        "/api/admin/users",
         json={
             "email": "x2@example.com",
             "username": "useryyy",
@@ -128,7 +128,7 @@ async def test_create_user_conflicts_and_failure(monkeypatch, async_client):
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_username", username_ok)
     monkeypatch.setattr(mod.admin_user_crud, "create_user", create_fail)
     r = await async_client.post(
-        "/admin/users",
+        "/api/admin/users",
         json={
             "email": "x3@example.com",
             "username": "userzzz",
@@ -154,7 +154,7 @@ async def test_update_user_conflicts_not_found_and_failure(monkeypatch, async_cl
         return None
 
     monkeypatch.setattr(mod.admin_user_crud, "get", get_none)
-    r = await async_client.put(f"/admin/users/{uid}", json={})
+    r = await async_client.put(f"/api/admin/users/{uid}", json={})
     assert r.status_code == 404
 
     # Found but email conflict
@@ -169,7 +169,10 @@ async def test_update_user_conflicts_not_found_and_failure(monkeypatch, async_cl
         return object()
 
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_email", email_conflict2)
-    r = await async_client.put(f"/admin/users/{uid}", json={"email": "new@example.com"})
+    r = await async_client.put(
+        f"/api/admin/users/{uid}",
+        json={"email": "new@example.com"},
+    )
     assert r.status_code == 400
 
     # Username conflict
@@ -181,7 +184,7 @@ async def test_update_user_conflicts_not_found_and_failure(monkeypatch, async_cl
 
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_email", none_email2)
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_username", username_conflict2)
-    r = await async_client.put(f"/admin/users/{uid}", json={"username": "userabc"})
+    r = await async_client.put(f"/api/admin/users/{uid}", json={"username": "userabc"})
     assert r.status_code == 400
 
     # Update failure
@@ -193,7 +196,7 @@ async def test_update_user_conflicts_not_found_and_failure(monkeypatch, async_cl
 
     monkeypatch.setattr(mod.admin_user_crud, "get_user_by_username", username_ok2)
     monkeypatch.setattr(mod.admin_user_crud, "update_user", update_fail)
-    r = await async_client.put(f"/admin/users/{uid}", json={"username": "userabc"})
+    r = await async_client.put(f"/api/admin/users/{uid}", json={"username": "userabc"})
     app.dependency_overrides.clear()
     assert r.status_code == 500
 
@@ -207,7 +210,7 @@ async def test_delete_user_self_not_found_and_failure(monkeypatch, async_client)
     app.dependency_overrides[mod.require_superuser] = lambda: admin
 
     # Self-delete
-    r = await async_client.delete(f"/admin/users/{admin.id}")
+    r = await async_client.delete(f"/api/admin/users/{admin.id}")
     assert r.status_code == 400
 
     # Not found
@@ -215,7 +218,7 @@ async def test_delete_user_self_not_found_and_failure(monkeypatch, async_client)
         return None
 
     monkeypatch.setattr(mod.admin_user_crud, "get", get_none2)
-    r = await async_client.delete(f"/admin/users/{uuid.uuid4()}")
+    r = await async_client.delete(f"/api/admin/users/{uuid.uuid4()}")
     assert r.status_code == 404
 
     # Failure
@@ -227,7 +230,7 @@ async def test_delete_user_self_not_found_and_failure(monkeypatch, async_client)
 
     monkeypatch.setattr(mod.admin_user_crud, "get", get_ok)
     monkeypatch.setattr(mod.admin_user_crud, "delete_user", delete_fail)
-    r = await async_client.delete(f"/admin/users/{uuid.uuid4()}")
+    r = await async_client.delete(f"/api/admin/users/{uuid.uuid4()}")
     app.dependency_overrides.clear()
     assert r.status_code == 500
 
@@ -241,7 +244,7 @@ async def test_toggle_superuser_self_and_not_found(monkeypatch, async_client):
     app.dependency_overrides[mod.require_superuser] = lambda: admin
 
     # Self
-    r = await async_client.post(f"/admin/users/{admin.id}/toggle-superuser")
+    r = await async_client.post(f"/api/admin/users/{admin.id}/toggle-superuser")
     assert r.status_code == 400
 
     # Not found
@@ -249,7 +252,7 @@ async def test_toggle_superuser_self_and_not_found(monkeypatch, async_client):
         return None
 
     monkeypatch.setattr(mod.admin_user_crud, "toggle_superuser_status", toggle_none)
-    r = await async_client.post(f"/admin/users/{uuid.uuid4()}/toggle-superuser")
+    r = await async_client.post(f"/api/admin/users/{uuid.uuid4()}/toggle-superuser")
     app.dependency_overrides.clear()
     assert r.status_code == 404
 
@@ -266,7 +269,7 @@ async def test_toggle_verification_not_found(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.admin_user_crud, "toggle_verification_status", toggle_none)
 
-    r = await async_client.post(f"/admin/users/{uuid.uuid4()}/toggle-verification")
+    r = await async_client.post(f"/api/admin/users/{uuid.uuid4()}/toggle-verification")
     app.dependency_overrides.clear()
     assert r.status_code == 404
 
@@ -282,7 +285,7 @@ async def test_force_delete_not_found_and_failure(monkeypatch, async_client):
         return None
 
     monkeypatch.setattr(mod.admin_user_crud, "get", get_none3)
-    r = await async_client.post(f"/admin/users/{uuid.uuid4()}/force-delete")
+    r = await async_client.post(f"/api/admin/users/{uuid.uuid4()}/force-delete")
     assert r.status_code == 404
 
     async def get_ok2(db, u):
@@ -293,7 +296,7 @@ async def test_force_delete_not_found_and_failure(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.admin_user_crud, "get", get_ok2)
     monkeypatch.setattr(mod.admin_user_crud, "force_delete_user", force_fail)
-    r = await async_client.post(f"/admin/users/{uuid.uuid4()}/force-delete")
+    r = await async_client.post(f"/api/admin/users/{uuid.uuid4()}/force-delete")
     app.dependency_overrides.clear()
     assert r.status_code == 500
 
@@ -317,7 +320,7 @@ async def test_bulk_operations_variants(monkeypatch, async_client):
     monkeypatch.setattr(mod.admin_user_crud, "toggle_verification_status", toggle_ver)
 
     r = await async_client.post(
-        "/admin/bulk-operations",
+        "/api/admin/bulk-operations",
         json={"operation": "verify", "user_ids": [str(uid)]},
     )
     assert r.status_code == 200 and r.json()["successful"] == 1
@@ -332,7 +335,7 @@ async def test_bulk_operations_variants(monkeypatch, async_client):
     monkeypatch.setattr(mod.admin_user_crud, "toggle_verification_status", toggle_ver2)
 
     r = await async_client.post(
-        "/admin/bulk-operations",
+        "/api/admin/bulk-operations",
         json={"operation": "unverify", "user_ids": [str(uid)]},
     )
     assert r.status_code == 200 and r.json()["successful"] == 1
@@ -343,7 +346,7 @@ async def test_bulk_operations_variants(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.admin_user_crud, "toggle_verification_status", toggle_raise)
     r = await async_client.post(
-        "/admin/bulk-operations",
+        "/api/admin/bulk-operations",
         json={"operation": "verify", "user_ids": [str(uid)]},
     )
     app.dependency_overrides.clear()

@@ -28,7 +28,7 @@ async def test_force_delete_user_not_found(monkeypatch, async_client):
     monkeypatch.setattr(admin_users.admin_user_crud, "get", fake_get)
 
     r = await async_client.post(
-        "/admin/users/00000000-0000-0000-0000-00000000fff0/force-delete",
+        "/api/admin/users/00000000-0000-0000-0000-00000000fff0/force-delete",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -57,7 +57,7 @@ async def test_force_delete_user_internal_error(monkeypatch, async_client):
     )
 
     r = await async_client.post(
-        "/admin/users/00000000-0000-0000-0000-00000000fff1/force-delete",
+        "/api/admin/users/00000000-0000-0000-0000-00000000fff1/force-delete",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -72,7 +72,7 @@ async def test_bulk_operations_invalid_operation(monkeypatch, async_client):
     app.dependency_overrides[core_admin_module.get_current_user] = lambda: _admin_user()
 
     r = await async_client.post(
-        "/admin/bulk-operations",
+        "/api/admin/bulk-operations",
         json={
             "operation": "noop",
             "user_ids": ["00000000-0000-0000-0000-000000000001"],

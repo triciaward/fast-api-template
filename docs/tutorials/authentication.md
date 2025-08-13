@@ -472,7 +472,7 @@ async def get_current_admin_user(
     return current_user
 
 # Use in endpoints
-@router.get("/admin/users")
+@router.get("/api/admin/users")
 async def get_all_users(
     current_user: User = Depends(get_current_admin_user),
     db: AsyncSession = Depends(get_db)

@@ -30,7 +30,7 @@ async def test_soft_delete_user_already_deleted(monkeypatch, async_client):
 
     r = await async_client.request(
         "DELETE",
-        "/users/00000000-0000-0000-0000-000000000010/soft",
+        "/api/users/00000000-0000-0000-0000-000000000010/soft",
         json={"reason": "already"},
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
@@ -52,7 +52,7 @@ async def test_restore_user_not_deleted(monkeypatch, async_client):
     monkeypatch.setattr(crud_user, "get_user_by_id", fake_get_user_by_id)
 
     r = await async_client.post(
-        "/users/00000000-0000-0000-0000-000000000011/restore",
+        "/api/users/00000000-0000-0000-0000-000000000011/restore",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -74,7 +74,7 @@ async def test_permanently_delete_user_not_found(monkeypatch, async_client):
 
     r = await async_client.request(
         "DELETE",
-        "/users/00000000-0000-0000-0000-000000000012/permanent",
+        "/api/users/00000000-0000-0000-0000-000000000012/permanent",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -100,7 +100,7 @@ async def test_permanently_delete_user_failure(monkeypatch, async_client):
 
     r = await async_client.request(
         "DELETE",
-        "/users/00000000-0000-0000-0000-000000000013/permanent",
+        "/api/users/00000000-0000-0000-0000-000000000013/permanent",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -153,7 +153,7 @@ async def test_search_deleted_users_filters_and_pagination_next(
 
     # Page 1 of size 2, total 4 -> has_next True, has_prev False
     r = await async_client.get(
-        "/users/deleted/search?deletion_reason=cleanup&deleted_by=00000000-0000-0000-0000-0000000000aa&deleted_after=2025-01-01T00:00:00Z&deleted_before=2025-01-03T00:00:00Z&page=1&size=2",
+        "/api/users/deleted/search?deletion_reason=cleanup&deleted_by=00000000-0000-0000-0000-0000000000aa&deleted_after=2025-01-01T00:00:00Z&deleted_before=2025-01-03T00:00:00Z&page=1&size=2",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -208,7 +208,7 @@ async def test_search_deleted_users_pagination_prev_only(monkeypatch, async_clie
 
     # Page 2 of size 2, total 3 -> total_pages 2, has_prev True, has_next False
     r = await async_client.get(
-        "/users/deleted/search?page=2&size=2",
+        "/api/users/deleted/search?page=2&size=2",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()

@@ -16,7 +16,7 @@ pytestmark = pytest.mark.unit
 async def test_login_invalid_email_format(async_client):
     """Test login with invalid email format returns 400."""
     resp = await async_client.post(
-        "/auth/login",
+        "/api/auth/login",
         data={"username": "not-an-email", "password": "x"},
         headers={
             "content-type": "application/x-www-form-urlencoded",
@@ -32,7 +32,7 @@ async def test_login_invalid_credentials(monkeypatch, async_client):
     mock_authentication_failure(monkeypatch, reason="invalid_credentials")
 
     resp = await async_client.post(
-        "/auth/login",
+        "/api/auth/login",
         data={"username": "user@example.com", "password": "wrong"},
         headers={
             "content-type": "application/x-www-form-urlencoded",
@@ -50,7 +50,7 @@ async def test_login_unverified_user_blocked(monkeypatch, async_client):
     mock_authentication_failure(monkeypatch, reason="unverified")
 
     resp = await async_client.post(
-        "/auth/login",
+        "/api/auth/login",
         data={"username": "user@example.com", "password": "secret"},
         headers={
             "content-type": "application/x-www-form-urlencoded",
@@ -80,7 +80,7 @@ async def test_login_invalid_password_with_validation(monkeypatch, async_client)
     monkeypatch.setattr(mod, "log_login_attempt", fake_log_login_attempt)
 
     resp = await async_client.post(
-        "/auth/login",
+        "/api/auth/login",
         data={"username": "u@example.com", "password": "bad"},
         headers={"user-agent": "pytest"},
     )
@@ -99,7 +99,7 @@ async def test_register_email_already_exists(monkeypatch, async_client):
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
 
     resp = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "existing@example.com",
             "username": "newuser",
@@ -130,7 +130,7 @@ async def test_register_username_already_exists(monkeypatch, async_client):
     )
 
     resp = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "new@example.com",
             "username": "existing",
@@ -177,7 +177,7 @@ async def test_register_email_service_not_configured_still_succeeds(
     monkeypatch.setattr(mod, "email_service", MockEmailService(configured=False))
 
     resp = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "test@example.com",
             "username": "testuser",

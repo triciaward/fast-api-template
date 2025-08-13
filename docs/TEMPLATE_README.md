@@ -12,7 +12,8 @@ A comprehensive, production-ready FastAPI template with authentication, admin pa
 [![Lint: Ruff](https://img.shields.io/badge/lint-ruff-red.svg)](https://github.com/astral-sh/ruff)
 [![Template Grade: A+](https://img.shields.io/badge/template%20grade-A%2B-brightgreen.svg)](https://github.com/triciaward/fast-api-template)
 [![Test Files: 173](https://img.shields.io/badge/test%20files-173-blue.svg)](https://github.com/triciaward/fast-api-template)
-[![Execution Time: 8.86s](https://img.shields.io/badge/execution%20time-8.86s-green.svg)](https://github.com/triciaward/fast-api-template)
+[![Tests Passing: 570](https://img.shields.io/badge/tests%20passing-570-brightgreen.svg)](https://github.com/triciaward/fast-api-template)
+[![Execution Time: 10.50s](https://img.shields.io/badge/execution%20time-10.50s-green.svg)](https://github.com/triciaward/fast-api-template)
 
 ## 🚀 Getting Started
 
@@ -270,6 +271,54 @@ app/
 └── database/              # Database configuration
 ```
 
+## 🌐 API Structure
+
+The template provides a **professional, consistent API structure** with all endpoints properly prefixed:
+
+### **API Endpoints**
+```
+/api/admin/          - Administrative functions
+├── /api/admin/users           - User management
+├── /api/admin/statistics      - System statistics
+└── /api/admin/bulk-operations - Bulk user operations
+
+/api/auth/           - Authentication & authorization
+├── /api/auth/login            - User login
+├── /api/auth/register         - User registration
+├── /api/auth/refresh          - Token refresh
+├── /api/auth/verify-email     - Email verification
+├── /api/auth/forgot-password  - Password reset
+├── /api/auth/api-keys         - API key management
+└── /api/auth/sessions         - Session management
+
+/api/users/          - User management
+├── /api/users/me              - Current user profile
+├── /api/users/search          - User search and filtering
+└── /api/users/{id}/soft      - Soft delete operations
+
+/api/system/         - System monitoring
+├── /api/system/health         - Health checks
+├── /api/system/health/detailed - Detailed health status
+├── /api/system/health/database - Database health
+├── /api/system/health/redis   - Redis health (if enabled)
+└── /api/system/health/metrics - Performance metrics
+
+/api/ws/             - WebSocket endpoints (if enabled)
+├── /api/ws/echo              - Echo service
+├── /api/ws/room              - Room-based messaging
+└── /api/ws/broadcast         - Broadcast messaging
+
+/api/integrations/   - Integration endpoints (if enabled)
+└── /api/integrations/status  - Integration status
+```
+
+### **Benefits of This Structure**
+- **Professional Standards**: Follows modern API design patterns
+- **Clear Organization**: Easy to understand and navigate
+- **Scalable**: Easy to add new features and endpoints
+- **Consistent**: All endpoints follow the same pattern
+- **Versionable**: Easy to add `/api/v2/` later if needed
+
 ## 🔧 Key Features
 
 ### **Async-First Architecture**
@@ -359,8 +408,45 @@ mypy app/
 
 ## 🧪 Testing
 
-- Run tests: `pytest -q`
-- With coverage: `pytest --cov=app --cov-report=term-missing -q`
+### **Current Test Results**
+- **Total Tests**: 580
+- **Passed**: 570 ✅
+- **Skipped**: 10 ⏭️ (intentional for optional features)
+- **Failed**: 0 ❌
+- **Coverage**: 98.2%
+
+### **Running Tests**
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=app --cov-report=term-missing
+
+# Run specific test categories
+pytest tests/api/admin/     # Admin API tests
+pytest tests/api/auth/      # Authentication tests
+pytest tests/api/users/     # User management tests
+pytest tests/api/system/    # System monitoring tests
+```
+
+### **Optional Feature Tests**
+Some tests are skipped by default for optional features. To enable them:
+
+```bash
+# Enable rate limiting tests
+ENABLE_RATE_LIMITING=true pytest
+
+# Enable WebSocket tests
+ENABLE_WEBSOCKETS=true pytest
+
+# Enable Celery tests
+ENABLE_CELERY=true pytest
+
+# Enable all optional features
+ENABLE_RATE_LIMITING=true ENABLE_WEBSOCKETS=true ENABLE_CELERY=true pytest
+```
+
 - Skipped, feature-flagged tests and how to enable them are documented in [`docs/testing/skipped-tests.md`](docs/testing/skipped-tests.md).
 
 ## 📊 Monitoring and Health
@@ -370,25 +456,25 @@ Comprehensive health monitoring:
 
 ```bash
 # Basic health
-curl http://localhost:8000/system/health
+curl http://localhost:8000/api/system/health
 
 # Simple health (load balancer)
-curl http://localhost:8000/system/health/simple
+curl http://localhost:8000/api/system/health/simple
 
 # Detailed health with database
-curl http://localhost:8000/system/health/detailed
+curl http://localhost:8000/api/system/health/detailed
 
 # Database-specific health
-curl http://localhost:8000/system/health/database
+curl http://localhost:8000/api/system/health/database
 
 # Application metrics
-curl http://localhost:8000/system/health/metrics
+curl http://localhost:8000/api/system/health/metrics
 
 # Readiness probe (Kubernetes)
-curl http://localhost:8000/system/health/ready
+curl http://localhost:8000/api/system/health/ready
 
 # Liveness probe (Kubernetes)
-curl http://localhost:8000/system/health/live
+curl http://localhost:8000/api/system/health/live
 ```
 
 ### **Performance Monitoring**

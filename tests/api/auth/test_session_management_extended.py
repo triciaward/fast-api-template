@@ -34,7 +34,7 @@ async def test_refresh_token_no_cookie(monkeypatch, async_client):
     monkeypatch.setattr(rt, "get_refresh_token_from_cookie", lambda req: None)
 
     resp = await async_client.post(
-        "/auth/refresh",
+        "/api/auth/refresh",
         headers={"authorization": "Bearer dummy", "user-agent": "pytest"},
     )
     assert resp.status_code == 401
@@ -73,7 +73,7 @@ async def test_get_user_sessions_happy(monkeypatch, async_client):
     monkeypatch.setattr(crud_rt, "get_user_sessions", fake_get_user_sessions)
 
     resp = await async_client.get(
-        "/auth/sessions",
+        "/api/auth/sessions",
         headers={"authorization": "Bearer dummy", "user-agent": "pytest"},
     )
     assert resp.status_code == 200

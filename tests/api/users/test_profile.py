@@ -32,7 +32,7 @@ async def test_read_current_user_with_valid_token(monkeypatch, async_client):
 
     # Inject Authorization header for OAuth2PasswordBearer
     resp = await async_client.get(
-        "/users/me",
+        "/api/users/me",
         headers={"authorization": "Bearer dummy", "user-agent": "pytest"},
     )
     assert resp.status_code == 200
@@ -68,7 +68,7 @@ async def test_read_current_user_api_key_success(monkeypatch, async_client):
     monkeypatch.setattr(audit, "log_api_key_usage", fake_log_api_key_usage)
 
     resp = await async_client.get(
-        "/users/me/api-key",
+        "/api/users/me/api-key",
         headers={"authorization": "Bearer TESTKEY", "user-agent": "pytest"},
     )
     assert resp.status_code == 200

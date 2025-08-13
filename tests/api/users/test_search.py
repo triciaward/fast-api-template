@@ -51,7 +51,7 @@ async def test_list_users_basic(monkeypatch, async_client):
     monkeypatch.setattr(search_module.admin_user_crud, "count", fake_count)
 
     resp = await async_client.get(
-        "/users/",
+        "/api/users/",
         headers={"authorization": "Bearer dummy", "user-agent": "pytest"},
     )
     assert resp.status_code == 200
@@ -89,7 +89,7 @@ async def test_search_users_metadata(monkeypatch, async_client):
     monkeypatch.setattr(search_module.admin_user_crud, "count", fake_count)
 
     resp = await async_client.get(
-        "/users/search?search=abc&is_verified=true&sort_by=username&sort_order=asc",
+        "/api/users/search?search=abc&is_verified=true&sort_by=username&sort_order=asc",
         headers={"authorization": "Bearer dummy", "user-agent": "pytest"},
     )
     assert resp.status_code == 200

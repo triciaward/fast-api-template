@@ -46,7 +46,7 @@ class TestAPIKeyCreation:
 
         try:
             resp = await async_client.post(
-                "/auth/api-keys",
+                "/api/auth/api-keys",
                 json={"label": "Test API Key", "scopes": ["read"]},
                 headers={"authorization": "Bearer token"},
             )
@@ -85,7 +85,7 @@ class TestAPIKeyCreation:
 
         try:
             resp = await async_client.post(
-                "/auth/api-keys",
+                "/api/auth/api-keys",
                 json={"label": "Test API Key", "scopes": ["read"]},
                 headers={"authorization": "Bearer token"},
             )
@@ -129,7 +129,7 @@ class TestAPIKeyCreation:
 
         try:
             resp = await async_client.post(
-                "/auth/api-keys",
+                "/api/auth/api-keys",
                 json={
                     "label": "Expiring API Key",
                     "scopes": ["read"],

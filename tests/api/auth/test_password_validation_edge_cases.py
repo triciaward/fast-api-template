@@ -44,7 +44,7 @@ class TestPasswordValidationEdgeCases:
 
         # Simulate successful flow despite rate limiting
         resp = await async_client.post(
-            "/auth/forgot-password",
+            "/api/auth/forgot-password",
             json={"email": "test@example.com"},
         )
 
@@ -58,7 +58,7 @@ class TestPasswordValidationEdgeCases:
 
         # Test with empty token
         resp = await async_client.post(
-            "/auth/reset-password",
+            "/api/auth/reset-password",
             json={"token": "", "new_password": "NewPassword123!"},
         )
         assert resp.status_code == 200  # Application handles empty tokens gracefully
@@ -70,7 +70,7 @@ class TestPasswordValidationEdgeCases:
         monkeypatch.setattr(mod, "email_service", mock_email_service)
 
         resp = await async_client.post(
-            "/auth/reset-password",
+            "/api/auth/reset-password",
             json={"token": long_token, "new_password": "NewPassword123!"},
         )
         assert resp.status_code == 200
@@ -96,7 +96,7 @@ class TestPasswordValidationEdgeCases:
         try:
             # Test with weak password (assuming validation happens at schema level)
             resp = await async_client.post(
-                "/auth/change-password",
+                "/api/auth/change-password",
                 json={"current_password": "OldPass123!", "new_password": "123"},
                 headers={"authorization": "Bearer token", "user-agent": "pytest"},
             )
@@ -132,7 +132,7 @@ class TestPasswordValidationEdgeCases:
         monkeypatch.setattr(mod, "email_service", mock_email_service)
 
         resp = await async_client.post(
-            "/auth/forgot-password",
+            "/api/auth/forgot-password",
             json={"email": "test@example.com"},
         )
 

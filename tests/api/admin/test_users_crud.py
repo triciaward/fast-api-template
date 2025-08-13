@@ -63,7 +63,7 @@ async def test_admin_create_user_conflict_email(monkeypatch, async_client):
     )
 
     resp = await async_client.post(
-        "/admin/users",
+        "/api/admin/users",
         json={
             "email": "new@example.com",
             "username": "validuser",
@@ -109,7 +109,7 @@ async def test_admin_create_user_success(monkeypatch, async_client):
     monkeypatch.setattr(admin_users.admin_user_crud, "create_user", fake_create_user)
 
     resp = await async_client.post(
-        "/admin/users",
+        "/api/admin/users",
         json={
             "email": "ok@example.com",
             "username": "validuser",
@@ -148,7 +148,7 @@ async def test_admin_update_user_conflict_email(monkeypatch, async_client):
     )
 
     resp = await async_client.put(
-        "/admin/users/00000000-0000-0000-0000-000000000003",
+        "/api/admin/users/00000000-0000-0000-0000-000000000003",
         json={"email": "exists@example.com"},
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
@@ -195,7 +195,7 @@ async def test_admin_update_user_success(monkeypatch, async_client):
     monkeypatch.setattr(admin_users.admin_user_crud, "update_user", fake_update_user)
 
     resp = await async_client.put(
-        "/admin/users/00000000-0000-0000-0000-000000000004",
+        "/api/admin/users/00000000-0000-0000-0000-000000000004",
         json={"username": "updated"},
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
@@ -213,7 +213,7 @@ async def test_admin_delete_user_self_block(monkeypatch, async_client):
     app.dependency_overrides[core_admin_module.get_current_user] = lambda: admin
 
     resp = await async_client.delete(
-        f"/admin/users/{admin.id}",
+        f"/api/admin/users/{admin.id}",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -240,7 +240,7 @@ async def test_admin_delete_user_success(monkeypatch, async_client):
     monkeypatch.setattr(admin_users.admin_user_crud, "delete_user", fake_delete_user)
 
     resp = await async_client.delete(
-        "/admin/users/00000000-0000-0000-0000-000000000005",
+        "/api/admin/users/00000000-0000-0000-0000-000000000005",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -277,7 +277,7 @@ async def test_admin_statistics(monkeypatch, async_client):
     )
 
     resp = await async_client.get(
-        "/admin/statistics",
+        "/api/admin/statistics",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()

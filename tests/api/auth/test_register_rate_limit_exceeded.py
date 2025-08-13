@@ -27,7 +27,7 @@ async def test_register_rate_limit_exceeded(monkeypatch, async_client):
     monkeypatch.setattr(rl, "limiter", FakeLimiter())
 
     resp = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "a@example.com",
             "username": "newuser",

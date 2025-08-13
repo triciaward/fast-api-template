@@ -45,7 +45,7 @@ class TestAPIKeyListing:
 
         try:
             resp = await async_client.get(
-                "/auth/api-keys",
+                "/api/auth/api-keys",
                 headers={"authorization": "Bearer token"},
             )
             assert resp.status_code == 200
@@ -102,7 +102,7 @@ class TestAPIKeyListing:
 
         try:
             resp = await async_client.get(
-                "/auth/api-keys?page=1&size=3",
+                "/api/auth/api-keys?page=1&size=3",
                 headers={"authorization": "Bearer token"},
             )
             assert resp.status_code == 200

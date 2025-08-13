@@ -38,7 +38,7 @@ class TestAPIKeyDeactivation:
 
         try:
             resp = await async_client.delete(
-                f"/auth/api-keys/{api_key_id}",
+                f"/api/auth/api-keys/{api_key_id}",
                 headers={"authorization": "Bearer token"},
             )
             assert resp.status_code == 204
@@ -69,7 +69,7 @@ class TestAPIKeyDeactivation:
 
         try:
             resp = await async_client.delete(
-                f"/auth/api-keys/{api_key_id}",
+                f"/api/auth/api-keys/{api_key_id}",
                 headers={"authorization": "Bearer token"},
             )
             assert resp.status_code == 404
@@ -91,7 +91,7 @@ class TestAPIKeyDeactivation:
 
         try:
             resp = await async_client.delete(
-                "/auth/api-keys/invalid-uuid",
+                "/api/auth/api-keys/invalid-uuid",
                 headers={"authorization": "Bearer token"},
             )
             # Should return 422 for validation error or handle gracefully

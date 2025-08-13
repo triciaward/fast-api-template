@@ -24,7 +24,7 @@ async def test_request_deletion_email_service_unconfigured(monkeypatch, async_cl
     monkeypatch.setattr(ad, "email_service", None)
 
     resp = await async_client.post(
-        "/auth/request-deletion",
+        "/api/auth/request-deletion",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -58,7 +58,7 @@ async def test_request_deletion_token_creation_failure(monkeypatch, async_client
     monkeypatch.setattr(ad, "email_service", esvc)
 
     resp = await async_client.post(
-        "/auth/request-deletion",
+        "/api/auth/request-deletion",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -100,7 +100,7 @@ async def test_request_deletion_mark_failure(monkeypatch, async_client):
     monkeypatch.setattr(ad, "email_service", esvc)
 
     resp = await async_client.post(
-        "/auth/request-deletion",
+        "/api/auth/request-deletion",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -143,7 +143,7 @@ async def test_request_deletion_email_send_failure(monkeypatch, async_client):
     monkeypatch.setattr(ad, "email_service", esvc)
 
     resp = await async_client.post(
-        "/auth/request-deletion",
+        "/api/auth/request-deletion",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -157,7 +157,7 @@ async def test_confirm_deletion_unconfigured_service(monkeypatch, async_client):
 
     monkeypatch.setattr(ad, "email_service", None)
     resp = await async_client.post(
-        "/auth/confirm-deletion",
+        "/api/auth/confirm-deletion",
         json={"token": "x"},
         headers={"user-agent": "pytest"},
     )
@@ -179,7 +179,7 @@ async def test_confirm_deletion_invalid_token(monkeypatch, async_client):
     monkeypatch.setattr(ad, "email_service", esvc)
 
     resp = await async_client.post(
-        "/auth/confirm-deletion",
+        "/api/auth/confirm-deletion",
         json={"token": "bad"},
         headers={"user-agent": "pytest"},
     )
@@ -211,7 +211,7 @@ async def test_cancel_deletion_fail_cancel(monkeypatch, async_client):
     )
 
     resp = await async_client.post(
-        "/auth/cancel-deletion",
+        "/api/auth/cancel-deletion",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )

@@ -46,7 +46,7 @@ class TestAPIKeyRotation:
 
         try:
             resp = await async_client.post(
-                f"/auth/api-keys/{api_key_id}/rotate",
+                f"/api/auth/api-keys/{api_key_id}/rotate",
                 headers={"authorization": "Bearer token"},
             )
             assert resp.status_code == 200
@@ -77,7 +77,7 @@ class TestAPIKeyRotation:
 
         try:
             resp = await async_client.post(
-                f"/auth/api-keys/{api_key_id}/rotate",
+                f"/api/auth/api-keys/{api_key_id}/rotate",
                 headers={"authorization": "Bearer token"},
             )
             assert resp.status_code == 404
@@ -112,7 +112,7 @@ class TestAPIKeyRotation:
 
         try:
             resp = await async_client.post(
-                f"/auth/api-keys/{api_key_id}/rotate",
+                f"/api/auth/api-keys/{api_key_id}/rotate",
                 headers={"authorization": "Bearer token"},
             )
             assert resp.status_code == 500

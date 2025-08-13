@@ -18,7 +18,7 @@ async def test_login_unexpected_error_returns_500(monkeypatch, async_client):
     mock_authentication_failure(monkeypatch, reason="exception")
 
     resp = await async_client.post(
-        "/auth/login",
+        "/api/auth/login",
         data={"username": "user@example.com", "password": "secret"},
         headers={
             "content-type": "application/x-www-form-urlencoded",
@@ -55,7 +55,7 @@ async def test_login_unexpected_error_maps_to_500_with_validation_bypass(
     monkeypatch.setattr(audit, "log_login_attempt", noop)
 
     resp = await async_client.post(
-        "/auth/login",
+        "/api/auth/login",
         data={"username": "a@example.com", "password": "Passw0rd!"},
         headers={
             "content-type": "application/x-www-form-urlencoded",
@@ -128,7 +128,7 @@ async def test_register_verification_token_none_still_succeeds(
     monkeypatch.setattr(mod, "email_service", FakeEmail())
 
     resp = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "e@example.com",
             "username": "zetatest",

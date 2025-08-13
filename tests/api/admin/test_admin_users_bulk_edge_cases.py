@@ -34,7 +34,7 @@ async def test_bulk_operations_mixed_and_invalid(monkeypatch, async_client):
 
     # verify: first id toggles twice to become verified, second fails, third already verified counts success
     r = await async_client.post(
-        "/admin/bulk-operations",
+        "/api/admin/bulk-operations",
         json={"operation": "verify", "user_ids": [str(i) for i in ids]},
     )
     assert r.status_code == 200
@@ -47,7 +47,7 @@ async def test_bulk_operations_mixed_and_invalid(monkeypatch, async_client):
 
     # invalid operation should mark all as failed
     r = await async_client.post(
-        "/admin/bulk-operations",
+        "/api/admin/bulk-operations",
         json={"operation": "noop", "user_ids": [str(i) for i in ids]},
     )
     app.dependency_overrides.clear()

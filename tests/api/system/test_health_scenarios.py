@@ -70,7 +70,7 @@ async def test_health_check_db_pool_metrics_success(monkeypatch, async_client):
     fake_db_module = types.SimpleNamespace(engine=FakeEngine())
     monkeypatch.setitem(sys.modules, "app.database.database", fake_db_module)
 
-    r = await async_client.get("/system/health")
+    r = await async_client.get("/api/system/health")
     app.dependency_overrides.clear()
     assert r.status_code == 200
     data = r.json()
@@ -109,7 +109,7 @@ async def test_health_check_db_pool_metrics_failure(monkeypatch, async_client):
     original_import = __import__
     monkeypatch.setattr("builtins.__import__", boom_import)  # type: ignore[arg-type]
 
-    r = await async_client.get("/system/health")
+    r = await async_client.get("/api/system/health")
     app.dependency_overrides.clear()
     # When pool metrics fail, endpoint raises 500
     assert r.status_code == 500
@@ -144,7 +144,7 @@ async def test_database_health_endpoint_unhealthy(monkeypatch, async_client):
 
     app.dependency_overrides[mod.get_db] = fake_get_db
 
-    r = await async_client.get("/system/health/database")
+    r = await async_client.get("/api/system/health/database")
     app.dependency_overrides.clear()
     assert r.status_code == 200
     data = r.json()

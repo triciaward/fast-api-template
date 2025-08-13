@@ -24,7 +24,7 @@ class TestAccountDeletionSecurityScenarios:
             mp.setattr(mod.crud_user, "get_user_by_email", mock_get_user)
 
             resp = await async_client.post(
-                "/auth/request-deletion",
+                "/api/auth/request-deletion",
                 json={"email": "nonexistent@example.com"},
             )
 
@@ -68,7 +68,7 @@ class TestAccountDeletionSecurityScenarios:
             # Multiple requests should still work (rate limiting is handled by decorator)
             for _ in range(3):
                 resp = await async_client.post(
-                    "/auth/request-deletion",
+                    "/api/auth/request-deletion",
                     json={"email": "test@example.com"},
                 )
                 assert resp.status_code == 200
@@ -86,7 +86,7 @@ class TestAccountDeletionSecurityScenarios:
             mp.setattr(mod, "email_service", mock_email_service)
 
             resp = await async_client.post(
-                "/auth/confirm-deletion",
+                "/api/auth/confirm-deletion",
                 json={"token": ""},
             )
             assert (
@@ -95,7 +95,7 @@ class TestAccountDeletionSecurityScenarios:
 
             # Test malformed token
             resp = await async_client.post(
-                "/auth/confirm-deletion",
+                "/api/auth/confirm-deletion",
                 json={"token": "malformed.token.here"},
             )
             assert resp.status_code == 200
@@ -136,7 +136,7 @@ class TestAccountDeletionSecurityScenarios:
             mp.setattr(mod, "log_account_deletion", mock_log_deletion)
 
             resp = await async_client.post(
-                "/auth/request-deletion",
+                "/api/auth/request-deletion",
                 json={"email": "test@example.com"},
             )
 

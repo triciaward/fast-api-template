@@ -11,10 +11,10 @@ pytestmark = pytest.mark.unit
 async def test_sensitive_health_endpoints_require_api_key(async_client):
     # No Authorization header → 401
     for path in [
-        "/system/health/detailed",
-        "/system/health/database",
-        "/system/health/metrics",
-        "/system/health/test-sentry",
+        "/api/system/health/detailed",
+        "/api/system/health/database",
+        "/api/system/health/metrics",
+        "/api/system/health/test-sentry",
     ]:
         r = await async_client.get(path)
         assert r.status_code == 401
@@ -40,9 +40,9 @@ async def test_sensitive_health_endpoints_forbidden_without_scope(
     app.dependency_overrides[auth_mod.get_api_key_user] = fake_get_api_key_user
 
     for path in [
-        "/system/health/detailed",
-        "/system/health/database",
-        "/system/health/metrics",
+        "/api/system/health/detailed",
+        "/api/system/health/database",
+        "/api/system/health/metrics",
     ]:
         r = await async_client.get(path, headers={"Authorization": "Bearer dummy"})
         assert r.status_code == 403
@@ -66,16 +66,16 @@ async def test_sensitive_health_endpoints_allow_with_scope(async_client, monkeyp
 
     # detailed/database/metrics should succeed
     for path in [
-        "/system/health/detailed",
-        "/system/health/database",
-        "/system/health/metrics",
+        "/api/system/health/detailed",
+        "/api/system/health/database",
+        "/api/system/health/metrics",
     ]:
         r = await async_client.get(path, headers={"Authorization": "Bearer good"})
         assert r.status_code == 200
 
     # test-sentry will raise 500 after auth passes
     r = await async_client.get(
-        "/system/health/test-sentry",
+        "/api/system/health/test-sentry",
         headers={"Authorization": "Bearer good"},
     )
     assert r.status_code == 500
@@ -85,10 +85,10 @@ async def test_sensitive_health_endpoints_allow_with_scope(async_client, monkeyp
 @pytest.mark.asyncio
 async def test_public_health_endpoints_remain_public(async_client):
     for path in [
-        "/system/health",
-        "/system/health/simple",
-        "/system/health/ready",
-        "/system/health/live",
+        "/api/system/health",
+        "/api/system/health/simple",
+        "/api/system/health/ready",
+        "/api/system/health/live",
     ]:
         r = await async_client.get(path)
         assert r.status_code == 200
@@ -126,14 +126,14 @@ async def test_rotation_old_rejected_new_accepted(async_client, monkeypatch):
 
     # Old key rejected
     r = await async_client.get(
-        "/system/health/detailed",
+        "/api/system/health/detailed",
         headers={"Authorization": "Bearer oldkey"},
     )
     assert r.status_code == 401
 
     # New key accepted
     r = await async_client.get(
-        "/system/health/detailed",
+        "/api/system/health/detailed",
         headers={"Authorization": "Bearer newkey"},
     )
     assert r.status_code == 200
@@ -167,7 +167,7 @@ async def test_deactivation_immediate_rejection(async_client, monkeypatch):
     monkeypatch.setattr(auth_mod.crud_api_key, "verify_api_key_in_db", fake_verify)
 
     r = await async_client.get(
-        "/system/health/detailed",
+        "/api/system/health/detailed",
         headers={"Authorization": "Bearer any"},
     )
     assert r.status_code == 401

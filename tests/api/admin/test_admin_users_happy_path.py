@@ -61,7 +61,7 @@ async def test_list_users_with_all_filters(monkeypatch, async_client):
     monkeypatch.setattr(mod.admin_user_crud, "count", fake_count)
 
     r = await async_client.get(
-        "/admin/users?is_superuser=true&is_verified=false&is_deleted=true&oauth_provider=google",
+        "/api/admin/users?is_superuser=true&is_verified=false&is_deleted=true&oauth_provider=google",
     )
     app.dependency_overrides.clear()
     assert r.status_code == 200
@@ -96,7 +96,7 @@ async def test_get_user_success(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.admin_user_crud, "get", fake_get)
 
-    r = await async_client.get(f"/admin/users/{uid}")
+    r = await async_client.get(f"/api/admin/users/{uid}")
     app.dependency_overrides.clear()
     assert r.status_code == 200
     assert r.json()["id"] == str(uid)
@@ -118,6 +118,6 @@ async def test_force_delete_user_success(monkeypatch, async_client):
     monkeypatch.setattr(mod.admin_user_crud, "get", fake_get)
     monkeypatch.setattr(mod.admin_user_crud, "force_delete_user", fake_force)
 
-    r = await async_client.post(f"/admin/users/{uuid.uuid4()}/force-delete")
+    r = await async_client.post(f"/api/admin/users/{uuid.uuid4()}/force-delete")
     app.dependency_overrides.clear()
     assert r.status_code == 204

@@ -6,6 +6,19 @@ This folder contains detailed release notes for all versions of the FastAPI Temp
 
 ## 🚀 **Latest Release**
 
+### **[v1.2.1 - Critical API Routing Fix](RELEASE_1.2.1.md)**
+**January 2025** - Critical Patch Release
+
+**Highlights:**
+- 🚨 **Fixed fundamental routing inconsistency** that caused confusion
+- 🔧 **Updated 66 test files** with 304 API path corrections
+- ✅ **All endpoints now consistently use `/api` prefix**
+- 🎯 **Professional API structure** following modern best practices
+
+**[Read Full Release Notes →](RELEASE_1.2.1.md)**
+
+---
+
 ### **[v1.2.0 - AI-Optimized Development System](RELEASE_1.2.0.md)**
 **August 13, 2025** - Major Release
 
@@ -70,6 +83,8 @@ v1.1.0 (July 2025)     → Enhanced features & stability
 v1.1.1 (August 2025)   → Bug fixes & UX improvements
     ↓
 v1.2.0 (August 2025)   → AI-optimized development system ✨
+    ↓
+v1.2.1 (January 2025)  → Critical API routing fix 🚨
 ```
 
 ---

@@ -7,8 +7,8 @@ from app.core.config import settings
 # Import domain routers
 from . import admin, auth, system, users
 
-# Create main API router
-api_router = APIRouter()
+# Create main API router with /api prefix
+api_router = APIRouter(prefix=settings.API_V1_STR)
 
 # Include core domain routers
 api_router.include_router(auth.router)

@@ -18,7 +18,7 @@ async def test_websocket_status_endpoint_feature_flag(monkeypatch, async_client)
         False,
         raising=False,
     )
-    resp = await async_client.get("/ws/status")
+    resp = await async_client.get("/api/ws/status")
     assert resp.status_code in (404, 200)
 
 
@@ -31,7 +31,7 @@ def test_websocket_echo_flow_with_testclient():
         pytest.skip("Websockets disabled in settings")
 
     with TestClient(app) as client:
-        with client.websocket_connect("/ws/demo") as ws:
+        with client.websocket_connect("/api/ws/demo") as ws:
             ws.send_text(json.dumps({"type": "echo", "message": "hello"}))
             message = ws.receive_text()
             payload = json.loads(message)

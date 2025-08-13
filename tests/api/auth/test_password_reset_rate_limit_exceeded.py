@@ -27,7 +27,7 @@ async def test_password_reset_rate_limit_exceeded(monkeypatch, async_client):
     monkeypatch.setattr(rl, "limiter", FakeLimiter())
 
     resp = await async_client.post(
-        "/auth/forgot-password",
+        "/api/auth/forgot-password",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )

@@ -35,7 +35,7 @@ async def test_admin_list_requires_superuser(monkeypatch, async_client):
     app.dependency_overrides[core_admin_module.get_current_user] = fake_get_current_user
 
     resp = await async_client.get(
-        "/admin/users",
+        "/api/admin/users",
         headers={"authorization": "Bearer dummy", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -66,7 +66,7 @@ async def test_admin_list_success(monkeypatch, async_client):
     monkeypatch.setattr(admin_users_module.admin_user_crud, "count", fake_count)
 
     resp = await async_client.get(
-        "/admin/users",
+        "/api/admin/users",
         headers={"authorization": "Bearer dummy", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()

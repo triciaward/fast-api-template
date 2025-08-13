@@ -28,7 +28,7 @@ async def test_oauth_rate_limit_exceeded(monkeypatch, async_client):
     monkeypatch.setattr(rl, "limiter", FakeLimiter())
 
     resp = await async_client.post(
-        "/auth/oauth/login",
+        "/api/auth/oauth/login",
         json={"provider": "google", "access_token": "token"},
         headers={"user-agent": "pytest"},
     )

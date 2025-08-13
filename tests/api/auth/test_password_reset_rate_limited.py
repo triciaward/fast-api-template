@@ -39,7 +39,7 @@ async def test_forgot_password_success_with_rate_limit_enabled(
     monkeypatch.setattr(pm, "email_service", esvc)
 
     resp = await async_client.post(
-        "/auth/forgot-password",
+        "/api/auth/forgot-password",
         json={"email": "user@example.com"},
         headers={"user-agent": "pytest"},
     )
@@ -77,7 +77,7 @@ async def test_reset_password_success_with_rate_limit_enabled(
     monkeypatch.setattr(crud_user, "reset_user_password", fake_reset_user_password)
 
     resp = await async_client.post(
-        "/auth/reset-password",
+        "/api/auth/reset-password",
         json={"token": "rtok", "new_password": "StrongPass123!"},
         headers={"user-agent": "pytest"},
     )

@@ -25,7 +25,7 @@ class TestAccountDeletionConfirmEdgeCases:
             mp.setattr(mod, "email_service", mock_email_service)
 
             resp = await async_client.post(
-                "/auth/confirm-deletion",
+                "/api/auth/confirm-deletion",
                 json={"token": "test-token"},
             )
 
@@ -45,7 +45,7 @@ class TestAccountDeletionConfirmEdgeCases:
             mp.setattr(mod, "email_service", mock_email_service)
 
             resp = await async_client.post(
-                "/auth/confirm-deletion",
+                "/api/auth/confirm-deletion",
                 json={"token": "invalid-token"},
             )
 
@@ -69,7 +69,7 @@ class TestAccountDeletionConfirmEdgeCases:
             mp.setattr(mod.crud_user, "get_user_by_id", mock_get_user_by_id)
 
             resp = await async_client.post(
-                "/auth/confirm-deletion",
+                "/api/auth/confirm-deletion",
                 json={"token": "valid-token"},
             )
 
@@ -99,7 +99,7 @@ class TestAccountDeletionConfirmEdgeCases:
             mp.setattr(mod.crud_user, "get_user_by_id", mock_get_user_by_id)
 
             resp = await async_client.post(
-                "/auth/confirm-deletion",
+                "/api/auth/confirm-deletion",
                 json={"token": "valid-token"},
             )
 
@@ -133,7 +133,7 @@ class TestAccountDeletionConfirmEdgeCases:
             mp.setattr(mod.crud_user, "confirm_account_deletion", mock_confirm_deletion)
 
             resp = await async_client.post(
-                "/auth/confirm-deletion",
+                "/api/auth/confirm-deletion",
                 json={"token": "valid-token"},
             )
 
@@ -173,7 +173,7 @@ class TestAccountDeletionConfirmEdgeCases:
             mp.setattr(mod.settings, "ACCOUNT_DELETION_GRACE_PERIOD_DAYS", 7)
 
             resp = await async_client.post(
-                "/auth/confirm-deletion",
+                "/api/auth/confirm-deletion",
                 json={"token": "valid-token"},
             )
 
@@ -204,7 +204,7 @@ class TestAccountDeletionConfirmEdgeCases:
             mp.setattr(mod, "email_service", mock_email_service)
 
             resp = await async_client.post(
-                "/auth/confirm-deletion",
+                "/api/auth/confirm-deletion",
                 json={"token": "valid-token"},
             )
 

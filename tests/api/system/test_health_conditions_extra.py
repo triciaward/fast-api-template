@@ -69,7 +69,7 @@ async def test_health_simple_includes_redis_when_enabled(monkeypatch, async_clie
     fake_db_module = types.SimpleNamespace(engine=FakeEngine())
     monkeypatch.setitem(sys.modules, "app.database.database", fake_db_module)
 
-    r = await async_client.get("/system/health")
+    r = await async_client.get("/api/system/health")
     app.dependency_overrides.clear()
     assert r.status_code == 200
     data = r.json()
@@ -90,7 +90,7 @@ async def test_detailed_health_db_failure(monkeypatch, async_client):
 
     app.dependency_overrides[mod.get_db] = fake_get_db
 
-    r = await async_client.get("/system/health/detailed")
+    r = await async_client.get("/api/system/health/detailed")
     app.dependency_overrides.clear()
     assert r.status_code == 200
     data = r.json()
@@ -125,7 +125,7 @@ async def test_detailed_health_redis_enabled_but_no_client(monkeypatch, async_cl
 
     monkeypatch.setattr(redis_mod, "get_redis_client", lambda: None, raising=False)
 
-    r = await async_client.get("/system/health/detailed")
+    r = await async_client.get("/api/system/health/detailed")
     app.dependency_overrides.clear()
     assert r.status_code == 200
     data = r.json()
@@ -161,7 +161,7 @@ async def test_readiness_with_redis_enabled_no_client(monkeypatch, async_client)
 
     monkeypatch.setattr(redis_mod, "get_redis_client", lambda: None, raising=False)
 
-    r = await async_client.get("/system/health/ready")
+    r = await async_client.get("/api/system/health/ready")
     app.dependency_overrides.clear()
     assert r.status_code == 200
     assert r.json()["ready"] is True
@@ -169,5 +169,5 @@ async def test_readiness_with_redis_enabled_no_client(monkeypatch, async_client)
 
 @pytest.mark.asyncio
 async def test_test_sentry_endpoint_returns_500(async_client):
-    r = await async_client.get("/system/health/test-sentry")
+    r = await async_client.get("/api/system/health/test-sentry")
     assert r.status_code == 500

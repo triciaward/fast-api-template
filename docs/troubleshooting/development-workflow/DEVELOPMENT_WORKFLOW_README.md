@@ -55,22 +55,22 @@ This runs pre-commit hooks first (format, lint, type checks), stages auto-fixes,
 ### Authentication Testing:
 ```bash
 # Test login
-curl -X POST "http://localhost:8000/auth/login" \
+curl -X POST "http://localhost:8000/api/auth/login" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=admin@example.com&password=Admin123!"
 
 # Test API keys dashboard with token
-curl -X GET "http://localhost:8000/admin/api-keys" \
+curl -X GET "http://localhost:8000/api/admin/api-keys" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN_HERE"
 ```
 
 ### Auth System Verification:
 ```bash
 # Check auth endpoints
-curl http://localhost:8000/auth/oauth/providers
+curl http://localhost:8000/api/auth/oauth/providers
 
 # Test registration
-curl -X POST http://localhost:8000/auth/register \
+curl -X POST http://localhost:8000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","username":"testuser","password":"TestPassword123!"}'
 ```

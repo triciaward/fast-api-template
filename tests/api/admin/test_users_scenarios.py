@@ -41,7 +41,7 @@ async def test_get_user_not_found(monkeypatch, async_client):
     monkeypatch.setattr(admin_users_module.admin_user_crud, "get", fake_get)
 
     resp = await async_client.get(
-        "/admin/users/11111111-1111-1111-1111-111111111111",
+        "/api/admin/users/11111111-1111-1111-1111-111111111111",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -61,7 +61,7 @@ async def test_toggle_superuser_self_block(monkeypatch, async_client):
     app.dependency_overrides[core_admin_module.get_current_user] = fake_get_current_user
 
     resp = await async_client.post(
-        f"/admin/users/{current_admin.id}/toggle-superuser",
+        f"/api/admin/users/{current_admin.id}/toggle-superuser",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()

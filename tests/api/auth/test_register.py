@@ -37,7 +37,7 @@ async def test_register_email_exists(monkeypatch, async_client):
     )
 
     resp = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "new@example.com",
             "username": "newuser",
@@ -75,7 +75,7 @@ async def test_register_username_taken(monkeypatch, async_client):
     )
 
     resp = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "new@example.com",
             "username": "newuser",
@@ -121,7 +121,7 @@ async def test_register_success_without_email_service(monkeypatch, async_client)
     monkeypatch.setattr(login_module.crud_user, "create_user", fake_create_user)
 
     resp = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "new@example.com",
             "username": "newuser",
@@ -172,7 +172,7 @@ async def test_register_success_with_email_service(monkeypatch, async_client):
     monkeypatch.setattr(login_module.crud_user, "create_user", fake_create_user)
 
     resp = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "new@example.com",
             "username": "newuser",

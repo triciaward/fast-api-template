@@ -19,7 +19,7 @@ async def test_register_integrity_email(monkeypatch, async_client):
     monkeypatch.setattr(mod.crud_user, "create_user", boom)
 
     r = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "e@example.com",
             "username": "zetauser",
@@ -46,7 +46,7 @@ async def test_register_integrity_username(monkeypatch, async_client):
     monkeypatch.setattr(mod.crud_user, "create_user", boom)
 
     r = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={
             "email": "e2@example.com",
             "username": "zetaname",
@@ -73,7 +73,7 @@ async def test_register_integrity_general(monkeypatch, async_client):
     monkeypatch.setattr(mod.crud_user, "create_user", boom)
 
     r = await async_client.post(
-        "/auth/register",
+        "/api/auth/register",
         json={"email": "e3@example.com", "username": "zetaok", "password": "Passw0rd!"},
         headers={"user-agent": "pytest"},
     )

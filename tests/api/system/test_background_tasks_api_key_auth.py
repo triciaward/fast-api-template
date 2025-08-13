@@ -12,16 +12,16 @@ async def test_background_tasks_require_api_key(async_client):
     from app.core.config import settings as settings_mod
 
     protected_paths = [
-        ("GET", "/system/status"),
-        ("GET", "/system/tasks/active"),
-        ("GET", "/system/tasks/123/status"),
-        ("POST", "/system/tasks/submit"),
-        ("DELETE", "/system/tasks/123/cancel"),
-        ("POST", "/system/tasks/send-email"),
-        ("POST", "/system/tasks/process-data"),
-        ("POST", "/system/tasks/cleanup"),
-        ("POST", "/system/tasks/long-running"),
-        ("POST", "/system/tasks/permanently-delete-accounts"),
+        ("GET", "/api/system/status"),
+        ("GET", "/api/system/tasks/active"),
+        ("GET", "/api/system/tasks/123/status"),
+        ("POST", "/api/system/tasks/submit"),
+        ("DELETE", "/api/system/tasks/123/cancel"),
+        ("POST", "/api/system/tasks/send-email"),
+        ("POST", "/api/system/tasks/process-data"),
+        ("POST", "/api/system/tasks/cleanup"),
+        ("POST", "/api/system/tasks/long-running"),
+        ("POST", "/api/system/tasks/permanently-delete-accounts"),
     ]
 
     for method, path in protected_paths:
@@ -49,9 +49,9 @@ async def test_background_tasks_forbidden_without_scope(async_client, monkeypatc
     monkeypatch.setattr(auth_mod, "get_api_key_user", fake_get_api_key_user)
 
     read_paths = [
-        ("GET", "/system/status"),
-        ("GET", "/system/tasks/active"),
-        ("GET", "/system/tasks/123/status"),
+        ("GET", "/api/system/status"),
+        ("GET", "/api/system/tasks/active"),
+        ("GET", "/api/system/tasks/123/status"),
     ]
     for method, path in read_paths:
         r = await async_client.request(
@@ -66,13 +66,13 @@ async def test_background_tasks_forbidden_without_scope(async_client, monkeypatc
             assert r.status_code == 404
 
     write_paths = [
-        ("POST", "/system/tasks/submit"),
-        ("DELETE", "/system/tasks/123/cancel"),
-        ("POST", "/system/tasks/send-email"),
-        ("POST", "/system/tasks/process-data"),
-        ("POST", "/system/tasks/cleanup"),
-        ("POST", "/system/tasks/long-running"),
-        ("POST", "/system/tasks/permanently-delete-accounts"),
+        ("POST", "/api/system/tasks/submit"),
+        ("DELETE", "/api/system/tasks/123/cancel"),
+        ("POST", "/api/system/tasks/send-email"),
+        ("POST", "/api/system/tasks/process-data"),
+        ("POST", "/api/system/tasks/cleanup"),
+        ("POST", "/api/system/tasks/long-running"),
+        ("POST", "/api/system/tasks/permanently-delete-accounts"),
     ]
     for method, path in write_paths:
         r = await async_client.request(
@@ -111,9 +111,9 @@ async def test_background_tasks_pass_auth_then_celery_guard_kicks_in(
 
     # Read endpoints should pass auth; then return 503 if Celery disabled
     for method, path in [
-        ("GET", "/system/status"),
-        ("GET", "/system/tasks/active"),
-        ("GET", "/system/tasks/123/status"),
+        ("GET", "/api/system/status"),
+        ("GET", "/api/system/tasks/active"),
+        ("GET", "/api/system/tasks/123/status"),
     ]:
         r = await async_client.request(
             method,
@@ -138,7 +138,7 @@ async def test_background_tasks_pass_auth_then_celery_guard_kicks_in(
     app.dependency_overrides[auth_mod.get_api_key_user] = fake_get_api_key_user_write
     r = await async_client.request(
         "POST",
-        "/system/tasks/submit",
+        "/api/system/tasks/submit",
         headers={"Authorization": "Bearer ok"},
         json={"task_name": "x", "args": [], "kwargs": {}},
     )

@@ -49,7 +49,7 @@ async def test_create_api_key_success(monkeypatch, async_client):
     monkeypatch.setattr(core_security, "generate_api_key", lambda: "RAWKEY")
 
     resp = await async_client.post(
-        "/auth/api-keys",
+        "/api/auth/api-keys",
         json={"label": "my key"},
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
@@ -77,7 +77,7 @@ async def test_create_api_key_failure(monkeypatch, async_client):
     monkeypatch.setattr(api_keys_mod.crud_api_key, "create_api_key", fake_create)
 
     resp = await async_client.post(
-        "/auth/api-keys",
+        "/api/auth/api-keys",
         json={"label": "err"},
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
@@ -111,7 +111,7 @@ async def test_list_api_keys_pagination(monkeypatch, async_client):
     )
 
     resp = await async_client.get(
-        "/auth/api-keys?page=1&size=2",
+        "/api/auth/api-keys?page=1&size=2",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -140,7 +140,7 @@ async def test_deactivate_api_key_not_found(monkeypatch, async_client):
     )
 
     resp = await async_client.delete(
-        "/auth/api-keys/key123",
+        "/api/auth/api-keys/key123",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -165,7 +165,7 @@ async def test_deactivate_api_key_success(monkeypatch, async_client):
     )
 
     resp = await async_client.delete(
-        "/auth/api-keys/key123",
+        "/api/auth/api-keys/key123",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -186,7 +186,7 @@ async def test_rotate_api_key_not_found(monkeypatch, async_client):
     monkeypatch.setattr(api_keys_mod.crud_api_key, "rotate_api_key", fake_rotate)
 
     resp = await async_client.post(
-        "/auth/api-keys/key123/rotate",
+        "/api/auth/api-keys/key123/rotate",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()
@@ -207,7 +207,7 @@ async def test_rotate_api_key_success(monkeypatch, async_client):
     monkeypatch.setattr(api_keys_mod.crud_api_key, "rotate_api_key", fake_rotate)
 
     resp = await async_client.post(
-        "/auth/api-keys/key123/rotate",
+        "/api/auth/api-keys/key123/rotate",
         headers={"authorization": "Bearer t", "user-agent": "pytest"},
     )
     app.dependency_overrides.clear()

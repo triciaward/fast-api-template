@@ -23,7 +23,7 @@ async def test_resend_verification_user_not_found(monkeypatch, async_client):
 
     monkeypatch.setattr(mod.crud_user, "get_user_by_email", fake_get_user_by_email)
     resp = await async_client.post(
-        "/auth/resend-verification",
+        "/api/auth/resend-verification",
         json={"email": "u@example.com"},
     )
     assert resp.status_code == 404
@@ -45,7 +45,7 @@ async def test_resend_verification_already_verified(monkeypatch, async_client):
         types.SimpleNamespace(is_configured=lambda: True),
     )
     resp = await async_client.post(
-        "/auth/resend-verification",
+        "/api/auth/resend-verification",
         json={"email": "u@example.com"},
     )
     assert resp.status_code == 200
@@ -73,7 +73,7 @@ async def test_resend_verification_sends_email(monkeypatch, async_client):
     monkeypatch.setattr(mod, "email_service", email_service)
 
     resp = await async_client.post(
-        "/auth/resend-verification",
+        "/api/auth/resend-verification",
         json={"email": "u@example.com"},
     )
     assert resp.status_code == 200
@@ -103,7 +103,7 @@ async def test_verify_email_happy_path(monkeypatch, async_client):
     monkeypatch.setattr(mod.crud_user, "get_user_by_id", fake_get_user_by_id)
     monkeypatch.setattr(mod.crud_user, "verify_user", fake_verify_user)
 
-    resp = await async_client.post("/auth/verify-email", json={"token": "tok"})
+    resp = await async_client.post("/api/auth/verify-email", json={"token": "tok"})
     assert resp.status_code == 200
     assert resp.json()["verified"] is True
 
@@ -121,7 +121,7 @@ async def test_verify_email_invalid_token(monkeypatch, async_client):
     )
 
     monkeypatch.setattr(mod, "email_service", email_service)
-    resp = await async_client.post("/auth/verify-email", json={"token": "invalid"})
+    resp = await async_client.post("/api/auth/verify-email", json={"token": "invalid"})
     assert resp.status_code == 200
     body = resp.json()
     assert body["verified"] is False
@@ -141,7 +141,7 @@ async def test_verify_email_tampered_token(monkeypatch, async_client):
     )
 
     monkeypatch.setattr(mod, "email_service", email_service)
-    resp = await async_client.post("/auth/verify-email", json={"token": "tampered"})
+    resp = await async_client.post("/api/auth/verify-email", json={"token": "tampered"})
     assert resp.status_code == 200
     body = resp.json()
     assert body["verified"] is False
@@ -166,7 +166,7 @@ async def test_verify_email_user_not_found(monkeypatch, async_client):
     monkeypatch.setattr(mod, "email_service", email_service)
     monkeypatch.setattr(mod.crud_user, "get_user_by_id", fake_get_user_by_id)
 
-    resp = await async_client.post("/auth/verify-email", json={"token": "tok"})
+    resp = await async_client.post("/api/auth/verify-email", json={"token": "tok"})
     assert resp.status_code == 200
     body = resp.json()
     assert body["verified"] is False
@@ -191,7 +191,7 @@ async def test_verify_email_already_verified(monkeypatch, async_client):
     monkeypatch.setattr(mod, "email_service", email_service)
     monkeypatch.setattr(mod.crud_user, "get_user_by_id", fake_get_user_by_id)
 
-    resp = await async_client.post("/auth/verify-email", json={"token": "tok"})
+    resp = await async_client.post("/api/auth/verify-email", json={"token": "tok"})
     assert resp.status_code == 200
     body = resp.json()
     assert body["verified"] is True
