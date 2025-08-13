@@ -1257,16 +1257,10 @@ if __name__ == "__main__":
                 verify_script.unlink()
 
     def install_git_hooks(self) -> None:
-        """Install git hooks for template protection."""
-        print()
-        print("🔧 Installing git hooks for template protection...")
+        """Install git hooks for template protection and code quality."""
+        print("🔧 Installing git hooks...")
 
-        git_dir = self.project_root / ".git"
-        if not git_dir.exists():
-            print("   ⚠️  Not a git repository, skipping git hooks")
-            return
-
-        hooks_dir = git_dir / "hooks"
+        hooks_dir = self.project_root / ".git" / "hooks"
         hooks_dir.mkdir(exist_ok=True)
 
         # Install pre-commit hook for template protection
@@ -1282,6 +1276,71 @@ if __name__ == "__main__":
                 print(f"   ⚠️  Failed to install git hooks: {e}")
         else:
             print("   ⚠️  Template protection hook not found")
+
+        # Install pre-commit framework for code quality checks
+        self._install_precommit_framework()
+
+    def _install_precommit_framework(self) -> None:
+        """Install and configure the pre-commit framework for code quality."""
+        print("   🔧 Setting up pre-commit framework...")
+
+        try:
+            # Use the virtual environment's Python path
+            venv_dir = self.project_root / "venv"
+            if not venv_dir.exists():
+                print("   ⚠️  Virtual environment not found, skipping pre-commit setup")
+                return
+
+            python_path = venv_dir / "bin" / "python"
+            if not python_path.exists():
+                python_path = venv_dir / "Scripts" / "python.exe"  # Windows
+
+            if not python_path.exists():
+                print("   ⚠️  Python executable not found in virtual environment")
+                return
+
+            # Check if pre-commit is already installed
+            result = subprocess.run(
+                [str(python_path), "-m", "pip", "show", "pre-commit"],
+                capture_output=True,
+                text=True,
+                cwd=self.project_root,
+            )
+
+            if result.returncode != 0:
+                print("   📦 Installing pre-commit...")
+                subprocess.run(
+                    [str(python_path), "-m", "pip", "install", "pre-commit"],
+                    check=True,
+                    cwd=self.project_root,
+                )
+                print("   ✅ Pre-commit installed")
+            else:
+                print("   ✅ Pre-commit already installed")
+
+            # Install the git hooks
+            print("   🔗 Installing pre-commit hooks...")
+            subprocess.run(
+                [str(python_path), "-m", "pre_commit", "install"],
+                check=True,
+                cwd=self.project_root,
+            )
+            print("   ✅ Pre-commit hooks installed")
+
+            # Run initial check on all files
+            print("   🔍 Running initial pre-commit check...")
+            subprocess.run(
+                [str(python_path), "-m", "pre_commit", "run", "--all-files"],
+                cwd=self.project_root,
+            )
+            print("   ✅ Pre-commit setup complete!")
+
+        except subprocess.CalledProcessError as e:
+            print(f"   ⚠️  Pre-commit setup failed: {e}")
+            print("   💡 You can manually install it later with:")
+            print("      pip install pre-commit && pre-commit install")
+        except Exception as e:
+            print(f"   ⚠️  Unexpected error during pre-commit setup: {e}")
 
     def final_checks(self) -> bool:
         """Run final validation checks."""
@@ -1404,7 +1463,7 @@ if __name__ == "__main__":
         print(
             f"  {'✅' if superuser_success else '❌'} Superuser account {'created' if superuser_success else 'failed'}",
         )
-        print("  ✅ Git hooks installed (template protection enabled)")
+        print("  ✅ Git hooks installed (template protection + code quality enabled)")
         print(
             f"  {'✅' if validation_success else '❌'} Final validation checks {'passed' if validation_success else 'failed'}",
         )

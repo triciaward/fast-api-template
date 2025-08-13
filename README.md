@@ -216,7 +216,7 @@ This FastAPI template gives you everything you need to build cool projects:
 
 ### 🛠️ Development & Testing
 - **173 test files** with 98.2% coverage
-- **Pre-commit hooks** for code quality
+- **Pre-commit hooks** for code quality (template protection + code formatting)
 - **Automated setup scripts** for easy onboarding
 - **Fix scripts** for common issues
 - **Verification tools** for deployment confidence
@@ -245,6 +245,7 @@ This FastAPI template gives you everything you need to build cool projects:
 - **[Environment & Setup Issues](docs/troubleshooting/environment-setup/ENVIRONMENT_SETUP_README.md)** - Setup problems
 - **[Development Workflow Issues](docs/troubleshooting/development-workflow/DEVELOPMENT_WORKFLOW_README.md)** - Workflow problems
 - **[Code Quality Issues](docs/troubleshooting/code-quality/CODE_QUALITY_README.md)** - Code quality problems
+- **[Pre-commit Setup Issues](#-pre-commit-setup-troubleshooting)** - Code quality hooks not working
 
 ### 📖 All Documentation
 - **[Tutorials Index](docs/tutorials/TUTORIALS.md)** - All tutorials in one place
@@ -316,6 +317,51 @@ docker-compose logs -f api
 # Stop all services
 docker-compose down
 ```
+
+## 🔧 Pre-commit Setup (Now Working Out of the Box!)
+
+**✅ Status**: Pre-commit hooks now work automatically for new projects!
+
+**What You Get**:
+- **Template Protection**: Prevents accidental commits to template repository
+- **Code Quality Checks**: Black (formatting), Ruff (linting), MyPy (type checking) run automatically
+- **Zero Setup**: Everything works after running the setup script
+
+**For New Projects**:
+```bash
+./scripts/setup/setup_project.py
+# ✅ Automatically installs both template protection AND code quality hooks
+```
+
+**For Existing Projects** (if you encounter issues):
+```bash
+# Quick fix script for existing projects
+./scripts/setup/fix_precommit_setup.sh
+```
+
+**Manual Fix**:
+```bash
+# 1. Activate your virtual environment
+source venv/bin/activate  # or venv\\Scripts\\activate on Windows
+
+# 2. Install pre-commit
+pip install pre-commit
+
+# 3. Install the git hooks
+pre-commit install
+
+# 4. Run initial check on all files
+pre-commit run --all-files
+```
+
+**What This Gives You**:
+- ✅ **Template Protection**: Prevents accidental commits to the template repository
+- ✅ **Code Formatting**: Black automatically formats your Python code
+- ✅ **Linting**: Ruff catches code quality issues
+- ✅ **Type Checking**: MyPy validates type annotations
+- ✅ **Automatic**: All checks run before every commit
+
+**Why This Happens**: The setup script installs template protection but sometimes misses the pre-commit framework setup.
 
 ## 🤝 Contributing
 

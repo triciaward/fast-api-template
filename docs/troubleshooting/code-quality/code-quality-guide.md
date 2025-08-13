@@ -4,6 +4,12 @@ This folder contains troubleshooting guides for code quality, formatting, and de
 
 ## 📁 Available Guides
 
+### **[Pre-commit Hooks Not Working](./pre-commit-hooks-not-working.md)**
+- Code quality checks (Black, Ruff, MyPy) not running automatically
+- Template protection working but formatting/linting missing
+- Quick fix script and manual installation steps
+- Verification and prevention strategies
+
 ### **[Bcrypt Warning Explanation](./bcrypt-warning-explanation.md)**
 - Understanding the bcrypt/passlib compatibility warning
 - Why this warning is safe to ignore
@@ -55,6 +61,9 @@ python -m black .
 
 # Fix linting
 python -m ruff check . --fix
+
+# Fix pre-commit hooks not working
+./scripts/setup/fix_precommit_setup.sh
 ```
 
 ## 🔧 Known Issues

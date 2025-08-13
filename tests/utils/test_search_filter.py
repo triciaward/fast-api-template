@@ -7,7 +7,7 @@ from sqlalchemy.orm import declarative_base
 if TYPE_CHECKING:
     from sqlalchemy.orm import DeclarativeBase
 
-    Base = DeclarativeBase
+    Base: type[DeclarativeBase] = DeclarativeBase
 else:
     Base = declarative_base()
 

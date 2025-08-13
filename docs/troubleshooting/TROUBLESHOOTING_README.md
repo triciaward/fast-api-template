@@ -40,6 +40,7 @@ The troubleshooting documentation has been **reorganized and updated** to focus 
   - Black vs Mypy type conflicts
   - Code formatting and linting issues
   - Dependency compatibility problems
+  - Pre-commit hooks not working (code quality checks missing)
 
 
 
@@ -91,6 +92,9 @@ python -m ruff check . --fix
 
 # Check types
 python -m mypy app/ scripts/
+
+# Fix pre-commit hooks not working
+./scripts/setup/fix_precommit_setup.sh
 ```
 
 ## 🛠️ Diagnostic Commands
