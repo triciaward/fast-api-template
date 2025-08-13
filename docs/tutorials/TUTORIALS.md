@@ -174,6 +174,7 @@ fast-api-template/
 - **[AI Development Features](ai-development-features.md)** - Optimize AI assistant interactions and reduce costs
 - **[Agent Setup Guide](agent_setup.md)** - Ensure AI agents work correctly with your project environment
 - **[Quick Reference](quick_reference.md)** - Common patterns, file locations, and project conventions
+- **[Frontend AI Development](frontend_ai_development.md)** - Extend AI system for full-stack development
 - **[Next Steps & Development Tips](next-steps-and-tips.md)** - What to build first, common commands, and mistakes to avoid
 
 ### 🎯 Template Customization
