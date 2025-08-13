@@ -40,18 +40,24 @@
       "settings": {
         "cache_project_files": true,
         "cache_dependencies": true,
-        "refresh_cache_on_change": true
+        "refresh_cache_on_change": true,
+        "cache_common_patterns": true,
+        "use_file_summaries": true,
+        "smart_context_selection": true
       }
     },
     {
       "description": "FastAPI template specific optimizations for efficient development.",
       "settings": {
-        "prioritize_core_files": ["app/main.py", "app/core/config/config.py", "app/database/database.py", "docs/tutorials/agent_setup.md"],
+        "prioritize_core_files": ["app/main.py", "app/core/config/config.py", "app/database/database.py", "docs/tutorials/agent_setup.md", "docs/tutorials/QUICK_REFERENCE.md"],
         "cache_test_patterns": ["tests/**/*.py"],
         "skip_verbose_imports": true,
         "prefer_functional_over_class": true,
         "always_check_setup_guide": true,
-        "project_specific_workflow": true
+        "project_specific_workflow": true,
+        "prefer_existing_patterns": true,
+        "learn_from_existing_tests": true,
+        "follow_established_conventions": true
       }
     },
     {
@@ -70,6 +76,17 @@
         "use_everyday_analogies": true,
         "break_down_technical_concepts": true,
         "provide_real_world_examples": true
+      }
+    },
+    {
+      "description": "Quality-preserving optimizations for better AI decisions.",
+      "settings": {
+        "understand_project_architecture": true,
+        "explain_why_not_how": true,
+        "highlight_alternatives": true,
+        "provide_context_for_decisions": true,
+        "maintain_code_quality": true,
+        "ensure_test_coverage": true
       }
     }
   ]
