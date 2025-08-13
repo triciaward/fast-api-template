@@ -173,7 +173,7 @@ fast-api-template/
 - **[Getting Started Guide](../TEMPLATE_README.md)** - Complete setup guide for creating a new app from this template
 - **[AI Development Features](ai-development-features.md)** - Optimize AI assistant interactions and reduce costs
 - **[Agent Setup Guide](agent_setup.md)** - Ensure AI agents work correctly with your project environment
-- **[Quick Reference](QUICK_REFERENCE.md)** - Common patterns, file locations, and project conventions
+- **[Quick Reference](quick_reference.md)** - Common patterns, file locations, and project conventions
 - **[Next Steps & Development Tips](next-steps-and-tips.md)** - What to build first, common commands, and mistakes to avoid
 
 ### 🎯 Template Customization

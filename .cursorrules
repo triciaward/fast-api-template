@@ -49,7 +49,7 @@
     {
       "description": "FastAPI template specific optimizations for efficient development.",
       "settings": {
-        "prioritize_core_files": ["app/main.py", "app/core/config/config.py", "app/database/database.py", "docs/tutorials/agent_setup.md", "docs/tutorials/QUICK_REFERENCE.md"],
+        "prioritize_core_files": ["app/main.py", "app/core/config/config.py", "app/database/database.py", "docs/tutorials/agent_setup.md", "docs/tutorials/quick_reference.md"],
         "cache_test_patterns": ["tests/**/*.py"],
         "skip_verbose_imports": true,
         "prefer_functional_over_class": true,
