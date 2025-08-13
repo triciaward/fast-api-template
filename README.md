@@ -17,6 +17,7 @@
 **⚡ What makes this special:** Everything you need to build cool stuff, with room to grow. No over-engineering, just solid foundations for your ideas.
 
 **🤖 AI-Optimized:** Built-in `.cursorrules` for efficient AI assistant interactions and beginner-friendly explanations.
+**🤖 Agent Setup Guide:** `docs/tutorials/agent_setup.md` ensures AI agents work correctly with your project environment.
 
 ## 🚀 Getting Started
 
