@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     )
 
     PROJECT_NAME: str = "FastAPI Template"
-    VERSION: str = "1.1.1"
+    VERSION: str = "1.2.0"
     DESCRIPTION: str = "FastAPI Template with Authentication"
     API_V1_STR: str = "/api"
     ENVIRONMENT: str = "development"
