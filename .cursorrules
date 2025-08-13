@@ -1,0 +1,74 @@
+{
+  "rules": [
+    {
+      "description": "Minimize token usage while still completing all tasks for a beginner user in agent mode.",
+      "settings": {
+        "max_context_tokens": 4096,
+        "send_full_file": false,
+        "prefer_partial_edits": true,
+        "auto_cache_context": true,
+        "aggressive_cache_reuse": true,
+        "summarize_context": true,
+        "truncate_long_history": true,
+        "limit_reasoning_output": true
+      }
+    },
+    {
+      "description": "Ensure AI does all implementation work while educating the user.",
+      "settings": {
+        "always_provide_complete_code": true,
+        "fill_in_missing_parts": true,
+        "explain_only_on_request": false,
+        "explain_implementation_choices": true,
+        "highlight_best_practices": true
+      }
+    },
+    {
+      "description": "Balance token efficiency with educational value for beginners.",
+      "settings": {
+        "default_output_style": "concise",
+        "omit_redundant_explanations": false,
+        "avoid_large_comments": false,
+        "explain_key_decisions": true,
+        "provide_learning_context": true,
+        "eli5_explanations": true,
+        "simple_analogies": true
+      }
+    },
+    {
+      "description": "Cache frequently used files and project context.",
+      "settings": {
+        "cache_project_files": true,
+        "cache_dependencies": true,
+        "refresh_cache_on_change": true
+      }
+    },
+    {
+      "description": "FastAPI template specific optimizations for efficient development.",
+      "settings": {
+        "prioritize_core_files": ["app/main.py", "app/core/config/config.py", "app/database/database.py"],
+        "cache_test_patterns": ["tests/**/*.py"],
+        "skip_verbose_imports": true,
+        "prefer_functional_over_class": true
+      }
+    },
+    {
+      "description": "Token-efficient code generation patterns.",
+      "settings": {
+        "use_compact_syntax": true,
+        "minimize_docstring_verbosity": true,
+        "prefer_inline_over_separate": true,
+        "skip_obvious_validation": true
+      }
+    },
+    {
+      "description": "ELI5 explanations for complex concepts.",
+      "settings": {
+        "explain_complex_topics_simply": true,
+        "use_everyday_analogies": true,
+        "break_down_technical_concepts": true,
+        "provide_real_world_examples": true
+      }
+    }
+  ]
+}
