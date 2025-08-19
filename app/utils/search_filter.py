@@ -122,7 +122,6 @@ class SearchFilterBuilder:
                     func.coalesce(getattr(self.model_class, field), "")
                     for field in filter_config.fields
                 ]
-                # Use string concatenation with spaces for full-text search
                 search_vector = func.to_tsvector(
                     "english",
                     func.concat_ws(" ", *field_expressions),
@@ -166,7 +165,8 @@ class SearchFilterBuilder:
                 else:
                     condition = field != query
             else:
-                continue
+                # Unknown operator: skip this field
+                continue  # type: ignore[unreachable]
 
             search_conditions.append(condition)
 
@@ -206,8 +206,7 @@ class SearchFilterBuilder:
             return field.is_(None)
         if filter_config.operator == FilterOperator.IS_NOT_NULL:
             return field.is_not(None)
-
-        return None
+        # All enum cases covered; no default branch needed
 
     def build_query(self, config: SearchFilterConfig) -> Any:
         """Build a complete SQLAlchemy query with search and filters."""

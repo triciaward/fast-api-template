@@ -13,7 +13,7 @@ from app.core.config import settings
 class OAuthService:
     def __init__(self) -> None:
         self.config = Config(".env")
-        self.oauth = OAuth()  # type: ignore[no-untyped-call]
+        self.oauth = OAuth()
         self._setup_oauth()
 
     def _setup_oauth(self) -> None:
@@ -41,7 +41,8 @@ class OAuthService:
                     headers=headers,
                 )
                 response.raise_for_status()
-                return response.json()  # type: ignore
+                data: dict[str, Any] = dict(response.json())
+                return data
         except Exception as e:
             raise HTTPException(
                 status_code=400,
@@ -76,7 +77,7 @@ class OAuthService:
                     params={"id_token": id_token},
                 )
                 response.raise_for_status()
-                data = response.json()
+                data: dict[str, Any] = dict(response.json())
 
                 # Verify the token is for our app
                 if data.get("aud") != settings.GOOGLE_CLIENT_ID:
@@ -87,7 +88,7 @@ class OAuthService:
         except Exception as e:
             _handle_google_verification_error(e)
         else:
-            return data  # type: ignore
+            return data
 
     async def verify_apple_token(self, id_token: str) -> dict[str, Any] | None:
         """Verify Apple ID token."""
@@ -126,7 +127,9 @@ class OAuthService:
             # For now, we'll just decode the JWT payload
 
             # Decode without verification for now (in production, verify with Apple's public keys)
-            payload = jwt.decode(id_token, options={"verify_signature": False})
+            payload: dict[str, Any] = dict(
+                jwt.decode(id_token, options={"verify_signature": False}),
+            )
 
             # Basic validation
             if payload.get("aud") != settings.APPLE_CLIENT_ID:
@@ -140,7 +143,7 @@ class OAuthService:
         except Exception as e:
             _handle_apple_verification_error(e)
         else:
-            return payload  # type: ignore
+            return payload
 
     def get_oauth_provider_config(self, provider: str) -> dict[str, Any]:
         """Get OAuth provider configuration."""
@@ -169,7 +172,7 @@ class OAuthService:
             }
 
         _handle_unsupported_provider()
-        return {}  # This line will never be reached, but satisfies the linter
+        # Unreachable: _handle_unsupported_provider raises
 
     def is_provider_configured(self, provider: str) -> bool:
         """Check if OAuth provider is configured."""

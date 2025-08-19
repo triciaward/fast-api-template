@@ -40,7 +40,9 @@ class SoftDeleteMixin:
     )
 
     # Composite index for efficient soft delete queries
-    __table_args__ = (Index("ix_soft_delete_composite", "is_deleted", "deleted_at"),)
+    __table_args__: tuple[Index, ...] = (
+        Index("ix_soft_delete_composite", "is_deleted", "deleted_at"),
+    )
 
     def soft_delete(
         self,
@@ -54,22 +56,22 @@ class SoftDeleteMixin:
             deleted_by: UUID of the user performing the deletion
             reason: Optional reason for deletion
         """
-        self.is_deleted = True  # type: ignore
-        self.deleted_at = utc_now()  # type: ignore
-        self.deleted_by = deleted_by  # type: ignore
-        self.deletion_reason = reason  # type: ignore
+        self.is_deleted = True  # type: ignore[assignment]
+        self.deleted_at = utc_now()  # type: ignore[assignment]
+        self.deleted_by = deleted_by  # type: ignore[assignment]
+        self.deletion_reason = reason  # type: ignore[assignment]
 
     def restore(self) -> None:
         """Restore a soft-deleted record."""
-        self.is_deleted = False  # type: ignore
-        self.deleted_at = None  # type: ignore
-        self.deleted_by = None  # type: ignore
-        self.deletion_reason = None  # type: ignore
+        self.is_deleted = False  # type: ignore[assignment]
+        self.deleted_at = None  # type: ignore[assignment]
+        self.deleted_by = None  # type: ignore[assignment]
+        self.deletion_reason = None  # type: ignore[assignment]
 
     @property
     def is_active(self) -> bool:
         """Check if the record is active (not soft-deleted)."""
-        return not self.is_deleted  # type: ignore
+        return bool(not self.is_deleted)
 
     @classmethod
     def get_active_query(cls) -> "Select":

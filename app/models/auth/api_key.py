@@ -71,7 +71,7 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Status and expiration
-    is_active = Column(
+    is_active = Column(  # type: ignore[assignment]
         Boolean,
         default=True,
         nullable=False,
@@ -94,7 +94,7 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Performance-optimized indexes
-    __table_args__ = (
+    __table_args__: tuple[Index, ...] = (
         # Composite index for user's active keys
         Index("ix_api_key_user_active", "user_id", "is_active", "expires_at"),
         # Composite index for system keys
@@ -115,39 +115,43 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
     @property
     def is_expired(self) -> bool:
         """Check if the API key has expired."""
-        if self.expires_at is None:
+        expires = getattr(self, "expires_at")
+        if expires is None:
             return False
-        return self.expires_at < utc_now()
+        return bool(expires < utc_now())
 
     @property
     def is_valid(self) -> bool:
         """Check if the API key is valid (active and not expired)."""
-        return self.is_active and not self.is_expired and not self.is_deleted
+        return bool(self.is_active and not self.is_expired and not self.is_deleted)
 
     def has_scope(self, scope: str) -> bool:
         """Check if the API key has a specific scope."""
-        if not self.scopes:
+        scopes = list(self.scopes or [])
+        if not scopes:
             return False
-        return scope in self.scopes
+        return scope in scopes
 
     def has_any_scope(self, scopes: list[str]) -> bool:
         """Check if the API key has any of the specified scopes."""
-        if not self.scopes:
+        current = list(self.scopes or [])
+        if not current:
             return False
-        return any(scope in self.scopes for scope in scopes)
+        return any(scope in current for scope in scopes)
 
     def has_all_scopes(self, scopes: list[str]) -> bool:
         """Check if the API key has all of the specified scopes."""
-        if not self.scopes:
+        current = list(self.scopes or [])
+        if not current:
             return False
-        return all(scope in self.scopes for scope in scopes)
+        return all(scope in current for scope in scopes)
 
     @property
     def is_system_key(self) -> bool:
         """Check if this is a system-level API key."""
-        return self.user_id is None
+        return bool(self.user_id is None)
 
     def revoke(self) -> None:
         """Revoke the API key."""
-        self.is_active = False  # type: ignore
-        self.updated_at = utc_now()  # type: ignore
+        self.is_active = False  # type: ignore[assignment]
+        self.updated_at = utc_now()  # type: ignore[assignment]

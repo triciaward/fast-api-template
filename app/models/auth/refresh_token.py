@@ -96,7 +96,7 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Performance-optimized indexes
-    __table_args__ = (
+    __table_args__: tuple[Index, ...] = (
         # Composite index for user's active tokens
         Index("ix_refresh_token_user_active", "user_id", "is_revoked", "expires_at"),
         # Composite index for token validation
@@ -124,12 +124,12 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
     @property
     def is_expired(self) -> bool:
         """Check if the refresh token has expired."""
-        return self.expires_at < utc_now()
+        return bool(self.expires_at < utc_now())
 
     @property
     def is_valid(self) -> bool:
         """Check if the refresh token is valid (not revoked, not expired, not deleted)."""
-        return not self.is_revoked and not self.is_expired and not self.is_deleted
+        return bool(not self.is_revoked and not self.is_expired and not self.is_deleted)
 
     @property
     def is_active(self) -> bool:
@@ -138,8 +138,8 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
 
     def revoke(self) -> None:
         """Revoke the refresh token."""
-        self.is_revoked = True  # type: ignore
-        self.updated_at = utc_now()  # type: ignore
+        self.is_revoked = True  # type: ignore[assignment]
+        self.updated_at = utc_now()  # type: ignore[assignment]
 
     def get_device_summary(self) -> str:
         """Get a human-readable device summary."""
@@ -174,4 +174,4 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
         if self.is_expired:
             return False
         delta = self.expires_at - utc_now()
-        return delta.total_seconds() < 86400  # 24 hours
+        return bool(delta.total_seconds() < 86400)  # 24 hours

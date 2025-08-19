@@ -14,10 +14,10 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 # Global Redis client instance
-redis_client: redis.Redis | None = None  # type: ignore[type-arg]
+redis_client: redis.Redis | None = None
 
 
-async def init_redis() -> redis.Redis | None:  # type: ignore[type-arg]
+async def init_redis() -> redis.Redis | None:
     """
     Initialize Redis connection if enabled.
 
@@ -67,7 +67,7 @@ async def close_redis() -> None:
             redis_client = None
 
 
-def get_redis_client() -> redis.Redis | None:  # type: ignore[type-arg]
+def get_redis_client() -> redis.Redis | None:
     """
     Get the global Redis client instance.
 

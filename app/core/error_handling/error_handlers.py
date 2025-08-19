@@ -228,17 +228,14 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
             ErrorType.INTERNAL_SERVER_ERROR,
         )
 
-        # Handle case where exc.detail is a dict (not hashable)
-        if isinstance(exc.detail, dict):
+        # Normalize detail into a string; map to an error code when possible
+        raw_detail: Any = exc.detail
+        if isinstance(raw_detail, dict):
             error_code = ErrorCode.INVALID_REQUEST
-            # Convert dict to string for message field
-            message = str(exc.detail)
-            # If dict has a 'message' key, use that as the primary message
-            if "message" in exc.detail:
-                message = str(exc.detail["message"])
+            message = str(raw_detail.get("message", raw_detail))
         else:
-            error_code = detail_to_code.get(exc.detail, ErrorCode.INVALID_REQUEST)
-            message = exc.detail
+            message = str(raw_detail)
+            error_code = detail_to_code.get(message, ErrorCode.INVALID_REQUEST)
 
         # Create appropriate error detail based on type
         error_detail: ErrorDetail

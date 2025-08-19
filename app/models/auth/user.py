@@ -188,17 +188,17 @@ class User(Base, SoftDeleteMixin, TimestampMixin):
     @property
     def is_oauth_user(self) -> bool:
         """Check if this is an OAuth user."""
-        return self.oauth_provider is not None and self.oauth_id is not None
+        return bool(self.oauth_provider is not None and self.oauth_id is not None)
 
     @property
     def has_password(self) -> bool:
         """Check if user has a password set."""
-        return self.hashed_password is not None
+        return bool(self.hashed_password is not None)
 
     def can_login_with_password(self) -> bool:
         """Check if user can login with password."""
-        return self.has_password and self.is_verified and not self.is_deleted
+        return bool(self.has_password and self.is_verified and not self.is_deleted)
 
     def get_display_name(self) -> str:
         """Get a display name for the user."""
-        return self.username or self.email.split("@")[0]
+        return str(self.username or self.email.split("@")[0])
