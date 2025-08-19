@@ -30,9 +30,13 @@ All notable changes to this project will be documented in this file.
 ```
 
 #### **Code Quality Improvements**
-- **Fixed mypy type checking issues** in test files
-- **Resolved ruff linting warnings** (5 trailing comma issues automatically fixed)
-- **Applied Black formatting** to maintain consistent code style
+- **Establish clean mypy baseline in template** (no issues across 85 source files)
+- **Targeted mypy overrides**: `psutil`, `celery.*`, and decorator allowance for `app.services.background.celery_tasks`
+- **Runtime-safe Redis typing**: avoid generics for `redis.asyncio.Redis` to prevent runtime `TypeError`
+- **Localized SQLAlchemy assignment ignores** in mixins/models to satisfy strict typing without refactor
+- **Explicit typing in OAuth/Redis/Admin**: concrete dict typing for HTTP JSON, safe casts in admin responses
+- **SearchFilter fix**: handle unknown operators gracefully and remove unreachable warnings
+- **Resolved ruff linting warnings** and kept Black formatting consistent
 - **All quality checks now pass**: mypy ✅, ruff ✅, black ✅
 
 #### **Test Results**

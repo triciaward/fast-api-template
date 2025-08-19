@@ -94,6 +94,7 @@ The setup script creates a **fully working API** with all the features you need 
 **📚 Release Notes**: See what's new in [v1.2.0](docs/releases/RELEASE_1.2.0.md) and [all releases](docs/releases/)
 
 **🆘 Need Help?**: If you encounter issues, see the [Troubleshooting Guide](docs/troubleshooting/TROUBLESHOOTING_README.md)
+  - Code quality baseline: see `docs/troubleshooting/code-quality/mypy_and_ruff_cleanup.md` (template-focused)
 
 ### 🤖 AI Assistant Users - READ THIS!
 
@@ -226,7 +227,9 @@ This FastAPI template gives you everything you need to build cool projects:
 - **Automated setup scripts** for easy onboarding
 - **Fix scripts** for common issues
 - **Verification tools** for deployment confidence
-- **Type safety** with full MyPy integration
+- **Type safety** with full MyPy integration (strict config; minimal, scoped overrides)
+  - Redis runtime-safe typing (avoid generics for `redis.asyncio.Redis`)
+  - Localized ignores for SQLAlchemy `Column[...]` assignments in mixins/models
 - **AI-optimized development** with `.cursorrules` for efficient AI interactions
 
 ## 📚 Documentation
