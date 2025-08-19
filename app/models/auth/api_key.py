@@ -115,10 +115,9 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
     @property
     def is_expired(self) -> bool:
         """Check if the API key has expired."""
-        expires = getattr(self, "expires_at")
-        if expires is None:
+        if self.expires_at is None:
             return False
-        return bool(expires < utc_now())
+        return bool(self.expires_at < utc_now())
 
     @property
     def is_valid(self) -> bool:

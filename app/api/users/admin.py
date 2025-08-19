@@ -6,6 +6,10 @@ including soft delete, restore, permanent delete, and management of
 deleted users.
 """
 
+from datetime import datetime
+from typing import cast
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,10 +26,6 @@ from app.schemas.auth.user import (
     SoftDeleteResponse,
     UserResponse,
 )
-from typing import cast
-from uuid import UUID
-from datetime import datetime
-
 from app.utils.pagination import PaginatedResponse, PaginationParams
 from app.utils.search_filter import DeletedUserSearchParams
 

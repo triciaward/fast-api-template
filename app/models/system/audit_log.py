@@ -153,8 +153,7 @@ class AuditLog(Base):
         """Add context information to the audit log."""
         current: dict[str, Any] = dict(self.context or {})
         current[key] = value
-        # Assign via setattr to avoid Column typing confusion
-        setattr(self, "context", current)
+        self.context = current  # type: ignore[assignment]
 
     def get_context(self, key: str, default: Any = None) -> Any:
         """Get context information from the audit log."""

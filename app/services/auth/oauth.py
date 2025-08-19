@@ -172,7 +172,7 @@ class OAuthService:
             }
 
         _handle_unsupported_provider()
-        # Unreachable: _handle_unsupported_provider raises
+        return {}
 
     def is_provider_configured(self, provider: str) -> bool:
         """Check if OAuth provider is configured."""

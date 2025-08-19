@@ -207,6 +207,7 @@ class SearchFilterBuilder:
         if filter_config.operator == FilterOperator.IS_NOT_NULL:
             return field.is_not(None)
         # All enum cases covered; no default branch needed
+        return None
 
     def build_query(self, config: SearchFilterConfig) -> Any:
         """Build a complete SQLAlchemy query with search and filters."""
