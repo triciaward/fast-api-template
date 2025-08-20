@@ -159,7 +159,7 @@ async def logout(
 @router.get("/sessions", response_model=SessionListResponse)
 async def get_user_sessions(
     request: Request,
-    current_user = Depends(get_current_user),
+    current_user=Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> SessionListResponse:
     """Get all active sessions for the current user."""
