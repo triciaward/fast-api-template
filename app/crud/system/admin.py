@@ -110,13 +110,12 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
             User: Created user
         """
         hashed_password = get_password_hash(user_data.password)
-        db_user = User(
-            email=user_data.email,
-            username=user_data.username,
-            hashed_password=hashed_password,
-            is_superuser=user_data.is_superuser,
-            is_verified=False,  # Default to False for new users
-        )
+        db_user = User()
+        db_user.email = user_data.email
+        db_user.username = user_data.username
+        db_user.hashed_password = hashed_password
+        db_user.is_superuser = bool(user_data.is_superuser)
+        db_user.is_verified = False
         db.add(db_user)
 
         await db.commit()
@@ -193,7 +192,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         if not user:
             return None
 
-        user.is_superuser = not user.is_superuser  # type: ignore
+        user.is_superuser = not user.is_superuser
         db.add(user)
         await db.commit()
         await db.refresh(user)
@@ -218,7 +217,7 @@ class AdminUserCRUD(BaseAdminCRUD[User, UserCreate, AdminUserUpdate, UserRespons
         if not user:
             return None
 
-        user.is_verified = not user.is_verified  # type: ignore
+        user.is_verified = not user.is_verified
         db.add(user)
         await db.commit()
         await db.refresh(user)

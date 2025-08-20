@@ -128,6 +128,9 @@ def permanently_delete_accounts_task() -> dict[str, Any]:
                     for user in accounts_for_reminder:
                         try:
                             # Calculate days remaining
+                            if user.deletion_scheduled_for is None:
+                                # Skip if schedule is missing
+                                continue
                             days_remaining = (
                                 user.deletion_scheduled_for - utc_now()
                             ).days

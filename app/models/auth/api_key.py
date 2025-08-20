@@ -3,10 +3,12 @@ Improved APIKey model with better constraints and indexing.
 """
 
 import uuid
+from datetime import datetime
+from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Boolean, Column, ForeignKey, Index, String
+from sqlalchemy import Boolean, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP, UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
 from app.models.core.base import SoftDeleteMixin, TimestampMixin
@@ -23,7 +25,7 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
     __tablename__ = "api_keys"
 
     # Primary key
-    id = Column(
+    id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
@@ -32,16 +34,16 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # User reference (nullable for system-level keys)
-    user_id = Column(
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=True,  # Nullable for system-level keys
+        nullable=True,
         index=True,
         comment="User who owns this API key (null for system keys)",
     )
 
     # Key information with proper constraints
-    key_hash = Column(
+    key_hash: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
         index=True,
@@ -50,20 +52,20 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Deterministic fingerprint for efficient lookup before bcrypt verify
-    key_fingerprint = Column(
+    key_fingerprint: Mapped[str | None] = mapped_column(
         String(64),
         nullable=True,
         index=True,
         comment="Deterministic fingerprint (SHA-256) of API key for lookup",
     )
-    label = Column(
+    label: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
         comment="Human-readable label for the API key",
     )
 
     # Scopes with proper JSON handling
-    scopes = Column(
+    scopes: Mapped[list[str]] = mapped_column(
         JSONB,
         nullable=False,
         default=list,
@@ -71,14 +73,14 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Status and expiration
-    is_active = Column(  # type: ignore[assignment]
+    is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
         nullable=False,
         index=True,
         comment="Whether the API key is active",
     )
-    expires_at = Column(
+    expires_at: Mapped[datetime | None] = mapped_column(
         TIMESTAMP(timezone=True),
         nullable=True,
         index=True,
@@ -86,7 +88,7 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Relationships
-    user = relationship(
+    user: Mapped[Optional["User"]] = relationship(
         "User",
         back_populates="api_keys",
         foreign_keys=[user_id],
@@ -152,5 +154,9 @@ class APIKey(Base, SoftDeleteMixin, TimestampMixin):
 
     def revoke(self) -> None:
         """Revoke the API key."""
-        self.is_active = False  # type: ignore[assignment]
-        self.updated_at = utc_now()  # type: ignore[assignment]
+        self.is_active = False
+        self.updated_at = utc_now()
+
+
+if TYPE_CHECKING:
+    from app.models.auth.user import User

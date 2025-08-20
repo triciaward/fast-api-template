@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 from typing import Any, TypeAlias
 
@@ -22,15 +23,18 @@ async def create_audit_log(
     session_id: str | None = None,
 ) -> AuditLog:
     """Create a new audit log entry."""
-    audit_log = AuditLog(
-        event_type=event_type,
-        user_id=user_id,
-        ip_address=ip_address,
-        user_agent=user_agent,
-        success=success,
-        context=context,
-        session_id=session_id,
+    audit_log = AuditLog()
+    audit_log.event_type = event_type
+    audit_log.user_id = (
+        None
+        if user_id in (None, "")
+        else uuid.UUID(user_id) if isinstance(user_id, str) else user_id
     )
+    audit_log.ip_address = ip_address
+    audit_log.user_agent = user_agent
+    audit_log.success = success
+    audit_log.context = context
+    audit_log.session_id = session_id
     db.add(audit_log)
     await db.commit()
     try:

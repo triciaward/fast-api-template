@@ -1,6 +1,7 @@
 """Authentication and session management services."""
 
-from .oauth import OAuthService
+from typing import TYPE_CHECKING
+
 from .refresh_token import (
     create_user_session,
     get_device_info,
@@ -10,15 +11,20 @@ from .refresh_token import (
     utc_now,
 )
 
-# Try to create service instances
+if TYPE_CHECKING:  # for type checkers only
+    from .oauth import OAuthService as _OAuthService
+
+# Typed optional instance initialized via alias import
+oauth_service: "_OAuthService | None"
 try:
-    oauth_service = OAuthService()
-except ImportError:
-    oauth_service = None  # type: ignore
+    from .oauth import OAuthService as _OAuthService
+
+    oauth_service = _OAuthService()
+except Exception:  # pragma: no cover - optional dependency path
+    oauth_service = None
 
 __all__ = [
     "oauth_service",
-    "OAuthService",
     "create_user_session",
     "get_device_info",
     "refresh_access_token",

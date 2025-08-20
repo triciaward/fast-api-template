@@ -3,6 +3,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from pydantic import BaseModel
 from starlette.responses import HTMLResponse
 
 from app.api import api_router
@@ -135,16 +136,13 @@ register_error_handlers(app)
 app.include_router(api_router)
 
 
-@app.get("/")
-async def root() -> dict[str, str]:
-    """
-    Root endpoint for the FastAPI application.
+class MessageResponse(BaseModel):
+    message: str
 
-    Returns:
-        dict: Welcome message with application information
-    """
-    logger.info("Root endpoint accessed")
-    return {"message": "Welcome to FastAPI Template"}
+
+@app.get("/", response_model=MessageResponse)
+async def read_root() -> MessageResponse:
+    return MessageResponse(message="Welcome to FastAPI Template")
 
 
 # Add feature status endpoint

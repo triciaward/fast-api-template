@@ -316,6 +316,9 @@ pytest
 # Check code quality
 ./scripts/development/validate_ci.sh
 
+# Type checking for SQLAlchemy-typed models (uses mypy plugin)
+./scripts/development/mypy_sa_check.sh
+
 # Start with optional features
 docker-compose up -d redis  # Add Redis for caching
 ENABLE_WEBSOCKETS=true docker-compose up -d  # Enable WebSockets

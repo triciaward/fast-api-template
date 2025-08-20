@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import NoReturn
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.users.auth import get_current_user
@@ -20,6 +21,10 @@ from app.services.monitoring.audit import log_logout
 
 router = APIRouter()
 logger = get_auth_logger()
+
+
+class MessageResponse(BaseModel):
+    message: str
 
 
 def utc_now() -> datetime:
@@ -97,12 +102,12 @@ async def refresh_token(
         _handle_refresh_error(e)
 
 
-@router.post("/logout")
+@router.post("/logout", response_model=MessageResponse)
 async def logout(
     request: Request,
     response: Response,
     db: AsyncSession = Depends(get_db),
-) -> dict[str, str]:
+) -> MessageResponse:
     """Logout user by revoking the current refresh token."""
     logger.info("Logout attempt")
 
@@ -146,9 +151,9 @@ async def logout(
         )
         # Still clear the cookie even if revocation fails
         clear_refresh_token_cookie(response)
-        return {"message": "Logout completed (with errors)"}
+        return MessageResponse(message="Logout completed (with errors)")
     else:
-        return {"message": "Successfully logged out"}
+        return MessageResponse(message="Successfully logged out")
 
 
 @router.get("/sessions", response_model=SessionListResponse)
@@ -193,12 +198,14 @@ async def get_user_sessions(
         # Convert to response format
         session_info_list = []
         for session in sessions:
-            session_info = SessionInfo(
-                id=session.id,  # type: ignore[arg-type]
-                created_at=session.created_at,  # type: ignore[arg-type]
-                device_info=session.device_info,  # type: ignore[arg-type]
-                ip_address=session.ip_address,  # type: ignore[arg-type]
-                is_current=getattr(session, "is_current", False),
+            session_info = SessionInfo.model_validate(
+                {
+                    "id": session.id,
+                    "created_at": session.created_at,
+                    "device_info": session.device_info,
+                    "ip_address": session.ip_address,
+                    "is_current": getattr(session, "is_current", False),
+                },
             )
             session_info_list.append(session_info)
 
@@ -223,12 +230,12 @@ async def get_user_sessions(
         )
 
 
-@router.delete("/sessions/{session_id}")
+@router.delete("/sessions/{session_id}", response_model=MessageResponse)
 async def revoke_session(
     session_id: str,
     current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> dict[str, str]:
+) -> MessageResponse:
     """Revoke a specific session for the current user."""
     logger.info(
         "Revoke session request",
@@ -295,15 +302,15 @@ async def revoke_session(
         )
         _handle_revoke_error(e)
     else:
-        return {"message": "Session revoked successfully"}
+        return MessageResponse(message="Session revoked successfully")
 
 
-@router.delete("/sessions")
+@router.delete("/sessions", response_model=MessageResponse)
 async def revoke_all_sessions(
     request: Request,
     current_user: UserResponse = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> dict[str, str]:
+) -> MessageResponse:
     """Revoke all refresh tokens for the current user."""
     logger.info(
         "User revoking all sessions",
@@ -343,6 +350,6 @@ async def revoke_all_sessions(
         revoked_count=revoked_count,
     )
 
-    return {
-        "message": f"All sessions revoked successfully. {revoked_count} sessions were active.",
-    }
+    return MessageResponse(
+        message=f"All sessions revoked successfully. {revoked_count} sessions were active.",
+    )

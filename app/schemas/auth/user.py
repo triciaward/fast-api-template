@@ -492,6 +492,8 @@ class APIKeyRotateResponse(BaseModel):
 class APIKeyListResponse(PaginatedResponse[APIKeyResponse]):
     """Paginated response for API key list."""
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class APIKeyUser(BaseModel):
     """Schema for API key user information."""

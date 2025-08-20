@@ -2,6 +2,7 @@ from typing import NoReturn
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,6 +26,10 @@ from app.services.monitoring.audit import log_login_attempt, log_oauth_login
 
 router = APIRouter()
 logger = get_auth_logger()
+
+
+class ProvidersResponse(BaseModel):
+    providers: list[str]
 
 
 @router.post("/register", response_model=UserResponse, status_code=201)
@@ -170,7 +175,9 @@ async def register_user(
         )
         _handle_general_error(e)
     else:
-        return db_user
+        from app.schemas.auth.user import UserResponse
+
+        return UserResponse.model_validate(db_user)
 
 
 @router.post("/login", response_model=Token)
@@ -481,11 +488,11 @@ async def oauth_login(
         ) from e
 
 
-@router.get("/oauth/providers")
-async def get_oauth_providers() -> dict[str, list[str]]:
+@router.get("/oauth/providers", response_model=ProvidersResponse)
+async def get_oauth_providers() -> ProvidersResponse:
     """Get available OAuth providers."""
     if not oauth_service:
-        return {"providers": []}
+        return ProvidersResponse(providers=[])
 
     providers = []
     if oauth_service.is_provider_configured("google"):
@@ -493,4 +500,4 @@ async def get_oauth_providers() -> dict[str, list[str]]:
     if oauth_service.is_provider_configured("apple"):
         providers.append("apple")
 
-    return {"providers": providers}
+    return ProvidersResponse(providers=providers)

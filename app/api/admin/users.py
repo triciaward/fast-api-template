@@ -83,24 +83,7 @@ async def list_users(
     total = await admin_user_crud.count(db, filters=filters)
 
     # Convert to response models
-    user_responses = [
-        AdminUserResponse(
-            id=user.id,  # type: ignore
-            email=user.email,  # type: ignore
-            username=user.username,  # type: ignore
-            is_superuser=user.is_superuser,  # type: ignore
-            is_verified=user.is_verified,  # type: ignore
-            is_deleted=user.is_deleted,  # type: ignore
-            created_at=user.created_at,  # type: ignore
-            oauth_provider=user.oauth_provider,  # type: ignore
-            oauth_id=user.oauth_id,  # type: ignore
-            oauth_email=user.oauth_email,  # type: ignore
-            deletion_requested_at=user.deletion_requested_at,  # type: ignore
-            deletion_confirmed_at=user.deletion_confirmed_at,  # type: ignore
-            deletion_scheduled_for=user.deletion_scheduled_for,  # type: ignore
-        )
-        for user in users
-    ]
+    user_responses = [AdminUserResponse.model_validate(user) for user in users]
 
     return AdminUserListResponse.create(
         items=user_responses,
@@ -133,21 +116,7 @@ async def get_user(
             detail="User not found",
         )
 
-    return AdminUserResponse(
-        id=user.id,  # type: ignore
-        email=user.email,  # type: ignore
-        username=user.username,  # type: ignore
-        is_superuser=user.is_superuser,  # type: ignore
-        is_verified=user.is_verified,  # type: ignore
-        is_deleted=user.is_deleted,  # type: ignore
-        created_at=user.created_at,  # type: ignore
-        oauth_provider=user.oauth_provider,  # type: ignore
-        oauth_id=user.oauth_id,  # type: ignore
-        oauth_email=user.oauth_email,  # type: ignore
-        deletion_requested_at=user.deletion_requested_at,  # type: ignore
-        deletion_confirmed_at=user.deletion_confirmed_at,  # type: ignore
-        deletion_scheduled_for=user.deletion_scheduled_for,  # type: ignore
-    )
+    return AdminUserResponse.model_validate(user)
 
 
 @router.post(
@@ -209,21 +178,7 @@ async def create_user(
             detail="Failed to create user",
         )
 
-    return AdminUserResponse(
-        id=user.id,  # type: ignore
-        email=user.email,  # type: ignore
-        username=user.username,  # type: ignore
-        is_superuser=user.is_superuser,  # type: ignore
-        is_verified=user.is_verified,  # type: ignore
-        is_deleted=user.is_deleted,  # type: ignore
-        created_at=user.created_at,  # type: ignore
-        oauth_provider=user.oauth_provider,  # type: ignore
-        oauth_id=user.oauth_id,  # type: ignore
-        oauth_email=user.oauth_email,  # type: ignore
-        deletion_requested_at=user.deletion_requested_at,  # type: ignore
-        deletion_confirmed_at=user.deletion_confirmed_at,  # type: ignore
-        deletion_scheduled_for=user.deletion_scheduled_for,  # type: ignore
-    )
+    return AdminUserResponse.model_validate(user)
 
 
 @router.put("/users/{user_id}", response_model=AdminUserResponse)
@@ -279,21 +234,7 @@ async def update_user(
             detail="Failed to update user",
         )
 
-    return AdminUserResponse(
-        id=user.id,  # type: ignore
-        email=user.email,  # type: ignore
-        username=user.username,  # type: ignore
-        is_superuser=user.is_superuser,  # type: ignore
-        is_verified=user.is_verified,  # type: ignore
-        is_deleted=user.is_deleted,  # type: ignore
-        created_at=user.created_at,  # type: ignore
-        oauth_provider=user.oauth_provider,  # type: ignore
-        oauth_id=user.oauth_id,  # type: ignore
-        oauth_email=user.oauth_email,  # type: ignore
-        deletion_requested_at=user.deletion_requested_at,  # type: ignore
-        deletion_confirmed_at=user.deletion_confirmed_at,  # type: ignore
-        deletion_scheduled_for=user.deletion_scheduled_for,  # type: ignore
-    )
+    return AdminUserResponse.model_validate(user)
 
 
 @router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -369,9 +310,9 @@ async def toggle_superuser_status(
         )
 
     return AdminUserToggleResponse(
-        user_id=user.id,  # type: ignore
+        user_id=user.id,
         field="is_superuser",
-        new_value=user.is_superuser,  # type: ignore
+        new_value=bool(user.is_superuser),
         message=f"Superuser status {'enabled' if user.is_superuser else 'disabled'} successfully",
     )
 
@@ -403,9 +344,9 @@ async def toggle_verification_status(
         )
 
     return AdminUserToggleResponse(
-        user_id=user.id,  # type: ignore
+        user_id=user.id,
         field="is_verified",
-        new_value=user.is_verified,  # type: ignore
+        new_value=bool(user.is_verified),
         message=f"Verification status {'enabled' if user.is_verified else 'disabled'} successfully",
     )
 

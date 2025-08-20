@@ -1,3 +1,4 @@
+import uuid
 from typing import TypeAlias
 
 from sqlalchemy import and_, select
@@ -30,14 +31,13 @@ async def create_api_key(
     key_hash = hash_api_key(raw_key)
     key_fp = fingerprint_api_key(raw_key)
 
-    db_api_key = APIKey(
-        user_id=user_id,
-        key_hash=key_hash,
-        key_fingerprint=key_fp,
-        label=api_key_data.label,
-        scopes=api_key_data.scopes,
-        expires_at=api_key_data.expires_at,
-    )
+    db_api_key = APIKey()
+    db_api_key.user_id = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+    db_api_key.key_hash = key_hash
+    db_api_key.key_fingerprint = key_fp
+    db_api_key.label = api_key_data.label
+    db_api_key.scopes = api_key_data.scopes
+    db_api_key.expires_at = api_key_data.expires_at
 
     db.add(db_api_key)
     await db.commit()
@@ -58,7 +58,8 @@ async def get_api_key_by_hash(db: DBSession, key_hash: str) -> APIKey | None:
         ),
     )
 
-    return result.scalar_one_or_none()
+    api_key: APIKey | None = result.scalar_one_or_none()
+    return api_key
 
 
 async def verify_api_key_in_db(db: DBSession, raw_key: str) -> APIKey | None:
@@ -71,7 +72,7 @@ async def verify_api_key_in_db(db: DBSession, raw_key: str) -> APIKey | None:
             APIKey.is_deleted.is_(False),
         ),
     )
-    api_key = result.scalar_one_or_none()
+    api_key: APIKey | None = result.scalar_one_or_none()
     if api_key and verify_api_key(raw_key, str(api_key.key_hash)):
         if not api_key.is_active:
             return api_key
@@ -135,7 +136,8 @@ async def get_api_key_by_id(
         query = query.filter(APIKey.user_id == user_id)
 
     result = await db.execute(query)
-    return result.scalar_one_or_none()
+    api_key: APIKey | None = result.scalar_one_or_none()
+    return api_key
 
 
 async def deactivate_api_key(
@@ -148,7 +150,7 @@ async def deactivate_api_key(
     if not api_key:
         return False
 
-    api_key.is_active = False  # type: ignore
+    api_key.is_active = False
     await db.commit()
     return True
 
@@ -164,19 +166,18 @@ async def rotate_api_key(
         return None, None
 
     # Deactivate the old key
-    old_key.is_active = False  # type: ignore
+    old_key.is_active = False
 
     # Create a new key with the same properties
     new_raw_key = generate_api_key()
     new_key_hash = hash_api_key(new_raw_key)
 
-    new_api_key = APIKey(
-        user_id=old_key.user_id,
-        key_hash=new_key_hash,
-        label=old_key.label,
-        scopes=old_key.scopes,
-        expires_at=old_key.expires_at,
-    )
+    new_api_key = APIKey()
+    new_api_key.user_id = old_key.user_id
+    new_api_key.key_hash = new_key_hash
+    new_api_key.label = old_key.label
+    new_api_key.scopes = old_key.scopes
+    new_api_key.expires_at = old_key.expires_at
 
     db.add(new_api_key)
     await db.commit()

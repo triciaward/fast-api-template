@@ -13,7 +13,7 @@ from app.schemas.auth.user import (
     APIKeyRotateResponse,
     UserResponse,
 )
-from app.utils.pagination import PaginationParams
+from app.utils.pagination import PaginationMetadata, PaginationParams
 
 router = APIRouter()
 logger = get_auth_logger()
@@ -54,8 +54,12 @@ async def create_api_key(
             label=api_key_data.label,
         )
 
+        # Convert ORM model to response schema
+        from app.schemas.auth.user import APIKeyResponse
+
+        api_key_resp = APIKeyResponse.model_validate(db_api_key)
         return APIKeyCreateResponse(
-            api_key=db_api_key,
+            api_key=api_key_resp,
             raw_key=raw_key,
         )
 
@@ -99,14 +103,17 @@ async def list_api_keys(
     )
 
     # Convert SQLAlchemy objects to Pydantic models
-    api_key_responses = [APIKeyResponse.model_validate(api_key) for api_key in api_keys]
+    api_key_responses: list[APIKeyResponse] = [
+        APIKeyResponse.model_validate(api_key) for api_key in api_keys
+    ]
 
-    return APIKeyListResponse.create(  # type: ignore[return-value]
-        items=api_key_responses,
+    # Return APIKeyListResponse with explicit metadata to satisfy mypy
+    metadata = PaginationMetadata.create(
         page=pagination.page,
         size=pagination.limit,
         total=total_count,
     )
+    return APIKeyListResponse(items=api_key_responses, metadata=metadata)
 
 
 @router.delete("/api-keys/{key_id}", status_code=status.HTTP_204_NO_CONTENT)

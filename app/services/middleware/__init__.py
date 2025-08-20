@@ -1,60 +1,83 @@
 """Middleware services for request processing."""
 
 from collections.abc import Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 
 from fastapi import Request
 
-try:
-    from .rate_limiter import (
-        get_client_ip,
-        get_limiter,
-        get_rate_limit_info,
-        rate_limit_account_deletion,
-        rate_limit_custom,
-        rate_limit_email_verification,
-        rate_limit_login,
-        rate_limit_oauth,
-        rate_limit_password_reset,
-        rate_limit_register,
-        setup_rate_limiting,
-    )
-except ImportError:
-    # Fallback if rate limiting dependencies not available
-    get_limiter = None  # type: ignore
+P = ParamSpec("P")
+R = TypeVar("R")
 
-    def _no_op_decorator(func: Any) -> Any:
-        return func
-
-    rate_limit_login = _no_op_decorator
-    rate_limit_register = _no_op_decorator
-    rate_limit_email_verification = _no_op_decorator
-    rate_limit_password_reset = _no_op_decorator
-    rate_limit_oauth = _no_op_decorator
-    rate_limit_account_deletion = _no_op_decorator
-
-    def rate_limit_custom(
-        limit: str,
-    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-        return _no_op_decorator
-
-    def setup_rate_limiting(app: Any) -> None:
-        return None
-
-    def get_rate_limit_info(request: Request) -> dict[str, Any]:
-        return {"enabled": False}
-
-    def get_client_ip(request: Request) -> str:
-        return "unknown"
+# Declare placeholders once
+get_limiter: Callable[..., Any] | None = None
 
 
-try:
-    from .websockets import ConnectionManager
+def _no_op_decorator(func: Callable[P, R]) -> Callable[P, R]:
+    return func
 
-    websocket_manager = ConnectionManager()
-except ImportError:
-    ConnectionManager = None  # type: ignore
-    websocket_manager = None  # type: ignore
+
+rate_limit_login: Callable[[Callable[P, R]], Callable[P, R]] = _no_op_decorator
+rate_limit_register: Callable[[Callable[P, R]], Callable[P, R]] = _no_op_decorator
+rate_limit_email_verification: Callable[[Callable[P, R]], Callable[P, R]] = (
+    _no_op_decorator
+)
+rate_limit_password_reset: Callable[[Callable[P, R]], Callable[P, R]] = _no_op_decorator
+rate_limit_oauth: Callable[[Callable[P, R]], Callable[P, R]] = _no_op_decorator
+rate_limit_account_deletion: Callable[[Callable[P, R]], Callable[P, R]] = (
+    _no_op_decorator
+)
+
+
+def rate_limit_custom(limit: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
+    return _no_op_decorator
+
+
+def setup_rate_limiting(app: Any) -> None:
+    return None
+
+
+def get_rate_limit_info(request: Request) -> dict[str, Any]:
+    return {"enabled": False}
+
+
+def get_client_ip(request: Request) -> str:
+    return "unknown"
+
+
+# Bind real implementations if available
+try:  # pragma: no cover - optional path
+    from . import rate_limiter as _rl
+
+    get_limiter = _rl.get_limiter
+    rate_limit_login = _rl.rate_limit_login
+    rate_limit_register = _rl.rate_limit_register
+    rate_limit_email_verification = _rl.rate_limit_email_verification
+    rate_limit_password_reset = _rl.rate_limit_password_reset
+    rate_limit_oauth = _rl.rate_limit_oauth
+    rate_limit_account_deletion = _rl.rate_limit_account_deletion
+    rate_limit_custom = _rl.rate_limit_custom
+    setup_rate_limiting = _rl.setup_rate_limiting
+    get_rate_limit_info = _rl.get_rate_limit_info
+    get_client_ip = _rl.get_client_ip
+except Exception:
+    pass
+
+
+if TYPE_CHECKING:
+    from .websockets import ConnectionManager as ConnectionManager
+else:
+
+    class ConnectionManager:  # runtime stub for export
+        pass
+
+
+websocket_manager: "ConnectionManager | None" = None
+try:  # pragma: no cover - optional path
+    from .websockets import ConnectionManager as _RealConnectionManager
+
+    websocket_manager = _RealConnectionManager()
+except Exception:
+    websocket_manager = None
 
 __all__ = [
     "get_limiter",

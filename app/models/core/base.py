@@ -3,16 +3,19 @@ Improved base model with better practices.
 """
 
 import uuid
-from typing import TYPE_CHECKING
+from datetime import datetime
+from typing import TYPE_CHECKING, TypeVar
 
-from sqlalchemy import Boolean, Column, ForeignKey, Index, String
+from sqlalchemy import Boolean, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
-from sqlalchemy.orm import declarative_mixin
+from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
 from app.utils.datetime_utils import utc_now
 
 if TYPE_CHECKING:
     from sqlalchemy.sql import Select
+
+TModel = TypeVar("TModel", bound="SoftDeleteMixin")
 
 
 @declarative_mixin
@@ -24,16 +27,25 @@ class SoftDeleteMixin:
     """
 
     # Soft delete fields with proper indexing
-    is_deleted = Column(Boolean, default=False, nullable=False, index=True)
-    deleted_at = Column(TIMESTAMP(timezone=True), nullable=True, index=True)
-    deleted_by = Column(
+    is_deleted: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        index=True,
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True),
+        nullable=True,
+        index=True,
+    )
+    deleted_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="SET NULL"),  # SET NULL to preserve audit trail
         nullable=True,
         index=True,
         comment="User who deleted the record",
     )
-    deletion_reason = Column(
+    deletion_reason: Mapped[str | None] = mapped_column(
         String(500),
         nullable=True,
         comment="Optional reason for deletion",
@@ -56,17 +68,17 @@ class SoftDeleteMixin:
             deleted_by: UUID of the user performing the deletion
             reason: Optional reason for deletion
         """
-        self.is_deleted = True  # type: ignore[assignment]
-        self.deleted_at = utc_now()  # type: ignore[assignment]
-        self.deleted_by = deleted_by  # type: ignore[assignment]
-        self.deletion_reason = reason  # type: ignore[assignment]
+        self.is_deleted = True
+        self.deleted_at = utc_now()
+        self.deleted_by = deleted_by
+        self.deletion_reason = reason
 
     def restore(self) -> None:
         """Restore a soft-deleted record."""
-        self.is_deleted = False  # type: ignore[assignment]
-        self.deleted_at = None  # type: ignore[assignment]
-        self.deleted_by = None  # type: ignore[assignment]
-        self.deletion_reason = None  # type: ignore[assignment]
+        self.is_deleted = False
+        self.deleted_at = None
+        self.deleted_by = None
+        self.deletion_reason = None
 
     @property
     def is_active(self) -> bool:
@@ -74,21 +86,21 @@ class SoftDeleteMixin:
         return bool(not self.is_deleted)
 
     @classmethod
-    def get_active_query(cls) -> "Select":
+    def get_active_query(cls: type[TModel]) -> "Select[tuple[TModel]]":
         """Get a query that excludes soft-deleted records."""
         from sqlalchemy import select
 
         return select(cls).filter(cls.is_deleted.is_(False))
 
     @classmethod
-    def get_deleted_query(cls) -> "Select":
+    def get_deleted_query(cls: type[TModel]) -> "Select[tuple[TModel]]":
         """Get a query that includes only soft-deleted records."""
         from sqlalchemy import select
 
         return select(cls).filter(cls.is_deleted.is_(True))
 
     @classmethod
-    def get_all_query(cls) -> "Select":
+    def get_all_query(cls: type[TModel]) -> "Select[tuple[TModel]]":
         """Get a query that includes all records (active and deleted)."""
         from sqlalchemy import select
 
@@ -99,14 +111,14 @@ class SoftDeleteMixin:
 class TimestampMixin:
     """Mixin to add created/updated timestamps to models."""
 
-    created_at = Column(
+    created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         default=utc_now,
         nullable=False,
         index=True,
         comment="Record creation timestamp",
     )
-    updated_at = Column(
+    updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         default=utc_now,
         onupdate=utc_now,

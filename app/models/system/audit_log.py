@@ -3,11 +3,12 @@ Improved AuditLog model with better indexing and constraints.
 """
 
 import uuid
+from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Boolean, Column, ForeignKey, Index, String, Text
+from sqlalchemy import Boolean, ForeignKey, Index, String, Text
 from sqlalchemy.dialects.postgresql import JSON, TIMESTAMP, UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
 from app.utils.datetime_utils import utc_now
@@ -23,7 +24,7 @@ class AuditLog(Base):
     __tablename__ = "audit_logs"
 
     # Primary key
-    id = Column(
+    id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
@@ -32,7 +33,7 @@ class AuditLog(Base):
     )
 
     # Timestamp with consistent timezone handling
-    timestamp = Column(
+    timestamp: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         default=utc_now,
         nullable=False,
@@ -41,16 +42,16 @@ class AuditLog(Base):
     )
 
     # User reference with proper foreign key and indexing
-    user_id = Column(
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("users.id", ondelete="SET NULL"),  # SET NULL to preserve audit trail
-        nullable=True,  # Nullable for anonymous/system events
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
         index=True,
         comment="User who performed the action (null for system events)",
     )
 
     # Event classification with length constraint
-    event_type = Column(
+    event_type: Mapped[str] = mapped_column(
         String(100),
         nullable=False,
         index=True,
@@ -58,36 +59,36 @@ class AuditLog(Base):
     )
 
     # Network information
-    ip_address = Column(
-        String(45),  # IPv6 max length
+    ip_address: Mapped[str | None] = mapped_column(
+        String(45),
         nullable=True,
-        index=True,  # Indexed for security analysis
+        index=True,
         comment="IP address of the client",
     )
-    user_agent = Column(
+    user_agent: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
         comment="User agent string from the client",
     )
 
     # Event outcome
-    success = Column(
+    success: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
         default=True,
-        index=True,  # Indexed for filtering failed events
+        index=True,
         comment="Whether the event was successful",
     )
 
     # Additional metadata with JSONB for better performance
-    context = Column(
+    context: Mapped[dict[str, Any] | None] = mapped_column(
         JSON,
         nullable=True,
         comment="Additional event metadata as JSON",
     )
 
     # Session tracking
-    session_id = Column(
+    session_id: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
         index=True,
@@ -153,7 +154,7 @@ class AuditLog(Base):
         """Add context information to the audit log."""
         current: dict[str, Any] = dict(self.context or {})
         current[key] = value
-        self.context = current  # type: ignore[assignment]
+        self.context = current
 
     def get_context(self, key: str, default: Any = None) -> Any:
         """Get context information from the audit log."""

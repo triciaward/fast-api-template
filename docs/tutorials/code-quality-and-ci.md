@@ -61,6 +61,27 @@ pip install -r requirements-dev.txt
 pre-commit install
 pre-commit run --all-files
 
+## Golden typing workflow
+
+- Lint, format, type-check app code strictly, with SQLAlchemy plugin for models:
+  ```bash
+  ruff check .
+  black .
+  python -m mypy app
+  ./scripts/development/mypy_sa_check.sh
+  ```
+
+## Makefile shortcuts
+
+- Use these for convenience:
+  ```bash
+  make fmt
+  make lint
+  make type
+  make type-sa
+  make precommit
+  ```
+
 # Ad-hoc runs
 ruff check app/
 black .

@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 from typing import TypeAlias
 
@@ -36,14 +37,15 @@ async def create_refresh_token(
     fingerprint = fingerprint_refresh_token(raw_token)
     hashed = hash_refresh_token(raw_token)
 
-    refresh_token = RefreshToken(
-        user_id=user_id,
-        token_hash=hashed,
-        token_fingerprint=fingerprint,
-        expires_at=expires_at,
-        device_info=device_info,
-        ip_address=ip_address,
+    refresh_token = RefreshToken()
+    refresh_token.user_id = (
+        uuid.UUID(str(user_id)) if not isinstance(user_id, uuid.UUID) else user_id
     )
+    refresh_token.token_hash = hashed
+    refresh_token.token_fingerprint = fingerprint
+    refresh_token.expires_at = expires_at
+    refresh_token.device_info = device_info
+    refresh_token.ip_address = ip_address
 
     db.add(refresh_token)
     await db.commit()
@@ -67,7 +69,7 @@ async def cleanup_expired_tokens(db: DBSession) -> int:
 
     count = 0
     for token in expired_tokens:
-        token.is_revoked = True  # type: ignore
+        token.is_revoked = True
         count += 1
 
     await db.commit()
@@ -87,7 +89,8 @@ async def get_refresh_token_by_hash(
             RefreshToken.is_revoked.is_(False),
         ),
     )
-    return result.scalar_one_or_none()
+    token: RefreshToken | None = result.scalar_one_or_none()
+    return token
 
 
 async def revoke_refresh_token(db: DBSession, token_hash: str) -> bool:
@@ -96,7 +99,7 @@ async def revoke_refresh_token(db: DBSession, token_hash: str) -> bool:
     if not token:
         return False
 
-    token.is_revoked = True  # type: ignore
+    token.is_revoked = True
     await db.commit()
 
     return True
@@ -112,10 +115,10 @@ async def revoke_refresh_token_by_id(db: DBSession, token_id: str) -> bool:
     result = await db.execute(
         select(RefreshToken).filter(RefreshToken.id == token_id),
     )
-    token = result.scalar_one_or_none()
+    token: RefreshToken | None = result.scalar_one_or_none()
     if not token:
         return False
-    token.is_revoked = True  # type: ignore
+    token.is_revoked = True
     await db.commit()
     return True
 
@@ -144,7 +147,7 @@ async def revoke_all_user_sessions(db: DBSession, user_id: str) -> int:
     sessions = await get_user_sessions(db, user_id)
 
     for session in sessions:
-        session.is_revoked = True  # type: ignore
+        session.is_revoked = True
 
     await db.commit()
     return len(sessions)
@@ -168,7 +171,7 @@ async def verify_refresh_token_in_db(
             RefreshToken.is_revoked.is_(False),
         ),
     )
-    candidate = result.scalar_one_or_none()
+    candidate: RefreshToken | None = result.scalar_one_or_none()
     if not candidate:
         # Backward compatibility: legacy records stored raw token in token_hash
         legacy_result = await db.execute(
@@ -182,8 +185,8 @@ async def verify_refresh_token_in_db(
         if not candidate:
             return None
         # Migrate legacy record in-place to hashed+fingerprint
-        candidate.token_fingerprint = fingerprint  # type: ignore
-        candidate.token_hash = hash_refresh_token(raw_token)  # type: ignore
+        candidate.token_fingerprint = fingerprint
+        candidate.token_hash = hash_refresh_token(raw_token)
         await db.commit()
 
     # Verify using bcrypt hash
@@ -204,7 +207,8 @@ async def enforce_session_limit(
     if len(sessions) >= max_sessions:
         # Sort by creation date (oldest first)
         def get_sort_key(s: RefreshToken) -> datetime:
-            return s.created_at  # type: ignore
+            # created_at comes from TimestampMixin and is non-null
+            return s.created_at
 
         sessions.sort(key=get_sort_key)
 
@@ -212,6 +216,6 @@ async def enforce_session_limit(
         sessions_to_revoke = sessions[: len(sessions) - max_sessions]
 
         for session in sessions_to_revoke:
-            session.is_revoked = True  # type: ignore
+            session.is_revoked = True
 
         await db.commit()

@@ -43,7 +43,9 @@ async def forgot_password(
                 email=request.email,
             )
             return PasswordResetResponse(
-                message="If an account with that email exists, a password reset link has been sent.",
+                message=(
+                    "If an account with that email exists, a password reset link has been sent."
+                ),
                 email_sent=True,
             )
 
@@ -56,7 +58,9 @@ async def forgot_password(
                 oauth_provider=user.oauth_provider,
             )
             return PasswordResetResponse(
-                message="If an account with that email exists, a password reset link has been sent.",
+                message=(
+                    "If an account with that email exists, a password reset link has been sent."
+                ),
                 email_sent=True,
             )
 

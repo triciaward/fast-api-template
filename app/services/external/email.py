@@ -90,7 +90,12 @@ class EmailService:
         except Exception:
             return False
         else:
-            return response.status_code == 250  # type: ignore
+            status_code = getattr(response, "status_code", 0)
+            try:
+                status_int = int(status_code)
+            except Exception:
+                return False
+            return status_int == 250
 
     async def create_verification_token(
         self,
@@ -170,7 +175,12 @@ class EmailService:
         except Exception:
             return False
         else:
-            return response.status_code == 250  # type: ignore
+            status_code = getattr(response, "status_code", 0)
+            try:
+                status_int = int(status_code)
+            except Exception:
+                return False
+            return status_int == 250
 
     async def create_password_reset_token(
         self,
@@ -259,7 +269,12 @@ class EmailService:
         except Exception:
             return False
         else:
-            return response.status_code == 250  # type: ignore
+            status_code = getattr(response, "status_code", 0)
+            try:
+                status_int = int(status_code)
+            except Exception:
+                return False
+            return status_int == 250
 
     def send_account_deletion_reminder_email(
         self,
@@ -305,7 +320,12 @@ class EmailService:
         except Exception:
             return False
         else:
-            return response.status_code == 250  # type: ignore
+            status_code = getattr(response, "status_code", 0)
+            try:
+                status_int = int(status_code)
+            except Exception:
+                return False
+            return status_int == 250
 
     async def create_deletion_token(self, db: AsyncSession, user_id: str) -> str | None:
         """Create and store deletion token for a user."""

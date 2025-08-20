@@ -67,22 +67,7 @@ async def list_users(
     )
 
     # Convert to response models
-    user_responses = [
-        UserResponse(
-            id=user.id,  # type: ignore
-            email=user.email,  # type: ignore
-            username=user.username,  # type: ignore
-            is_superuser=user.is_superuser,  # type: ignore
-            is_verified=user.is_verified,  # type: ignore
-            created_at=user.created_at,  # type: ignore
-            oauth_provider=user.oauth_provider,  # type: ignore
-            is_deleted=user.is_deleted,  # type: ignore
-            deleted_at=user.deleted_at,  # type: ignore
-            deleted_by=user.deleted_by,  # type: ignore
-            deletion_reason=user.deletion_reason,  # type: ignore
-        )
-        for user in users
-    ]
+    user_responses = [UserResponse.model_validate(user) for user in users]
 
     return UserListResponse.create(
         items=user_responses,
@@ -127,22 +112,7 @@ async def search_users(
     )
 
     # Convert to response models
-    user_responses = [
-        UserResponse(
-            id=user.id,  # type: ignore
-            email=user.email,  # type: ignore
-            username=user.username,  # type: ignore
-            is_superuser=user.is_superuser,  # type: ignore
-            is_verified=user.is_verified,  # type: ignore
-            created_at=user.created_at,  # type: ignore
-            oauth_provider=user.oauth_provider,  # type: ignore
-            is_deleted=user.is_deleted,  # type: ignore
-            deleted_at=user.deleted_at,  # type: ignore
-            deleted_by=user.deleted_by,  # type: ignore
-            deletion_reason=user.deletion_reason,  # type: ignore
-        )
-        for user in users
-    ]
+    user_responses = [UserResponse.model_validate(user) for user in users]
 
     # Determine which filters were applied
     filters_applied = []

@@ -12,13 +12,12 @@ repos:
       - id: black
         types: [python]
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.17.0
+  - repo: local
     hooks:
-      - id: mypy
-        types: [python]
-        exclude: ^alembic/versions/
-        args: [--ignore-missing-imports]
-        additional_dependencies: [types-requests, types-redis, types-PyYAML, types-python-jose, types-authlib]
+      - id: mypy-app
+        name: mypy (app)
+        entry: python -m mypy app
+        language: system
+        pass_filenames: false
 
  

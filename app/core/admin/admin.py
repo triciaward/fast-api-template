@@ -30,6 +30,10 @@ class HasId(Protocol):
     id: Any
 
 
+class AdminTagged(Protocol):
+    __admin_only__: bool
+
+
 # Type variables for generic CRUD operations
 ModelType = TypeVar("ModelType", bound=HasId)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
@@ -193,7 +197,8 @@ class BaseAdminCRUD(
         result = await db.execute(
             select(self.model).filter(self.model.id == record_id),
         )
-        return result.scalar_one_or_none()
+        obj: ModelType | None = result.scalar_one_or_none()
+        return obj
 
     async def create(self, db: DBSession, obj_in: CreateSchemaType) -> ModelType:
         """
@@ -302,6 +307,7 @@ def admin_only_endpoint(func: Callable[..., Any]) -> Callable[..., Any]:
     Returns:
         Callable: Decorated function
     """
-    # Add admin-only metadata to the function
-    func.__admin_only__ = True  # type: ignore
+    # Add admin-only metadata to the function without mypy error
+    _f_any: Any = func
+    _f_any.__admin_only__ = True
     return func

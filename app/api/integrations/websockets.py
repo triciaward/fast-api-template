@@ -11,9 +11,9 @@ This endpoint demonstrates WebSocket functionality including:
 import json
 import logging
 from datetime import datetime, timezone
-from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel
 
 from app.services.middleware.websockets import manager
 
@@ -124,20 +124,27 @@ async def websocket_demo(websocket: WebSocket) -> None:
         manager.disconnect(websocket)
 
 
-@router.get("/ws/status")
-async def websocket_status() -> dict[str, Any]:
+class WebsocketStatusResponse(BaseModel):
+    total_connections: int
+    active_rooms: list[str]
+    room_connections: dict[str, int]
+    timestamp: str
+
+
+@router.get("/ws/status", response_model=WebsocketStatusResponse)
+async def websocket_status() -> WebsocketStatusResponse:
     """
     Get WebSocket connection status.
 
     Returns:
         Dictionary with connection statistics
     """
-    return {
-        "total_connections": manager.get_total_connections(),
-        "active_rooms": list(manager.active_connections.keys()),
-        "room_connections": {
+    return WebsocketStatusResponse(
+        total_connections=manager.get_total_connections(),
+        active_rooms=list(manager.active_connections.keys()),
+        room_connections={
             room: len(connections)
             for room, connections in manager.active_connections.items()
         },
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    }
+        timestamp=datetime.now(timezone.utc).isoformat(),
+    )

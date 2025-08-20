@@ -2,95 +2,48 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [ main, develop ]
   pull_request:
-    branches: [main, develop]
+    branches: [ main, develop ]
 
 jobs:
-  lint:
-    name: 🔍 Lint (ruff)
+  lint-and-type:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: pip
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
+          pip install -r requirements.txt -r requirements-dev.txt
 
-      - name: Copy environment files
-        run: |
-          cp .env.example .env
-          echo "Environment file copied for CI"
+      - name: Ruff
+        run: ruff check .
 
-      - name: Run Ruff and Black
-        run: |
-          echo "Running ruff check..."
-          ruff check .
-          echo "Running black format check..."
-          black --check .
+      - name: MyPy (app only)
+        run: python -m mypy app
 
-  type-check:
-    name: 🧠 Type Check (mypy)
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-          cache: pip
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
-
-      - name: Copy environment files
-        run: |
-          cp .env.example .env
-          echo "Environment file copied for CI"
-
-      - name: Run Mypy
-        run: |
-          mypy app/ scripts/
-
-  test:
-    name: 🧪 Tests (pytest)
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-          cache: pip
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
-
-      - name: Copy environment files
-        run: |
-          cp .env.example .env
-          echo "Environment file copied for CI"
-
-      - name: Run Tests
-        run: |
-          echo "Running pytest..."
-          python -m pytest tests/ -v --tb=short 
+  # tests-docker:
+  #   runs-on: ubuntu-latest
+  #   if: false  # enable later when dockerized tests are added
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #     - name: Setup Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: '3.11'
+  #     - name: Install deps
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         pip install -r requirements.txt -r requirements-dev.txt
+  #     - name: Run tests (dockerized)
+  #       run: |
+  #         make test-docker

@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,8 +28,62 @@ router = APIRouter()
 logger = get_app_logger()
 
 
-@router.get("/health")
-async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
+class HealthStatus(BaseModel):
+    status: str
+    timestamp: str
+    version: str
+    environment: str
+    checks: dict[str, Any]
+    sentry: dict[str, Any] | None = None
+
+
+class SimpleHealthResponse(BaseModel):
+    status: str
+    timestamp: str
+
+
+class DetailedHealthResponse(BaseModel):
+    status: str
+    timestamp: str
+    version: str
+    environment: str
+    checks: dict[str, Any]
+
+
+class ReadinessResponse(BaseModel):
+    ready: bool
+    timestamp: str
+    components: dict[str, Any]
+
+
+class LivenessResponse(BaseModel):
+    alive: str
+    timestamp: str
+
+
+class DatabaseHealthResponse(BaseModel):
+    status: str
+    response_time: float | None = Field(default=None)
+    table_count: int | None = Field(default=None)
+    connection_pool: dict[str, Any] | None = Field(default=None)
+    database_url: str | None = Field(default=None)
+    error: str | None = Field(default=None)
+
+
+class RateLimitInfoResponse(BaseModel):
+    enabled: bool
+    timestamp: str
+    configuration: dict[str, Any]
+
+
+class MetricsResponse(BaseModel):
+    system: dict[str, Any]
+    application: dict[str, Any]
+    timestamp: float
+
+
+@router.get("/health", response_model=HealthStatus)
+async def health_check(db: AsyncSession = Depends(get_db)) -> HealthStatus:
     """
     Basic health check endpoint.
 
@@ -92,28 +147,28 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
             detail="Database health check failed",
         ) from None
 
-    return health_status
+    return HealthStatus.model_validate(health_status)
 
 
-@router.get("/health/simple")
-async def simple_health_check() -> dict[str, Any]:
+@router.get("/health/simple", response_model=SimpleHealthResponse)
+async def simple_health_check() -> SimpleHealthResponse:
     """
     Simple health check endpoint for load balancers.
 
     Returns:
         dict: Simple health status
     """
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    }
+    return SimpleHealthResponse(
+        status="healthy",
+        timestamp=datetime.now(timezone.utc).isoformat(),
+    )
 
 
-@router.get("/health/detailed")
+@router.get("/health/detailed", response_model=DetailedHealthResponse)
 async def detailed_health_check(
     db: AsyncSession = Depends(get_db),
     _: APIKeyUser = Depends(require_api_scope("system:read")),
-) -> dict[str, Any]:
+) -> DetailedHealthResponse:
     """
     Detailed health check with database connectivity test.
 
@@ -209,11 +264,11 @@ async def detailed_health_check(
             health_status=health_status,
         )
 
-    return health_status
+    return DetailedHealthResponse.model_validate(health_status)
 
 
-@router.get("/health/ready")
-async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
+@router.get("/health/ready", response_model=ReadinessResponse)
+async def readiness_check(db: AsyncSession = Depends(get_db)) -> ReadinessResponse:
     """
     Readiness check for Kubernetes/container orchestration.
 
@@ -236,14 +291,14 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
             if redis_client:
                 await redis_client.ping()
 
-        return {
-            "ready": True,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "components": {
+        return ReadinessResponse(
+            ready=True,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            components={
                 "database": {"ready": True},
                 "application": {"ready": True},
             },
-        }
+        )
 
     except Exception as e:
         logger.exception("Readiness check failed", error=str(e))
@@ -253,8 +308,8 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
         ) from e
 
 
-@router.get("/health/live")
-async def liveness_check() -> dict[str, Any]:
+@router.get("/health/live", response_model=LivenessResponse)
+async def liveness_check() -> LivenessResponse:
     """
     Liveness check for Kubernetes/container orchestration.
 
@@ -264,17 +319,17 @@ async def liveness_check() -> dict[str, Any]:
     Returns:
         dict: Liveness status
     """
-    return {
-        "alive": "true",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    }
+    return LivenessResponse(
+        alive="true",
+        timestamp=datetime.now(timezone.utc).isoformat(),
+    )
 
 
-@router.get("/health/database")
+@router.get("/health/database", response_model=DatabaseHealthResponse)
 async def database_health_check(
     db: AsyncSession = Depends(get_db),
     _: APIKeyUser = Depends(require_api_scope("system:read")),
-) -> dict[str, Any]:
+) -> DatabaseHealthResponse:
     """
     Detailed database health check with performance metrics.
 
@@ -300,45 +355,45 @@ async def database_health_check(
         # Analyze database performance
         # analyzer = QueryAnalyzer(db)  # Unused for now
 
-        return {
-            "status": "healthy",
-            "response_time": round(response_time, 3),
-            "table_count": table_count,
-            "connection_pool": {
+        return DatabaseHealthResponse(
+            status="healthy",
+            response_time=round(response_time, 3),
+            table_count=table_count,
+            connection_pool={
                 "pool_size": settings.DB_POOL_SIZE,
                 "max_overflow": settings.DB_MAX_OVERFLOW,
                 "pool_recycle": settings.DB_POOL_RECYCLE,
             },
-            "database_url": settings.DATABASE_URL.split("@")[-1],  # Hide credentials
-        }
+            database_url=settings.DATABASE_URL.split("@")[-1],
+        )
 
     except Exception as e:
         logger.exception("Database health check failed", error=str(e))
-        return {
-            "status": "unhealthy",
-            "error": str(e),
-            "response_time": None,
-        }
+        return DatabaseHealthResponse(
+            status="unhealthy",
+            error=str(e),
+            response_time=None,
+        )
 
 
-@router.get("/health/rate-limit")
-async def rate_limit_info() -> dict[str, Any]:
+@router.get("/health/rate-limit", response_model=RateLimitInfoResponse)
+async def rate_limit_info() -> RateLimitInfoResponse:
     """
     Rate limiting information endpoint.
 
     Returns:
         dict: Rate limiting configuration and status
     """
-    return {
-        "enabled": settings.ENABLE_RATE_LIMITING,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "configuration": {
+    return RateLimitInfoResponse(
+        enabled=settings.ENABLE_RATE_LIMITING,
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        configuration={
             "default_limit": settings.RATE_LIMIT_DEFAULT,
             "login_limit": settings.RATE_LIMIT_LOGIN,
             "register_limit": settings.RATE_LIMIT_REGISTER,
             "storage_backend": settings.RATE_LIMIT_STORAGE_BACKEND,
         },
-    }
+    )
 
 
 @router.get("/health/test-sentry")
@@ -358,10 +413,10 @@ async def test_sentry_endpoint(
     )
 
 
-@router.get("/health/metrics")
+@router.get("/health/metrics", response_model=MetricsResponse)
 async def metrics_endpoint(
     _: APIKeyUser = Depends(require_api_scope("system:read")),
-) -> dict[str, Any]:
+) -> MetricsResponse:
     """
     Application metrics endpoint for monitoring.
 
@@ -375,15 +430,15 @@ async def metrics_endpoint(
     memory = psutil.virtual_memory()
     disk = psutil.disk_usage("/")
 
-    return {
-        "system": {
+    return MetricsResponse(
+        system={
             "cpu_percent": cpu_percent,
             "memory_percent": memory.percent,
             "memory_available": memory.available,
             "disk_percent": disk.percent,
             "disk_free": disk.free,
         },
-        "application": {
+        application={
             "version": settings.VERSION,
             "environment": settings.ENVIRONMENT,
             "features": {
@@ -394,5 +449,5 @@ async def metrics_endpoint(
                 "sentry_enabled": settings.ENABLE_SENTRY,
             },
         },
-        "timestamp": time.time(),
-    }
+        timestamp=time.time(),
+    )

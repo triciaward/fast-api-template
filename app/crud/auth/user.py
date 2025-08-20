@@ -17,24 +17,25 @@ async def get_user_by_email(db: DBSession, email: str) -> User | None:
     result = await db.execute(
         select(User).filter(User.email == email, User.is_deleted.is_(False)),
     )
-    return result.scalar_one_or_none()
+    user: User | None = result.scalar_one_or_none()
+    return user
 
 
 async def get_user_by_username(db: DBSession, username: str) -> User | None:
     result = await db.execute(
         select(User).filter(User.username == username, User.is_deleted.is_(False)),
     )
-    return result.scalar_one_or_none()
+    user: User | None = result.scalar_one_or_none()
+    return user
 
 
 async def create_user(db: DBSession, user: UserCreate) -> User:
     hashed_password = get_password_hash(user.password)
-    db_user = User(
-        email=user.email,
-        username=user.username,
-        hashed_password=hashed_password,
-        is_superuser=user.is_superuser,
-    )
+    db_user = User()
+    db_user.email = user.email
+    db_user.username = user.username
+    db_user.hashed_password = hashed_password
+    db_user.is_superuser = user.is_superuser
     db.add(db_user)
     await db.commit()
     try:
@@ -55,7 +56,8 @@ async def get_user_by_id(db: DBSession, user_id: str) -> User | None:
     result = await db.execute(
         select(User).filter(User.id == user_id, User.is_deleted.is_(False)),
     )
-    return result.scalar_one_or_none()
+    user: User | None = result.scalar_one_or_none()
+    return user
 
 
 async def get_user_by_oauth_id(
@@ -70,7 +72,8 @@ async def get_user_by_oauth_id(
             User.is_deleted.is_(False),
         ),
     )
-    return result.scalar_one_or_none()
+    user: User | None = result.scalar_one_or_none()
+    return user
 
 
 async def create_oauth_user(
@@ -81,14 +84,13 @@ async def create_oauth_user(
     oauth_id: str,
     oauth_email: str,
 ) -> User:
-    db_user = User(
-        email=email,
-        username=username,
-        oauth_provider=oauth_provider,
-        oauth_id=oauth_id,
-        oauth_email=oauth_email,
-        is_verified=True,  # OAuth users are pre-verified
-    )
+    db_user = User()
+    db_user.email = email
+    db_user.username = username
+    db_user.oauth_provider = oauth_provider
+    db_user.oauth_id = oauth_id
+    db_user.oauth_email = oauth_email
+    db_user.is_verified = True
     db.add(db_user)
     await db.commit()
     try:
@@ -103,9 +105,9 @@ async def verify_user(db: DBSession, user_id: str) -> bool:
     if not user:
         return False
 
-    user.is_verified = True  # type: ignore
-    user.verification_token = None  # type: ignore
-    user.verification_token_expires = None  # type: ignore
+    user.is_verified = True
+    user.verification_token = None
+    user.verification_token_expires = None
 
     await db.commit()
     return True
@@ -121,8 +123,8 @@ async def update_verification_token(
     if not user:
         return False
 
-    user.verification_token = token  # type: ignore
-    user.verification_token_expires = expires  # type: ignore
+    user.verification_token = token
+    user.verification_token_expires = expires
 
     await db.commit()
     return True
@@ -136,7 +138,8 @@ async def get_user_by_verification_token(db: DBSession, token: str) -> User | No
             User.is_deleted.is_(False),
         ),
     )
-    return result.scalar_one_or_none()
+    user: User | None = result.scalar_one_or_none()
+    return user
 
 
 async def update_password_reset_token(
@@ -149,8 +152,8 @@ async def update_password_reset_token(
     if not user:
         return False
 
-    user.password_reset_token = token  # type: ignore
-    user.password_reset_token_expires = expires  # type: ignore
+    user.password_reset_token = token
+    user.password_reset_token_expires = expires
 
     await db.commit()
     return True
@@ -164,7 +167,8 @@ async def get_user_by_password_reset_token(db: DBSession, token: str) -> User | 
             User.is_deleted.is_(False),
         ),
     )
-    return result.scalar_one_or_none()
+    user: User | None = result.scalar_one_or_none()
+    return user
 
 
 async def reset_user_password(db: DBSession, user_id: str, new_password: str) -> bool:
@@ -172,9 +176,9 @@ async def reset_user_password(db: DBSession, user_id: str, new_password: str) ->
     if not user:
         return False
 
-    user.hashed_password = get_password_hash(new_password)  # type: ignore
-    user.password_reset_token = None  # type: ignore
-    user.password_reset_token_expires = None  # type: ignore
+    user.hashed_password = get_password_hash(new_password)
+    user.password_reset_token = None
+    user.password_reset_token_expires = None
 
     await db.commit()
     return True
@@ -185,7 +189,7 @@ async def update_user_password(db: DBSession, user_id: str, new_password: str) -
     if not user:
         return False
 
-    user.hashed_password = get_password_hash(new_password)  # type: ignore
+    user.hashed_password = get_password_hash(new_password)
 
     await db.commit()
     return True
@@ -201,8 +205,8 @@ async def update_deletion_token(
     if not user:
         return False
 
-    user.deletion_token = token  # type: ignore
-    user.deletion_token_expires = expires  # type: ignore
+    user.deletion_token = token
+    user.deletion_token_expires = expires
 
     await db.commit()
     return True
@@ -216,7 +220,8 @@ async def get_user_by_deletion_token(db: DBSession, token: str) -> User | None:
             User.is_deleted.is_(False),
         ),
     )
-    return result.scalar_one_or_none()
+    user: User | None = result.scalar_one_or_none()
+    return user
 
 
 async def schedule_user_deletion(
@@ -228,8 +233,8 @@ async def schedule_user_deletion(
     if not user:
         return False
 
-    user.deletion_scheduled_for = scheduled_date  # type: ignore[assignment]
-    user.deletion_requested_at = utc_now()  # type: ignore[assignment]
+    user.deletion_scheduled_for = scheduled_date
+    user.deletion_requested_at = utc_now()
 
     await db.commit()
     return True
@@ -240,13 +245,13 @@ async def confirm_user_deletion(db: DBSession, user_id: str) -> bool:
     if not user:
         return False
 
-    user.is_deleted = True  # type: ignore[assignment]
-    user.deleted_at = utc_now()  # type: ignore[assignment]
-    user.deletion_scheduled_for = None  # type: ignore[assignment]
-    user.deletion_requested_at = None  # type: ignore[assignment]
-    user.deletion_confirmed_at = utc_now()  # type: ignore[assignment]
-    user.deletion_token = None  # type: ignore[assignment]
-    user.deletion_token_expires = None  # type: ignore[assignment]
+    user.is_deleted = True
+    user.deleted_at = utc_now()
+    user.deletion_scheduled_for = None
+    user.deletion_requested_at = None
+    user.deletion_confirmed_at = utc_now()
+    user.deletion_token = None
+    user.deletion_token_expires = None
 
     await db.commit()
     return True
@@ -257,11 +262,11 @@ async def cancel_user_deletion(db: DBSession, user_id: str) -> bool:
     if not user:
         return False
 
-    user.deletion_scheduled_for = None  # type: ignore[assignment]
-    user.deletion_requested_at = None  # type: ignore[assignment]
-    user.deletion_confirmed_at = None  # type: ignore[assignment]
-    user.deletion_token = None  # type: ignore[assignment]
-    user.deletion_token_expires = None  # type: ignore[assignment]
+    user.deletion_scheduled_for = None
+    user.deletion_requested_at = None
+    user.deletion_confirmed_at = None
+    user.deletion_token = None
+    user.deletion_token_expires = None
 
     await db.commit()
     return True
@@ -305,8 +310,8 @@ async def soft_delete_user(db: DBSession, user_id: str) -> bool:
     if not user:
         return False
 
-    user.is_deleted = True  # type: ignore[assignment]
-    user.deleted_at = utc_now()  # type: ignore[assignment]
+    user.is_deleted = True
+    user.deleted_at = utc_now()
 
     await db.commit()
     return True
@@ -317,8 +322,8 @@ async def restore_user(db: DBSession, user_id: str) -> bool:
     if not user or not user.is_deleted:
         return False
 
-    user.is_deleted = False  # type: ignore
-    user.deleted_at = None  # type: ignore
+    user.is_deleted = False
+    user.deleted_at = None
 
     await db.commit()
     return True
@@ -351,7 +356,8 @@ async def get_user_by_id_any_status(db: DBSession, user_id: str) -> User | None:
     result = await db.execute(
         select(User).filter(User.id == user_id),
     )
-    return result.scalar_one_or_none()
+    user: User | None = result.scalar_one_or_none()
+    return user
 
 
 async def get_deleted_users(

@@ -54,7 +54,10 @@ async def get_current_user(
     user = await crud_user.get_user_by_id(db, user_id=str(user_id))
     if user is None:
         raise credentials_exception
-    return user
+    # Convert to response schema
+    from app.schemas.auth.user import UserResponse
+
+    return UserResponse.model_validate(user)
 
 
 async def get_api_key_user(
@@ -117,12 +120,7 @@ async def get_api_key_user(
     )
 
     # Return API key user object
-    return APIKeyUser(
-        id=db_api_key.id,  # type: ignore
-        scopes=db_api_key.scopes,  # type: ignore
-        user_id=db_api_key.user_id,  # type: ignore
-        key_id=db_api_key.id,  # type: ignore
-    )
+    return APIKeyUser.model_validate(db_api_key)
 
 
 def require_api_scope(required_scope: str) -> Callable[[APIKeyUser], APIKeyUser]:

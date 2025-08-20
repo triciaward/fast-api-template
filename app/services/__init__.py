@@ -1,48 +1,69 @@
 # Services package for optional features organized by category
 from collections.abc import Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 
 from fastapi import Request
 
 # Import from organized subfolders
+if TYPE_CHECKING:
+    from .auth import oauth_service as _oauth_service  # noqa: F401
 try:
-    from .auth import oauth_service
-except ImportError:
-    oauth_service = None  # type: ignore
+    from . import auth as _auth_mod
+
+    oauth_service = _auth_mod.oauth_service
+except Exception:  # pragma: no cover - optional path
+    oauth_service = None
 
 try:
-    from .external import email_service, redis_client
-except ImportError:
-    email_service = None  # type: ignore
+    from . import external as _external_mod
+
+    email_service = _external_mod.email_service
+    redis_client = _external_mod.redis_client
+except Exception:  # pragma: no cover - optional path
+    email_service = None
     redis_client = None
 
 # Background task services
+# Predeclare optional callables so both branches are compatible
+SubmitTask = Callable[..., Any | None]
+GetTaskStatus = Callable[[str], dict[str, Any] | None]
+CancelTask = Callable[[str], bool]
+GetCeleryApp = Callable[[], Any]
+
+submit_task: SubmitTask | None = None
+get_task_status: GetTaskStatus | None = None
+cancel_task: CancelTask | None = None
+get_celery_app: GetCeleryApp | None = None
+
+
+def _is_celery_enabled_fallback() -> bool:
+    return False
+
+
+def _get_active_tasks_fallback() -> list[dict[str, Any]]:
+    return []
+
+
+def _get_celery_stats_fallback() -> dict[str, Any]:
+    return {"enabled": False}
+
+
+is_celery_enabled: Callable[[], bool] = _is_celery_enabled_fallback
+get_active_tasks: Callable[[], list[dict[str, Any]]] = _get_active_tasks_fallback
+get_celery_stats: Callable[[], dict[str, Any]] = _get_celery_stats_fallback
+
 try:
-    from .background import (
-        cancel_task,
-        get_active_tasks,
-        get_celery_app,
-        get_celery_stats,
-        get_task_status,
-        is_celery_enabled,
-        submit_task,
-    )
-except ImportError:
-    # Fallback if Celery is not available
-    get_celery_app = None  # type: ignore
+    from . import background as _bg_mod
 
-    def is_celery_enabled() -> bool:
-        return False
-
-    submit_task = None  # type: ignore
-    get_task_status = None  # type: ignore
-    cancel_task = None  # type: ignore
-
-    def get_active_tasks() -> list[dict[str, Any]]:
-        return []
-
-    def get_celery_stats() -> dict[str, Any]:
-        return {"enabled": False}
+    get_celery_app = _bg_mod.get_celery_app
+    is_celery_enabled = _bg_mod.is_celery_enabled
+    submit_task = _bg_mod.submit_task
+    get_task_status = _bg_mod.get_task_status
+    cancel_task = _bg_mod.cancel_task
+    get_active_tasks = _bg_mod.get_active_tasks
+    get_celery_stats = _bg_mod.get_celery_stats
+except ImportError:  # pragma: no cover - optional path
+    pass
 
 
 # Rate limiting service
@@ -61,10 +82,13 @@ try:
     )
 except ImportError:
     # Fallback if rate limiting is not available
-    get_limiter = None  # type: ignore
+    get_limiter = None
     # Create no-op decorators that just return the function unchanged
 
-    def _no_op_decorator(func: Any) -> Any:
+    _P = ParamSpec("_P")
+    _R = TypeVar("_R")
+
+    def _no_op_decorator(func: Callable[_P, _R]) -> Callable[_P, _R]:
         return func
 
     rate_limit_login = _no_op_decorator
@@ -74,9 +98,7 @@ except ImportError:
     rate_limit_oauth = _no_op_decorator
     rate_limit_account_deletion = _no_op_decorator
 
-    def rate_limit_custom(
-        limit: str,
-    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    def rate_limit_custom(limit: str) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]:
         return _no_op_decorator
 
     def setup_rate_limiting(app: Any) -> None:

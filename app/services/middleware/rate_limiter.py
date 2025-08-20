@@ -1,7 +1,7 @@
 """Rate limiting service using slowapi with support for both memory and Redis backends."""
 
 from collections.abc import Callable
-from typing import Any
+from typing import Any, ParamSpec, TypeVar
 
 from fastapi import Request
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -65,75 +65,79 @@ def get_client_ip(request: Request) -> str:
 
 
 # No-op decorator for when rate limiting is disabled
-def _no_op_decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def _no_op_decorator(func: Callable[P, R]) -> Callable[P, R]:
     """No-op decorator that returns the function unchanged."""
     return func
 
 
 # Rate limiting decorators
-def rate_limit_login(func: Callable[..., Any]) -> Callable[..., Any]:
+def rate_limit_login(func: Callable[P, R]) -> Callable[P, R]:
     """Rate limit decorator for login endpoints."""
     if not settings.ENABLE_RATE_LIMITING:
         return _no_op_decorator(func)
 
     # Use slowapi's limit decorator
-    return get_limiter().limit(settings.RATE_LIMIT_LOGIN)(func)  # type: ignore
+    return get_limiter().limit(settings.RATE_LIMIT_LOGIN)(func)  # type: ignore[misc]
 
 
-def rate_limit_register(func: Callable[..., Any]) -> Callable[..., Any]:
+def rate_limit_register(func: Callable[P, R]) -> Callable[P, R]:
     """Rate limit decorator for registration endpoints."""
     if not settings.ENABLE_RATE_LIMITING:
         return _no_op_decorator(func)
 
     # Use slowapi's limit decorator
-    return get_limiter().limit(settings.RATE_LIMIT_REGISTER)(func)  # type: ignore
+    return get_limiter().limit(settings.RATE_LIMIT_REGISTER)(func)  # type: ignore[misc]
 
 
-def rate_limit_email_verification(func: Callable[..., Any]) -> Callable[..., Any]:
+def rate_limit_email_verification(func: Callable[P, R]) -> Callable[P, R]:
     """Rate limit decorator for email verification endpoints."""
     if not settings.ENABLE_RATE_LIMITING:
         return _no_op_decorator(func)
 
     # Use slowapi's limit decorator
-    return get_limiter().limit(settings.RATE_LIMIT_EMAIL_VERIFICATION)(func)  # type: ignore
+    return get_limiter().limit(settings.RATE_LIMIT_EMAIL_VERIFICATION)(func)  # type: ignore[misc]
 
 
-def rate_limit_password_reset(func: Callable[..., Any]) -> Callable[..., Any]:
+def rate_limit_password_reset(func: Callable[P, R]) -> Callable[P, R]:
     """Rate limit decorator for password reset endpoints."""
     if not settings.ENABLE_RATE_LIMITING:
         return _no_op_decorator(func)
 
     # Use slowapi's limit decorator
-    return get_limiter().limit(settings.RATE_LIMIT_PASSWORD_RESET)(func)  # type: ignore
+    return get_limiter().limit(settings.RATE_LIMIT_PASSWORD_RESET)(func)  # type: ignore[misc]
 
 
-def rate_limit_oauth(func: Callable[..., Any]) -> Callable[..., Any]:
+def rate_limit_oauth(func: Callable[P, R]) -> Callable[P, R]:
     """Rate limit decorator for OAuth endpoints."""
     if not settings.ENABLE_RATE_LIMITING:
         return _no_op_decorator(func)
 
     # Use slowapi's limit decorator
-    return get_limiter().limit(settings.RATE_LIMIT_OAUTH)(func)  # type: ignore
+    return get_limiter().limit(settings.RATE_LIMIT_OAUTH)(func)  # type: ignore[misc]
 
 
-def rate_limit_account_deletion(func: Callable[..., Any]) -> Callable[..., Any]:
+def rate_limit_account_deletion(func: Callable[P, R]) -> Callable[P, R]:
     """Rate limit decorator for account deletion endpoints."""
     if not settings.ENABLE_RATE_LIMITING:
         return _no_op_decorator(func)
 
     # Use slowapi's limit decorator
-    return get_limiter().limit(settings.RATE_LIMIT_ACCOUNT_DELETION)(func)  # type: ignore
+    return get_limiter().limit(settings.RATE_LIMIT_ACCOUNT_DELETION)(func)  # type: ignore[misc]
 
 
-def rate_limit_custom(limit: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+def rate_limit_custom(limit: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
     """Custom rate limit decorator with specified limit."""
 
-    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
         if not settings.ENABLE_RATE_LIMITING:
             return _no_op_decorator(func)
 
         # Use slowapi's limit decorator
-        return get_limiter().limit(limit)(func)  # type: ignore
+        return get_limiter().limit(limit)(func)  # type: ignore[misc]
 
     return decorator
 

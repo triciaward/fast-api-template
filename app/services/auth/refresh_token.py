@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timedelta, timezone
+from typing import Literal, TypeAlias
 
 from fastapi import Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -70,6 +71,22 @@ def get_client_ip(request: Request) -> str:
     return request.client.host if request.client else "unknown"
 
 
+CookieSameSite: TypeAlias = Literal["lax", "strict", "none"] | None
+
+
+def _samesite_value(raw: str | None) -> CookieSameSite:
+    if raw is None:
+        return None
+    v = raw.lower()
+    if v == "lax":
+        return "lax"
+    if v == "strict":
+        return "strict"
+    if v == "none":
+        return "none"
+    return None
+
+
 def set_refresh_token_cookie(response: Response, token: str) -> None:
     """Set the refresh token as an HttpOnly cookie."""
     response.set_cookie(
@@ -81,7 +98,9 @@ def set_refresh_token_cookie(response: Response, token: str) -> None:
         * 60,  # Convert days to seconds
         httponly=settings.REFRESH_TOKEN_COOKIE_HTTPONLY,
         secure=settings.REFRESH_TOKEN_COOKIE_SECURE,
-        samesite=settings.REFRESH_TOKEN_COOKIE_SAMESITE,  # type: ignore
+        samesite=_samesite_value(
+            getattr(settings, "REFRESH_TOKEN_COOKIE_SAMESITE", None),
+        ),
         path=settings.REFRESH_TOKEN_COOKIE_PATH,
     )
 
@@ -115,7 +134,7 @@ async def create_user_session(
     # Store refresh token in database
     await crud_create_refresh_token(
         db=db,
-        user_id=user.id,  # type: ignore
+        user_id=str(user.id),
         token_hash=refresh_token_value,
         device_info=device_info,
         ip_address=ip_address,
@@ -124,7 +143,7 @@ async def create_user_session(
     # Enforce session limit
     from app.core.config import settings as _settings
 
-    await enforce_session_limit(db, user.id, _settings.MAX_SESSIONS_PER_USER)  # type: ignore
+    await enforce_session_limit(db, str(user.id), _settings.MAX_SESSIONS_PER_USER)
 
     # Create access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -150,7 +169,7 @@ async def refresh_access_token(
     from sqlalchemy import select
 
     result = await db.execute(select(User).filter(User.id == db_refresh_token.user_id))
-    user = result.scalar_one_or_none()
+    user: User | None = result.scalar_one_or_none()
     if not user or user.is_deleted:
         return None
 

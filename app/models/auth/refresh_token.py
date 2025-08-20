@@ -3,10 +3,12 @@ Improved RefreshToken model with better constraints and indexing.
 """
 
 import uuid
+from datetime import datetime
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, ForeignKey, Index, String, Text
+from sqlalchemy import Boolean, ForeignKey, Index, String, Text
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
 from app.models.core.base import SoftDeleteMixin, TimestampMixin
@@ -23,7 +25,7 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
     __tablename__ = "refresh_tokens"
 
     # Primary key
-    id = Column(
+    id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
@@ -32,7 +34,7 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # User reference with proper foreign key
-    user_id = Column(
+    user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
@@ -41,16 +43,16 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Token information with proper constraints
-    token_hash = Column(
+    token_hash: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
         index=True,
-        unique=True,  # Ensure token uniqueness
+        unique=True,
         comment="Hashed refresh token value",
     )
 
     # Deterministic fingerprint for efficient lookup before bcrypt verify
-    token_fingerprint = Column(
+    token_fingerprint: Mapped[str | None] = mapped_column(
         String(64),
         nullable=True,
         index=True,
@@ -58,7 +60,7 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Expiration with consistent timezone handling
-    expires_at = Column(
+    expires_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         nullable=False,
         index=True,
@@ -66,7 +68,7 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Status tracking
-    is_revoked = Column(
+    is_revoked: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
         nullable=False,
@@ -75,20 +77,20 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
     )
 
     # Device and network information
-    device_info = Column(
+    device_info: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
         comment="Device information (browser, OS, etc.)",
     )
-    ip_address = Column(
-        String(45),  # IPv6 max length
+    ip_address: Mapped[str | None] = mapped_column(
+        String(45),
         nullable=True,
-        index=True,  # Indexed for security analysis
+        index=True,
         comment="IP address where token was created",
     )
 
     # Relationships
-    user = relationship(
+    user: Mapped["User"] = relationship(
         "User",
         back_populates="refresh_tokens",
         foreign_keys=[user_id],
@@ -138,8 +140,8 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
 
     def revoke(self) -> None:
         """Revoke the refresh token."""
-        self.is_revoked = True  # type: ignore[assignment]
-        self.updated_at = utc_now()  # type: ignore[assignment]
+        self.is_revoked = True
+        self.updated_at = utc_now()
 
     def get_device_summary(self) -> str:
         """Get a human-readable device summary."""
@@ -163,15 +165,15 @@ class RefreshToken(Base, SoftDeleteMixin, TimestampMixin):
     @property
     def time_until_expiry(self) -> int | None:
         """Get seconds until token expires (negative if expired)."""
-        if self.is_expired:
-            return None
         delta = self.expires_at - utc_now()
         return int(delta.total_seconds())
 
     @property
     def is_near_expiry(self) -> bool:
         """Check if token expires within 24 hours."""
-        if self.is_expired:
-            return False
         delta = self.expires_at - utc_now()
-        return bool(delta.total_seconds() < 86400)  # 24 hours
+        return bool(delta.total_seconds() < 86400)
+
+
+if TYPE_CHECKING:
+    from app.models.auth.user import User

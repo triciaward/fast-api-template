@@ -9,9 +9,9 @@ This module provides:
 """
 
 import time
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from functools import wraps
-from typing import Any, TypeVar
+from typing import Any, ParamSpec, TypeVar
 
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
@@ -21,8 +21,9 @@ from app.core.config import get_app_logger
 
 logger = get_app_logger()
 
-# Type variable for generic functions
-F = TypeVar("F", bound=Callable[..., Any])
+# Generic type params for decorators
+P = ParamSpec("P")
+R = TypeVar("R")
 
 # Global cache for performance utilities
 _performance_cache: dict[str, tuple[Any, float]] = {}
@@ -84,7 +85,9 @@ def optimize_query(query: Any, limit: int = 100) -> Any:
     return query.limit(limit)
 
 
-def cache_result(ttl: int = 300) -> Callable[[F], F]:
+def cache_result(
+    ttl: int = 300,
+) -> Callable[[Callable[P, Awaitable[R]]], Callable[P, Awaitable[R]]]:
     """
     Decorator to cache function results.
 
@@ -95,9 +98,9 @@ def cache_result(ttl: int = 300) -> Callable[[F], F]:
         Decorated function with caching
     """
 
-    def decorator(func: F) -> Any:
+    def decorator(func: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[R]]:
         @wraps(func)
-        async def wrapper(*args: Any, **kwargs: Any) -> Any:
+        async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             # Simple in-memory cache (in production, use Redis)
             cache_key = (
                 f"{func.__name__}:{hash(str(args) + str(sorted(kwargs.items())))}"
@@ -123,7 +126,9 @@ def cache_result(ttl: int = 300) -> Callable[[F], F]:
     return decorator
 
 
-def monitor_request_performance() -> Callable[[F], F]:
+def monitor_request_performance() -> (
+    Callable[[Callable[P, Awaitable[R]]], Callable[P, Awaitable[R]]]
+):
     """
     Decorator to monitor request performance.
 
@@ -131,9 +136,9 @@ def monitor_request_performance() -> Callable[[F], F]:
         Decorated function with performance monitoring
     """
 
-    def decorator(func: F) -> Any:
+    def decorator(func: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[R]]:
         @wraps(func)
-        async def wrapper(*args: Any, **kwargs: Any) -> Any:
+        async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             start_time = time.time()
 
             try:

@@ -6,8 +6,6 @@ including soft delete, restore, permanent delete, and management of
 deleted users.
 """
 
-from datetime import datetime
-from typing import cast
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -84,12 +82,24 @@ async def soft_delete_user(
     updated_user = await crud_user.get_user_by_id(db, user_id)
 
     assert updated_user is not None
+    # Normalize and type values explicitly for mypy
+    user_id_val = UUID(str(updated_user.id))
+    deleted_at_val = (
+        updated_user.deleted_at if updated_user.deleted_at is not None else utc_now()
+    )
+    deleted_by_val = (
+        UUID(str(updated_user.deleted_by)) if updated_user.deleted_by else None
+    )
+    reason_val = (
+        str(updated_user.deletion_reason) if updated_user.deletion_reason else None
+    )
+
     return SoftDeleteResponse(
         message="User soft deleted successfully",
-        user_id=updated_user.id,  # type: ignore[arg-type]
-        deleted_at=updated_user.deleted_at,  # type: ignore[arg-type]
-        deleted_by=updated_user.deleted_by,  # type: ignore[arg-type]
-        reason=updated_user.deletion_reason,  # type: ignore[arg-type]
+        user_id=user_id_val,
+        deleted_at=deleted_at_val,
+        deleted_by=deleted_by_val,
+        reason=reason_val,
     )
 
 
@@ -137,7 +147,7 @@ async def restore_user(
 
     return RestoreUserResponse(
         message="User restored successfully",
-        user_id=cast("UUID", user.id),
+        user_id=UUID(str(user.id)),
         restored_at=utc_now(),
     )
 
@@ -193,17 +203,23 @@ async def list_deleted_users(
 
         user_responses.append(
             DeletedUserResponse(
-                id=cast("UUID", user.id),
-                email=cast(str, user.email),
-                username=cast(str, user.username),
-                is_superuser=cast(bool, user.is_superuser),
-                is_verified=cast(bool, user.is_verified),
-                created_at=cast("datetime", created_at_value),
-                oauth_provider=cast("str | None", user.oauth_provider),
-                is_deleted=cast(bool, user.is_deleted),
-                deleted_at=cast("datetime", user.deleted_at),
-                deleted_by=cast("UUID | None", user.deleted_by),
-                deletion_reason=cast("str | None", user.deletion_reason),
+                id=UUID(str(user.id)),
+                email=str(user.email),
+                username=str(user.username),
+                is_superuser=bool(user.is_superuser),
+                is_verified=bool(user.is_verified),
+                created_at=created_at_value,
+                oauth_provider=(
+                    str(user.oauth_provider) if user.oauth_provider else None
+                ),
+                is_deleted=bool(user.is_deleted),
+                deleted_at=(
+                    created_at_value if user.deleted_at is None else user.deleted_at
+                ),
+                deleted_by=UUID(str(user.deleted_by)) if user.deleted_by else None,
+                deletion_reason=(
+                    str(user.deletion_reason) if user.deletion_reason else None
+                ),
             ),
         )
 
@@ -261,17 +277,23 @@ async def search_deleted_users(
 
         user_responses.append(
             DeletedUserResponse(
-                id=cast("UUID", user.id),
-                email=cast(str, user.email),
-                username=cast(str, user.username),
-                is_superuser=cast(bool, user.is_superuser),
-                is_verified=cast(bool, user.is_verified),
-                created_at=cast("datetime", created_at_value),
-                oauth_provider=cast("str | None", user.oauth_provider),
-                is_deleted=cast(bool, user.is_deleted),
-                deleted_at=cast("datetime", user.deleted_at),
-                deleted_by=cast("UUID | None", user.deleted_by),
-                deletion_reason=cast("str | None", user.deletion_reason),
+                id=UUID(str(user.id)),
+                email=str(user.email),
+                username=str(user.username),
+                is_superuser=bool(user.is_superuser),
+                is_verified=bool(user.is_verified),
+                created_at=created_at_value,
+                oauth_provider=(
+                    str(user.oauth_provider) if user.oauth_provider else None
+                ),
+                is_deleted=bool(user.is_deleted),
+                deleted_at=(
+                    created_at_value if user.deleted_at is None else user.deleted_at
+                ),
+                deleted_by=UUID(str(user.deleted_by)) if user.deleted_by else None,
+                deletion_reason=(
+                    str(user.deletion_reason) if user.deletion_reason else None
+                ),
             ),
         )
 

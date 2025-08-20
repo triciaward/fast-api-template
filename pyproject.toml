@@ -16,12 +16,28 @@ strict_equality = true
 # Allow some flexibility for FastAPI
 disallow_any_generics = false
 packages = ["app"]
+plugins = ["sqlalchemy.ext.mypy.plugin"]
 # Ignore missing imports for some packages
 [[tool.mypy.overrides]]
 module = [
     "alembic.*",
     "jose.*",
-    "passlib.*"
+    "passlib.*",
+    "fastapi",
+    "fastapi.*",
+    "starlette.*",
+    "pydantic",
+    "pydantic.*",
+    "pydantic_settings.*",
+    "slowapi",
+    "slowapi.*",
+    "structlog",
+    "structlog.*",
+    "sentry_sdk",
+    "sentry_sdk.*",
+    "httpx",
+    "jwt",
+    "authlib.*",
 ]
 ignore_missing_imports = true
 
@@ -32,6 +48,24 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = ["app.services.background.celery_tasks"]
 disallow_untyped_decorators = false
+[[tool.mypy.overrides]]
+module = [
+    "app.api.*",
+]
+disallow_untyped_decorators = false
+
+
+[[tool.mypy.overrides]]
+# Re-enable strict decorator checks for hardened API modules
+module = [
+    "app.api.auth.login",
+    "app.api.auth.session_management",
+    "app.api.auth.api_keys",
+    "app.api.system.health",
+    "app.api.integrations.websockets",
+]
+disallow_untyped_decorators = true
+
 
 [[tool.mypy.overrides]]
 module = [
@@ -40,6 +74,18 @@ module = [
     "emails",
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "app.models.core.base",
+    "app.models.auth.user",
+    "app.models.system.audit_log",
+    "app.models.auth.api_key",
+    "app.models.auth.refresh_token",
+    "app.crud.system.audit_log",
+]
+disallow_any_generics = true
+warn_return_any = true
 
 [tool.ruff]
 target-version = "py311"
