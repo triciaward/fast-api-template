@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint:
-    name: Lint and Type Check (mypy)
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,6 +35,7 @@ jobs:
         run: black --check .
 
   type-check:
+    name: Type Check (mypy)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -59,7 +60,7 @@ jobs:
         run: python -m mypy app
 
   tests:
-    name: 🧪 Tests (pytest)
+    name: Tests (pytest)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
