@@ -13,7 +13,7 @@ A comprehensive, production-ready FastAPI template with authentication, admin pa
 [![Template Grade: A+](https://img.shields.io/badge/template%20grade-A%2B-brightgreen.svg)](https://github.com/triciaward/fast-api-template)
 [![Test Files: 173](https://img.shields.io/badge/test%20files-173-blue.svg)](https://github.com/triciaward/fast-api-template)
 [![Tests Passing: 570](https://img.shields.io/badge/tests%20passing-570-brightgreen.svg)](https://github.com/triciaward/fast-api-template)
-[![Execution Time: 10.50s](https://img.shields.io/badge/execution%20time-10.50s-green.svg)](https://github.com/triciaward/fast-api-template)
+[![Execution Time: 10.9s](https://img.shields.io/badge/execution%20time-10.9s-green.svg)](https://github.com/triciaward/fast-api-template)
 
 ## 🚀 Getting Started
 
@@ -408,7 +408,7 @@ mypy app/
 
 ## 🧪 Testing
 
-### **Current Test Results**
+### **Current Test Results** (v1.2.2)
 - **Total Tests**: 580
 - **Passed**: 570 ✅
 - **Skipped**: 10 ⏭️ (intentional for optional features)

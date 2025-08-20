@@ -19,6 +19,15 @@ All notable changes to this project will be documented in this file.
 - Middleware & services glue: conditional exports updated so no‑op and real implementations have identical signatures.
 - CI & hooks: pre‑commit runs ruff/black/mypy; CI runs ruff/black + `mypy app` with pip cache enabled.
 
+### 🧷 Stability & CI Polish
+
+- Optional services fallbacks hardened:
+  - Celery: when `app.services.background` exists but `celery` submodule or symbols are missing, exported callables are now cleanly `None`, and status helpers return safe defaults.
+  - Import capture: switch to `importlib.import_module("app.services.background.celery_tasks")` in `app/main.py` so tests can assert import behavior reliably.
+- Root endpoint simplified to return a plain `{"message": ...}` dict to avoid unnecessary Pydantic import surface at import time.
+- Minor lint and formatting fixes to keep ruff/black green.
+- CI job names clarified and split: "Lint", "Type Check (mypy)", and "Tests (pytest)".
+
 ### 🧰 Developer UX
 
 - Added/updated: `CONTRIBUTING.md`, `docs/HOW_TO_BUILD.md`, and `Makefile` targets (`fmt`, `lint`, `type`, `type-sa`, `precommit`).
@@ -29,7 +38,7 @@ All notable changes to this project will be documented in this file.
 - mypy (app): 0 errors
 - ruff/black: clean
 - pre‑commit: green
-- No behavior changes; typing and structure only
+- No behavior changes to public APIs; internal stability improved
 
 ## [1.2.1] - 2025-01-XX
 

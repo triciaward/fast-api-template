@@ -1,8 +1,8 @@
-# 🚀 FastAPI Template v1.2.1 for Solo Developers
+# 🚀 FastAPI Template v1.2.2 for Solo Developers
 
 **The perfect starter for building your own projects that can scale. Built for vibe-coding with AI.**
 
-> 🆕 **NEW IN v1.2.1**: Critical API routing fix + AI-optimized development with 60%+ cost savings! [See what's new →](docs/releases/RELEASE_1.2.1.md)
+> 🆕 **NEW IN v1.2.2**: Strict typing baseline (SQLAlchemy 2.0 typed ORM), CI polish, and robust optional service fallbacks. [See what's new →](docs/releases/RELEASE_1.2.2.md)
 
 [![CI](https://github.com/triciaward/fast-api-template/workflows/CI/badge.svg)](https://github.com/triciaward/fast-api-template/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -69,11 +69,11 @@ cd your-project-name
 - ✅ Install git protection hooks
 - ✅ Verify everything works
 
-### 🔍 Verify It's Working (v1.2.0)
+### 🔍 Verify It's Working (v1.2.2)
 
 ```bash
 # Check the API is running
-curl http://localhost:8000/system/health
+curl http://localhost:8000/api/system/health
 # Expected: {"status": "healthy", "timestamp": "..."}
 
 # View the interactive API docs
