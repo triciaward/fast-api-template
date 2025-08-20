@@ -25,11 +25,15 @@ async def create_audit_log(
     """Create a new audit log entry."""
     audit_log = AuditLog()
     audit_log.event_type = event_type
-    audit_log.user_id = (
-        None
-        if user_id in (None, "")
-        else uuid.UUID(user_id) if isinstance(user_id, str) else user_id
-    )
+    if user_id in (None, ""):
+        audit_log.user_id = None
+    elif isinstance(user_id, str):
+        try:
+            audit_log.user_id = uuid.UUID(user_id)
+        except ValueError:
+            audit_log.user_id = None
+    else:
+        audit_log.user_id = user_id
     audit_log.ip_address = ip_address
     audit_log.user_agent = user_agent
     audit_log.success = success

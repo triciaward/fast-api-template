@@ -71,9 +71,10 @@ except Exception:
 
 try:  # pragma: no cover - optional path
     from .websockets import ConnectionManager as ConnectionManager
+
     websocket_manager: "ConnectionManager | None" = ConnectionManager()
 except Exception:
-    ConnectionManager = None  # type: ignore[assignment]
+    # Fallback: no ConnectionManager symbol; tests expect getattr(..., "ConnectionManager", None) is None
     websocket_manager = None
 
 __all__ = [

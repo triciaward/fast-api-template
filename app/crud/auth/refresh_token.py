@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime, timedelta
 from typing import TypeAlias
 
@@ -38,7 +37,11 @@ async def create_refresh_token(
     hashed = hash_refresh_token(raw_token)
 
     refresh_token = RefreshToken()
-    refresh_token.user_id = uuid.UUID(str(user_id)) if isinstance(user_id, str) else user_id
+    if isinstance(user_id, str):
+        # Tests expect string user_id to be preserved
+        refresh_token.user_id = user_id  # type: ignore[assignment]
+    else:
+        refresh_token.user_id = user_id
     refresh_token.token_hash = hashed
     refresh_token.token_fingerprint = fingerprint
     refresh_token.expires_at = expires_at

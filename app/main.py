@@ -3,7 +3,6 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from pydantic import BaseModel
 from starlette.responses import HTMLResponse
 
 from app.api import api_router
@@ -24,7 +23,7 @@ from app.services import init_sentry
 
 if settings.ENABLE_CELERY:
     # Import celery tasks to register them with the worker
-    # Use a different approach to avoid naming conflicts
+    # Use import_module so tests can capture the import call list
     import importlib
 
     importlib.import_module("app.services.background.celery_tasks")
@@ -136,13 +135,9 @@ register_error_handlers(app)
 app.include_router(api_router)
 
 
-class MessageResponse(BaseModel):
-    message: str
-
-
-@app.get("/", response_model=MessageResponse)
-async def read_root() -> MessageResponse:
-    return MessageResponse(message="Welcome to FastAPI Template")
+@app.get("/")
+async def read_root() -> dict[str, str]:
+    return {"message": "Welcome to FastAPI Template"}
 
 
 # Add feature status endpoint

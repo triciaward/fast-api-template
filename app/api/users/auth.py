@@ -17,7 +17,7 @@ from app.core.config import settings
 from app.crud.auth import api_key as crud_api_key
 from app.crud.auth import user as crud_user
 from app.database.database import get_db
-from app.schemas.auth.user import APIKeyUser, TokenData, UserResponse
+from app.schemas.auth.user import APIKeyUser, TokenData
 
 
 def utc_now() -> datetime:

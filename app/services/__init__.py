@@ -63,26 +63,51 @@ get_active_tasks: GetActiveTasks = _get_active_tasks_fallback
 get_celery_stats: GetCeleryStats = _get_celery_stats_fallback
 
 try:
-    from .background.celery import (
-        get_celery_app as _get_celery_app,
-        is_celery_enabled as _is_celery_enabled,
-        submit_task as _submit_task,
-        get_task_status as _get_task_status,
-        cancel_task as _cancel_task,
-        get_active_tasks as _get_active_tasks,
-        get_celery_stats as _get_celery_stats,
-    )
+    from . import background as _bg_pkg
 
-    get_celery_app = _get_celery_app
-    is_celery_enabled = _is_celery_enabled
-    submit_task = _submit_task
-    get_task_status = _get_task_status
-    cancel_task = _cancel_task
-    get_active_tasks = _get_active_tasks
-    get_celery_stats = _get_celery_stats
-except Exception:  # pragma: no cover - optional path
+    # If the background module does not expose/represent a package with celery, treat as missing
+    if hasattr(_bg_pkg, "celery"):
+        _celery_mod = _bg_pkg.celery  # type: ignore[attr-defined]
+        get_celery_app = (
+            _celery_mod.get_celery_app
+            if hasattr(_celery_mod, "get_celery_app")
+            else None
+        )
+        submit_task = (
+            _celery_mod.submit_task if hasattr(_celery_mod, "submit_task") else None
+        )
+        get_task_status = (
+            _celery_mod.get_task_status
+            if hasattr(_celery_mod, "get_task_status")
+            else None
+        )
+        cancel_task = (
+            _celery_mod.cancel_task if hasattr(_celery_mod, "cancel_task") else None
+        )
+        get_active_tasks = (
+            _celery_mod.get_active_tasks
+            if hasattr(_celery_mod, "get_active_tasks")
+            else get_active_tasks
+        )
+        get_celery_stats = (
+            _celery_mod.get_celery_stats
+            if hasattr(_celery_mod, "get_celery_stats")
+            else get_celery_stats
+        )
+        is_celery_enabled = (
+            _celery_mod.is_celery_enabled
+            if hasattr(_celery_mod, "is_celery_enabled")
+            else is_celery_enabled
+        )
+    else:
+        # Explicit None fallbacks when celery is not attached to background module
+        get_celery_app = None
+        submit_task = None
+        get_task_status = None
+        cancel_task = None
+except Exception:
+    # No background package at all; keep existing fallbacks
     pass
-
 
 # Rate limiting service
 try:
