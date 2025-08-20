@@ -31,7 +31,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
-) -> UserResponse:
+) -> object:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -54,10 +54,8 @@ async def get_current_user(
     user = await crud_user.get_user_by_id(db, user_id=str(user_id))
     if user is None:
         raise credentials_exception
-    # Return raw ORM user; callers that need schemas can convert explicitly
-    # Tests rely on this dependency returning an ORM-like object shape
-    from app.schemas.auth.user import UserResponse
-    return UserResponse.model_validate(user)
+    # Return raw ORM user object; tests mock with SimpleNamespace
+    return user
 
 
 async def get_api_key_user(

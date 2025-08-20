@@ -82,8 +82,8 @@ class MetricsResponse(BaseModel):
     timestamp: float
 
 
-@router.get("/health", response_model=HealthStatus)
-async def health_check(db: AsyncSession = Depends(get_db)) -> HealthStatus:
+@router.get("/health", response_model=dict)
+async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """
     Basic health check endpoint.
 
@@ -147,7 +147,7 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> HealthStatus:
             detail="Database health check failed",
         ) from None
 
-    return HealthStatus.model_validate(health_status)
+    return health_status
 
 
 @router.get("/health/simple", response_model=SimpleHealthResponse)

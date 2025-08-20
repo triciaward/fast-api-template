@@ -38,9 +38,7 @@ async def create_refresh_token(
     hashed = hash_refresh_token(raw_token)
 
     refresh_token = RefreshToken()
-    refresh_token.user_id = (
-        uuid.UUID(str(user_id)) if not isinstance(user_id, uuid.UUID) else user_id
-    )
+    refresh_token.user_id = uuid.UUID(str(user_id)) if isinstance(user_id, str) else user_id
     refresh_token.token_hash = hashed
     refresh_token.token_fingerprint = fingerprint
     refresh_token.expires_at = expires_at

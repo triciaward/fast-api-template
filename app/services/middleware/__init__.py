@@ -69,20 +69,11 @@ except Exception:
     pass
 
 
-if TYPE_CHECKING:
-    from .websockets import ConnectionManager as ConnectionManager
-else:
-
-    class ConnectionManager:  # runtime stub for export
-        pass
-
-
-websocket_manager: "ConnectionManager | None" = None
 try:  # pragma: no cover - optional path
-    from .websockets import ConnectionManager as _RealConnectionManager
-
-    websocket_manager = _RealConnectionManager()
+    from .websockets import ConnectionManager as ConnectionManager
+    websocket_manager: "ConnectionManager | None" = ConnectionManager()
 except Exception:
+    ConnectionManager = None  # type: ignore[assignment]
     websocket_manager = None
 
 __all__ = [

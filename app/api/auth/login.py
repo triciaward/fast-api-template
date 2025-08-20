@@ -27,7 +27,7 @@ router = APIRouter()
 logger = get_auth_logger()
 
 
- # Return plain dict so direct function calls in tests match expectations
+# Return plain dict so direct function calls in tests match expectations
 
 
 @router.post("/register", response_model=UserResponse, status_code=201)

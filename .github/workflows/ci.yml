@@ -8,6 +8,7 @@ on:
 
 jobs:
   lint:
+    name: Lint and Type Check (mypy)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

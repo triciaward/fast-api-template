@@ -63,16 +63,24 @@ get_active_tasks: GetActiveTasks = _get_active_tasks_fallback
 get_celery_stats: GetCeleryStats = _get_celery_stats_fallback
 
 try:
-    from . import background as _bg_mod
+    from .background.celery import (
+        get_celery_app as _get_celery_app,
+        is_celery_enabled as _is_celery_enabled,
+        submit_task as _submit_task,
+        get_task_status as _get_task_status,
+        cancel_task as _cancel_task,
+        get_active_tasks as _get_active_tasks,
+        get_celery_stats as _get_celery_stats,
+    )
 
-    get_celery_app = _bg_mod.get_celery_app
-    is_celery_enabled = _bg_mod.is_celery_enabled
-    submit_task = _bg_mod.submit_task
-    get_task_status = _bg_mod.get_task_status
-    cancel_task = _bg_mod.cancel_task
-    get_active_tasks = _bg_mod.get_active_tasks
-    get_celery_stats = _bg_mod.get_celery_stats
-except ImportError:  # pragma: no cover - optional path
+    get_celery_app = _get_celery_app
+    is_celery_enabled = _is_celery_enabled
+    submit_task = _submit_task
+    get_task_status = _get_task_status
+    cancel_task = _cancel_task
+    get_active_tasks = _get_active_tasks
+    get_celery_stats = _get_celery_stats
+except Exception:  # pragma: no cover - optional path
     pass
 
 
