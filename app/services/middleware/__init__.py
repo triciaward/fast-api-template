@@ -36,7 +36,13 @@ def setup_rate_limiting(app: Any) -> None:
     return None
 
 
-def get_rate_limit_info(request: Request) -> dict[str, Any]:
+if TYPE_CHECKING:
+    from .rate_limiter import RateLimitInfoTD as _RateLimitInfoTD
+else:
+    _RateLimitInfoTD = dict[str, Any]  # type: ignore[valid-type]
+
+
+def get_rate_limit_info(request: Request) -> "_RateLimitInfoTD":
     return {"enabled": False}
 
 

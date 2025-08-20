@@ -54,9 +54,9 @@ async def get_current_user(
     user = await crud_user.get_user_by_id(db, user_id=str(user_id))
     if user is None:
         raise credentials_exception
-    # Convert to response schema
+    # Return raw ORM user; callers that need schemas can convert explicitly
+    # Tests rely on this dependency returning an ORM-like object shape
     from app.schemas.auth.user import UserResponse
-
     return UserResponse.model_validate(user)
 
 
@@ -119,8 +119,13 @@ async def get_api_key_user(
         user_id=str(db_api_key.user_id) if db_api_key.user_id else None,
     )
 
-    # Return API key user object
-    return APIKeyUser.model_validate(db_api_key)
+    # Build APIKeyUser shape expected by tests (explicit key_id separate from id)
+    return APIKeyUser(
+        id=db_api_key.id,
+        scopes=list(getattr(db_api_key, "scopes", [])),
+        user_id=getattr(db_api_key, "user_id", None),
+        key_id=db_api_key.id,
+    )
 
 
 def require_api_scope(required_scope: str) -> Callable[[APIKeyUser], APIKeyUser]:

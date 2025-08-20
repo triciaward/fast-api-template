@@ -7,7 +7,7 @@ like email sending, data processing, and cleanup jobs.
 This file should NOT define or register any Celery tasks. Tasks are defined in celery_tasks.py and only imported when Celery is enabled.
 """
 
-from typing import Any
+from typing import Any, TypedDict
 
 from celery.result import AsyncResult
 from celery.utils.log import get_task_logger
@@ -18,6 +18,35 @@ from app.services.background.celery_app import celery_app
 
 app_logger = get_app_logger()
 celery_logger = get_task_logger(__name__)
+
+
+class TaskStatusTD(TypedDict, total=False):
+    task_id: str
+    status: str
+    ready: bool
+    successful: bool
+    failed: bool
+    result: Any
+    error: str
+
+
+class ActiveTaskTD(TypedDict):
+    task_id: str
+    name: str
+    worker: str
+    args: list[Any]
+    kwargs: dict[str, Any]
+    time_start: float | None
+
+
+class CeleryStatsTD(TypedDict, total=False):
+    enabled: bool
+    broker_url: str | None
+    result_backend: str | None
+    active_workers: int | None
+    registered_tasks: int | None
+    active_tasks: int | None
+    error: str | None
 
 
 def get_celery_app() -> Any:
@@ -58,14 +87,14 @@ def submit_task(task_name: str, *args: Any, **kwargs: Any) -> AsyncResult | None
         return result
 
 
-def get_task_status(task_id: str) -> dict[str, Any] | None:
+def get_task_status(task_id: str) -> TaskStatusTD | None:
     if not is_celery_enabled():
         return None
 
     try:
         app = get_celery_app()
         result = AsyncResult(task_id, app=app)
-        status_info = {
+        status_info: TaskStatusTD = {
             "task_id": task_id,
             "status": result.status,
             "ready": result.ready(),
@@ -109,7 +138,7 @@ def cancel_task(task_id: str) -> bool:
         return True
 
 
-def get_active_tasks() -> list[dict[str, Any]]:
+def get_active_tasks() -> list[ActiveTaskTD]:
     if not is_celery_enabled():
         return []
 
@@ -119,14 +148,14 @@ def get_active_tasks() -> list[dict[str, Any]]:
         if not active_tasks:
             return []
         return [
-            {
-                "task_id": task["id"],
-                "name": task["name"],
-                "worker": worker,
-                "args": task.get("args", []),
-                "kwargs": task.get("kwargs", {}),
-                "time_start": task.get("time_start"),
-            }
+            ActiveTaskTD(
+                task_id=str(task.get("id", "")),
+                name=str(task.get("name", "")),
+                worker=str(worker),
+                args=list(task.get("args", [])),
+                kwargs=dict(task.get("kwargs", {})),
+                time_start=task.get("time_start"),
+            )
             for worker, worker_tasks in active_tasks.items()
             for task in worker_tasks
         ]
@@ -135,7 +164,7 @@ def get_active_tasks() -> list[dict[str, Any]]:
         return []
 
 
-def get_celery_stats() -> dict[str, Any]:
+def get_celery_stats() -> CeleryStatsTD:
     if not is_celery_enabled():
         return {"enabled": False}
 

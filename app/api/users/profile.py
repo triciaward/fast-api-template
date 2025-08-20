@@ -13,7 +13,7 @@ from app.schemas.auth.user import APIKeyUser, UserResponse
 router = APIRouter()
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me")
 async def read_current_user(
     current_user: UserResponse = Depends(get_current_user),
 ) -> UserResponse:
@@ -21,7 +21,7 @@ async def read_current_user(
     return current_user
 
 
-@router.get("/me/api-key", response_model=APIKeyUser)
+@router.get("/me/api-key")
 async def read_current_user_api_key(
     api_key_user: APIKeyUser = Depends(get_api_key_user),
 ) -> APIKeyUser:

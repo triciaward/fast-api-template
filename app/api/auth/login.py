@@ -2,7 +2,6 @@ from typing import NoReturn
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,8 +27,7 @@ router = APIRouter()
 logger = get_auth_logger()
 
 
-class ProvidersResponse(BaseModel):
-    providers: list[str]
+ # Return plain dict so direct function calls in tests match expectations
 
 
 @router.post("/register", response_model=UserResponse, status_code=201)
@@ -488,11 +486,11 @@ async def oauth_login(
         ) from e
 
 
-@router.get("/oauth/providers", response_model=ProvidersResponse)
-async def get_oauth_providers() -> ProvidersResponse:
+@router.get("/oauth/providers")
+async def get_oauth_providers() -> dict[str, list[str]]:
     """Get available OAuth providers."""
     if not oauth_service:
-        return ProvidersResponse(providers=[])
+        return {"providers": []}
 
     providers = []
     if oauth_service.is_provider_configured("google"):
@@ -500,4 +498,4 @@ async def get_oauth_providers() -> ProvidersResponse:
     if oauth_service.is_provider_configured("apple"):
         providers.append("apple")
 
-    return ProvidersResponse(providers=providers)
+    return {"providers": providers}

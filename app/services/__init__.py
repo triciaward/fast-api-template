@@ -26,7 +26,17 @@ except Exception:  # pragma: no cover - optional path
 # Background task services
 # Predeclare optional callables so both branches are compatible
 SubmitTask = Callable[..., Any | None]
-GetTaskStatus = Callable[[str], dict[str, Any] | None]
+
+if TYPE_CHECKING:
+    from .background.celery import ActiveTaskTD, CeleryStatsTD, TaskStatusTD
+else:
+    TaskStatusTD = dict[str, Any]  # type: ignore[valid-type]
+    ActiveTaskTD = dict[str, Any]  # type: ignore[valid-type]
+    CeleryStatsTD = dict[str, Any]  # type: ignore[valid-type]
+
+GetTaskStatus = Callable[[str], TaskStatusTD | None]
+GetActiveTasks = Callable[[], list[ActiveTaskTD]]
+GetCeleryStats = Callable[[], CeleryStatsTD]
 CancelTask = Callable[[str], bool]
 GetCeleryApp = Callable[[], Any]
 
@@ -40,17 +50,17 @@ def _is_celery_enabled_fallback() -> bool:
     return False
 
 
-def _get_active_tasks_fallback() -> list[dict[str, Any]]:
+def _get_active_tasks_fallback() -> list[ActiveTaskTD]:
     return []
 
 
-def _get_celery_stats_fallback() -> dict[str, Any]:
+def _get_celery_stats_fallback() -> CeleryStatsTD:
     return {"enabled": False}
 
 
 is_celery_enabled: Callable[[], bool] = _is_celery_enabled_fallback
-get_active_tasks: Callable[[], list[dict[str, Any]]] = _get_active_tasks_fallback
-get_celery_stats: Callable[[], dict[str, Any]] = _get_celery_stats_fallback
+get_active_tasks: GetActiveTasks = _get_active_tasks_fallback
+get_celery_stats: GetCeleryStats = _get_celery_stats_fallback
 
 try:
     from . import background as _bg_mod
@@ -104,7 +114,12 @@ except ImportError:
     def setup_rate_limiting(app: Any) -> None:
         return None
 
-    def get_rate_limit_info(request: Request) -> dict[str, Any]:
+    if TYPE_CHECKING:
+        from .middleware.rate_limiter import RateLimitInfoTD as RateLimitInfoTD
+    else:
+        RateLimitInfoTD = dict[str, Any]  # type: ignore[valid-type]
+
+    def get_rate_limit_info(request: Request) -> "RateLimitInfoTD":
         return {"enabled": False}
 
 

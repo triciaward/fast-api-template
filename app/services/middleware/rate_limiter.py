@@ -1,7 +1,7 @@
 """Rate limiting service using slowapi with support for both memory and Redis backends."""
 
 from collections.abc import Callable
-from typing import Any, ParamSpec, TypeVar
+from typing import Any, ParamSpec, TypedDict, TypeVar
 
 from fastapi import Request
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -163,7 +163,16 @@ def setup_rate_limiting(app: Any) -> None:
     app.state.limiter = limiter_instance
 
 
-def get_rate_limit_info(request: Request) -> dict[str, Any]:
+class RateLimitInfoTD(TypedDict, total=False):
+    enabled: bool
+    client_ip: str
+    remaining: int
+    reset_time: int
+    limit: int
+    error: str
+
+
+def get_rate_limit_info(request: Request) -> RateLimitInfoTD:
     """Get current rate limit information for the client."""
     if not settings.ENABLE_RATE_LIMITING:
         return {"enabled": False}

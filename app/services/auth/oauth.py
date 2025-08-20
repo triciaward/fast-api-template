@@ -1,5 +1,5 @@
 import time
-from typing import Any, NoReturn
+from typing import Any, NoReturn, TypedDict
 
 import httpx
 import jwt
@@ -11,6 +11,13 @@ from app.core.config import settings
 
 
 class OAuthService:
+    class OAuthProviderConfig(TypedDict, total=False):
+        client_id: str | None
+        authorization_url: str
+        token_url: str
+        userinfo_url: str | None
+        scope: str
+
     def __init__(self) -> None:
         self.config = Config(".env")
         self.oauth = OAuth()
@@ -145,7 +152,10 @@ class OAuthService:
         else:
             return payload
 
-    def get_oauth_provider_config(self, provider: str) -> dict[str, Any]:
+    def get_oauth_provider_config(
+        self,
+        provider: str,
+    ) -> "OAuthService.OAuthProviderConfig":
         """Get OAuth provider configuration."""
 
         def _handle_unsupported_provider() -> NoReturn:

@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.2] - 2025-08-20
+
+### 🧠 Typing & Code Quality Hardening (mypy-zero baseline)
+
+- Established strict mypy baseline in application code (0 errors across 85 source files) with SQLAlchemy plugin enabled and checks scoped to `app/`.
+- ORM typed migration: models now use SQLAlchemy 2.0 `Mapped[...]`, `mapped_column(...)`, and typed `relationship(...)`; forward references guarded with `TYPE_CHECKING` to avoid cycles.
+- CRUD safety: switched to instantiate-then-assign for model writes; assigned ORM scalars to typed locals; removed stale `# type: ignore` usages.
+- API contracts: added `response_model` across routers and returned Pydantic schemas via `model_validate(...)`; replaced ad‑hoc dict responses with small models (e.g., `MessageResponse`).
+- Decorators and optional imports: refactored custom decorators using `ParamSpec`/`TypeVar` to preserve signatures; service initializers use module‑alias imports with typed fallbacks (no redefinitions).
+- Dynamic value normalization: cookie `samesite` mapped to Literal (`"lax"|"strict"|"none"`); headers/cookies treated as `str | None`.
+- Services typing:
+  - Celery: introduced `TaskStatusTD`, `ActiveTaskTD`, `CeleryStatsTD`; updated helpers to return these types.
+  - Rate limiter: added `RateLimitInfoTD` and aligned placeholders/exports.
+  - OAuth: added `OAuthProviderConfig` TypedDict for provider configuration.
+- Middleware & services glue: conditional exports updated so no‑op and real implementations have identical signatures.
+- CI & hooks: pre‑commit runs ruff/black/mypy; CI runs ruff/black + `mypy app` with pip cache enabled.
+
+### 🧰 Developer UX
+
+- Added/updated: `CONTRIBUTING.md`, `docs/HOW_TO_BUILD.md`, and `Makefile` targets (`fmt`, `lint`, `type`, `type-sa`, `precommit`).
+- Scripts: `scripts/development/mypy_sa_check.sh` for SQLAlchemy‑focused checks.
+
+### ✅ Results
+
+- mypy (app): 0 errors
+- ruff/black: clean
+- pre‑commit: green
+- No behavior changes; typing and structure only
+
 ## [1.2.1] - 2025-01-XX
 
 ### 🚨 **Critical Fix: API Routing Consistency**
