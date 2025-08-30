@@ -20,6 +20,16 @@
   pre-commit run --all-files
   ```
 
+## Debt-free build workflow
+
+- Run during feature development before writing tests/docs:
+  ```bash
+  make debt-check
+  # or
+  ./scripts/development/prevent_technical_debt.sh [feature_name]
+  ```
+  This runs mypy, ruff, black, basic perf scans, and an import smoke-test.
+
 ## Prompt templates
 
 - Migrate models in a feature

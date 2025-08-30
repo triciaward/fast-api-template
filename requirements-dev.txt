@@ -2,7 +2,7 @@
 black==25.1.0
 mypy==1.17.0
 sqlalchemy[mypy]==2.0.23
-ruff==0.4.0
+ruff==0.5.7
 pytest==8.4.1
 pytest-asyncio==1.1.0
 pytest-cov==4.1.0

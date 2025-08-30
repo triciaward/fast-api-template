@@ -23,3 +23,8 @@ precommit:
 	@pre-commit run --all-files
 
 
+.PHONY: debt-check
+debt-check: ## Run technical debt prevention check
+	./scripts/development/prevent_technical_debt.sh
+
+
