@@ -1,5 +1,6 @@
 #!/bin/bash
 # CI Validation Script - Run this before pushing to catch CI issues locally
+# Runs: Black formatting, Ruff linting, full test suite, and import checks
 
 set -e  # Exit on any error
 
@@ -72,6 +73,16 @@ echo "⚠️  Skipping mypy check due to transformers library internal error"
 print_status "Mypy type check skipped (known transformers issue)"
 
 
+
+# 4. Test suite execution
+echo "🧪 Running full test suite..."
+if python3 -m pytest tests/ -q --tb=short; then
+    print_status "Test suite passed (all tests green)"
+else
+    print_error "Test suite failed"
+    print_warning "Fix failing tests before pushing"
+    exit 1
+fi
 
 # 5. Import check for critical modules
 echo "📦 Checking critical imports..."
