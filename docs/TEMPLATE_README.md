@@ -228,8 +228,9 @@ This FastAPI template provides a comprehensive foundation for building productio
 - Error tracking with Sentry (optional)
 
 ### 🛠️ Development Tools
+- **7-step debt-free development workflow** for building features cleanly
 - Pre-commit hooks for code quality
-- Automated setup scripts
+- Automated setup scripts with technical debt prevention
 - Fix scripts for common issues
 - Verification tools
 
@@ -363,6 +364,19 @@ async def create_user(
 ```
 
 ## 🚀 Development Workflow
+
+### **Building New Features**
+Follow the **7-step debt-free development workflow** to prevent technical debt:
+
+```bash
+# 1-5: Build your feature (models, schemas, CRUD, API, migration)
+# 6: MANDATORY debt check before tests/docs
+make debt-check
+
+# 7: Write tests and documentation
+```
+
+**📖 Complete Guide**: See [`docs/HOW_TO_BUILD.md`](HOW_TO_BUILD.md) for the full ELI5 workflow with AI agent instructions.
 
 ### **Local Development**
 ```bash

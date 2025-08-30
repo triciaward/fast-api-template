@@ -222,9 +222,11 @@ This FastAPI template gives you everything you need to build cool projects:
 - **Performance monitoring** with query analysis
 
 ### 🛠️ Development & Testing
+- **7-step debt-free development workflow** prevents technical debt buildup
 - **173 test files** with 98.2% coverage
 - **Pre-commit hooks** for code quality (template protection + code formatting)
 - **Automated setup scripts** for easy onboarding
+- **Technical debt prevention** with automated quality gates
 - **Fix scripts** for common issues
 - **Verification tools** for deployment confidence
 - **Type safety** with full MyPy integration (strict config; minimal, scoped overrides)
@@ -236,6 +238,7 @@ This FastAPI template gives you everything you need to build cool projects:
 
 ### 🚀 Getting Started
 - **[Complete Setup Guide](docs/TEMPLATE_README.md)** - Detailed setup instructions and project overview
+- **[How to Build Features](docs/HOW_TO_BUILD.md)** - 7-step debt-free development workflow with ELI5 explanations
 - **[Next Steps & Development Tips](docs/tutorials/next-steps-and-tips.md)** - What to build first
 
 ### 🛠️ Development Guides
