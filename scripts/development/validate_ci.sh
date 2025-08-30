@@ -76,7 +76,7 @@ print_status "Mypy type check skipped (known transformers issue)"
 
 # 4. Test suite execution
 echo "🧪 Running full test suite..."
-if python3 -m pytest tests/ -q --tb=short; then
+if python3 -m pytest tests/ -v --tb=short; then
     print_status "Test suite passed (all tests green)"
 else
     print_error "Test suite failed"
