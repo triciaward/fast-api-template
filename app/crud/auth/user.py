@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import TypeAlias
 
-from sqlalchemy import select
+from sqlalchemy import func, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security.security import get_password_hash, verify_password
@@ -40,7 +41,7 @@ async def create_user(db: DBSession, user: UserCreate) -> User:
     await db.commit()
     try:
         await db.refresh(db_user)
-    except Exception:
+    except SQLAlchemyError:
         pass
     return db_user
 
@@ -95,7 +96,7 @@ async def create_oauth_user(
     await db.commit()
     try:
         await db.refresh(db_user)
-    except Exception:
+    except SQLAlchemyError:
         pass
     return db_user
 
@@ -300,9 +301,10 @@ async def get_users_for_permanent_deletion(db: DBSession) -> list[User]:
 async def count_users(db: DBSession) -> int:
     """Count all non-deleted users."""
     result = await db.execute(
-        select(User).filter(User.is_deleted.is_(False)),
+        select(func.count()).select_from(User).filter(User.is_deleted.is_(False)),
     )
-    return len(result.scalars().all())
+    count: int = int(result.scalar_one() or 0)
+    return count
 
 
 async def soft_delete_user(db: DBSession, user_id: str) -> bool:
@@ -375,9 +377,10 @@ async def get_deleted_users(
 async def count_deleted_users(db: DBSession) -> int:
     """Count all deleted users."""
     result = await db.execute(
-        select(User).filter(User.is_deleted.is_(True)),
+        select(func.count()).select_from(User).filter(User.is_deleted.is_(True)),
     )
-    return len(result.scalars().all())
+    count: int = int(result.scalar_one() or 0)
+    return count
 
 
 async def get_users(db: DBSession, skip: int = 0, limit: int = 100) -> list[User]:

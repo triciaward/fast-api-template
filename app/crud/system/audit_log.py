@@ -2,7 +2,8 @@ import uuid
 from datetime import timedelta
 from typing import Any, TypeAlias
 
-from sqlalchemy import desc, select
+from sqlalchemy import desc, func, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import AuditLog
@@ -43,7 +44,7 @@ async def create_audit_log(
     await db.commit()
     try:
         await db.refresh(audit_log)
-    except Exception:
+    except SQLAlchemyError:
         pass
     return audit_log
 
@@ -147,12 +148,15 @@ async def cleanup_old_audit_logs(db: DBSession, days_to_keep: int = 90) -> int:
     cutoff_date = utc_now() - timedelta(days=days_to_keep)
 
     result = await db.execute(
-        select(AuditLog).filter(AuditLog.timestamp < cutoff_date),
+        select(func.count())
+        .select_from(AuditLog)
+        .filter(AuditLog.timestamp < cutoff_date),
     )
-    old_logs = result.scalars().all()
+    count: int = int(result.scalar_one() or 0)
 
-    for log in old_logs:
-        await db.delete(log)
-
+    # Delete old logs in a single statement for efficiency
+    await db.execute(
+        AuditLog.__table__.delete().where(AuditLog.timestamp < cutoff_date),  # type: ignore[attr-defined]
+    )
     await db.commit()
-    return len(old_logs)
+    return count

@@ -1,7 +1,8 @@
 import uuid
 from typing import TypeAlias
 
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security.security import (
@@ -43,7 +44,7 @@ async def create_api_key(
     await db.commit()
     try:
         await db.refresh(db_api_key)
-    except Exception:
+    except SQLAlchemyError:
         pass
 
     return db_api_key
@@ -109,14 +110,17 @@ async def get_user_api_keys(
 async def count_user_api_keys(db: DBSession, user_id: str) -> int:
     """Count API keys for a user."""
     result = await db.execute(
-        select(APIKey).filter(
+        select(func.count())
+        .select_from(APIKey)
+        .filter(
             and_(
                 APIKey.user_id == user_id,
                 APIKey.is_deleted.is_(False),
             ),
         ),
     )
-    return len(result.scalars().all())
+    count: int = int(result.scalar_one() or 0)
+    return count
 
 
 async def get_api_key_by_id(
@@ -205,6 +209,7 @@ async def get_all_api_keys(
 async def count_all_api_keys(db: DBSession) -> int:
     """Count all API keys (admin function)."""
     result = await db.execute(
-        select(APIKey).filter(APIKey.is_deleted.is_(False)),
+        select(func.count()).select_from(APIKey).filter(APIKey.is_deleted.is_(False)),
     )
-    return len(result.scalars().all())
+    count: int = int(result.scalar_one() or 0)
+    return count

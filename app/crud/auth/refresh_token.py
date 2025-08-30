@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import TypeAlias
 
-from sqlalchemy import select
+from sqlalchemy import func, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -52,7 +53,7 @@ async def create_refresh_token(
     await db.commit()
     try:
         await db.refresh(refresh_token)
-    except Exception:
+    except SQLAlchemyError:
         pass
 
     return refresh_token
@@ -139,8 +140,17 @@ async def get_user_sessions(db: DBSession, user_id: str) -> list[RefreshToken]:
 
 async def get_user_session_count(db: DBSession, user_id: str) -> int:
     """Get the number of active sessions for a user."""
-    sessions = await get_user_sessions(db, user_id)
-    return len(sessions)
+    result = await db.execute(
+        select(func.count())
+        .select_from(RefreshToken)
+        .filter(
+            RefreshToken.user_id == user_id,
+            RefreshToken.expires_at > utc_now(),
+            RefreshToken.is_revoked.is_(False),
+        ),
+    )
+    count: int = int(result.scalar_one() or 0)
+    return count
 
 
 async def revoke_all_user_sessions(db: DBSession, user_id: str) -> int:
@@ -204,7 +214,6 @@ async def enforce_session_limit(
 ) -> None:
     """Enforce session limit by revoking oldest sessions if needed."""
     sessions = await get_user_sessions(db, user_id)
-
     if len(sessions) >= max_sessions:
         # Sort by creation date (oldest first)
         def get_sort_key(s: RefreshToken) -> datetime:
@@ -214,7 +223,7 @@ async def enforce_session_limit(
         sessions.sort(key=get_sort_key)
 
         # Revoke oldest sessions to reduce to max_sessions
-        sessions_to_revoke = sessions[: len(sessions) - max_sessions]
+        sessions_to_revoke = sessions[: max(0, len(sessions) - max_sessions)]
 
         for session in sessions_to_revoke:
             session.is_revoked = True
