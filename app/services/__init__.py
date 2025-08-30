@@ -1,6 +1,6 @@
 # Services package for optional features organized by category
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Any, ParamSpec, TypedDict, TypeVar
 
 from fastapi import Request
 
@@ -30,9 +30,26 @@ SubmitTask = Callable[..., Any | None]
 if TYPE_CHECKING:
     from .background.celery import ActiveTaskTD, CeleryStatsTD, TaskStatusTD
 else:
-    TaskStatusTD = dict[str, Any]  # type: ignore[valid-type]
-    ActiveTaskTD = dict[str, Any]  # type: ignore[valid-type]
-    CeleryStatsTD = dict[str, Any]  # type: ignore[valid-type]
+
+    class TaskStatusTD(TypedDict, total=False):
+        id: str
+        state: str
+        result: Any
+        error: str
+
+    class ActiveTaskTD(TypedDict, total=False):
+        id: str
+        name: str
+        started_at: float
+        args: list[Any]
+        kwargs: dict[str, Any]
+
+    class CeleryStatsTD(TypedDict, total=False):
+        enabled: bool
+        active_workers: int
+        registered_tasks: int
+        active_tasks: int
+
 
 GetTaskStatus = Callable[[str], TaskStatusTD | None]
 GetActiveTasks = Callable[[], list[ActiveTaskTD]]
@@ -150,7 +167,14 @@ except ImportError:
     if TYPE_CHECKING:
         from .middleware.rate_limiter import RateLimitInfoTD as RateLimitInfoTD
     else:
-        RateLimitInfoTD = dict[str, Any]  # type: ignore[valid-type]
+
+        class RateLimitInfoTD(TypedDict, total=False):
+            enabled: bool
+            client_ip: str
+            remaining: int
+            reset_time: int
+            limit: int
+            error: str
 
     def get_rate_limit_info(request: Request) -> "RateLimitInfoTD":
         return {"enabled": False}

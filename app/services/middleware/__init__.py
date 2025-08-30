@@ -1,7 +1,7 @@
 """Middleware services for request processing."""
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Any, ParamSpec, TypedDict, TypeVar
 
 from fastapi import Request
 
@@ -39,7 +39,14 @@ def setup_rate_limiting(app: Any) -> None:
 if TYPE_CHECKING:
     from .rate_limiter import RateLimitInfoTD as _RateLimitInfoTD
 else:
-    _RateLimitInfoTD = dict[str, Any]  # type: ignore[valid-type]
+
+    class _RateLimitInfoTD(TypedDict, total=False):
+        enabled: bool
+        client_ip: str
+        remaining: int
+        reset_time: int
+        limit: int
+        error: str
 
 
 def get_rate_limit_info(request: Request) -> "_RateLimitInfoTD":

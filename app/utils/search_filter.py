@@ -166,7 +166,7 @@ class SearchFilterBuilder:
                     condition = field != query
             else:
                 # Unknown operator: skip this field
-                continue  # type: ignore[unreachable]
+                continue
 
             search_conditions.append(condition)
 

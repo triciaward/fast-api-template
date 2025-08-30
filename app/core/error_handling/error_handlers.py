@@ -6,7 +6,8 @@ error responses for consistent API behavior.
 """
 
 import uuid
-from typing import Any
+from collections.abc import Awaitable, Callable
+from typing import Any, cast
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -14,6 +15,7 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from starlette.responses import Response
 
 from app.core.config.logging_config import get_app_logger
 from app.schemas.core.errors import (
@@ -408,12 +410,32 @@ def register_error_handlers(app: FastAPI) -> None:
     """Register all error handlers with the FastAPI application."""
 
     # Register exception handlers
-    app.add_exception_handler(RequestValidationError, validation_exception_handler)  # type: ignore[arg-type]
-    app.add_exception_handler(ValidationError, validation_exception_handler)  # type: ignore[arg-type]
-    app.add_exception_handler(HTTPException, http_exception_handler)  # type: ignore[arg-type]
-    app.add_exception_handler(RateLimitExceeded, rate_limit_exception_handler)  # type: ignore[arg-type]
-    app.add_exception_handler(IntegrityError, integrity_error_handler)  # type: ignore[arg-type]
-    app.add_exception_handler(SQLAlchemyError, sqlalchemy_error_handler)  # type: ignore[arg-type]
+    ExceptionHandler = Callable[[Request, Exception], Awaitable[Response]]
+
+    app.add_exception_handler(
+        RequestValidationError,
+        cast(ExceptionHandler, validation_exception_handler),
+    )
+    app.add_exception_handler(
+        ValidationError,
+        cast(ExceptionHandler, validation_exception_handler),
+    )
+    app.add_exception_handler(
+        HTTPException,
+        cast(ExceptionHandler, http_exception_handler),
+    )
+    app.add_exception_handler(
+        RateLimitExceeded,
+        cast(ExceptionHandler, rate_limit_exception_handler),
+    )
+    app.add_exception_handler(
+        IntegrityError,
+        cast(ExceptionHandler, integrity_error_handler),
+    )
+    app.add_exception_handler(
+        SQLAlchemyError,
+        cast(ExceptionHandler, sqlalchemy_error_handler),
+    )
     app.add_exception_handler(Exception, general_exception_handler)
 
     logger.info("Error handlers registered successfully")
