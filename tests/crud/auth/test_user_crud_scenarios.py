@@ -13,6 +13,9 @@ class FakeResult:
     def scalar_one_or_none(self):  # type: ignore[no-untyped-def]
         return self._value
 
+    def scalar(self):  # type: ignore[no-untyped-def]
+        return len(self._many) if self._many else self._value
+
     def scalars(self):  # type: ignore[no-untyped-def]
         return types.SimpleNamespace(all=lambda: self._many)
 

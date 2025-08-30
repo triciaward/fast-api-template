@@ -61,17 +61,30 @@ def get_client_ip(request: Request) -> str:
 try:  # pragma: no cover - optional path
     from . import rate_limiter as _rl
 
-    get_limiter = _rl.get_limiter
-    rate_limit_login = _rl.rate_limit_login
-    rate_limit_register = _rl.rate_limit_register
-    rate_limit_email_verification = _rl.rate_limit_email_verification
-    rate_limit_password_reset = _rl.rate_limit_password_reset
-    rate_limit_oauth = _rl.rate_limit_oauth
-    rate_limit_account_deletion = _rl.rate_limit_account_deletion
-    rate_limit_custom = _rl.rate_limit_custom
-    setup_rate_limiting = _rl.setup_rate_limiting
-    get_rate_limit_info = _rl.get_rate_limit_info
-    get_client_ip = _rl.get_client_ip
+    # Bind only if attributes exist; otherwise keep defaults/no-ops
+    get_limiter = getattr(_rl, "get_limiter", get_limiter)
+    rate_limit_login = getattr(_rl, "rate_limit_login", rate_limit_login)
+    rate_limit_register = getattr(_rl, "rate_limit_register", rate_limit_register)
+    rate_limit_email_verification = getattr(
+        _rl,
+        "rate_limit_email_verification",
+        rate_limit_email_verification,
+    )
+    rate_limit_password_reset = getattr(
+        _rl,
+        "rate_limit_password_reset",
+        rate_limit_password_reset,
+    )
+    rate_limit_oauth = getattr(_rl, "rate_limit_oauth", rate_limit_oauth)
+    rate_limit_account_deletion = getattr(
+        _rl,
+        "rate_limit_account_deletion",
+        rate_limit_account_deletion,
+    )
+    rate_limit_custom = getattr(_rl, "rate_limit_custom", rate_limit_custom)
+    setup_rate_limiting = getattr(_rl, "setup_rate_limiting", setup_rate_limiting)
+    get_rate_limit_info = getattr(_rl, "get_rate_limit_info", get_rate_limit_info)
+    get_client_ip = getattr(_rl, "get_client_ip", get_client_ip)
 except ImportError:
     pass
 

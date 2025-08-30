@@ -303,7 +303,7 @@ async def count_users(db: DBSession) -> int:
     result = await db.execute(
         select(func.count()).select_from(User).filter(User.is_deleted.is_(False)),
     )
-    count: int = int(result.scalar_one() or 0)
+    count: int = int(result.scalar() or 0)
     return count
 
 
@@ -379,7 +379,7 @@ async def count_deleted_users(db: DBSession) -> int:
     result = await db.execute(
         select(func.count()).select_from(User).filter(User.is_deleted.is_(True)),
     )
-    count: int = int(result.scalar_one() or 0)
+    count: int = int(result.scalar() or 0)
     return count
 
 

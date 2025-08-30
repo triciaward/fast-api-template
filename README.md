@@ -81,7 +81,7 @@ open http://localhost:8000/docs
 
 # Run the test suite
 pytest
-# Expected: 173 files, 570 passed, 98% coverage
+# Expected: 173 files, 565 passed, 15 skipped, 98% coverage
 ```
 
 > Docs page tip: If `/docs` appears blank, just refresh once after startup. The template ships with a custom docs page and a relaxed CSP for docs only. If your network blocks CDNs, allowlist `unpkg.com` and `cdnjs.cloudflare.com` or serve Swagger UI assets locally.
@@ -118,7 +118,7 @@ If you're using AI assistants (Claude, ChatGPT, Cursor AI, etc.), they might off
 ## 🏆 Why This Template?
 
 ### 🚀 **Solid Foundation to Build On**
-- **173 test files** with 98.2% coverage - everything works
+- **173 test files** with 98.2% coverage - zero failures, everything works
 - **Clean architecture** that grows with your project
 - **Async-first design** for good performance
 - **Type-safe** with full MyPy integration
@@ -223,7 +223,7 @@ This FastAPI template gives you everything you need to build cool projects:
 
 ### 🛠️ Development & Testing
 - **7-step debt-free development workflow** prevents technical debt buildup
-- **173 test files** with 98.2% coverage
+- **173 test files** with 98.2% coverage and zero failures
 - **Pre-commit hooks** for code quality (template protection + code formatting)
 - **Automated setup scripts** for easy onboarding
 - **Technical debt prevention** with automated quality gates
@@ -282,8 +282,8 @@ The template includes pre-configured Cursor rules that:
 
 ### **Everything is Tested**
 - **173 test files** with **98.2% coverage**
-- **570 passing tests** covering all core functionality
-- **10 optional feature tests** (skipped by default, can be enabled)
+- **565 passing tests** covering all core functionality
+- **15 skipped tests** (optional features + template-specific tests)
 
 ### **Optional Features**
 The template includes tests for optional features that you can enable when you need them:

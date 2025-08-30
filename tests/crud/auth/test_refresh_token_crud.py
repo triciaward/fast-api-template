@@ -131,6 +131,9 @@ async def test_get_user_sessions_and_count(monkeypatch):
         def scalars(self):
             return types.SimpleNamespace(all=lambda: [tok1, tok2])
 
+        def scalar(self):  # type: ignore[no-untyped-def]
+            return 2  # Count of tok1, tok2
+
     class DB:
         async def execute(self, *a, **k):
             return Result()

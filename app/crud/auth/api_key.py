@@ -119,7 +119,7 @@ async def count_user_api_keys(db: DBSession, user_id: str) -> int:
             ),
         ),
     )
-    count: int = int(result.scalar_one() or 0)
+    count: int = int(result.scalar() or 0)
     return count
 
 
@@ -211,5 +211,5 @@ async def count_all_api_keys(db: DBSession) -> int:
     result = await db.execute(
         select(func.count()).select_from(APIKey).filter(APIKey.is_deleted.is_(False)),
     )
-    count: int = int(result.scalar_one() or 0)
+    count: int = int(result.scalar() or 0)
     return count

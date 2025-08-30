@@ -19,6 +19,9 @@ class FakeResult:
     def scalar_one_or_none(self):
         return self._single
 
+    def scalar(self):  # type: ignore[no-untyped-def]
+        return len(self._items) if self._items else self._single
+
     def scalars(self):
         return FakeScalars(self._items)
 

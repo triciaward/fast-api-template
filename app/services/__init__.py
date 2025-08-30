@@ -84,7 +84,7 @@ try:
 
     # If the background module does not expose/represent a package with celery, treat as missing
     if hasattr(_bg_pkg, "celery"):
-        _celery_mod = _bg_pkg.celery  # type: ignore[attr-defined]
+        _celery_mod = _bg_pkg.celery
         get_celery_app = (
             _celery_mod.get_celery_app
             if hasattr(_celery_mod, "get_celery_app")

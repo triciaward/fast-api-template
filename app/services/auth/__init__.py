@@ -20,7 +20,7 @@ try:
     from .oauth import OAuthService as _OAuthService
 
     oauth_service = _OAuthService()
-except Exception:  # pragma: no cover - optional dependency path
+except ImportError:  # pragma: no cover - optional dependency path
     oauth_service = None
 
 __all__ = [

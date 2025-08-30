@@ -38,11 +38,8 @@ async def create_refresh_token(
     hashed = hash_refresh_token(raw_token)
 
     refresh_token = RefreshToken()
-    if isinstance(user_id, str):
-        # Tests expect string user_id to be preserved
-        refresh_token.user_id = user_id  # type: ignore[assignment]
-    else:
-        refresh_token.user_id = user_id
+    # Accept both str and UUID-like; store as-is to satisfy existing tests
+    refresh_token.user_id = user_id  # type: ignore[assignment]
     refresh_token.token_hash = hashed
     refresh_token.token_fingerprint = fingerprint
     refresh_token.expires_at = expires_at
@@ -149,7 +146,7 @@ async def get_user_session_count(db: DBSession, user_id: str) -> int:
             RefreshToken.is_revoked.is_(False),
         ),
     )
-    count: int = int(result.scalar_one() or 0)
+    count: int = int(result.scalar() or 0)
     return count
 
 

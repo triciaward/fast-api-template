@@ -424,8 +424,8 @@ mypy app/
 
 ### **Current Test Results** (v1.2.2)
 - **Total Tests**: 580
-- **Passed**: 570 ✅
-- **Skipped**: 10 ⏭️ (intentional for optional features)
+- **Passed**: 565 ✅
+- **Skipped**: 15 ⏭️ (intentional for optional features + template-specific tests)
 - **Failed**: 0 ❌
 - **Coverage**: 98.2%
 
