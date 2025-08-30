@@ -72,7 +72,7 @@ try:  # pragma: no cover - optional path
     setup_rate_limiting = _rl.setup_rate_limiting
     get_rate_limit_info = _rl.get_rate_limit_info
     get_client_ip = _rl.get_client_ip
-except Exception:
+except ImportError:
     pass
 
 
@@ -80,7 +80,7 @@ try:  # pragma: no cover - optional path
     from .websockets import ConnectionManager as ConnectionManager
 
     websocket_manager: "ConnectionManager | None" = ConnectionManager()
-except Exception:
+except ImportError:
     # Fallback: no ConnectionManager symbol; tests expect getattr(..., "ConnectionManager", None) is None
     websocket_manager = None
 

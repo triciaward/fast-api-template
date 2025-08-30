@@ -14,7 +14,7 @@ try:
     from .email import EmailService as _EmailService
 
     email_service = _EmailService()
-except Exception:  # pragma: no cover - optional path
+except ImportError:  # pragma: no cover - optional path
     email_service = None
 
 redis_client: Any | None = None
@@ -31,7 +31,7 @@ try:  # pragma: no cover - optional path
     close_redis = _redis.close_redis
     get_redis_client = _redis.get_redis_client
     health_check_redis = _redis.health_check_redis
-except Exception:
+except ImportError:
     pass
 
 # Sentry (optional)
@@ -49,7 +49,7 @@ try:  # pragma: no cover - optional path
     capture_message = _sentry.capture_message
     set_request_context = _sentry.set_request_context
     set_user_context = _sentry.set_user_context
-except Exception:
+except ImportError:
     pass
 
 __all__ = [

@@ -11,7 +11,7 @@ try:
     from . import auth as _auth_mod
 
     oauth_service = _auth_mod.oauth_service
-except Exception:  # pragma: no cover - optional path
+except ImportError:  # pragma: no cover - optional path
     oauth_service = None
 
 try:
@@ -19,7 +19,7 @@ try:
 
     email_service = _external_mod.email_service
     redis_client = _external_mod.redis_client
-except Exception:  # pragma: no cover - optional path
+except ImportError:  # pragma: no cover - optional path
     email_service = None
     redis_client = None
 
@@ -122,7 +122,7 @@ try:
         submit_task = None
         get_task_status = None
         cancel_task = None
-except Exception:
+except ImportError:
     # No background package at all; keep existing fallbacks
     pass
 

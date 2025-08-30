@@ -16,6 +16,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.users.auth import require_api_scope
@@ -131,14 +132,14 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
                 },
             }
 
-        except Exception as e:
+        except SQLAlchemyError as e:
             logger.debug("Could not retrieve pool metrics", error=str(e))
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Database pool metrics unavailable",
             ) from None
 
-    except Exception as e:
+    except SQLAlchemyError as e:
         health_status["checks"]["database"] = "unhealthy"
         health_status["status"] = "degraded"
         logger.exception("Database health check failed", error=str(e))
@@ -200,7 +201,7 @@ async def detailed_health_check(
         }
         logger.debug("Database health check passed", response_time=db_response_time)
 
-    except Exception as e:
+    except SQLAlchemyError as e:
         health_status["checks"]["database"] = {
             "status": "unhealthy",
             "error": str(e),
@@ -367,7 +368,7 @@ async def database_health_check(
             database_url=settings.DATABASE_URL.split("@")[-1],
         )
 
-    except Exception as e:
+    except SQLAlchemyError as e:
         logger.exception("Database health check failed", error=str(e))
         return DatabaseHealthResponse(
             status="unhealthy",
